@@ -1,0 +1,1 @@
+# Project Tracks\n\nThis file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.\n\n---\n\n- [ ] **Track: Implement Core NL2SQL Pipeline with Metadata-Driven Schema Search**\n  *Link: [./tracks/core_pipeline_20260218/](./tracks/core_pipeline_20260218/)*

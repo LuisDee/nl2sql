@@ -1,0 +1,31 @@
+[project]
+name = "nl2sql-agent"
+version = "0.1.0"
+description = "NL2SQL sub-agent for Mako Group trading data"
+requires-python = ">=3.11"
+dependencies = [
+    "google-adk>=1.0.0",
+    "google-cloud-bigquery>=3.25.0",
+    "google-cloud-aiplatform>=1.60.0",
+    "litellm>=1.40.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0.0",
+    "structlog>=24.0.0",
+    "pandas>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["nl2sql_agent"]
+namespaces = false

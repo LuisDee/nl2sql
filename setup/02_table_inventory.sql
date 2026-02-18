@@ -1,0 +1,28 @@
+-- ALREADY EXECUTED — DO NOT RUN AGAIN
+-- Kept for documentation: shows what tables exist and where they came from.
+--
+-- ============================================================
+-- nl2sql_omx_kpi — GOLD LAYER (KPI-enriched trade data)
+-- Partition: trade_date
+-- Data: 2026-02-17 only
+-- ============================================================
+-- cloud-data-n-base-d4b3.nl2sql_omx_kpi.brokertrade   (EMPTY — no data for this date)
+-- cloud-data-n-base-d4b3.nl2sql_omx_kpi.clicktrade
+-- cloud-data-n-base-d4b3.nl2sql_omx_kpi.markettrade
+-- cloud-data-n-base-d4b3.nl2sql_omx_kpi.otoswing
+-- cloud-data-n-base-d4b3.nl2sql_omx_kpi.quotertrade
+--
+-- ============================================================
+-- nl2sql_omx_data — SILVER LAYER (raw trade/market data)
+-- Partition: trade_date
+-- Cluster: varies (see below)
+-- Data: 2026-02-17 only
+-- ============================================================
+-- cloud-data-n-base-d4b3.nl2sql_omx_data.brokertrade    CLUSTER BY portfolio, symbol, term, instrument_hash
+-- cloud-data-n-base-d4b3.nl2sql_omx_data.clicktrade     CLUSTER BY portfolio, symbol, term, instrument_hash
+-- cloud-data-n-base-d4b3.nl2sql_omx_data.markettrade    CLUSTER BY portfolio, symbol, term, instrument_hash
+-- cloud-data-n-base-d4b3.nl2sql_omx_data.swingdata      (no clustering)
+-- cloud-data-n-base-d4b3.nl2sql_omx_data.quotertrade    CLUSTER BY portfolio, symbol, term, instrument_hash
+-- cloud-data-n-base-d4b3.nl2sql_omx_data.theodata       CLUSTER BY portfolio, symbol, term, instrument_hash
+-- cloud-data-n-base-d4b3.nl2sql_omx_data.marketdata     CLUSTER BY symbol, term, instrument_hash
+-- cloud-data-n-base-d4b3.nl2sql_omx_data.marketdepth    CLUSTER BY symbol, term, instrument_hash

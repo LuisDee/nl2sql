@@ -1,0 +1,5 @@
+-- ALREADY EXECUTED — DO NOT RUN AGAIN
+-- Kept for documentation only.
+--
+-- bq mk --location=europe-west2 cloud-data-n-base-d4b3:nl2sql_omx_kpi
+-- bq mk --location=europe-west2 cloud-data-n-base-d4b3:nl2sql_omx_data

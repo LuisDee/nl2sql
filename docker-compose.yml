@@ -1,0 +1,12 @@
+services:
+  agent:
+    build: .
+    volumes:
+      - .:/app                    # Mount source code for live development
+    env_file:
+      - nl2sql_agent/.env         # Load environment variables
+    stdin_open: true              # Required for interactive adk run
+    tty: true                     # Required for interactive adk run
+    ports:
+      - "8000:8000"               # For adk web (when used)
+    command: adk run nl2sql_agent  # Default: terminal chat mode

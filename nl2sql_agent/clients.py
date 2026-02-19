@@ -6,6 +6,8 @@ real external services (BigQuery, Vertex AI, etc.).
 For unit testing, use the fakes in tests/fakes.py instead.
 """
 
+from typing import Any
+
 import pandas as pd
 from google.cloud import bigquery
 
@@ -73,3 +75,43 @@ class LiveBigQueryClient:
             }
             for field in bq_table.schema
         ]
+
+    def query_with_params(
+        self, sql: str, params: list[dict[str, Any]] | None = None
+    ) -> list[dict[str, Any]]:
+        """Execute a parameterised SQL query and return results as list of dicts."""
+        job_config = bigquery.QueryJobConfig()
+
+        if params:
+            job_config.query_parameters = [
+                bigquery.ScalarQueryParameter(p["name"], p["type"], p["value"])
+                for p in params
+            ]
+
+        logger.info(
+            "bq_query_with_params",
+            sql_preview=sql[:200],
+            has_params=bool(params),
+        )
+
+        try:
+            query_job = self._client.query(
+                sql,
+                job_config=job_config,
+                timeout=settings.bq_query_timeout_seconds,
+            )
+            rows = [
+                dict(row)
+                for row in query_job.result(
+                    timeout=settings.bq_query_timeout_seconds
+                )
+            ]
+            logger.info("bq_query_with_params_complete", row_count=len(rows))
+            return rows
+        except Exception as e:
+            logger.error(
+                "bq_query_with_params_error",
+                error=str(e),
+                sql_preview=sql[:200],
+            )
+            raise

@@ -76,6 +76,20 @@ class Settings(BaseSettings):
         description="Vertex AI text embedding model name (underlying endpoint)",
     )
 
+    # --- Query Limits (Track 03) ---
+    bq_query_timeout_seconds: float = Field(
+        default=30.0,
+        description="Timeout in seconds for BigQuery query execution",
+    )
+    bq_max_result_rows: int = Field(
+        default=1000,
+        description="Maximum rows returned by execute_sql tool",
+    )
+    vector_search_top_k: int = Field(
+        default=5,
+        description="Number of results for vector search queries",
+    )
+
 
 # Singleton instance — import this everywhere
 settings = Settings()

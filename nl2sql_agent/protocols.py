@@ -23,7 +23,7 @@ Usage:
     my_function(client)
 """
 
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 import pandas as pd
 
@@ -74,6 +74,21 @@ class BigQueryProtocol(Protocol):
 
         Returns:
             List of dicts with keys: name, type, mode, description.
+        """
+        ...
+
+    def query_with_params(
+        self, sql: str, params: list[dict[str, Any]] | None = None
+    ) -> list[dict[str, Any]]:
+        """Execute a parameterised SQL query and return results as list of dicts.
+
+        Args:
+            sql: BigQuery SQL query with @param placeholders.
+            params: List of query parameter dicts, each with keys:
+                    name (str), type (str), value (Any).
+
+        Returns:
+            List of dicts, one per row. Column names are keys.
         """
         ...
 

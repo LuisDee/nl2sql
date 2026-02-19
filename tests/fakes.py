@@ -10,6 +10,8 @@ Usage in tests:
     result = client.execute_query("SELECT 1")
 """
 
+from typing import Any
+
 import pandas as pd
 
 
@@ -66,6 +68,15 @@ class FakeBigQueryClient:
         if key not in self._schemas:
             raise KeyError(f"FakeBigQueryClient: No schema registered for {key}")
         return self._schemas[key]
+
+    def query_with_params(
+        self, sql: str, params: list[dict[str, Any]] | None = None
+    ) -> list[dict[str, Any]]:
+        """Return pre-registered result for the parameterised query as list of dicts."""
+        self.executed_queries.append(sql)
+        if sql in self._results:
+            return self._results[sql].to_dict(orient="records")
+        return []
 
 
 class FakeEmbeddingClient:

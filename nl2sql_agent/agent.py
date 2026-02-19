@@ -8,9 +8,22 @@ import os
 
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
+from google.genai.types import GenerateContentConfig
 
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import setup_logging, get_logger
+from nl2sql_agent.clients import LiveBigQueryClient
+from nl2sql_agent.prompts import build_nl2sql_instruction
+from nl2sql_agent.callbacks import before_tool_guard, after_tool_log
+from nl2sql_agent.tools import (
+    init_bq_service,
+    vector_search_tables,
+    fetch_few_shot_examples,
+    load_yaml_metadata,
+    dry_run_sql,
+    execute_sql,
+    save_validated_query,
+)
 
 # --- Initialise logging ---
 setup_logging()
@@ -21,6 +34,12 @@ logger = get_logger(__name__)
 # We set them here from our pydantic settings to ensure they're available.
 os.environ["LITELLM_API_KEY"] = settings.litellm_api_key
 os.environ["LITELLM_API_BASE"] = settings.litellm_api_base
+
+# --- Initialise tool dependencies ---
+bq_client = LiveBigQueryClient(
+    project=settings.gcp_project, location=settings.bq_location
+)
+init_bq_service(bq_client)
 
 # --- Model instances ---
 default_model = LiteLlm(model=settings.litellm_model)
@@ -35,16 +54,18 @@ nl2sql_agent = LlmAgent(
         "broker performance, edge/slippage analysis across all trading desks. "
         "Routes to the correct table based on question context."
     ),
-    instruction=(
-        "You are a SQL expert for Mako Group, an options market-making firm. "
-        "Your job is to answer natural language questions about trading data. "
-        "For now, you have no tools — just acknowledge the question and explain "
-        "that you will be able to query BigQuery once tools are connected. "
-        "Mention which tables might be relevant based on the question. "
-        "KPI tables (gold layer) are in nl2sql_omx_kpi dataset. "
-        "Raw data tables (silver layer) are in nl2sql_omx_data dataset."
-    ),
-    # tools=[] — no tools in Track 01. Added in Track 03.
+    instruction=build_nl2sql_instruction,
+    generate_content_config=GenerateContentConfig(temperature=0.1),
+    tools=[
+        vector_search_tables,
+        fetch_few_shot_examples,
+        load_yaml_metadata,
+        dry_run_sql,
+        execute_sql,
+        save_validated_query,
+    ],
+    before_tool_callback=before_tool_guard,
+    after_tool_callback=after_tool_log,
 )
 
 # --- Root Agent ---
@@ -55,11 +76,16 @@ root_agent = LlmAgent(
     description="Mako Group trading assistant.",
     instruction=(
         "You are a helpful assistant for Mako Group traders. "
-        "For any questions about trading data, performance, KPIs, "
-        "theo/vol analysis, quoter activity, edge, slippage, PnL, "
-        "or anything that requires querying a database, delegate to nl2sql_agent. "
-        "For general questions, greetings, or clarifications, answer directly. "
-        "If the trader's question is ambiguous, ask a clarifying question."
+        "You coordinate between specialised sub-agents.\n\n"
+        "## Delegation Rules\n"
+        "- For ANY question about trading data, performance, KPIs, PnL, edge, "
+        "slippage, theo/vol/delta, greeks, quoter activity, broker performance, "
+        "market data, order book depth, or anything that requires querying "
+        "a database → delegate to nl2sql_agent.\n"
+        "- For general questions, greetings, or clarifications → answer directly.\n"
+        "- If the trader's question is ambiguous about whether it needs data → "
+        "ask a clarifying question before delegating.\n"
+        "- Do NOT attempt to write SQL yourself. Always delegate to nl2sql_agent.\n"
     ),
     sub_agents=[nl2sql_agent],
 )
@@ -69,4 +95,5 @@ logger.info(
     root_agent=root_agent.name,
     sub_agents=[a.name for a in root_agent.sub_agents],
     model=settings.litellm_model,
+    tool_count=len(nl2sql_agent.tools),
 )

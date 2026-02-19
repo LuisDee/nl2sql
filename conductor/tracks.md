@@ -13,7 +13,7 @@
 
 ---
 
-## [ ] Track: Agent Tools (Phase C)
+## [x] Track: Agent Tools (Phase C)
 - **ID:** 03_agent_tools
 - **Wave:** 3
 - **Complexity:** M
@@ -21,7 +21,7 @@
 
 ---
 
-## [ ] Track: Agent Logic (Phase D)
+## [~] Track: Agent Logic (Phase D)
 - **ID:** 04_agent_logic
 - **Wave:** 4
 - **Complexity:** M

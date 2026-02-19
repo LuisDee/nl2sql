@@ -30,11 +30,6 @@ from nl2sql_agent.tools import (
 setup_logging()
 logger = get_logger(__name__)
 
-# --- Configure LiteLLM environment ---
-# LiteLLM reads these environment variables directly.
-# We set them here from our pydantic settings to ensure they're available.
-os.environ["LITELLM_API_KEY"] = settings.litellm_api_key
-os.environ["LITELLM_API_BASE"] = settings.litellm_api_base
 
 # --- Initialise tool dependencies ---
 bq_client = LiveBigQueryClient(
@@ -43,7 +38,11 @@ bq_client = LiveBigQueryClient(
 init_bq_service(bq_client)
 
 # --- Model instances ---
-default_model = LiteLlm(model=settings.litellm_model)
+default_model = LiteLlm(
+    model=settings.litellm_model,
+    api_key=settings.litellm_api_key,
+    api_base=settings.litellm_api_base,
+)
 
 # --- NL2SQL Sub-Agent ---
 nl2sql_agent = LlmAgent(

@@ -363,15 +363,16 @@ Wired the tools into the agent with a comprehensive system prompt and safety cal
 - `GenerateContentConfig(temperature=0.1)` for deterministic SQL
 - 155 unit tests + 20 integration tests
 
-### Track 05: Eval & Hardening -- PLANNED
+### Track 05: Eval & Hardening -- COMPLETE
 
 Will establish accuracy metrics and harden the agent.
 
-**Goals:**
+**Delivered:**
 - Gold-standard evaluation set (50+ questions with expected SQL)
-- Accuracy metrics per question type and table
-- Retry logic for failed queries (up to 3 attempts)
-- Edge case handling (empty results, ambiguous questions)
+- `run_eval.py` runner with Online execution mode
+- Retry logic (LoopAgent) for failed dry-run queries (up to 3 attempts)
+- Semantic Caching and Learning Loop integration verified
+- Online accuracy metrics (Routing, Syntax, Execution)
 
 ### Track 06: Metadata Enrichment -- PLANNED
 

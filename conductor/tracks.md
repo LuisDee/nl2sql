@@ -46,7 +46,7 @@
 
 ---
 
-## [~] Track: Fix Missing DB Dependencies
+## [x] Track: Fix Missing DB Dependencies
 - **ID:** 07_dependency_fix
 - **Wave:** 1
 - **Complexity:** S

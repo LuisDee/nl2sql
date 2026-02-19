@@ -416,3 +416,19 @@ docker compose up
 # Docker terminal mode
 docker compose run --rm agent adk run nl2sql_agent
 ```
+
+## Running Evaluations
+
+The evaluation runner tests the agent's accuracy against the gold standard dataset (`eval/gold_queries.yaml`).
+
+```bash
+# Offline Mode (Syntax & Routing check only)
+# Fast, does not use LLM. Checks if SQL is valid and tables match.
+python eval/run_eval.py --mode offline
+
+# Online Mode (Full End-to-End Accuracy)
+# Uses live LLM. Executes agent's SQL and Gold SQL against BigQuery.
+# Compares actual result sets (row counts, values).
+python eval/run_eval.py --mode online
+```
+

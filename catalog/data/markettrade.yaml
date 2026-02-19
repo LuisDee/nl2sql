@@ -1,0 +1,449 @@
+table:
+  name: markettrade
+  dataset: nl2sql_omx_data
+  fqn: '{project}.nl2sql_omx_data.markettrade'
+  layer: data
+  description: Raw market trade execution details from the exchange feed. Contains trade price, size, aggressor side, and
+    full instrument reference data. NOT a KPI table -- use nl2sql_omx_kpi.markettrade for edge/slippage metrics. Partitioned
+    by trade_date.
+  partition_field: trade_date
+  cluster_fields:
+  - symbol
+  - portfolio
+  - term
+  row_count_approx: 0
+  columns:
+  - name: kafka_partition
+    type: INTEGER
+    description: Kafka partition the record was consumed from.
+    synonyms: []
+  - name: kafka_offset
+    type: INTEGER
+    description: Kafka offset of the record.
+    synonyms: []
+  - name: instrument_hash
+    type: STRING
+    description: Unique hash identifier for the instrument.
+    synonyms:
+    - instrument id
+    - instrument key
+  - name: algo
+    type: STRING
+    description: Algorithm or strategy name used for the trade.
+    synonyms:
+    - strategy
+    - algo name
+    - trading algo
+  - name: ref_curve_id
+    type: INTEGER
+    description: Reference volatility curve identifier.
+    synonyms:
+    - ref curve
+  - name: ref_carry_id
+    type: INTEGER
+    description: Reference carry/dividend curve identifier.
+    synonyms:
+    - ref carry
+  - name: ref_tv
+    type: FLOAT
+    description: Reference theoretical value used at time of trade.
+    synonyms:
+    - reference theo
+    - ref fair value
+  - name: ref_delta
+    type: FLOAT
+    description: Reference delta used in KPI computation.
+    synonyms:
+    - reference delta
+  - name: ref_gamma
+    type: FLOAT
+    description: Reference gamma used in KPI computation.
+    synonyms:
+    - reference gamma
+  - name: ref_base_price
+    type: FLOAT
+    description: Reference base (underlying) price.
+    synonyms:
+    - ref underlying
+    - reference price
+  - name: ref_roll
+    type: FLOAT
+    description: Reference roll value.
+    synonyms:
+    - reference roll
+  - name: raw_bv_bid
+    type: FLOAT
+    description: Raw base value bid price.
+    synonyms:
+    - bv bid
+  - name: raw_bv_bid_size
+    type: INTEGER
+    description: Raw base value bid size.
+    synonyms: []
+  - name: raw_bv_ask
+    type: FLOAT
+    description: Raw base value ask price.
+    synonyms:
+    - bv ask
+  - name: raw_bv_ask_size
+    type: INTEGER
+    description: Raw base value ask size.
+    synonyms: []
+  - name: layered_base_bid
+    type: FLOAT
+    description: Layered base bid price after adjustments.
+    synonyms: []
+  - name: layered_base_bid_size
+    type: INTEGER
+    description: Layered base bid size.
+    synonyms: []
+  - name: layered_base_ask
+    type: FLOAT
+    description: Layered base ask price after adjustments.
+    synonyms: []
+  - name: layered_base_ask_size
+    type: INTEGER
+    description: Layered base ask size.
+    synonyms: []
+  - name: layered_base_adjustment
+    type: FLOAT
+    description: Layered base adjustment.
+    synonyms: []
+  - name: odr_adjustment
+    type: FLOAT
+    description: Odr adjustment.
+    synonyms: []
+  - name: inflight_deflection_tv_adjustment_bid
+    type: FLOAT
+    description: Inflight deflection tv adjustment bid.
+    synonyms: []
+  - name: inflight_deflection_tv_adjustment_ask
+    type: FLOAT
+    description: Inflight deflection tv adjustment ask.
+    synonyms: []
+  - name: internal_tv_adjustment_bid
+    type: FLOAT
+    description: Internal tv adjustment bid.
+    synonyms: []
+  - name: internal_tv_adjustment_ask
+    type: FLOAT
+    description: Internal tv adjustment ask.
+    synonyms: []
+  - name: nhr_adjustment_bid
+    type: FLOAT
+    description: Nhr adjustment bid.
+    synonyms: []
+  - name: nhr_adjustment_ask
+    type: FLOAT
+    description: Nhr adjustment ask.
+    synonyms: []
+  - name: base_edge_bid
+    type: FLOAT
+    description: Base edge on the bid side.
+    synonyms:
+    - bid edge
+  - name: base_edge_ask
+    type: FLOAT
+    description: Base edge on the ask side.
+    synonyms:
+    - ask edge
+  - name: fees
+    type: FLOAT
+    description: Trading fees (exchange + clearing).
+    synonyms:
+    - exchange fees
+    - transaction costs
+  - name: roll
+    type: FLOAT
+    description: Roll adjustment value.
+    synonyms:
+    - calendar roll
+    - roll value
+  - name: bv_side
+    type: STRING
+    description: Side of the base value update (bid/ask).
+    synonyms: []
+  - name: delta_adjusted_base_price
+    type: FLOAT
+    description: Delta at adjusted_base_price after trade.
+    synonyms:
+    - delta adjusted_base_price
+  - name: tv
+    type: FLOAT
+    description: Theoretical value (fair value) of the option.
+    synonyms:
+    - theo
+    - theoretical value
+    - fair value
+    - machine price
+    - TV
+  - name: base_sequence_number
+    type: STRING
+    description: Base sequence number.
+    synonyms: []
+  - name: option_sequence_number
+    type: INTEGER
+    description: Option sequence number.
+    synonyms: []
+  - name: base_instrument_hash
+    type: STRING
+    description: Base instrument hash.
+    synonyms: []
+  - name: hardware_nic_rx_timestamp
+    type: TIMESTAMP
+    description: Hardware NIC receive timestamp for latency measurement.
+    synonyms:
+    - nic timestamp
+  - name: hardware_nic_rx_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: hardware_nic_rx_timestamp_ns.'
+    synonyms: []
+  - name: event_timestamp
+    type: TIMESTAMP
+    description: Timestamp of the event.
+    synonyms:
+    - event time
+  - name: event_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns.'
+    synonyms: []
+  - name: trade_price
+    type: FLOAT
+    description: Execution price of the trade.
+    synonyms:
+    - fill price
+    - execution price
+    - price
+  - name: trade_size
+    type: INTEGER
+    description: Number of contracts traded.
+    synonyms:
+    - fill size
+    - quantity
+    - lots
+    - volume
+  - name: trade_aggressor_side
+    type: STRING
+    description: Which side was the aggressor (taker) in the trade.
+    synonyms:
+    - aggressor
+    - taker side
+  - name: edge
+    type: FLOAT
+    description: Edge.
+    synonyms: []
+  - name: is_mako_trade
+    type: INTEGER
+    description: Whether this was a Mako (our) trade vs. market trade.
+    synonyms:
+    - our trade
+  - name: counterparty_id
+    type: STRING
+    description: Counterparty or market participant on the other side.
+    synonyms:
+    - counter party
+    - other side
+  - name: exchange_timestamp
+    type: TIMESTAMP
+    description: Timestamp from the exchange matching engine.
+    synonyms:
+    - exchange time
+  - name: exchange_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: exchange_timestamp_ns.'
+    synonyms: []
+  - name: is_active_instrument
+    type: BOOLEAN
+    description: Whether the instrument was actively quoted.
+    synonyms: []
+  - name: bv_update_sequence_number
+    type: INTEGER
+    description: Bv update sequence number.
+    synonyms: []
+  - name: bv_update_instrument_hash
+    type: STRING
+    description: Bv update instrument hash.
+    synonyms: []
+  - name: underlying_sequence_number
+    type: INTEGER
+    description: 'Underlying-related field: underlying_sequence_number.'
+    synonyms: []
+  - name: underlying_instrument_hash
+    type: STRING
+    description: 'Underlying-related field: underlying_instrument_hash.'
+    synonyms: []
+  - name: first_fill_sequence_number
+    type: INTEGER
+    description: First fill sequence number.
+    synonyms: []
+  - name: last_fill_sequence_number
+    type: INTEGER
+    description: Last fill sequence number.
+    synonyms: []
+  - name: contains_implied_fills
+    type: BOOLEAN
+    description: Contains implied fills.
+    synonyms: []
+  - name: is_bv_invalid
+    type: BOOLEAN
+    description: Whether the base value was invalid at time of trade.
+    synonyms: []
+  - name: underlying_exe_exch
+    type: INTEGER
+    description: 'Underlying-related field: underlying_exe_exch.'
+    synonyms: []
+  - name: underlying_exe_exch_name
+    type: STRING
+    description: 'Underlying-related field: underlying_exe_exch_name.'
+    synonyms: []
+  - name: is_spark
+    type: BOOLEAN
+    description: Whether this is a Spark (fast-path) event.
+    synonyms: []
+  - name: ref_inst_curve_id
+    type: INTEGER
+    description: Ref inst curve id.
+    synonyms: []
+  - name: ref_inst_carry_id
+    type: INTEGER
+    description: Ref inst carry id.
+    synonyms: []
+  - name: is_ref_theo_invalid
+    type: BOOLEAN
+    description: Whether the reference theo was invalid.
+    synonyms: []
+  - name: lb_enabled
+    type: BOOLEAN
+    description: Whether lean-back mode was enabled.
+    synonyms: []
+  - name: edge_model_type
+    type: INTEGER
+    description: Edge model type used for this instrument.
+    synonyms: []
+  - name: edge_model_type_name
+    type: STRING
+    description: Edge model type used for this instrument.
+    synonyms: []
+  - name: streamsource_stream_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_stream_id.'
+    synonyms: []
+  - name: streamsource_event_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_event_id.'
+    synonyms: []
+  - name: streamsource_message_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_message_id.'
+    synonyms: []
+  - name: datasource_pid
+    type: INTEGER
+    description: 'Data provenance field: datasource_pid.'
+    synonyms: []
+  - name: datasource_hostname
+    type: STRING
+    description: 'Data provenance field: datasource_hostname.'
+    synonyms: []
+  - name: bid_price_0
+    type: FLOAT
+    description: Best bid price at level 0.
+    synonyms:
+    - bid 0
+  - name: ask_price_0
+    type: FLOAT
+    description: Best ask price at level 0.
+    synonyms:
+    - ask 0
+  - name: ask_volume_0
+    type: INTEGER
+    description: Ask volume at level 0.
+    synonyms:
+    - ask size 0
+  - name: bid_volume_0
+    type: INTEGER
+    description: Bid volume at level 0.
+    synonyms:
+    - bid size 0
+  - name: ref_theoevent_stream_id
+    type: STRING
+    description: Ref theoevent stream id.
+    synonyms: []
+  - name: ref_theoevent_event_id
+    type: STRING
+    description: Ref theoevent event id.
+    synonyms: []
+  - name: exch_aggressor_side
+    type: STRING
+    description: Which side was the aggressor (taker) in the trade.
+    synonyms:
+    - aggressor
+    - taker side
+  - name: strike
+    type: FLOAT
+    description: Option strike price.
+    synonyms:
+    - exercise price
+    - strike price
+    - K
+  - name: option_type
+    type: INTEGER
+    description: Option type code (call/put).
+    synonyms:
+    - call put
+    - C/P
+  - name: option_type_name
+    type: STRING
+    description: Option type name (Call or Put).
+    synonyms:
+    - call put name
+  - name: expiry_timestamp
+    type: TIMESTAMP
+    description: Expiration timestamp of the option contract.
+    synonyms:
+    - expiry
+    - expiration
+    - maturity date
+  - name: mako_symbol
+    type: STRING
+    description: Internal Mako system symbol for the instrument.
+    synonyms:
+    - internal symbol
+  - name: currency
+    type: INTEGER
+    description: Currency identifier for the instrument.
+    synonyms:
+    - ccy
+  - name: inst_type_name
+    type: STRING
+    description: Instrument type name (e.g. Option, Future, Spread).
+    synonyms:
+    - instrument type
+    - product type
+  - name: term
+    type: STRING
+    description: Expiry term or tenor label (e.g. monthly, weekly).
+    synonyms:
+    - tenor
+    - expiry term
+    - maturity
+  - name: trade_date
+    type: DATE
+    description: Business date of the trade, used for partitioning.
+    synonyms:
+    - date
+    - business date
+    - trading date
+  - name: portfolio
+    type: STRING
+    description: Trading portfolio or book the trade belongs to.
+    synonyms:
+    - book
+    - trading book
+    - strategy
+  - name: symbol
+    type: STRING
+    description: Exchange symbol or ticker for the instrument.
+    synonyms:
+    - ticker
+    - product
+    - instrument

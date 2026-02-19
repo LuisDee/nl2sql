@@ -1,0 +1,84 @@
+dataset:
+  name: nl2sql_omx_kpi
+  layer: kpi
+  description: >
+    KPI (Key Performance Indicators) for OMX options trading. Gold layer.
+    Contains one table per trade origin, all sharing the same KPI column structure.
+    Each row represents one trade with computed performance metrics:
+    edge_bps, instant_pnl, slippage, delta_bucket, required_edge_bps.
+
+  tables:
+    - brokertrade
+    - clicktrade
+    - markettrade
+    - otoswing
+    - quotertrade
+
+  shared_columns:
+    trade_date:
+      description: "Date of the trade. Partition column. Always filter on this."
+      synonyms: ["date", "trading date"]
+    portfolio:
+      description: "Trading portfolio identifier"
+      synonyms: ["book", "portfolio name"]
+    symbol:
+      description: "Underlying instrument symbol"
+      synonyms: ["underlying", "ticker", "product"]
+    term:
+      description: "Option expiry/term"
+      synonyms: ["expiry", "expiration", "maturity"]
+    instrument_hash:
+      description: "Unique hash identifying the specific option contract"
+      synonyms: ["contract id", "instrument id"]
+    edge_bps:
+      description: >
+        Difference between machine fair value (theo) and actual trade price,
+        measured in basis points. Positive = traded better than fair value.
+      synonyms: ["edge", "the edge", "how much edge", "trading edge"]
+    required_edge_bps:
+      description: "Minimum edge threshold set by risk management for this trade"
+      synonyms: ["required edge", "edge requirement", "minimum edge", "edge threshold"]
+    instant_pnl:
+      description: "Immediate profit/loss from the trade at execution time"
+      synonyms: ["PnL", "instant PnL", "profit", "loss", "P&L", "pnl"]
+    delta_bucket:
+      description: >
+        Standard delta categorisation bucket. Groups trades by moneyness.
+      synonyms: ["delta range", "moneyness bucket"]
+      example_values: ["0-25", "25-40", "40-60", "60+"]
+    slippage:
+      description: "Execution slippage metric -- difference from expected fill"
+      synonyms: ["slip", "execution slippage"]
+
+  routing:
+    - patterns: ["market trade", "exchange trade", "generic trades"]
+      table: markettrade
+      notes: "Default KPI table when trade type is unspecified"
+
+    - patterns: ["quoter trade", "quoter fill", "quoter PnL", "quoter edge", "auto-quoter"]
+      table: quotertrade
+      notes: "KPI metrics for auto-quoter originated fills. NOT raw quoter activity."
+
+    - patterns: ["broker trade", "voice trade", "BGC", "MGN", "account", "broker performance"]
+      table: brokertrade
+      notes: "Has account/broker fields. Use when comparing broker performance. NOTE: may be empty for some dates."
+
+    - patterns: ["click trade", "manual trade"]
+      table: clicktrade
+
+    - patterns: ["OTO", "swing", "otoswing", "OTO swing"]
+      table: otoswing
+
+    - patterns: ["all trades", "total PnL", "overall", "across all types", "every trade type"]
+      action: "UNION ALL across all 5 kpi tables"
+      notes: "Agent must query all tables and combine results"
+
+  disambiguation:
+    kpi_vs_data_same_table_name: >
+      Both nl2sql_omx_kpi and nl2sql_omx_data contain tables with the same names
+      (brokertrade, clicktrade, markettrade, quotertrade). The KPI dataset has
+      enriched performance metrics (edge_bps, instant_pnl, slippage, delta_bucket).
+      The data dataset has raw trade execution details (exact timestamps, prices,
+      sizes, fill information). If the question is about performance, edge, PnL,
+      or slippage, use KPI. If the question is about raw execution details, timestamps,
+      or exact fill prices, use data.

@@ -1,0 +1,301 @@
+examples:
+  # --- markettrade (default KPI table) ---
+  - question: "What was the total instant PnL for market trades today?"
+    sql: |
+      SELECT
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        COUNT(*) AS trade_count
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: simple
+    routing_signal: "generic PnL question -> default to markettrade"
+    validated: false
+    validated_by: ""
+
+  - question: "Show me PnL breakdown by symbol for market trades"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "PnL by symbol -> KPI markettrade"
+    validated: false
+    validated_by: ""
+
+  - question: "Which market trades had edge above 0.5?"
+    sql: |
+      SELECT
+        symbol, term, strike,
+        ROUND(edge, 4) AS edge,
+        ROUND(instant_pnl, 2) AS instant_pnl,
+        trade_size
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+        AND edge > 0.5
+      ORDER BY edge DESC
+      LIMIT 20
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: simple
+    routing_signal: "edge threshold filter -> KPI markettrade"
+    validated: false
+    validated_by: ""
+
+  - question: "What was the average edge by portfolio for market trades?"
+    sql: |
+      SELECT
+        portfolio,
+        COUNT(*) AS trade_count,
+        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY portfolio
+      ORDER BY total_pnl DESC
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "edge by portfolio -> KPI markettrade"
+    validated: false
+    validated_by: ""
+
+  - question: "Show me the best and worst trades by edge today"
+    sql: |
+      (
+        SELECT 'best' AS category, symbol, term, strike, ROUND(edge, 4) AS edge, ROUND(instant_pnl, 2) AS pnl
+        FROM `{project}.nl2sql_omx_kpi.markettrade`
+        WHERE trade_date = '2026-02-17'
+        ORDER BY edge DESC
+        LIMIT 5
+      )
+      UNION ALL
+      (
+        SELECT 'worst', symbol, term, strike, ROUND(edge, 4), ROUND(instant_pnl, 2)
+        FROM `{project}.nl2sql_omx_kpi.markettrade`
+        WHERE trade_date = '2026-02-17'
+        ORDER BY edge ASC
+        LIMIT 5
+      )
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "best/worst by edge -> KPI markettrade"
+    validated: false
+    validated_by: ""
+
+  - question: "What was PnL including fees vs without fees for market trades?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS pnl_no_fees,
+        ROUND(SUM(instant_pnl_w_fees), 2) AS pnl_with_fees,
+        ROUND(SUM(instant_pnl) - SUM(instant_pnl_w_fees), 2) AS total_fees
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY pnl_no_fees DESC
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "PnL with/without fees -> KPI markettrade"
+    validated: false
+    validated_by: ""
+
+  # --- quotertrade (auto-quoter fills) ---
+  - question: "How did the quoter perform today in terms of edge and PnL?"
+    sql: |
+      SELECT
+        COUNT(*) AS fill_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = '2026-02-17'
+    tables_used: [quotertrade]
+    dataset: nl2sql_omx_kpi
+    complexity: simple
+    routing_signal: "quoter performance/edge/PnL -> KPI quotertrade"
+    validated: false
+    validated_by: ""
+
+  - question: "Show quoter fills by portfolio"
+    sql: |
+      SELECT
+        portfolio,
+        COUNT(*) AS fill_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY portfolio
+      ORDER BY total_pnl DESC
+    tables_used: [quotertrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "quoter fills breakdown -> KPI quotertrade"
+    validated: false
+    validated_by: ""
+
+  - question: "What was instant PnL by symbol for quoter trades?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(instant_pnl), 2) AS avg_pnl
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    tables_used: [quotertrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "PnL by symbol for quoter -> KPI quotertrade"
+    validated: false
+    validated_by: ""
+
+  # --- brokertrade ---
+  - question: "How have broker trades performed?"
+    sql: |
+      SELECT
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = '2026-02-17'
+    tables_used: [brokertrade]
+    dataset: nl2sql_omx_kpi
+    complexity: simple
+    routing_signal: "broker performance -> KPI brokertrade"
+    validated: false
+    validated_by: ""
+
+  # --- clicktrade ---
+  - question: "What was the edge on our click trades?"
+    sql: |
+      SELECT
+        COUNT(*) AS trade_count,
+        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      WHERE trade_date = '2026-02-17'
+    tables_used: [clicktrade]
+    dataset: nl2sql_omx_kpi
+    complexity: simple
+    routing_signal: "click trade edge -> KPI clicktrade"
+    validated: false
+    validated_by: ""
+
+  - question: "Show click trade PnL by symbol"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    tables_used: [clicktrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "click trade breakdown -> KPI clicktrade"
+    validated: false
+    validated_by: ""
+
+  # --- otoswing ---
+  - question: "Show me OTO swing trade performance"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    tables_used: [otoswing]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "OTO swing -> KPI otoswing"
+    validated: false
+    validated_by: ""
+
+  # --- UNION ALL across all KPI tables ---
+  - question: "What was total PnL across all trade types?"
+    sql: |
+      SELECT 'markettrade' AS trade_type, ROUND(SUM(instant_pnl), 2) AS total_pnl, COUNT(*) AS count
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      UNION ALL
+      SELECT 'quotertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = '2026-02-17'
+      UNION ALL
+      SELECT 'brokertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = '2026-02-17'
+      UNION ALL
+      SELECT 'clicktrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      WHERE trade_date = '2026-02-17'
+      UNION ALL
+      SELECT 'otoswing', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = '2026-02-17'
+      ORDER BY total_pnl DESC
+    tables_used: [markettrade, quotertrade, brokertrade, clicktrade, otoswing]
+    dataset: nl2sql_omx_kpi
+    complexity: complex
+    routing_signal: "all trades / total PnL -> UNION ALL across all KPI"
+    validated: false
+    validated_by: ""
+
+  - question: "How many trades did we do by symbol across market and quoter?"
+    sql: |
+      SELECT symbol, 'markettrade' AS source, COUNT(*) AS trade_count, ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      UNION ALL
+      SELECT symbol, 'quotertrade', COUNT(*), ROUND(SUM(instant_pnl), 2)
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    tables_used: [markettrade, quotertrade]
+    dataset: nl2sql_omx_kpi
+    complexity: complex
+    routing_signal: "cross-table symbol comparison -> UNION KPI tables"
+    validated: false
+    validated_by: ""
+
+  - question: "What was the delta slippage at 1 minute for market trades by symbol?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(AVG(delta_slippage_1m), 4) AS avg_delta_slip_1m,
+        ROUND(AVG(delta_slippage_1m_per_unit), 4) AS avg_delta_slip_1m_per_unit
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY avg_delta_slip_1m DESC
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "delta slippage -> KPI markettrade"
+    validated: false
+    validated_by: ""

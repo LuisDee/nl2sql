@@ -1,0 +1,228 @@
+table:
+  name: marketdata
+  dataset: nl2sql_omx_data
+  fqn: '{project}.nl2sql_omx_data.marketdata'
+  layer: data
+  description: Market data feed snapshots containing trade and quote events from the exchange. Each row is a market data event
+    (trade, quote update, etc.) with exchange timestamps and instrument details. Partitioned by trade_date.
+  partition_field: trade_date
+  cluster_fields:
+  - symbol
+  - term
+  row_count_approx: 0
+  columns:
+  - name: kafka_partition
+    type: INTEGER
+    description: Kafka partition the record was consumed from.
+    synonyms: []
+  - name: kafka_offset
+    type: INTEGER
+    description: Kafka offset of the record.
+    synonyms: []
+  - name: symbol
+    type: STRING
+    description: Exchange symbol or ticker for the instrument.
+    synonyms:
+    - ticker
+    - product
+    - instrument
+  - name: trade_date
+    type: DATE
+    description: Business date of the trade, used for partitioning.
+    synonyms:
+    - date
+    - business date
+    - trading date
+  - name: event_date
+    type: DATE
+    description: Event date.
+    synonyms: []
+  - name: exchange_timestamp
+    type: TIMESTAMP
+    description: Timestamp from the exchange matching engine.
+    synonyms:
+    - exchange time
+  - name: hw_nic_rx_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: hw_nic_rx_timestamp.'
+    synonyms: []
+  - name: mako_ingress_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: mako_ingress_timestamp.'
+    synonyms: []
+  - name: software_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: software_timestamp.'
+    synonyms: []
+  - name: exchange_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: exchange_timestamp_ns.'
+    synonyms: []
+  - name: hw_nic_rx_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: hw_nic_rx_timestamp_ns.'
+    synonyms: []
+  - name: mako_ingress_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: mako_ingress_timestamp_ns.'
+    synonyms: []
+  - name: software_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: software_timestamp_ns.'
+    synonyms: []
+  - name: instrument_hash
+    type: STRING
+    description: Unique hash identifier for the instrument.
+    synonyms:
+    - instrument id
+    - instrument key
+  - name: event_type
+    type: INTEGER
+    description: Type of the event.
+    synonyms: []
+  - name: sequence_number
+    type: INTEGER
+    description: Sequence number for ordering events.
+    synonyms:
+    - seq num
+  - name: side
+    type: INTEGER
+    description: Side of the market data event (bid/ask/trade).
+    synonyms:
+    - market side
+  - name: price
+    type: FLOAT
+    description: Trade execution price.
+    synonyms:
+    - fill price
+    - execution price
+  - name: quantity
+    type: INTEGER
+    description: Quantity in the market data event.
+    synonyms:
+    - size
+    - volume
+  - name: order_id
+    type: INTEGER
+    description: Exchange order identifier.
+    synonyms: []
+  - name: order_position
+    type: INTEGER
+    description: Position of the order in the book.
+    synonyms:
+    - queue position
+  - name: market_state
+    type: INTEGER
+    description: Current market state (e.g. open, auction, closed).
+    synonyms:
+    - trading state
+  - name: keyframe
+    type: BOOLEAN
+    description: Whether this is a full snapshot (keyframe) or incremental update.
+    synonyms:
+    - snapshot
+  - name: instrument_type
+    type: STRING
+    description: Type of instrument.
+    synonyms: []
+  - name: data_order_identifier
+    type: INTEGER
+    description: Data order identifier.
+    synonyms: []
+  - name: data_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: data_timestamp.'
+    synonyms: []
+  - name: data_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: data_timestamp_ns.'
+    synonyms: []
+  - name: is_snap
+    type: BOOLEAN
+    description: Whether this record is a snapshot.
+    synonyms:
+    - snapshot
+  - name: strike
+    type: FLOAT
+    description: Option strike price.
+    synonyms:
+    - exercise price
+    - strike price
+    - K
+  - name: option_type
+    type: INTEGER
+    description: Option type code (call/put).
+    synonyms:
+    - call put
+    - C/P
+  - name: option_type_name
+    type: STRING
+    description: Option type name (Call or Put).
+    synonyms:
+    - call put name
+  - name: expiry_timestamp
+    type: TIMESTAMP
+    description: Expiration timestamp of the option contract.
+    synonyms:
+    - expiry
+    - expiration
+    - maturity date
+  - name: mako_symbol
+    type: STRING
+    description: Internal Mako system symbol for the instrument.
+    synonyms:
+    - internal symbol
+  - name: currency
+    type: INTEGER
+    description: Currency identifier for the instrument.
+    synonyms:
+    - ccy
+  - name: term
+    type: STRING
+    description: Expiry term or tenor label (e.g. monthly, weekly).
+    synonyms:
+    - tenor
+    - expiry term
+    - maturity
+  - name: inst_type_name
+    type: STRING
+    description: Instrument type name (e.g. Option, Future, Spread).
+    synonyms:
+    - instrument type
+    - product type
+  - name: cancel_quantity
+    type: STRING
+    description: Cancel quantity.
+    synonyms: []
+  - name: hidden_quantity
+    type: STRING
+    description: Hidden quantity.
+    synonyms: []
+  - name: fill_quantity
+    type: STRING
+    description: Fill quantity.
+    synonyms: []
+  - name: mako_sequence_number
+    type: INTEGER
+    description: Mako sequence number.
+    synonyms: []
+  - name: streamsource_stream_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_stream_id.'
+    synonyms: []
+  - name: streamsource_event_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_event_id.'
+    synonyms: []
+  - name: streamsource_message_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_message_id.'
+    synonyms: []
+  - name: datasource_pid
+    type: INTEGER
+    description: 'Data provenance field: datasource_pid.'
+    synonyms: []
+  - name: datasource_hostname
+    type: STRING
+    description: 'Data provenance field: datasource_hostname.'
+    synonyms: []

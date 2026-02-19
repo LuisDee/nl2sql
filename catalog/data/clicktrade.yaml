@@ -1,0 +1,340 @@
+table:
+  name: clicktrade
+  dataset: nl2sql_omx_data
+  fqn: '{project}.nl2sql_omx_data.clicktrade'
+  layer: data
+  description: Raw click trade execution details from the Mako system. Contains full detail on manual click trade executions
+    including position management fields. Use nl2sql_omx_kpi.clicktrade for edge/slippage analysis. Partitioned by trade_date.
+  partition_field: trade_date
+  cluster_fields:
+  - symbol
+  - portfolio
+  - term
+  row_count_approx: 0
+  columns:
+  - name: trade_date
+    type: DATE
+    description: Business date of the trade, used for partitioning.
+    synonyms:
+    - date
+    - business date
+    - trading date
+  - name: symbol
+    type: STRING
+    description: Exchange symbol or ticker for the instrument.
+    synonyms:
+    - ticker
+    - product
+    - instrument
+  - name: portfolio
+    type: STRING
+    description: Trading portfolio or book the trade belongs to.
+    synonyms:
+    - book
+    - trading book
+    - strategy
+  - name: instrument_hash
+    type: STRING
+    description: Unique hash identifier for the instrument.
+    synonyms:
+    - instrument id
+    - instrument key
+  - name: inst_type_name
+    type: STRING
+    description: Instrument type name (e.g. Option, Future, Spread).
+    synonyms:
+    - instrument type
+    - product type
+  - name: expiry_timestamp
+    type: STRING
+    description: Expiration timestamp of the option contract.
+    synonyms:
+    - expiry
+    - expiration
+    - maturity date
+  - name: term
+    type: STRING
+    description: Expiry term or tenor label (e.g. monthly, weekly).
+    synonyms:
+    - tenor
+    - expiry term
+    - maturity
+  - name: currency
+    type: STRING
+    description: Currency identifier for the instrument.
+    synonyms:
+    - ccy
+  - name: trader_id
+    type: STRING
+    description: Trader identifier.
+    synonyms:
+    - trader
+    - user id
+  - name: mako_id
+    type: STRING
+    description: Mako system internal identifier.
+    synonyms: []
+  - name: algorithm
+    type: STRING
+    description: Algorithm or strategy name used for the trade.
+    synonyms:
+    - strategy
+    - algo name
+    - trading algo
+  - name: channel
+    type: STRING
+    description: Trading channel (electronic, voice, etc.).
+    synonyms:
+    - execution channel
+  - name: inventory
+    type: STRING
+    description: Inventory or sub-account classification.
+    synonyms:
+    - sub-account
+  - name: account
+    type: STRING
+    description: Trading account identifier (e.g. BGC, MGN for broker trades).
+    synonyms:
+    - trading account
+    - broker account
+  - name: transaction_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: transaction_timestamp.'
+    synonyms: []
+  - name: transaction_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: transaction_timestamp_ns.'
+    synonyms: []
+  - name: exchange_timestamp
+    type: TIMESTAMP
+    description: Timestamp from the exchange matching engine.
+    synonyms:
+    - exchange time
+  - name: exchange_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: exchange_timestamp_ns.'
+    synonyms: []
+  - name: exchange_date
+    type: DATE
+    description: Exchange date.
+    synonyms: []
+  - name: exchange_transaction_id
+    type: STRING
+    description: Exchange transaction id.
+    synonyms: []
+  - name: exchange_order_id
+    type: STRING
+    description: Exchange order id.
+    synonyms: []
+  - name: agg_pos_timestamp
+    type: STRING
+    description: 'Timestamp field: agg_pos_timestamp.'
+    synonyms: []
+  - name: agg_pos_timestamp_ns
+    type: STRING
+    description: 'Timestamp field: agg_pos_timestamp_ns.'
+    synonyms: []
+  - name: agg_pos_date
+    type: STRING
+    description: Agg pos date.
+    synonyms: []
+  - name: revision
+    type: INTEGER
+    description: Revision number of the trade record.
+    synonyms:
+    - version
+  - name: revision_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: revision_timestamp.'
+    synonyms: []
+  - name: revision_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: revision_timestamp_ns.'
+    synonyms: []
+  - name: traded_size
+    type: INTEGER
+    description: Number of contracts traded.
+    synonyms:
+    - fill size
+    - quantity
+    - lots
+  - name: price
+    type: FLOAT
+    description: Trade execution price.
+    synonyms:
+    - fill price
+    - execution price
+  - name: size
+    type: STRING
+    description: Trade size in contracts.
+    synonyms:
+    - quantity
+    - lots
+  - name: tv
+    type: FLOAT
+    description: Theoretical value (fair value) of the option.
+    synonyms:
+    - theo
+    - theoretical value
+    - fair value
+    - machine price
+    - TV
+  - name: counterparty
+    type: STRING
+    description: Counterparty or market participant on the other side.
+    synonyms:
+    - counter party
+    - other side
+  - name: revisor
+    type: STRING
+    description: Revisor.
+    synonyms: []
+  - name: transaction_id
+    type: INTEGER
+    description: Transaction id.
+    synonyms: []
+  - name: order_id
+    type: INTEGER
+    description: Exchange order identifier.
+    synonyms: []
+  - name: position_type
+    type: INTEGER
+    description: Position type.
+    synonyms: []
+  - name: position_id
+    type: INTEGER
+    description: Position id.
+    synonyms: []
+  - name: curve_id
+    type: INTEGER
+    description: Volatility curve identifier.
+    synonyms:
+    - vol curve
+  - name: carry_id
+    type: INTEGER
+    description: Carry/dividend curve identifier.
+    synonyms:
+    - dividend curve
+  - name: trade_id
+    type: INTEGER
+    description: Unique identifier for the trade.
+    synonyms:
+    - fill id
+  - name: text
+    type: STRING
+    description: Text.
+    synonyms: []
+  - name: strike
+    type: STRING
+    description: Option strike price.
+    synonyms:
+    - exercise price
+    - strike price
+    - K
+  - name: option_type
+    type: STRING
+    description: Option type code (call/put).
+    synonyms:
+    - call put
+    - C/P
+  - name: option_type_name
+    type: STRING
+    description: Option type name (Call or Put).
+    synonyms:
+    - call put name
+  - name: mako_symbol
+    type: STRING
+    description: Internal Mako system symbol for the instrument.
+    synonyms:
+    - internal symbol
+  - name: contract_size
+    type: STRING
+    description: Contract multiplier for the instrument.
+    synonyms:
+    - multiplier
+    - point value
+  - name: underlying_instrument_hash
+    type: STRING
+    description: 'Underlying-related field: underlying_instrument_hash.'
+    synonyms: []
+  - name: underlying_exe_exch
+    type: INTEGER
+    description: 'Underlying-related field: underlying_exe_exch.'
+    synonyms: []
+  - name: underlying_exe_exch_name
+    type: STRING
+    description: 'Underlying-related field: underlying_exe_exch_name.'
+    synonyms: []
+  - name: combo_type_name
+    type: STRING
+    description: Type of combo (e.g. calendar, vertical, etc.).
+    synonyms:
+    - spread type
+  - name: executable_exchange
+    type: INTEGER
+    description: Exchange identifier for execution.
+    synonyms: []
+  - name: is_parent
+    type: BOOLEAN
+    description: Whether this row is the parent (combo) level.
+    synonyms: []
+  - name: is_ref_component
+    type: INTEGER
+    description: Is ref component.
+    synonyms: []
+  - name: leg_index
+    type: STRING
+    description: Index of this leg within the combo.
+    synonyms: []
+  - name: leg_ratio
+    type: STRING
+    description: Ratio of this leg in the combo.
+    synonyms: []
+  - name: liquid
+    type: INTEGER
+    description: Liquid.
+    synonyms: []
+  - name: no_legs
+    type: STRING
+    description: Number of legs in the combo.
+    synonyms:
+    - num legs
+    - leg count
+  - name: parent_combo_type_name
+    type: STRING
+    description: Combo type name of the parent instrument.
+    synonyms: []
+  - name: parent_feed_code
+    type: STRING
+    description: Feed code of the parent combo.
+    synonyms: []
+  - name: parent_instrument_hash
+    type: STRING
+    description: Instrument hash of the parent combo.
+    synonyms: []
+  - name: parent_is_combo
+    type: BOOLEAN
+    description: Whether the parent instrument is a combo/spread.
+    synonyms:
+    - is combo
+  - name: ref_inst_type_name
+    type: STRING
+    description: Ref inst type name.
+    synonyms: []
+  - name: ref_term
+    type: STRING
+    description: Ref term.
+    synonyms: []
+  - name: total_traded_size
+    type: STRING
+    description: Total size traded across all legs.
+    synonyms:
+    - total lots
+  - name: underlying_inst_type_name
+    type: STRING
+    description: 'Underlying-related field: underlying_inst_type_name.'
+    synonyms: []
+  - name: underlying_symbol
+    type: STRING
+    description: 'Underlying-related field: underlying_symbol.'
+    synonyms: []

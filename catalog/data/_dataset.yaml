@@ -1,0 +1,53 @@
+dataset:
+  name: nl2sql_omx_data
+  layer: data
+  description: >
+    Raw OMX options trading and market data. Silver layer.
+    Contains trade execution details, theoretical pricing snapshots,
+    market data feeds, and order book depth. Higher granularity than KPI
+    but without computed performance metrics.
+
+  tables:
+    - brokertrade
+    - clicktrade
+    - markettrade
+    - quotertrade
+    - theodata
+    - swingdata
+    - marketdata
+    - marketdepth
+
+  routing:
+    - patterns: ["theo", "theoretical", "fair value", "TV", "machine price", "vol surface"]
+      table: theodata
+      notes: "Theoretical options pricing snapshots"
+
+    - patterns: ["market data", "market feed", "exchange data", "price feed"]
+      table: marketdata
+      notes: "Market data feed snapshots"
+
+    - patterns: ["order book", "depth", "market depth", "bid ask", "bid/ask", "levels"]
+      table: marketdepth
+      notes: "Order book depth / market depth snapshots"
+
+    - patterns: ["swing", "swing data", "OTO swing data"]
+      table: swingdata
+      notes: "Raw swing trade data"
+
+    - patterns: ["raw trade", "execution detail", "fill detail", "exact timestamp"]
+      table: markettrade
+      notes: "Raw trade execution details (not KPI enriched)"
+
+  disambiguation:
+    theodata_unique: >
+      theodata exists ONLY in nl2sql_omx_data. It contains theoretical options
+      pricing: theo (fair value), delta, vol (implied volatility), vega, gamma
+      per strike per timestamp. Questions about "vol", "IV", "implied volatility",
+      "theo", "delta", "vega", "greeks", "fair value", or "machine price" should
+      route here.
+
+    marketdata_vs_marketdepth: >
+      marketdata has aggregated market data snapshots (top-of-book prices, volumes).
+      marketdepth has full order book depth (multiple price levels, bid/ask sizes
+      at each level). Use marketdata for "what was the market price" questions.
+      Use marketdepth for "what did the order book look like" questions.

@@ -1,0 +1,337 @@
+table:
+  name: marketdepth
+  dataset: nl2sql_omx_data
+  fqn: '{project}.nl2sql_omx_data.marketdepth'
+  layer: data
+  description: Order book depth snapshots with 5 levels of bid/ask prices, volumes, and order counts, plus implied prices.
+    Use for spread analysis, liquidity analysis, and book shape studies. Partitioned by trade_date.
+  partition_field: trade_date
+  cluster_fields:
+  - symbol
+  - term
+  row_count_approx: 0
+  columns:
+  - name: kafka_partition
+    type: INTEGER
+    description: Kafka partition the record was consumed from.
+    synonyms: []
+  - name: kafka_offset
+    type: INTEGER
+    description: Kafka offset of the record.
+    synonyms: []
+  - name: event_date
+    type: DATE
+    description: Event date.
+    synonyms: []
+  - name: exchange_timestamp
+    type: TIMESTAMP
+    description: Timestamp from the exchange matching engine.
+    synonyms:
+    - exchange time
+  - name: exchange_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: exchange_timestamp_ns.'
+    synonyms: []
+  - name: hw_nic_rx_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: hw_nic_rx_timestamp.'
+    synonyms: []
+  - name: hw_nic_rx_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: hw_nic_rx_timestamp_ns.'
+    synonyms: []
+  - name: mako_ingress_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: mako_ingress_timestamp.'
+    synonyms: []
+  - name: mako_ingress_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: mako_ingress_timestamp_ns.'
+    synonyms: []
+  - name: software_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: software_timestamp.'
+    synonyms: []
+  - name: software_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: software_timestamp_ns.'
+    synonyms: []
+  - name: instrument_hash
+    type: STRING
+    description: Unique hash identifier for the instrument.
+    synonyms:
+    - instrument id
+    - instrument key
+  - name: sequence_number
+    type: INTEGER
+    description: Sequence number for ordering events.
+    synonyms:
+    - seq num
+  - name: ask_price_0
+    type: FLOAT
+    description: Best ask price at level 0.
+    synonyms:
+    - ask 0
+  - name: ask_price_1
+    type: FLOAT
+    description: Best ask price at level 1.
+    synonyms:
+    - ask 1
+  - name: ask_price_2
+    type: FLOAT
+    description: Best ask price at level 2.
+    synonyms:
+    - ask 2
+  - name: ask_price_3
+    type: FLOAT
+    description: Best ask price at level 3.
+    synonyms:
+    - ask 3
+  - name: ask_price_4
+    type: FLOAT
+    description: Best ask price at level 4.
+    synonyms:
+    - ask 4
+  - name: bid_price_0
+    type: FLOAT
+    description: Best bid price at level 0.
+    synonyms:
+    - bid 0
+  - name: bid_price_1
+    type: FLOAT
+    description: Best bid price at level 1.
+    synonyms:
+    - bid 1
+  - name: bid_price_2
+    type: FLOAT
+    description: Best bid price at level 2.
+    synonyms:
+    - bid 2
+  - name: bid_price_3
+    type: FLOAT
+    description: Best bid price at level 3.
+    synonyms:
+    - bid 3
+  - name: bid_price_4
+    type: FLOAT
+    description: Best bid price at level 4.
+    synonyms:
+    - bid 4
+  - name: ask_volume_0
+    type: INTEGER
+    description: Ask volume at level 0.
+    synonyms:
+    - ask size 0
+  - name: ask_volume_1
+    type: INTEGER
+    description: Ask volume at level 1.
+    synonyms:
+    - ask size 1
+  - name: ask_volume_2
+    type: INTEGER
+    description: Ask volume at level 2.
+    synonyms:
+    - ask size 2
+  - name: ask_volume_3
+    type: INTEGER
+    description: Ask volume at level 3.
+    synonyms:
+    - ask size 3
+  - name: ask_volume_4
+    type: INTEGER
+    description: Ask volume at level 4.
+    synonyms:
+    - ask size 4
+  - name: bid_volume_0
+    type: INTEGER
+    description: Bid volume at level 0.
+    synonyms:
+    - bid size 0
+  - name: bid_volume_1
+    type: INTEGER
+    description: Bid volume at level 1.
+    synonyms:
+    - bid size 1
+  - name: bid_volume_2
+    type: INTEGER
+    description: Bid volume at level 2.
+    synonyms:
+    - bid size 2
+  - name: bid_volume_3
+    type: INTEGER
+    description: Bid volume at level 3.
+    synonyms:
+    - bid size 3
+  - name: bid_volume_4
+    type: INTEGER
+    description: Bid volume at level 4.
+    synonyms:
+    - bid size 4
+  - name: ask_orders_0
+    type: INTEGER
+    description: Number of ask orders at level 0.
+    synonyms: []
+  - name: ask_orders_1
+    type: INTEGER
+    description: Number of ask orders at level 1.
+    synonyms: []
+  - name: ask_orders_2
+    type: INTEGER
+    description: Number of ask orders at level 2.
+    synonyms: []
+  - name: ask_orders_3
+    type: INTEGER
+    description: Number of ask orders at level 3.
+    synonyms: []
+  - name: ask_orders_4
+    type: INTEGER
+    description: Number of ask orders at level 4.
+    synonyms: []
+  - name: bid_orders_0
+    type: INTEGER
+    description: Number of bid orders at level 0.
+    synonyms: []
+  - name: bid_orders_1
+    type: INTEGER
+    description: Number of bid orders at level 1.
+    synonyms: []
+  - name: bid_orders_2
+    type: INTEGER
+    description: Number of bid orders at level 2.
+    synonyms: []
+  - name: bid_orders_3
+    type: INTEGER
+    description: Number of bid orders at level 3.
+    synonyms: []
+  - name: bid_orders_4
+    type: INTEGER
+    description: Number of bid orders at level 4.
+    synonyms: []
+  - name: implied_bid_price
+    type: FLOAT
+    description: Implied bid price/volume/orders from spread markets.
+    synonyms: []
+  - name: implied_bid_volume
+    type: INTEGER
+    description: Implied bid price/volume/orders from spread markets.
+    synonyms: []
+  - name: implied_bid_orders
+    type: INTEGER
+    description: Implied bid price/volume/orders from spread markets.
+    synonyms: []
+  - name: implied_ask_price
+    type: FLOAT
+    description: Implied ask price/volume/orders from spread markets.
+    synonyms: []
+  - name: implied_ask_volume
+    type: INTEGER
+    description: Implied ask price/volume/orders from spread markets.
+    synonyms: []
+  - name: implied_ask_orders
+    type: INTEGER
+    description: Implied ask price/volume/orders from spread markets.
+    synonyms: []
+  - name: keyframe
+    type: BOOLEAN
+    description: Whether this is a full snapshot (keyframe) or incremental update.
+    synonyms:
+    - snapshot
+  - name: data_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: data_timestamp.'
+    synonyms: []
+  - name: data_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: data_timestamp_ns.'
+    synonyms: []
+  - name: data_order_identifier
+    type: INTEGER
+    description: Data order identifier.
+    synonyms: []
+  - name: streamsource_stream_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_stream_id.'
+    synonyms: []
+  - name: streamsource_event_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_event_id.'
+    synonyms: []
+  - name: streamsource_message_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_message_id.'
+    synonyms: []
+  - name: datasource_pid
+    type: INTEGER
+    description: 'Data provenance field: datasource_pid.'
+    synonyms: []
+  - name: datasource_hostname
+    type: STRING
+    description: 'Data provenance field: datasource_hostname.'
+    synonyms: []
+  - name: market_state
+    type: INTEGER
+    description: Current market state (e.g. open, auction, closed).
+    synonyms:
+    - trading state
+  - name: strike
+    type: FLOAT
+    description: Option strike price.
+    synonyms:
+    - exercise price
+    - strike price
+    - K
+  - name: option_type
+    type: INTEGER
+    description: Option type code (call/put).
+    synonyms:
+    - call put
+    - C/P
+  - name: option_type_name
+    type: STRING
+    description: Option type name (Call or Put).
+    synonyms:
+    - call put name
+  - name: expiry_timestamp
+    type: TIMESTAMP
+    description: Expiration timestamp of the option contract.
+    synonyms:
+    - expiry
+    - expiration
+    - maturity date
+  - name: mako_symbol
+    type: STRING
+    description: Internal Mako system symbol for the instrument.
+    synonyms:
+    - internal symbol
+  - name: currency
+    type: INTEGER
+    description: Currency identifier for the instrument.
+    synonyms:
+    - ccy
+  - name: inst_type_name
+    type: STRING
+    description: Instrument type name (e.g. Option, Future, Spread).
+    synonyms:
+    - instrument type
+    - product type
+  - name: term
+    type: STRING
+    description: Expiry term or tenor label (e.g. monthly, weekly).
+    synonyms:
+    - tenor
+    - expiry term
+    - maturity
+  - name: trade_date
+    type: DATE
+    description: Business date of the trade, used for partitioning.
+    synonyms:
+    - date
+    - business date
+    - trading date
+  - name: symbol
+    type: STRING
+    description: Exchange symbol or ticker for the instrument.
+    synonyms:
+    - ticker
+    - product
+    - instrument

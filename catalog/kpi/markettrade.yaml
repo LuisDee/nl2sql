@@ -1,0 +1,3407 @@
+table:
+  name: markettrade
+  dataset: nl2sql_omx_kpi
+  fqn: '{project}.nl2sql_omx_kpi.markettrade'
+  layer: kpi
+  description: Exchange/market trade KPIs with time-bucketed slippage and Greeks. This is the DEFAULT table when users ask
+    about trades without specifying a trade type. Contains one row per market trade with instant edge, PnL, and forward-looking
+    slippage at intervals from 1s to end-of-day. Partitioned by trade_date.
+  partition_field: trade_date
+  cluster_fields:
+  - symbol
+  - portfolio
+  row_count_approx: 0
+  columns:
+  - name: algo
+    type: STRING
+    description: Algorithm or strategy name used for the trade.
+    synonyms:
+    - strategy
+    - algo name
+    - trading algo
+  - name: ref_curve_id
+    type: INTEGER
+    description: Reference volatility curve identifier.
+    synonyms:
+    - ref curve
+  - name: ref_carry_id
+    type: INTEGER
+    description: Reference carry/dividend curve identifier.
+    synonyms:
+    - ref carry
+  - name: ref_tv
+    type: FLOAT
+    description: Reference theoretical value used at time of trade.
+    synonyms:
+    - reference theo
+    - ref fair value
+  - name: ref_base_price
+    type: FLOAT
+    description: Reference base (underlying) price.
+    synonyms:
+    - ref underlying
+    - reference price
+  - name: ref_roll
+    type: FLOAT
+    description: Reference roll value.
+    synonyms:
+    - reference roll
+  - name: raw_bv_bid
+    type: FLOAT
+    description: Raw base value bid price.
+    synonyms:
+    - bv bid
+  - name: raw_bv_bid_size
+    type: INTEGER
+    description: Raw base value bid size.
+    synonyms: []
+  - name: raw_bv_ask
+    type: FLOAT
+    description: Raw base value ask price.
+    synonyms:
+    - bv ask
+  - name: raw_bv_ask_size
+    type: INTEGER
+    description: Raw base value ask size.
+    synonyms: []
+  - name: layered_base_bid
+    type: FLOAT
+    description: Layered base bid price after adjustments.
+    synonyms: []
+  - name: layered_base_bid_size
+    type: INTEGER
+    description: Layered base bid size.
+    synonyms: []
+  - name: layered_base_ask
+    type: FLOAT
+    description: Layered base ask price after adjustments.
+    synonyms: []
+  - name: layered_base_ask_size
+    type: INTEGER
+    description: Layered base ask size.
+    synonyms: []
+  - name: layered_base_adjustment
+    type: FLOAT
+    description: Layered base adjustment.
+    synonyms: []
+  - name: odr_adjustment
+    type: FLOAT
+    description: Odr adjustment.
+    synonyms: []
+  - name: inflight_deflection_tv_adjustment_bid
+    type: FLOAT
+    description: Inflight deflection tv adjustment bid.
+    synonyms: []
+  - name: inflight_deflection_tv_adjustment_ask
+    type: FLOAT
+    description: Inflight deflection tv adjustment ask.
+    synonyms: []
+  - name: internal_tv_adjustment_bid
+    type: FLOAT
+    description: Internal tv adjustment bid.
+    synonyms: []
+  - name: internal_tv_adjustment_ask
+    type: FLOAT
+    description: Internal tv adjustment ask.
+    synonyms: []
+  - name: nhr_adjustment_bid
+    type: FLOAT
+    description: Nhr adjustment bid.
+    synonyms: []
+  - name: nhr_adjustment_ask
+    type: FLOAT
+    description: Nhr adjustment ask.
+    synonyms: []
+  - name: base_edge_bid
+    type: FLOAT
+    description: Base edge on the bid side.
+    synonyms:
+    - bid edge
+  - name: base_edge_ask
+    type: FLOAT
+    description: Base edge on the ask side.
+    synonyms:
+    - ask edge
+  - name: fees
+    type: FLOAT
+    description: Trading fees (exchange + clearing).
+    synonyms:
+    - exchange fees
+    - transaction costs
+  - name: bv_side
+    type: STRING
+    description: Side of the base value update (bid/ask).
+    synonyms: []
+  - name: delta_adjusted_base_price
+    type: FLOAT
+    description: Delta at adjusted_base_price after trade.
+    synonyms:
+    - delta adjusted_base_price
+  - name: base_sequence_number
+    type: STRING
+    description: Base sequence number.
+    synonyms: []
+  - name: option_sequence_number
+    type: INTEGER
+    description: Option sequence number.
+    synonyms: []
+  - name: base_instrument_hash
+    type: STRING
+    description: Base instrument hash.
+    synonyms: []
+  - name: hardware_nic_rx_timestamp
+    type: TIMESTAMP
+    description: Hardware NIC receive timestamp for latency measurement.
+    synonyms:
+    - nic timestamp
+  - name: hardware_nic_rx_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: hardware_nic_rx_timestamp_ns.'
+    synonyms: []
+  - name: trade_size
+    type: INTEGER
+    description: Number of contracts traded.
+    synonyms:
+    - fill size
+    - quantity
+    - lots
+    - volume
+  - name: edge
+    type: FLOAT
+    description: Edge.
+    synonyms: []
+  - name: is_mako_trade
+    type: INTEGER
+    description: Whether this was a Mako (our) trade vs. market trade.
+    synonyms:
+    - our trade
+  - name: counterparty_id
+    type: STRING
+    description: Counterparty or market participant on the other side.
+    synonyms:
+    - counter party
+    - other side
+  - name: exchange_timestamp
+    type: TIMESTAMP
+    description: Timestamp from the exchange matching engine.
+    synonyms:
+    - exchange time
+  - name: exchange_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: exchange_timestamp_ns.'
+    synonyms: []
+  - name: is_active_instrument
+    type: BOOLEAN
+    description: Whether the instrument was actively quoted.
+    synonyms: []
+  - name: bv_update_sequence_number
+    type: INTEGER
+    description: Bv update sequence number.
+    synonyms: []
+  - name: bv_update_instrument_hash
+    type: STRING
+    description: Bv update instrument hash.
+    synonyms: []
+  - name: underlying_sequence_number
+    type: INTEGER
+    description: 'Underlying-related field: underlying_sequence_number.'
+    synonyms: []
+  - name: underlying_instrument_hash
+    type: STRING
+    description: 'Underlying-related field: underlying_instrument_hash.'
+    synonyms: []
+  - name: first_fill_sequence_number
+    type: INTEGER
+    description: First fill sequence number.
+    synonyms: []
+  - name: last_fill_sequence_number
+    type: INTEGER
+    description: Last fill sequence number.
+    synonyms: []
+  - name: contains_implied_fills
+    type: BOOLEAN
+    description: Contains implied fills.
+    synonyms: []
+  - name: underlying_exe_exch
+    type: INTEGER
+    description: 'Underlying-related field: underlying_exe_exch.'
+    synonyms: []
+  - name: underlying_exe_exch_name
+    type: STRING
+    description: 'Underlying-related field: underlying_exe_exch_name.'
+    synonyms: []
+  - name: is_spark
+    type: BOOLEAN
+    description: Whether this is a Spark (fast-path) event.
+    synonyms: []
+  - name: ref_inst_curve_id
+    type: INTEGER
+    description: Ref inst curve id.
+    synonyms: []
+  - name: ref_inst_carry_id
+    type: INTEGER
+    description: Ref inst carry id.
+    synonyms: []
+  - name: is_ref_theo_invalid
+    type: BOOLEAN
+    description: Whether the reference theo was invalid.
+    synonyms: []
+  - name: lb_enabled
+    type: BOOLEAN
+    description: Whether lean-back mode was enabled.
+    synonyms: []
+  - name: edge_model_type
+    type: INTEGER
+    description: Edge model type used for this instrument.
+    synonyms: []
+  - name: edge_model_type_name
+    type: STRING
+    description: Edge model type used for this instrument.
+    synonyms: []
+  - name: ref_theoevent_stream_id
+    type: STRING
+    description: Ref theoevent stream id.
+    synonyms: []
+  - name: ref_theoevent_event_id
+    type: STRING
+    description: Ref theoevent event id.
+    synonyms: []
+  - name: exch_aggressor_side
+    type: STRING
+    description: Which side was the aggressor (taker) in the trade.
+    synonyms:
+    - aggressor
+    - taker side
+  - name: mako_symbol
+    type: STRING
+    description: Internal Mako system symbol for the instrument.
+    synonyms:
+    - internal symbol
+  - name: portfolio
+    type: STRING
+    description: Trading portfolio or book the trade belongs to.
+    synonyms:
+    - book
+    - trading book
+    - strategy
+  - name: symbol
+    type: STRING
+    description: Exchange symbol or ticker for the instrument.
+    synonyms:
+    - ticker
+    - product
+    - instrument
+  - name: trade_price
+    type: FLOAT
+    description: Execution price of the trade.
+    synonyms:
+    - fill price
+    - execution price
+    - price
+  - name: trade_row_key
+    type: STRING
+    description: Unique key identifying this trade row.
+    synonyms:
+    - trade key
+    - row id
+  - name: trade_type
+    type: STRING
+    description: Classification of the trade type.
+    synonyms:
+    - type
+  - name: trade_date
+    type: DATE
+    description: Business date of the trade, used for partitioning.
+    synonyms:
+    - date
+    - business date
+    - trading date
+  - name: parent_is_combo
+    type: BOOLEAN
+    description: Whether the parent instrument is a combo/spread.
+    synonyms:
+    - is combo
+  - name: is_parent
+    type: BOOLEAN
+    description: Whether this row is the parent (combo) level.
+    synonyms: []
+  - name: is_auction
+    type: BOOLEAN
+    description: Whether the trade occurred during an auction.
+    synonyms: []
+  - name: contract_size
+    type: FLOAT
+    description: Contract multiplier for the instrument.
+    synonyms:
+    - multiplier
+    - point value
+  - name: instrument_hash
+    type: STRING
+    description: Unique hash identifier for the instrument.
+    synonyms:
+    - instrument id
+    - instrument key
+  - name: parent_instrument_hash
+    type: STRING
+    description: Instrument hash of the parent combo.
+    synonyms: []
+  - name: parent_feed_code
+    type: STRING
+    description: Feed code of the parent combo.
+    synonyms: []
+  - name: no_legs
+    type: INTEGER
+    description: Number of legs in the combo.
+    synonyms:
+    - num legs
+    - leg count
+  - name: leg_index
+    type: INTEGER
+    description: Index of this leg within the combo.
+    synonyms: []
+  - name: leg_ratio
+    type: STRING
+    description: Ratio of this leg in the combo.
+    synonyms: []
+  - name: strike
+    type: FLOAT
+    description: Option strike price.
+    synonyms:
+    - exercise price
+    - strike price
+    - K
+  - name: option_type
+    type: INTEGER
+    description: Option type code (call/put).
+    synonyms:
+    - call put
+    - C/P
+  - name: currency_id
+    type: INTEGER
+    description: Currency identifier for the instrument.
+    synonyms:
+    - ccy
+  - name: parent_combo_type_name
+    type: STRING
+    description: Combo type name of the parent instrument.
+    synonyms: []
+  - name: option_type_name
+    type: STRING
+    description: Option type name (Call or Put).
+    synonyms:
+    - call put name
+  - name: underlying_inst_type_name
+    type: STRING
+    description: 'Underlying-related field: underlying_inst_type_name.'
+    synonyms: []
+  - name: inst_type_name
+    type: STRING
+    description: Instrument type name (e.g. Option, Future, Spread).
+    synonyms:
+    - instrument type
+    - product type
+  - name: term
+    type: STRING
+    description: Expiry term or tenor label (e.g. monthly, weekly).
+    synonyms:
+    - tenor
+    - expiry term
+    - maturity
+  - name: expiry_timestamp
+    type: TIMESTAMP
+    description: Expiration timestamp of the option contract.
+    synonyms:
+    - expiry
+    - expiration
+    - maturity date
+  - name: is_bv_invalid
+    type: BOOLEAN
+    description: Whether the base value was invalid at time of trade.
+    synonyms: []
+  - name: option_exchange
+    type: STRING
+    description: Exchange for the option leg.
+    synonyms: []
+  - name: underlying_exchange
+    type: STRING
+    description: Exchange for the underlying.
+    synonyms: []
+  - name: streamsource_stream_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_stream_id.'
+    synonyms: []
+  - name: streamsource_event_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_event_id.'
+    synonyms: []
+  - name: streamsource_message_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_message_id.'
+    synonyms: []
+  - name: datasource_pid
+    type: INTEGER
+    description: 'Data provenance field: datasource_pid.'
+    synonyms: []
+  - name: datasource_hostname
+    type: STRING
+    description: 'Data provenance field: datasource_hostname.'
+    synonyms: []
+  - name: ref_delta
+    type: FLOAT
+    description: Reference delta used in KPI computation.
+    synonyms:
+    - reference delta
+  - name: ref_gamma
+    type: FLOAT
+    description: Reference gamma used in KPI computation.
+    synonyms:
+    - reference gamma
+  - name: mdepth_sequence_number
+    type: INTEGER
+    description: Mdepth sequence number.
+    synonyms: []
+  - name: curve_id
+    type: INTEGER
+    description: Volatility curve identifier.
+    synonyms:
+    - vol curve
+  - name: carry_id
+    type: INTEGER
+    description: Carry/dividend curve identifier.
+    synonyms:
+    - dividend curve
+  - name: is_mdepth_snapshot
+    type: BOOLEAN
+    description: Is mdepth snapshot.
+    synonyms: []
+  - name: is_theodata_snapshot
+    type: BOOLEAN
+    description: Is theodata snapshot.
+    synonyms: []
+  - name: tv_offset
+    type: FLOAT
+    description: Offset applied to theoretical value.
+    synonyms:
+    - theo offset
+  - name: event_timestamp
+    type: TIMESTAMP
+    description: Timestamp of the event.
+    synonyms:
+    - event time
+  - name: event_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns.'
+    synonyms: []
+  - name: option_mdepth_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: option_mdepth_timestamp.'
+    synonyms: []
+  - name: option_mdepth_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: option_mdepth_timestamp_ns.'
+    synonyms: []
+  - name: theo_event_tx_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns.'
+    synonyms: []
+  - name: when_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp.'
+    synonyms: []
+  - name: when_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns.'
+    synonyms: []
+  - name: bid_price_0
+    type: FLOAT
+    description: Best bid price at level 0.
+    synonyms:
+    - bid 0
+  - name: bid_volume_0
+    type: INTEGER
+    description: Bid volume at level 0.
+    synonyms:
+    - bid size 0
+  - name: ask_price_0
+    type: FLOAT
+    description: Best ask price at level 0.
+    synonyms:
+    - ask 0
+  - name: ask_volume_0
+    type: INTEGER
+    description: Ask volume at level 0.
+    synonyms:
+    - ask size 0
+  - name: ul_bid_price_0
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0.'
+    synonyms: []
+  - name: ul_bid_volume_0
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0.'
+    synonyms: []
+  - name: ul_ask_price_0
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0.'
+    synonyms: []
+  - name: ul_ask_volume_0
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0.'
+    synonyms: []
+  - name: ul_bid_price_1
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_1.'
+    synonyms: []
+  - name: ul_bid_volume_1
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_1.'
+    synonyms: []
+  - name: ul_ask_price_1
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_1.'
+    synonyms: []
+  - name: ul_ask_volume_1
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_1.'
+    synonyms: []
+  - name: ul_bid_price_2
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_2.'
+    synonyms: []
+  - name: ul_bid_volume_2
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_2.'
+    synonyms: []
+  - name: ul_ask_price_2
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_2.'
+    synonyms: []
+  - name: ul_ask_volume_2
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_2.'
+    synonyms: []
+  - name: ul_bid_price_3
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_3.'
+    synonyms: []
+  - name: ul_bid_volume_3
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_3.'
+    synonyms: []
+  - name: ul_ask_price_3
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_3.'
+    synonyms: []
+  - name: ul_ask_volume_3
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_3.'
+    synonyms: []
+  - name: ul_bid_price_4
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_4.'
+    synonyms: []
+  - name: ul_bid_volume_4
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_4.'
+    synonyms: []
+  - name: ul_ask_price_4
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_4.'
+    synonyms: []
+  - name: ul_ask_volume_4
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_4.'
+    synonyms: []
+  - name: adjusted_roll
+    type: FLOAT
+    description: Adjusted roll.
+    synonyms: []
+  - name: front_month_roll
+    type: STRING
+    description: Front month roll.
+    synonyms: []
+  - name: curve_id_1s
+    type: INTEGER
+    description: Curve id 1s.
+    synonyms: []
+  - name: carry_id_1s
+    type: INTEGER
+    description: Carry id 1s.
+    synonyms: []
+  - name: mdepth_sequence_number_1s
+    type: INTEGER
+    description: Mdepth sequence number 1s.
+    synonyms: []
+  - name: is_mdepth_snapshot_1s
+    type: BOOLEAN
+    description: Is mdepth snapshot 1s.
+    synonyms: []
+  - name: is_theodata_snapshot_1s
+    type: BOOLEAN
+    description: Is theodata snapshot 1s.
+    synonyms: []
+  - name: event_timestamp_1s
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_1s.'
+    synonyms: []
+  - name: event_timestamp_ns_1s
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_1s.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_1s
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_1s.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_1s
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_1s.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_1s
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_1s.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_1s
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_1s.'
+    synonyms: []
+  - name: when_timestamp_1s
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_1s.'
+    synonyms: []
+  - name: when_timestamp_ns_1s
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_1s.'
+    synonyms: []
+  - name: ul_bid_price_0_1s
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_1s.'
+    synonyms: []
+  - name: ul_bid_volume_0_1s
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_1s.'
+    synonyms: []
+  - name: ul_ask_price_0_1s
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_1s.'
+    synonyms: []
+  - name: ul_ask_volume_0_1s
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_1s.'
+    synonyms: []
+  - name: calculated_base_val_1s
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_1s.'
+    synonyms: []
+  - name: tv_offset_1s
+    type: FLOAT
+    description: Tv offset 1s.
+    synonyms: []
+  - name: raw_delta_mid_bv_1s
+    type: FLOAT
+    description: Raw delta mid bv 1s.
+    synonyms: []
+  - name: ref_base_val_1s
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_1s.'
+    synonyms: []
+  - name: curve_id_5s
+    type: INTEGER
+    description: Curve id 5s.
+    synonyms: []
+  - name: carry_id_5s
+    type: INTEGER
+    description: Carry id 5s.
+    synonyms: []
+  - name: mdepth_sequence_number_5s
+    type: INTEGER
+    description: Mdepth sequence number 5s.
+    synonyms: []
+  - name: is_mdepth_snapshot_5s
+    type: BOOLEAN
+    description: Is mdepth snapshot 5s.
+    synonyms: []
+  - name: is_theodata_snapshot_5s
+    type: BOOLEAN
+    description: Is theodata snapshot 5s.
+    synonyms: []
+  - name: event_timestamp_5s
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_5s.'
+    synonyms: []
+  - name: event_timestamp_ns_5s
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_5s.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_5s
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_5s.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_5s
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_5s.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_5s
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_5s.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_5s
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_5s.'
+    synonyms: []
+  - name: when_timestamp_5s
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_5s.'
+    synonyms: []
+  - name: when_timestamp_ns_5s
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_5s.'
+    synonyms: []
+  - name: ul_bid_price_0_5s
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_5s.'
+    synonyms: []
+  - name: ul_bid_volume_0_5s
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_5s.'
+    synonyms: []
+  - name: ul_ask_price_0_5s
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_5s.'
+    synonyms: []
+  - name: ul_ask_volume_0_5s
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_5s.'
+    synonyms: []
+  - name: calculated_base_val_5s
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_5s.'
+    synonyms: []
+  - name: tv_offset_5s
+    type: FLOAT
+    description: Tv offset 5s.
+    synonyms: []
+  - name: raw_delta_mid_bv_5s
+    type: FLOAT
+    description: Raw delta mid bv 5s.
+    synonyms: []
+  - name: ref_base_val_5s
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_5s.'
+    synonyms: []
+  - name: curve_id_10s
+    type: INTEGER
+    description: Curve id 10s.
+    synonyms: []
+  - name: carry_id_10s
+    type: INTEGER
+    description: Carry id 10s.
+    synonyms: []
+  - name: mdepth_sequence_number_10s
+    type: INTEGER
+    description: Mdepth sequence number 10s.
+    synonyms: []
+  - name: is_mdepth_snapshot_10s
+    type: BOOLEAN
+    description: Is mdepth snapshot 10s.
+    synonyms: []
+  - name: is_theodata_snapshot_10s
+    type: BOOLEAN
+    description: Is theodata snapshot 10s.
+    synonyms: []
+  - name: event_timestamp_10s
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_10s.'
+    synonyms: []
+  - name: event_timestamp_ns_10s
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_10s.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_10s
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_10s.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_10s
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_10s.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_10s
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_10s.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_10s
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_10s.'
+    synonyms: []
+  - name: when_timestamp_10s
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_10s.'
+    synonyms: []
+  - name: when_timestamp_ns_10s
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_10s.'
+    synonyms: []
+  - name: ul_bid_price_0_10s
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_10s.'
+    synonyms: []
+  - name: ul_bid_volume_0_10s
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_10s.'
+    synonyms: []
+  - name: ul_ask_price_0_10s
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_10s.'
+    synonyms: []
+  - name: ul_ask_volume_0_10s
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_10s.'
+    synonyms: []
+  - name: calculated_base_val_10s
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_10s.'
+    synonyms: []
+  - name: tv_offset_10s
+    type: FLOAT
+    description: Tv offset 10s.
+    synonyms: []
+  - name: raw_delta_mid_bv_10s
+    type: FLOAT
+    description: Raw delta mid bv 10s.
+    synonyms: []
+  - name: ref_base_val_10s
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_10s.'
+    synonyms: []
+  - name: curve_id_30s
+    type: INTEGER
+    description: Curve id 30s.
+    synonyms: []
+  - name: carry_id_30s
+    type: INTEGER
+    description: Carry id 30s.
+    synonyms: []
+  - name: mdepth_sequence_number_30s
+    type: INTEGER
+    description: Mdepth sequence number 30s.
+    synonyms: []
+  - name: is_mdepth_snapshot_30s
+    type: BOOLEAN
+    description: Is mdepth snapshot 30s.
+    synonyms: []
+  - name: is_theodata_snapshot_30s
+    type: BOOLEAN
+    description: Is theodata snapshot 30s.
+    synonyms: []
+  - name: event_timestamp_30s
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_30s.'
+    synonyms: []
+  - name: event_timestamp_ns_30s
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_30s.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_30s
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_30s.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_30s
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_30s.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_30s
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_30s.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_30s
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_30s.'
+    synonyms: []
+  - name: when_timestamp_30s
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_30s.'
+    synonyms: []
+  - name: when_timestamp_ns_30s
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_30s.'
+    synonyms: []
+  - name: ul_bid_price_0_30s
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_30s.'
+    synonyms: []
+  - name: ul_bid_volume_0_30s
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_30s.'
+    synonyms: []
+  - name: ul_ask_price_0_30s
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_30s.'
+    synonyms: []
+  - name: ul_ask_volume_0_30s
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_30s.'
+    synonyms: []
+  - name: calculated_base_val_30s
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_30s.'
+    synonyms: []
+  - name: tv_offset_30s
+    type: FLOAT
+    description: Tv offset 30s.
+    synonyms: []
+  - name: raw_delta_mid_bv_30s
+    type: FLOAT
+    description: Raw delta mid bv 30s.
+    synonyms: []
+  - name: ref_base_val_30s
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_30s.'
+    synonyms: []
+  - name: curve_id_1m
+    type: INTEGER
+    description: Curve id 1m.
+    synonyms: []
+  - name: carry_id_1m
+    type: INTEGER
+    description: Carry id 1m.
+    synonyms: []
+  - name: mdepth_sequence_number_1m
+    type: INTEGER
+    description: Mdepth sequence number 1m.
+    synonyms: []
+  - name: is_mdepth_snapshot_1m
+    type: BOOLEAN
+    description: Is mdepth snapshot 1m.
+    synonyms: []
+  - name: is_theodata_snapshot_1m
+    type: BOOLEAN
+    description: Is theodata snapshot 1m.
+    synonyms: []
+  - name: event_timestamp_1m
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_1m.'
+    synonyms: []
+  - name: event_timestamp_ns_1m
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_1m.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_1m
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_1m.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_1m
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_1m.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_1m
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_1m.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_1m
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_1m.'
+    synonyms: []
+  - name: when_timestamp_1m
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_1m.'
+    synonyms: []
+  - name: when_timestamp_ns_1m
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_1m.'
+    synonyms: []
+  - name: ul_bid_price_0_1m
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_1m.'
+    synonyms: []
+  - name: ul_bid_volume_0_1m
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_1m.'
+    synonyms: []
+  - name: ul_ask_price_0_1m
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_1m.'
+    synonyms: []
+  - name: ul_ask_volume_0_1m
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_1m.'
+    synonyms: []
+  - name: calculated_base_val_1m
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_1m.'
+    synonyms: []
+  - name: tv_offset_1m
+    type: FLOAT
+    description: Tv offset 1m.
+    synonyms: []
+  - name: raw_delta_mid_bv_1m
+    type: FLOAT
+    description: Raw delta mid bv 1m.
+    synonyms: []
+  - name: ref_base_val_1m
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_1m.'
+    synonyms: []
+  - name: curve_id_5m
+    type: INTEGER
+    description: Curve id 5m.
+    synonyms: []
+  - name: carry_id_5m
+    type: INTEGER
+    description: Carry id 5m.
+    synonyms: []
+  - name: mdepth_sequence_number_5m
+    type: INTEGER
+    description: Mdepth sequence number 5m.
+    synonyms: []
+  - name: is_mdepth_snapshot_5m
+    type: BOOLEAN
+    description: Is mdepth snapshot 5m.
+    synonyms: []
+  - name: is_theodata_snapshot_5m
+    type: BOOLEAN
+    description: Is theodata snapshot 5m.
+    synonyms: []
+  - name: event_timestamp_5m
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_5m.'
+    synonyms: []
+  - name: event_timestamp_ns_5m
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_5m.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_5m
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_5m.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_5m
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_5m.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_5m
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_5m.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_5m
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_5m.'
+    synonyms: []
+  - name: when_timestamp_5m
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_5m.'
+    synonyms: []
+  - name: when_timestamp_ns_5m
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_5m.'
+    synonyms: []
+  - name: ul_bid_price_0_5m
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_5m.'
+    synonyms: []
+  - name: ul_bid_volume_0_5m
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_5m.'
+    synonyms: []
+  - name: ul_ask_price_0_5m
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_5m.'
+    synonyms: []
+  - name: ul_ask_volume_0_5m
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_5m.'
+    synonyms: []
+  - name: calculated_base_val_5m
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_5m.'
+    synonyms: []
+  - name: tv_offset_5m
+    type: FLOAT
+    description: Tv offset 5m.
+    synonyms: []
+  - name: raw_delta_mid_bv_5m
+    type: FLOAT
+    description: Raw delta mid bv 5m.
+    synonyms: []
+  - name: ref_base_val_5m
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_5m.'
+    synonyms: []
+  - name: curve_id_10m
+    type: INTEGER
+    description: Curve id 10m.
+    synonyms: []
+  - name: carry_id_10m
+    type: INTEGER
+    description: Carry id 10m.
+    synonyms: []
+  - name: mdepth_sequence_number_10m
+    type: INTEGER
+    description: Mdepth sequence number 10m.
+    synonyms: []
+  - name: is_mdepth_snapshot_10m
+    type: BOOLEAN
+    description: Is mdepth snapshot 10m.
+    synonyms: []
+  - name: is_theodata_snapshot_10m
+    type: BOOLEAN
+    description: Is theodata snapshot 10m.
+    synonyms: []
+  - name: event_timestamp_10m
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_10m.'
+    synonyms: []
+  - name: event_timestamp_ns_10m
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_10m.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_10m
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_10m.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_10m
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_10m.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_10m
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_10m.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_10m
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_10m.'
+    synonyms: []
+  - name: when_timestamp_10m
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_10m.'
+    synonyms: []
+  - name: when_timestamp_ns_10m
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_10m.'
+    synonyms: []
+  - name: ul_bid_price_0_10m
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_10m.'
+    synonyms: []
+  - name: ul_bid_volume_0_10m
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_10m.'
+    synonyms: []
+  - name: ul_ask_price_0_10m
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_10m.'
+    synonyms: []
+  - name: ul_ask_volume_0_10m
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_10m.'
+    synonyms: []
+  - name: calculated_base_val_10m
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_10m.'
+    synonyms: []
+  - name: tv_offset_10m
+    type: FLOAT
+    description: Tv offset 10m.
+    synonyms: []
+  - name: raw_delta_mid_bv_10m
+    type: FLOAT
+    description: Raw delta mid bv 10m.
+    synonyms: []
+  - name: ref_base_val_10m
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_10m.'
+    synonyms: []
+  - name: curve_id_30m
+    type: INTEGER
+    description: Curve id 30m.
+    synonyms: []
+  - name: carry_id_30m
+    type: INTEGER
+    description: Carry id 30m.
+    synonyms: []
+  - name: mdepth_sequence_number_30m
+    type: INTEGER
+    description: Mdepth sequence number 30m.
+    synonyms: []
+  - name: is_mdepth_snapshot_30m
+    type: BOOLEAN
+    description: Is mdepth snapshot 30m.
+    synonyms: []
+  - name: is_theodata_snapshot_30m
+    type: BOOLEAN
+    description: Is theodata snapshot 30m.
+    synonyms: []
+  - name: event_timestamp_30m
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_30m.'
+    synonyms: []
+  - name: event_timestamp_ns_30m
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_30m.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_30m
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_30m.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_30m
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_30m.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_30m
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_30m.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_30m
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_30m.'
+    synonyms: []
+  - name: when_timestamp_30m
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_30m.'
+    synonyms: []
+  - name: when_timestamp_ns_30m
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_30m.'
+    synonyms: []
+  - name: ul_bid_price_0_30m
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_30m.'
+    synonyms: []
+  - name: ul_bid_volume_0_30m
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_30m.'
+    synonyms: []
+  - name: ul_ask_price_0_30m
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_30m.'
+    synonyms: []
+  - name: ul_ask_volume_0_30m
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_30m.'
+    synonyms: []
+  - name: calculated_base_val_30m
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_30m.'
+    synonyms: []
+  - name: tv_offset_30m
+    type: FLOAT
+    description: Tv offset 30m.
+    synonyms: []
+  - name: raw_delta_mid_bv_30m
+    type: FLOAT
+    description: Raw delta mid bv 30m.
+    synonyms: []
+  - name: ref_base_val_30m
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_30m.'
+    synonyms: []
+  - name: curve_id_1h
+    type: INTEGER
+    description: Curve id 1h.
+    synonyms: []
+  - name: carry_id_1h
+    type: INTEGER
+    description: Carry id 1h.
+    synonyms: []
+  - name: mdepth_sequence_number_1h
+    type: INTEGER
+    description: Mdepth sequence number 1h.
+    synonyms: []
+  - name: is_mdepth_snapshot_1h
+    type: BOOLEAN
+    description: Is mdepth snapshot 1h.
+    synonyms: []
+  - name: is_theodata_snapshot_1h
+    type: BOOLEAN
+    description: Is theodata snapshot 1h.
+    synonyms: []
+  - name: event_timestamp_1h
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_1h.'
+    synonyms: []
+  - name: event_timestamp_ns_1h
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_1h.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_1h
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_1h.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_1h
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_1h.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_1h
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_1h.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_1h
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_1h.'
+    synonyms: []
+  - name: when_timestamp_1h
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_1h.'
+    synonyms: []
+  - name: when_timestamp_ns_1h
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_1h.'
+    synonyms: []
+  - name: ul_bid_price_0_1h
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_1h.'
+    synonyms: []
+  - name: ul_bid_volume_0_1h
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_1h.'
+    synonyms: []
+  - name: ul_ask_price_0_1h
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_1h.'
+    synonyms: []
+  - name: ul_ask_volume_0_1h
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_1h.'
+    synonyms: []
+  - name: calculated_base_val_1h
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_1h.'
+    synonyms: []
+  - name: tv_offset_1h
+    type: FLOAT
+    description: Tv offset 1h.
+    synonyms: []
+  - name: raw_delta_mid_bv_1h
+    type: FLOAT
+    description: Raw delta mid bv 1h.
+    synonyms: []
+  - name: ref_base_val_1h
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_1h.'
+    synonyms: []
+  - name: mdepth_sequence_number_eod
+    type: INTEGER
+    description: Mdepth sequence number eod.
+    synonyms: []
+  - name: is_mdepth_snapshot_eod
+    type: BOOLEAN
+    description: Is mdepth snapshot eod.
+    synonyms: []
+  - name: is_theodata_snapshot_eod
+    type: BOOLEAN
+    description: Is theodata snapshot eod.
+    synonyms: []
+  - name: event_timestamp_eod
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_eod.'
+    synonyms: []
+  - name: event_timestamp_ns_eod
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_eod.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_eod
+    type: TIMESTAMP
+    description: 'Timestamp field: calculated_base_val_timestamp_eod.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_eod
+    type: INTEGER
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_eod.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_eod
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp_eod.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_eod
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_eod.'
+    synonyms: []
+  - name: when_timestamp_eod
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp_eod.'
+    synonyms: []
+  - name: when_timestamp_ns_eod
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns_eod.'
+    synonyms: []
+  - name: ul_bid_price_0_eod
+    type: FLOAT
+    description: 'Underlying-related field: ul_bid_price_0_eod.'
+    synonyms: []
+  - name: ul_bid_volume_0_eod
+    type: INTEGER
+    description: 'Underlying-related field: ul_bid_volume_0_eod.'
+    synonyms: []
+  - name: ul_ask_price_0_eod
+    type: FLOAT
+    description: 'Underlying-related field: ul_ask_price_0_eod.'
+    synonyms: []
+  - name: ul_ask_volume_0_eod
+    type: INTEGER
+    description: 'Underlying-related field: ul_ask_volume_0_eod.'
+    synonyms: []
+  - name: tv_offset_eod
+    type: FLOAT
+    description: Tv offset eod.
+    synonyms: []
+  - name: raw_delta_mid_bv_eod
+    type: FLOAT
+    description: Raw delta mid bv eod.
+    synonyms: []
+  - name: ref_base_val_eod
+    type: FLOAT
+    description: 'Reference base value field: ref_base_val_eod.'
+    synonyms: []
+  - name: curve_id_1D
+    type: STRING
+    description: Curve id 1d.
+    synonyms: []
+  - name: carry_id_1D
+    type: STRING
+    description: Carry id 1d.
+    synonyms: []
+  - name: mdepth_sequence_number_1D
+    type: STRING
+    description: Mdepth sequence number 1d.
+    synonyms: []
+  - name: is_mdepth_snapshot_1D
+    type: STRING
+    description: Is mdepth snapshot 1d.
+    synonyms: []
+  - name: is_theodata_snapshot_1D
+    type: STRING
+    description: Is theodata snapshot 1d.
+    synonyms: []
+  - name: event_timestamp_1D
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_1d.'
+    synonyms: []
+  - name: event_timestamp_ns_1D
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_1d.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_1D
+    type: STRING
+    description: 'Timestamp field: calculated_base_val_timestamp_1d.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_1D
+    type: STRING
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_1d.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_1D
+    type: STRING
+    description: 'Timestamp field: theo_event_tx_timestamp_1d.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_1D
+    type: STRING
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_1d.'
+    synonyms: []
+  - name: when_timestamp_1D
+    type: STRING
+    description: 'Timestamp field: when_timestamp_1d.'
+    synonyms: []
+  - name: when_timestamp_ns_1D
+    type: STRING
+    description: 'Timestamp field: when_timestamp_ns_1d.'
+    synonyms: []
+  - name: ul_bid_price_0_1D
+    type: STRING
+    description: 'Underlying-related field: ul_bid_price_0_1d.'
+    synonyms: []
+  - name: ul_bid_volume_0_1D
+    type: STRING
+    description: 'Underlying-related field: ul_bid_volume_0_1d.'
+    synonyms: []
+  - name: ul_ask_price_0_1D
+    type: STRING
+    description: 'Underlying-related field: ul_ask_price_0_1d.'
+    synonyms: []
+  - name: ul_ask_volume_0_1D
+    type: STRING
+    description: 'Underlying-related field: ul_ask_volume_0_1d.'
+    synonyms: []
+  - name: tv_offset_1D
+    type: STRING
+    description: Tv offset 1d.
+    synonyms: []
+  - name: raw_delta_mid_bv_1D
+    type: STRING
+    description: Raw delta mid bv 1d.
+    synonyms: []
+  - name: ref_base_val_1D
+    type: STRING
+    description: 'Reference base value field: ref_base_val_1d.'
+    synonyms: []
+  - name: curve_id_5D
+    type: STRING
+    description: Curve id 5d.
+    synonyms: []
+  - name: carry_id_5D
+    type: STRING
+    description: Carry id 5d.
+    synonyms: []
+  - name: mdepth_sequence_number_5D
+    type: STRING
+    description: Mdepth sequence number 5d.
+    synonyms: []
+  - name: is_mdepth_snapshot_5D
+    type: STRING
+    description: Is mdepth snapshot 5d.
+    synonyms: []
+  - name: is_theodata_snapshot_5D
+    type: STRING
+    description: Is theodata snapshot 5d.
+    synonyms: []
+  - name: event_timestamp_5D
+    type: TIMESTAMP
+    description: 'Timestamp field: event_timestamp_5d.'
+    synonyms: []
+  - name: event_timestamp_ns_5D
+    type: INTEGER
+    description: 'Timestamp field: event_timestamp_ns_5d.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_5D
+    type: STRING
+    description: 'Timestamp field: calculated_base_val_timestamp_5d.'
+    synonyms: []
+  - name: calculated_base_val_timestamp_ns_5D
+    type: STRING
+    description: 'Timestamp field: calculated_base_val_timestamp_ns_5d.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_5D
+    type: STRING
+    description: 'Timestamp field: theo_event_tx_timestamp_5d.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns_5D
+    type: STRING
+    description: 'Timestamp field: theo_event_tx_timestamp_ns_5d.'
+    synonyms: []
+  - name: when_timestamp_5D
+    type: STRING
+    description: 'Timestamp field: when_timestamp_5d.'
+    synonyms: []
+  - name: when_timestamp_ns_5D
+    type: STRING
+    description: 'Timestamp field: when_timestamp_ns_5d.'
+    synonyms: []
+  - name: ul_bid_price_0_5D
+    type: STRING
+    description: 'Underlying-related field: ul_bid_price_0_5d.'
+    synonyms: []
+  - name: ul_bid_volume_0_5D
+    type: STRING
+    description: 'Underlying-related field: ul_bid_volume_0_5d.'
+    synonyms: []
+  - name: ul_ask_price_0_5D
+    type: STRING
+    description: 'Underlying-related field: ul_ask_price_0_5d.'
+    synonyms: []
+  - name: ul_ask_volume_0_5D
+    type: STRING
+    description: 'Underlying-related field: ul_ask_volume_0_5d.'
+    synonyms: []
+  - name: tv_offset_5D
+    type: STRING
+    description: Tv offset 5d.
+    synonyms: []
+  - name: raw_delta_mid_bv_5D
+    type: STRING
+    description: Raw delta mid bv 5d.
+    synonyms: []
+  - name: ref_base_val_5D
+    type: STRING
+    description: 'Reference base value field: ref_base_val_5d.'
+    synonyms: []
+  - name: is_auction_marketdepth_1s
+    type: BOOLEAN
+    description: Whether market depth at 1s was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_5s
+    type: BOOLEAN
+    description: Whether market depth at 5s was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_10s
+    type: BOOLEAN
+    description: Whether market depth at 10s was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_30s
+    type: BOOLEAN
+    description: Whether market depth at 30s was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_1m
+    type: BOOLEAN
+    description: Whether market depth at 1m was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_5m
+    type: BOOLEAN
+    description: Whether market depth at 5m was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_10m
+    type: BOOLEAN
+    description: Whether market depth at 10m was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_30m
+    type: BOOLEAN
+    description: Whether market depth at 30m was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_1h
+    type: BOOLEAN
+    description: Whether market depth at 1h was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_eod
+    type: BOOLEAN
+    description: Whether market depth at eod was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_1D
+    type: BOOLEAN
+    description: Whether market depth at 1d was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth_5D
+    type: BOOLEAN
+    description: Whether market depth at 5d was during auction.
+    synonyms: []
+  - name: is_auction_marketdepth
+    type: BOOLEAN
+    description: Whether market depth at trade time was during auction.
+    synonyms: []
+  - name: tv
+    type: FLOAT
+    description: Theoretical value (fair value) of the option at time of trade.
+    synonyms:
+    - theo
+    - theoretical value
+    - fair value
+    - machine price
+    - TV
+  - name: parent_trade_aggressor_side
+    type: STRING
+    description: Parent trade aggressor side.
+    synonyms: []
+  - name: trade_aggressor_side
+    type: STRING
+    description: Which side was the aggressor (taker) in the trade.
+    synonyms:
+    - aggressor
+    - taker side
+  - name: exchange
+    type: STRING
+    description: Exchange where the trade was executed.
+    synonyms:
+    - venue
+    - market
+  - name: mid_base_val
+    type: FLOAT
+    description: Mid base val.
+    synonyms: []
+  - name: raw_delta_mid_bv
+    type: FLOAT
+    description: Raw delta mid bv.
+    synonyms: []
+  - name: base_adjustment
+    type: FLOAT
+    description: Base adjustment.
+    synonyms: []
+  - name: buy_sell_multiplier
+    type: INTEGER
+    description: 'Multiplier indicating direction: +1 for buy, -1 for sell.'
+    synonyms:
+    - direction multiplier
+  - name: instant_edge
+    type: FLOAT
+    description: Instantaneous edge at time of trade in ticks, measuring theoretical profit per unit before slippage.
+    synonyms:
+    - edge
+    - trading edge
+    - edge_bps
+  - name: instant_pnl
+    type: FLOAT
+    description: Instant profit and loss at time of trade, edge times size.
+    synonyms:
+    - PnL
+    - profit
+    - loss
+    - instant profit
+  - name: instant_pnl_w_fees
+    type: FLOAT
+    description: Instant PnL including exchange and brokerage fees.
+    synonyms:
+    - PnL with fees
+    - net PnL
+    - profit after fees
+  - name: vol_path_estimate_1s
+    type: FLOAT
+    description: Vol path estimate 1s.
+    synonyms: []
+  - name: vol_slippage_1s_per_unit
+    type: FLOAT
+    description: Volatility slippage component at 1s horizon.
+    synonyms:
+    - vol slip 1s
+  - name: vol_slippage_1s
+    type: FLOAT
+    description: Volatility slippage component at 1s horizon.
+    synonyms:
+    - vol slip 1s
+  - name: other_slippage_1s_per_unit
+    type: FLOAT
+    description: Other slippage component at 1s horizon.
+    synonyms:
+    - other slip 1s
+  - name: other_slippage_1s
+    type: FLOAT
+    description: Other slippage component at 1s horizon.
+    synonyms:
+    - other slip 1s
+  - name: tv_1s
+    type: FLOAT
+    description: Theoretical value at 1s after trade.
+    synonyms:
+    - theo 1s
+  - name: delta_1s
+    type: FLOAT
+    description: Delta at 1s after trade.
+    synonyms:
+    - delta 1s
+  - name: gamma_1s
+    type: FLOAT
+    description: Gamma at 1s after trade.
+    synonyms: []
+  - name: vega_1s
+    type: FLOAT
+    description: Vega at 1s after trade.
+    synonyms: []
+  - name: theta_1s
+    type: FLOAT
+    description: Theta at 1s after trade.
+    synonyms: []
+  - name: under_1s
+    type: FLOAT
+    description: Underlying price at 1s after trade.
+    synonyms:
+    - spot 1s
+  - name: vol_1s
+    type: FLOAT
+    description: Implied volatility at 1s after trade.
+    synonyms:
+    - IV 1s
+  - name: rho_1s
+    type: FLOAT
+    description: Rho at 1s after trade.
+    synonyms: []
+  - name: raw_delta_1s
+    type: FLOAT
+    description: Raw delta 1s.
+    synonyms: []
+  - name: raw_gamma_1s
+    type: FLOAT
+    description: Raw gamma 1s.
+    synonyms: []
+  - name: norm_strike_1s
+    type: FLOAT
+    description: Norm strike 1s.
+    synonyms: []
+  - name: roll_1s
+    type: FLOAT
+    description: Roll 1s.
+    synonyms: []
+  - name: tv_change_1s
+    type: FLOAT
+    description: Theoretical value change at 1s after trade.
+    synonyms:
+    - tv move 1s
+  - name: tv_change_buysell_1s
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at 1s.
+    synonyms:
+    - pnl 1s
+  - name: roll_slippage_1s_per_unit
+    type: FLOAT
+    description: Roll slippage component at 1s horizon.
+    synonyms:
+    - roll slip 1s
+  - name: roll_slippage_1s
+    type: FLOAT
+    description: Roll slippage component at 1s horizon.
+    synonyms:
+    - roll slip 1s
+  - name: adjusted_tv_1s
+    type: FLOAT
+    description: Adjusted tv 1s.
+    synonyms: []
+  - name: delta_slippage_1s_per_unit
+    type: FLOAT
+    description: Delta slippage component at 1s horizon.
+    synonyms:
+    - delta slip 1s
+  - name: delta_slippage_1s
+    type: FLOAT
+    description: Delta slippage component at 1s horizon.
+    synonyms:
+    - delta slip 1s
+  - name: vol_path_estimate_5s
+    type: FLOAT
+    description: Vol path estimate 5s.
+    synonyms: []
+  - name: vol_slippage_5s_per_unit
+    type: FLOAT
+    description: Volatility slippage component at 5s horizon.
+    synonyms:
+    - vol slip 5s
+  - name: vol_slippage_5s
+    type: FLOAT
+    description: Volatility slippage component at 5s horizon.
+    synonyms:
+    - vol slip 5s
+  - name: other_slippage_5s_per_unit
+    type: FLOAT
+    description: Other slippage component at 5s horizon.
+    synonyms:
+    - other slip 5s
+  - name: other_slippage_5s
+    type: FLOAT
+    description: Other slippage component at 5s horizon.
+    synonyms:
+    - other slip 5s
+  - name: tv_5s
+    type: FLOAT
+    description: Theoretical value at 5s after trade.
+    synonyms:
+    - theo 5s
+  - name: delta_5s
+    type: FLOAT
+    description: Delta at 5s after trade.
+    synonyms:
+    - delta 5s
+  - name: gamma_5s
+    type: FLOAT
+    description: Gamma at 5s after trade.
+    synonyms: []
+  - name: vega_5s
+    type: FLOAT
+    description: Vega at 5s after trade.
+    synonyms: []
+  - name: theta_5s
+    type: FLOAT
+    description: Theta at 5s after trade.
+    synonyms: []
+  - name: under_5s
+    type: FLOAT
+    description: Underlying price at 5s after trade.
+    synonyms:
+    - spot 5s
+  - name: vol_5s
+    type: FLOAT
+    description: Implied volatility at 5s after trade.
+    synonyms:
+    - IV 5s
+  - name: rho_5s
+    type: FLOAT
+    description: Rho at 5s after trade.
+    synonyms: []
+  - name: raw_delta_5s
+    type: FLOAT
+    description: Raw delta 5s.
+    synonyms: []
+  - name: raw_gamma_5s
+    type: FLOAT
+    description: Raw gamma 5s.
+    synonyms: []
+  - name: norm_strike_5s
+    type: FLOAT
+    description: Norm strike 5s.
+    synonyms: []
+  - name: roll_5s
+    type: FLOAT
+    description: Roll 5s.
+    synonyms: []
+  - name: tv_change_5s
+    type: FLOAT
+    description: Theoretical value change at 5s after trade.
+    synonyms:
+    - tv move 5s
+  - name: tv_change_buysell_5s
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at 5s.
+    synonyms:
+    - pnl 5s
+  - name: roll_slippage_5s_per_unit
+    type: FLOAT
+    description: Roll slippage component at 5s horizon.
+    synonyms:
+    - roll slip 5s
+  - name: roll_slippage_5s
+    type: FLOAT
+    description: Roll slippage component at 5s horizon.
+    synonyms:
+    - roll slip 5s
+  - name: adjusted_tv_5s
+    type: FLOAT
+    description: Adjusted tv 5s.
+    synonyms: []
+  - name: delta_slippage_5s_per_unit
+    type: FLOAT
+    description: Delta slippage component at 5s horizon.
+    synonyms:
+    - delta slip 5s
+  - name: delta_slippage_5s
+    type: FLOAT
+    description: Delta slippage component at 5s horizon.
+    synonyms:
+    - delta slip 5s
+  - name: vol_path_estimate_10s
+    type: FLOAT
+    description: Vol path estimate 10s.
+    synonyms: []
+  - name: vol_slippage_10s_per_unit
+    type: FLOAT
+    description: Volatility slippage component at 10s horizon.
+    synonyms:
+    - vol slip 10s
+  - name: vol_slippage_10s
+    type: FLOAT
+    description: Volatility slippage component at 10s horizon.
+    synonyms:
+    - vol slip 10s
+  - name: other_slippage_10s_per_unit
+    type: FLOAT
+    description: Other slippage component at 10s horizon.
+    synonyms:
+    - other slip 10s
+  - name: other_slippage_10s
+    type: FLOAT
+    description: Other slippage component at 10s horizon.
+    synonyms:
+    - other slip 10s
+  - name: tv_10s
+    type: FLOAT
+    description: Theoretical value at 10s after trade.
+    synonyms:
+    - theo 10s
+  - name: delta_10s
+    type: FLOAT
+    description: Delta at 10s after trade.
+    synonyms:
+    - delta 10s
+  - name: gamma_10s
+    type: FLOAT
+    description: Gamma at 10s after trade.
+    synonyms: []
+  - name: vega_10s
+    type: FLOAT
+    description: Vega at 10s after trade.
+    synonyms: []
+  - name: theta_10s
+    type: FLOAT
+    description: Theta at 10s after trade.
+    synonyms: []
+  - name: under_10s
+    type: FLOAT
+    description: Underlying price at 10s after trade.
+    synonyms:
+    - spot 10s
+  - name: vol_10s
+    type: FLOAT
+    description: Implied volatility at 10s after trade.
+    synonyms:
+    - IV 10s
+  - name: rho_10s
+    type: FLOAT
+    description: Rho at 10s after trade.
+    synonyms: []
+  - name: raw_delta_10s
+    type: FLOAT
+    description: Raw delta 10s.
+    synonyms: []
+  - name: raw_gamma_10s
+    type: FLOAT
+    description: Raw gamma 10s.
+    synonyms: []
+  - name: norm_strike_10s
+    type: FLOAT
+    description: Norm strike 10s.
+    synonyms: []
+  - name: roll_10s
+    type: FLOAT
+    description: Roll 10s.
+    synonyms: []
+  - name: tv_change_10s
+    type: FLOAT
+    description: Theoretical value change at 10s after trade.
+    synonyms:
+    - tv move 10s
+  - name: tv_change_buysell_10s
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at 10s.
+    synonyms:
+    - pnl 10s
+  - name: roll_slippage_10s_per_unit
+    type: FLOAT
+    description: Roll slippage component at 10s horizon.
+    synonyms:
+    - roll slip 10s
+  - name: roll_slippage_10s
+    type: FLOAT
+    description: Roll slippage component at 10s horizon.
+    synonyms:
+    - roll slip 10s
+  - name: adjusted_tv_10s
+    type: FLOAT
+    description: Adjusted tv 10s.
+    synonyms: []
+  - name: delta_slippage_10s_per_unit
+    type: FLOAT
+    description: Delta slippage component at 10s horizon.
+    synonyms:
+    - delta slip 10s
+  - name: delta_slippage_10s
+    type: FLOAT
+    description: Delta slippage component at 10s horizon.
+    synonyms:
+    - delta slip 10s
+  - name: vol_path_estimate_30s
+    type: FLOAT
+    description: Vol path estimate 30s.
+    synonyms: []
+  - name: vol_slippage_30s_per_unit
+    type: FLOAT
+    description: Volatility slippage component at 30s horizon.
+    synonyms:
+    - vol slip 30s
+  - name: vol_slippage_30s
+    type: FLOAT
+    description: Volatility slippage component at 30s horizon.
+    synonyms:
+    - vol slip 30s
+  - name: other_slippage_30s_per_unit
+    type: FLOAT
+    description: Other slippage component at 30s horizon.
+    synonyms:
+    - other slip 30s
+  - name: other_slippage_30s
+    type: FLOAT
+    description: Other slippage component at 30s horizon.
+    synonyms:
+    - other slip 30s
+  - name: tv_30s
+    type: FLOAT
+    description: Theoretical value at 30s after trade.
+    synonyms:
+    - theo 30s
+  - name: delta_30s
+    type: FLOAT
+    description: Delta at 30s after trade.
+    synonyms:
+    - delta 30s
+  - name: gamma_30s
+    type: FLOAT
+    description: Gamma at 30s after trade.
+    synonyms: []
+  - name: vega_30s
+    type: FLOAT
+    description: Vega at 30s after trade.
+    synonyms: []
+  - name: theta_30s
+    type: FLOAT
+    description: Theta at 30s after trade.
+    synonyms: []
+  - name: under_30s
+    type: FLOAT
+    description: Underlying price at 30s after trade.
+    synonyms:
+    - spot 30s
+  - name: vol_30s
+    type: FLOAT
+    description: Implied volatility at 30s after trade.
+    synonyms:
+    - IV 30s
+  - name: rho_30s
+    type: FLOAT
+    description: Rho at 30s after trade.
+    synonyms: []
+  - name: raw_delta_30s
+    type: FLOAT
+    description: Raw delta 30s.
+    synonyms: []
+  - name: raw_gamma_30s
+    type: FLOAT
+    description: Raw gamma 30s.
+    synonyms: []
+  - name: norm_strike_30s
+    type: FLOAT
+    description: Norm strike 30s.
+    synonyms: []
+  - name: roll_30s
+    type: FLOAT
+    description: Roll 30s.
+    synonyms: []
+  - name: tv_change_30s
+    type: FLOAT
+    description: Theoretical value change at 30s after trade.
+    synonyms:
+    - tv move 30s
+  - name: tv_change_buysell_30s
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at 30s.
+    synonyms:
+    - pnl 30s
+  - name: roll_slippage_30s_per_unit
+    type: FLOAT
+    description: Roll slippage component at 30s horizon.
+    synonyms:
+    - roll slip 30s
+  - name: roll_slippage_30s
+    type: FLOAT
+    description: Roll slippage component at 30s horizon.
+    synonyms:
+    - roll slip 30s
+  - name: adjusted_tv_30s
+    type: FLOAT
+    description: Adjusted tv 30s.
+    synonyms: []
+  - name: delta_slippage_30s_per_unit
+    type: FLOAT
+    description: Delta slippage component at 30s horizon.
+    synonyms:
+    - delta slip 30s
+  - name: delta_slippage_30s
+    type: FLOAT
+    description: Delta slippage component at 30s horizon.
+    synonyms:
+    - delta slip 30s
+  - name: vol_path_estimate_1m
+    type: FLOAT
+    description: Vol path estimate 1m.
+    synonyms: []
+  - name: vol_slippage_1m_per_unit
+    type: FLOAT
+    description: Volatility slippage component at 1m horizon.
+    synonyms:
+    - vol slip 1m
+  - name: vol_slippage_1m
+    type: FLOAT
+    description: Volatility slippage component at 1m horizon.
+    synonyms:
+    - vol slip 1m
+  - name: other_slippage_1m_per_unit
+    type: FLOAT
+    description: Other slippage component at 1m horizon.
+    synonyms:
+    - other slip 1m
+  - name: other_slippage_1m
+    type: FLOAT
+    description: Other slippage component at 1m horizon.
+    synonyms:
+    - other slip 1m
+  - name: tv_1m
+    type: FLOAT
+    description: Theoretical value at 1m after trade.
+    synonyms:
+    - theo 1m
+  - name: delta_1m
+    type: FLOAT
+    description: Delta at 1m after trade.
+    synonyms:
+    - delta 1m
+  - name: gamma_1m
+    type: FLOAT
+    description: Gamma at 1m after trade.
+    synonyms: []
+  - name: vega_1m
+    type: FLOAT
+    description: Vega at 1m after trade.
+    synonyms: []
+  - name: theta_1m
+    type: FLOAT
+    description: Theta at 1m after trade.
+    synonyms: []
+  - name: under_1m
+    type: FLOAT
+    description: Underlying price at 1m after trade.
+    synonyms:
+    - spot 1m
+  - name: vol_1m
+    type: FLOAT
+    description: Implied volatility at 1m after trade.
+    synonyms:
+    - IV 1m
+  - name: rho_1m
+    type: FLOAT
+    description: Rho at 1m after trade.
+    synonyms: []
+  - name: raw_delta_1m
+    type: FLOAT
+    description: Raw delta 1m.
+    synonyms: []
+  - name: raw_gamma_1m
+    type: FLOAT
+    description: Raw gamma 1m.
+    synonyms: []
+  - name: norm_strike_1m
+    type: FLOAT
+    description: Norm strike 1m.
+    synonyms: []
+  - name: roll_1m
+    type: FLOAT
+    description: Roll 1m.
+    synonyms: []
+  - name: tv_change_1m
+    type: FLOAT
+    description: Theoretical value change at 1m after trade.
+    synonyms:
+    - tv move 1m
+  - name: tv_change_buysell_1m
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at 1m.
+    synonyms:
+    - pnl 1m
+  - name: roll_slippage_1m_per_unit
+    type: FLOAT
+    description: Roll slippage component at 1m horizon.
+    synonyms:
+    - roll slip 1m
+  - name: roll_slippage_1m
+    type: FLOAT
+    description: Roll slippage component at 1m horizon.
+    synonyms:
+    - roll slip 1m
+  - name: adjusted_tv_1m
+    type: FLOAT
+    description: Adjusted tv 1m.
+    synonyms: []
+  - name: delta_slippage_1m_per_unit
+    type: FLOAT
+    description: Delta slippage component at 1m horizon.
+    synonyms:
+    - delta slip 1m
+  - name: delta_slippage_1m
+    type: FLOAT
+    description: Delta slippage component at 1m horizon.
+    synonyms:
+    - delta slip 1m
+  - name: vol_path_estimate_5m
+    type: FLOAT
+    description: Vol path estimate 5m.
+    synonyms: []
+  - name: vol_slippage_5m_per_unit
+    type: FLOAT
+    description: Volatility slippage component at 5m horizon.
+    synonyms:
+    - vol slip 5m
+  - name: vol_slippage_5m
+    type: FLOAT
+    description: Volatility slippage component at 5m horizon.
+    synonyms:
+    - vol slip 5m
+  - name: other_slippage_5m_per_unit
+    type: FLOAT
+    description: Other slippage component at 5m horizon.
+    synonyms:
+    - other slip 5m
+  - name: other_slippage_5m
+    type: FLOAT
+    description: Other slippage component at 5m horizon.
+    synonyms:
+    - other slip 5m
+  - name: tv_5m
+    type: FLOAT
+    description: Theoretical value at 5m after trade.
+    synonyms:
+    - theo 5m
+  - name: delta_5m
+    type: FLOAT
+    description: Delta at 5m after trade.
+    synonyms:
+    - delta 5m
+  - name: gamma_5m
+    type: FLOAT
+    description: Gamma at 5m after trade.
+    synonyms: []
+  - name: vega_5m
+    type: FLOAT
+    description: Vega at 5m after trade.
+    synonyms: []
+  - name: theta_5m
+    type: FLOAT
+    description: Theta at 5m after trade.
+    synonyms: []
+  - name: under_5m
+    type: FLOAT
+    description: Underlying price at 5m after trade.
+    synonyms:
+    - spot 5m
+  - name: vol_5m
+    type: FLOAT
+    description: Implied volatility at 5m after trade.
+    synonyms:
+    - IV 5m
+  - name: rho_5m
+    type: FLOAT
+    description: Rho at 5m after trade.
+    synonyms: []
+  - name: raw_delta_5m
+    type: FLOAT
+    description: Raw delta 5m.
+    synonyms: []
+  - name: raw_gamma_5m
+    type: FLOAT
+    description: Raw gamma 5m.
+    synonyms: []
+  - name: norm_strike_5m
+    type: FLOAT
+    description: Norm strike 5m.
+    synonyms: []
+  - name: roll_5m
+    type: FLOAT
+    description: Roll 5m.
+    synonyms: []
+  - name: tv_change_5m
+    type: FLOAT
+    description: Theoretical value change at 5m after trade.
+    synonyms:
+    - tv move 5m
+  - name: tv_change_buysell_5m
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at 5m.
+    synonyms:
+    - pnl 5m
+  - name: roll_slippage_5m_per_unit
+    type: FLOAT
+    description: Roll slippage component at 5m horizon.
+    synonyms:
+    - roll slip 5m
+  - name: roll_slippage_5m
+    type: FLOAT
+    description: Roll slippage component at 5m horizon.
+    synonyms:
+    - roll slip 5m
+  - name: adjusted_tv_5m
+    type: FLOAT
+    description: Adjusted tv 5m.
+    synonyms: []
+  - name: delta_slippage_5m_per_unit
+    type: FLOAT
+    description: Delta slippage component at 5m horizon.
+    synonyms:
+    - delta slip 5m
+  - name: delta_slippage_5m
+    type: FLOAT
+    description: Delta slippage component at 5m horizon.
+    synonyms:
+    - delta slip 5m
+  - name: vol_path_estimate_10m
+    type: FLOAT
+    description: Vol path estimate 10m.
+    synonyms: []
+  - name: vol_slippage_10m_per_unit
+    type: FLOAT
+    description: Volatility slippage component at 10m horizon.
+    synonyms:
+    - vol slip 10m
+  - name: vol_slippage_10m
+    type: FLOAT
+    description: Volatility slippage component at 10m horizon.
+    synonyms:
+    - vol slip 10m
+  - name: other_slippage_10m_per_unit
+    type: FLOAT
+    description: Other slippage component at 10m horizon.
+    synonyms:
+    - other slip 10m
+  - name: other_slippage_10m
+    type: FLOAT
+    description: Other slippage component at 10m horizon.
+    synonyms:
+    - other slip 10m
+  - name: tv_10m
+    type: FLOAT
+    description: Theoretical value at 10m after trade.
+    synonyms:
+    - theo 10m
+  - name: delta_10m
+    type: FLOAT
+    description: Delta at 10m after trade.
+    synonyms:
+    - delta 10m
+  - name: gamma_10m
+    type: FLOAT
+    description: Gamma at 10m after trade.
+    synonyms: []
+  - name: vega_10m
+    type: FLOAT
+    description: Vega at 10m after trade.
+    synonyms: []
+  - name: theta_10m
+    type: FLOAT
+    description: Theta at 10m after trade.
+    synonyms: []
+  - name: under_10m
+    type: FLOAT
+    description: Underlying price at 10m after trade.
+    synonyms:
+    - spot 10m
+  - name: vol_10m
+    type: FLOAT
+    description: Implied volatility at 10m after trade.
+    synonyms:
+    - IV 10m
+  - name: rho_10m
+    type: FLOAT
+    description: Rho at 10m after trade.
+    synonyms: []
+  - name: raw_delta_10m
+    type: FLOAT
+    description: Raw delta 10m.
+    synonyms: []
+  - name: raw_gamma_10m
+    type: FLOAT
+    description: Raw gamma 10m.
+    synonyms: []
+  - name: norm_strike_10m
+    type: FLOAT
+    description: Norm strike 10m.
+    synonyms: []
+  - name: roll_10m
+    type: FLOAT
+    description: Roll 10m.
+    synonyms: []
+  - name: tv_change_10m
+    type: FLOAT
+    description: Theoretical value change at 10m after trade.
+    synonyms:
+    - tv move 10m
+  - name: tv_change_buysell_10m
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at 10m.
+    synonyms:
+    - pnl 10m
+  - name: roll_slippage_10m_per_unit
+    type: FLOAT
+    description: Roll slippage component at 10m horizon.
+    synonyms:
+    - roll slip 10m
+  - name: roll_slippage_10m
+    type: FLOAT
+    description: Roll slippage component at 10m horizon.
+    synonyms:
+    - roll slip 10m
+  - name: adjusted_tv_10m
+    type: FLOAT
+    description: Adjusted tv 10m.
+    synonyms: []
+  - name: delta_slippage_10m_per_unit
+    type: FLOAT
+    description: Delta slippage component at 10m horizon.
+    synonyms:
+    - delta slip 10m
+  - name: delta_slippage_10m
+    type: FLOAT
+    description: Delta slippage component at 10m horizon.
+    synonyms:
+    - delta slip 10m
+  - name: vol_path_estimate_30m
+    type: FLOAT
+    description: Vol path estimate 30m.
+    synonyms: []
+  - name: vol_slippage_30m_per_unit
+    type: FLOAT
+    description: Volatility slippage component at 30m horizon.
+    synonyms:
+    - vol slip 30m
+  - name: vol_slippage_30m
+    type: FLOAT
+    description: Volatility slippage component at 30m horizon.
+    synonyms:
+    - vol slip 30m
+  - name: other_slippage_30m_per_unit
+    type: FLOAT
+    description: Other slippage component at 30m horizon.
+    synonyms:
+    - other slip 30m
+  - name: other_slippage_30m
+    type: FLOAT
+    description: Other slippage component at 30m horizon.
+    synonyms:
+    - other slip 30m
+  - name: tv_30m
+    type: FLOAT
+    description: Theoretical value at 30m after trade.
+    synonyms:
+    - theo 30m
+  - name: delta_30m
+    type: FLOAT
+    description: Delta at 30m after trade.
+    synonyms:
+    - delta 30m
+  - name: gamma_30m
+    type: FLOAT
+    description: Gamma at 30m after trade.
+    synonyms: []
+  - name: vega_30m
+    type: FLOAT
+    description: Vega at 30m after trade.
+    synonyms: []
+  - name: theta_30m
+    type: FLOAT
+    description: Theta at 30m after trade.
+    synonyms: []
+  - name: under_30m
+    type: FLOAT
+    description: Underlying price at 30m after trade.
+    synonyms:
+    - spot 30m
+  - name: vol_30m
+    type: FLOAT
+    description: Implied volatility at 30m after trade.
+    synonyms:
+    - IV 30m
+  - name: rho_30m
+    type: FLOAT
+    description: Rho at 30m after trade.
+    synonyms: []
+  - name: raw_delta_30m
+    type: FLOAT
+    description: Raw delta 30m.
+    synonyms: []
+  - name: raw_gamma_30m
+    type: FLOAT
+    description: Raw gamma 30m.
+    synonyms: []
+  - name: norm_strike_30m
+    type: FLOAT
+    description: Norm strike 30m.
+    synonyms: []
+  - name: roll_30m
+    type: FLOAT
+    description: Roll 30m.
+    synonyms: []
+  - name: tv_change_30m
+    type: FLOAT
+    description: Theoretical value change at 30m after trade.
+    synonyms:
+    - tv move 30m
+  - name: tv_change_buysell_30m
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at 30m.
+    synonyms:
+    - pnl 30m
+  - name: roll_slippage_30m_per_unit
+    type: FLOAT
+    description: Roll slippage component at 30m horizon.
+    synonyms:
+    - roll slip 30m
+  - name: roll_slippage_30m
+    type: FLOAT
+    description: Roll slippage component at 30m horizon.
+    synonyms:
+    - roll slip 30m
+  - name: adjusted_tv_30m
+    type: FLOAT
+    description: Adjusted tv 30m.
+    synonyms: []
+  - name: delta_slippage_30m_per_unit
+    type: FLOAT
+    description: Delta slippage component at 30m horizon.
+    synonyms:
+    - delta slip 30m
+  - name: delta_slippage_30m
+    type: FLOAT
+    description: Delta slippage component at 30m horizon.
+    synonyms:
+    - delta slip 30m
+  - name: vol_path_estimate_1h
+    type: FLOAT
+    description: Vol path estimate 1h.
+    synonyms: []
+  - name: vol_slippage_1h_per_unit
+    type: FLOAT
+    description: Volatility slippage component at 1h horizon.
+    synonyms:
+    - vol slip 1h
+  - name: vol_slippage_1h
+    type: FLOAT
+    description: Volatility slippage component at 1h horizon.
+    synonyms:
+    - vol slip 1h
+  - name: other_slippage_1h_per_unit
+    type: FLOAT
+    description: Other slippage component at 1h horizon.
+    synonyms:
+    - other slip 1h
+  - name: other_slippage_1h
+    type: FLOAT
+    description: Other slippage component at 1h horizon.
+    synonyms:
+    - other slip 1h
+  - name: tv_1h
+    type: FLOAT
+    description: Theoretical value at 1h after trade.
+    synonyms:
+    - theo 1h
+  - name: delta_1h
+    type: FLOAT
+    description: Delta at 1h after trade.
+    synonyms:
+    - delta 1h
+  - name: gamma_1h
+    type: FLOAT
+    description: Gamma at 1h after trade.
+    synonyms: []
+  - name: vega_1h
+    type: FLOAT
+    description: Vega at 1h after trade.
+    synonyms: []
+  - name: theta_1h
+    type: FLOAT
+    description: Theta at 1h after trade.
+    synonyms: []
+  - name: under_1h
+    type: FLOAT
+    description: Underlying price at 1h after trade.
+    synonyms:
+    - spot 1h
+  - name: vol_1h
+    type: FLOAT
+    description: Implied volatility at 1h after trade.
+    synonyms:
+    - IV 1h
+  - name: rho_1h
+    type: FLOAT
+    description: Rho at 1h after trade.
+    synonyms: []
+  - name: raw_delta_1h
+    type: FLOAT
+    description: Raw delta 1h.
+    synonyms: []
+  - name: raw_gamma_1h
+    type: FLOAT
+    description: Raw gamma 1h.
+    synonyms: []
+  - name: norm_strike_1h
+    type: FLOAT
+    description: Norm strike 1h.
+    synonyms: []
+  - name: roll_1h
+    type: FLOAT
+    description: Roll 1h.
+    synonyms: []
+  - name: tv_change_1h
+    type: FLOAT
+    description: Theoretical value change at 1h after trade.
+    synonyms:
+    - tv move 1h
+  - name: tv_change_buysell_1h
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at 1h.
+    synonyms:
+    - pnl 1h
+  - name: roll_slippage_1h_per_unit
+    type: FLOAT
+    description: Roll slippage component at 1h horizon.
+    synonyms:
+    - roll slip 1h
+  - name: roll_slippage_1h
+    type: FLOAT
+    description: Roll slippage component at 1h horizon.
+    synonyms:
+    - roll slip 1h
+  - name: adjusted_tv_1h
+    type: FLOAT
+    description: Adjusted tv 1h.
+    synonyms: []
+  - name: delta_slippage_1h_per_unit
+    type: FLOAT
+    description: Delta slippage component at 1h horizon.
+    synonyms:
+    - delta slip 1h
+  - name: delta_slippage_1h
+    type: FLOAT
+    description: Delta slippage component at 1h horizon.
+    synonyms:
+    - delta slip 1h
+  - name: vol_path_estimate_eod
+    type: FLOAT
+    description: Vol path estimate eod.
+    synonyms: []
+  - name: vol_slippage_eod_per_unit
+    type: FLOAT
+    description: Volatility slippage component at eod horizon.
+    synonyms:
+    - vol slip eod
+  - name: vol_slippage_eod
+    type: FLOAT
+    description: Volatility slippage component at eod horizon.
+    synonyms:
+    - vol slip eod
+  - name: other_slippage_eod_per_unit
+    type: FLOAT
+    description: Other slippage component at eod horizon.
+    synonyms:
+    - other slip eod
+  - name: other_slippage_eod
+    type: FLOAT
+    description: Other slippage component at eod horizon.
+    synonyms:
+    - other slip eod
+  - name: tv_eod
+    type: FLOAT
+    description: Theoretical value at eod after trade.
+    synonyms:
+    - theo eod
+  - name: delta_eod
+    type: FLOAT
+    description: Delta at eod after trade.
+    synonyms:
+    - delta eod
+  - name: gamma_eod
+    type: FLOAT
+    description: Gamma at eod after trade.
+    synonyms: []
+  - name: vega_eod
+    type: FLOAT
+    description: Vega at eod after trade.
+    synonyms: []
+  - name: theta_eod
+    type: FLOAT
+    description: Theta at eod after trade.
+    synonyms: []
+  - name: under_eod
+    type: FLOAT
+    description: Underlying price at eod after trade.
+    synonyms:
+    - spot eod
+  - name: vol_eod
+    type: FLOAT
+    description: Implied volatility at eod after trade.
+    synonyms:
+    - IV eod
+  - name: rho_eod
+    type: FLOAT
+    description: Rho at eod after trade.
+    synonyms: []
+  - name: raw_delta_eod
+    type: FLOAT
+    description: Raw delta eod.
+    synonyms: []
+  - name: raw_gamma_eod
+    type: FLOAT
+    description: Raw gamma eod.
+    synonyms: []
+  - name: norm_strike_eod
+    type: FLOAT
+    description: Norm strike eod.
+    synonyms: []
+  - name: roll_eod
+    type: FLOAT
+    description: Roll eod.
+    synonyms: []
+  - name: tv_change_eod
+    type: FLOAT
+    description: Theoretical value change at eod after trade.
+    synonyms:
+    - tv move eod
+  - name: tv_change_buysell_eod
+    type: FLOAT
+    description: Directional TV change (buy/sell adjusted) at eod.
+    synonyms:
+    - pnl eod
+  - name: roll_slippage_eod_per_unit
+    type: FLOAT
+    description: Roll slippage component at eod horizon.
+    synonyms:
+    - roll slip eod
+  - name: roll_slippage_eod
+    type: FLOAT
+    description: Roll slippage component at eod horizon.
+    synonyms:
+    - roll slip eod
+  - name: adjusted_tv_eod
+    type: FLOAT
+    description: Adjusted tv eod.
+    synonyms: []
+  - name: delta_slippage_eod_per_unit
+    type: FLOAT
+    description: Delta slippage component at eod horizon.
+    synonyms:
+    - delta slip eod
+  - name: delta_slippage_eod
+    type: FLOAT
+    description: Delta slippage component at eod horizon.
+    synonyms:
+    - delta slip eod
+  - name: vol_path_estimate_1D
+    type: STRING
+    description: Vol path estimate 1d.
+    synonyms: []
+  - name: vol_slippage_1D_per_unit
+    type: STRING
+    description: Volatility slippage component at 1d horizon.
+    synonyms:
+    - vol slip 1d
+  - name: vol_slippage_1D
+    type: STRING
+    description: Volatility slippage component at 1d horizon.
+    synonyms:
+    - vol slip 1d
+  - name: other_slippage_1D_per_unit
+    type: STRING
+    description: Other slippage component at 1d horizon.
+    synonyms:
+    - other slip 1d
+  - name: other_slippage_1D
+    type: STRING
+    description: Other slippage component at 1d horizon.
+    synonyms:
+    - other slip 1d
+  - name: tv_1D
+    type: STRING
+    description: Theoretical value at 1d after trade.
+    synonyms:
+    - theo 1d
+  - name: delta_1D
+    type: STRING
+    description: Delta at 1d after trade.
+    synonyms:
+    - delta 1d
+  - name: gamma_1D
+    type: STRING
+    description: Gamma at 1d after trade.
+    synonyms: []
+  - name: vega_1D
+    type: STRING
+    description: Vega at 1d after trade.
+    synonyms: []
+  - name: theta_1D
+    type: STRING
+    description: Theta at 1d after trade.
+    synonyms: []
+  - name: under_1D
+    type: STRING
+    description: Underlying price at 1d after trade.
+    synonyms:
+    - spot 1d
+  - name: vol_1D
+    type: STRING
+    description: Implied volatility at 1d after trade.
+    synonyms:
+    - IV 1d
+  - name: rho_1D
+    type: STRING
+    description: Rho at 1d after trade.
+    synonyms: []
+  - name: raw_delta_1D
+    type: STRING
+    description: Raw delta 1d.
+    synonyms: []
+  - name: raw_gamma_1D
+    type: STRING
+    description: Raw gamma 1d.
+    synonyms: []
+  - name: norm_strike_1D
+    type: STRING
+    description: Norm strike 1d.
+    synonyms: []
+  - name: roll_1D
+    type: STRING
+    description: Roll 1d.
+    synonyms: []
+  - name: tv_change_1D
+    type: STRING
+    description: Theoretical value change at 1d after trade.
+    synonyms:
+    - tv move 1d
+  - name: tv_change_buysell_1D
+    type: STRING
+    description: Directional TV change (buy/sell adjusted) at 1d.
+    synonyms:
+    - pnl 1d
+  - name: roll_slippage_1D_per_unit
+    type: STRING
+    description: Roll slippage component at 1d horizon.
+    synonyms:
+    - roll slip 1d
+  - name: roll_slippage_1D
+    type: STRING
+    description: Roll slippage component at 1d horizon.
+    synonyms:
+    - roll slip 1d
+  - name: adjusted_tv_1D
+    type: STRING
+    description: Adjusted tv 1d.
+    synonyms: []
+  - name: delta_slippage_1D_per_unit
+    type: STRING
+    description: Delta slippage component at 1d horizon.
+    synonyms:
+    - delta slip 1d
+  - name: delta_slippage_1D
+    type: STRING
+    description: Delta slippage component at 1d horizon.
+    synonyms:
+    - delta slip 1d
+  - name: vol_path_estimate_5D
+    type: STRING
+    description: Vol path estimate 5d.
+    synonyms: []
+  - name: vol_slippage_5D_per_unit
+    type: STRING
+    description: Volatility slippage component at 5d horizon.
+    synonyms:
+    - vol slip 5d
+  - name: vol_slippage_5D
+    type: STRING
+    description: Volatility slippage component at 5d horizon.
+    synonyms:
+    - vol slip 5d
+  - name: other_slippage_5D_per_unit
+    type: STRING
+    description: Other slippage component at 5d horizon.
+    synonyms:
+    - other slip 5d
+  - name: other_slippage_5D
+    type: STRING
+    description: Other slippage component at 5d horizon.
+    synonyms:
+    - other slip 5d
+  - name: tv_5D
+    type: STRING
+    description: Theoretical value at 5d after trade.
+    synonyms:
+    - theo 5d
+  - name: delta_5D
+    type: STRING
+    description: Delta at 5d after trade.
+    synonyms:
+    - delta 5d
+  - name: gamma_5D
+    type: STRING
+    description: Gamma at 5d after trade.
+    synonyms: []
+  - name: vega_5D
+    type: STRING
+    description: Vega at 5d after trade.
+    synonyms: []
+  - name: theta_5D
+    type: STRING
+    description: Theta at 5d after trade.
+    synonyms: []
+  - name: under_5D
+    type: STRING
+    description: Underlying price at 5d after trade.
+    synonyms:
+    - spot 5d
+  - name: vol_5D
+    type: STRING
+    description: Implied volatility at 5d after trade.
+    synonyms:
+    - IV 5d
+  - name: rho_5D
+    type: STRING
+    description: Rho at 5d after trade.
+    synonyms: []
+  - name: raw_delta_5D
+    type: STRING
+    description: Raw delta 5d.
+    synonyms: []
+  - name: raw_gamma_5D
+    type: STRING
+    description: Raw gamma 5d.
+    synonyms: []
+  - name: norm_strike_5D
+    type: STRING
+    description: Norm strike 5d.
+    synonyms: []
+  - name: roll_5D
+    type: STRING
+    description: Roll 5d.
+    synonyms: []
+  - name: tv_change_5D
+    type: STRING
+    description: Theoretical value change at 5d after trade.
+    synonyms:
+    - tv move 5d
+  - name: tv_change_buysell_5D
+    type: STRING
+    description: Directional TV change (buy/sell adjusted) at 5d.
+    synonyms:
+    - pnl 5d
+  - name: roll_slippage_5D_per_unit
+    type: STRING
+    description: Roll slippage component at 5d horizon.
+    synonyms:
+    - roll slip 5d
+  - name: roll_slippage_5D
+    type: STRING
+    description: Roll slippage component at 5d horizon.
+    synonyms:
+    - roll slip 5d
+  - name: adjusted_tv_5D
+    type: STRING
+    description: Adjusted tv 5d.
+    synonyms: []
+  - name: delta_slippage_5D_per_unit
+    type: STRING
+    description: Delta slippage component at 5d horizon.
+    synonyms:
+    - delta slip 5d
+  - name: delta_slippage_5D
+    type: STRING
+    description: Delta slippage component at 5d horizon.
+    synonyms:
+    - delta slip 5d
+  - name: calculated_base_val_eod
+    type: FLOAT
+    description: 'Calculated base value field: calculated_base_val_eod.'
+    synonyms: []
+  - name: calculated_base_val_1D
+    type: STRING
+    description: 'Calculated base value field: calculated_base_val_1d.'
+    synonyms: []
+  - name: calculated_base_val_5D
+    type: STRING
+    description: 'Calculated base value field: calculated_base_val_5d.'
+    synonyms: []
+  - name: delta
+    type: FLOAT
+    description: Option delta at time of trade, sensitivity to underlying price.
+    synonyms:
+    - delta exposure
+    - hedge ratio
+  - name: gamma
+    type: FLOAT
+    description: Option gamma at time of trade, rate of change of delta.
+    synonyms:
+    - gamma exposure
+    - convexity
+  - name: vega
+    type: FLOAT
+    description: Option vega at time of trade, sensitivity to implied volatility.
+    synonyms:
+    - vol sensitivity
+    - vega exposure
+  - name: theta
+    type: FLOAT
+    description: Option theta at time of trade, time decay per day.
+    synonyms:
+    - time decay
+    - theta decay
+  - name: under
+    type: FLOAT
+    description: Underlying price at time of trade.
+    synonyms:
+    - underlying
+    - spot
+    - underlying price
+  - name: vol
+    type: FLOAT
+    description: Implied volatility at time of trade.
+    synonyms:
+    - implied volatility
+    - IV
+    - sigma
+    - implied vol
+  - name: rho
+    type: FLOAT
+    description: Option rho, sensitivity to interest rate changes.
+    synonyms:
+    - rate sensitivity
+  - name: raw_delta
+    type: FLOAT
+    description: Raw (unadjusted) option delta.
+    synonyms:
+    - unadjusted delta
+  - name: raw_gamma
+    type: FLOAT
+    description: Raw (unadjusted) option gamma.
+    synonyms:
+    - unadjusted gamma
+  - name: norm_strike
+    type: FLOAT
+    description: Normalized strike (moneyness measure).
+    synonyms:
+    - moneyness
+    - delta bucket
+    - normalized strike
+  - name: roll
+    type: FLOAT
+    description: Roll adjustment value.
+    synonyms:
+    - calendar roll
+    - roll value
+  - name: abs_trade_size
+    type: FLOAT
+    description: Absolute (unsigned) trade size.
+    synonyms:
+    - unsigned size
+    - absolute lots
+  - name: tte_1s
+    type: FLOAT
+    description: Tte 1s.
+    synonyms: []
+  - name: forward_1s
+    type: FLOAT
+    description: Forward 1s.
+    synonyms: []
+  - name: short_rate_1s
+    type: FLOAT
+    description: Short rate 1s.
+    synonyms: []
+  - name: stock_roll_1s
+    type: FLOAT
+    description: Stock roll 1s.
+    synonyms: []
+  - name: reference_roll_1s
+    type: FLOAT
+    description: Reference roll 1s.
+    synonyms: []
+  - name: tte_5s
+    type: FLOAT
+    description: Tte 5s.
+    synonyms: []
+  - name: forward_5s
+    type: FLOAT
+    description: Forward 5s.
+    synonyms: []
+  - name: short_rate_5s
+    type: FLOAT
+    description: Short rate 5s.
+    synonyms: []
+  - name: stock_roll_5s
+    type: FLOAT
+    description: Stock roll 5s.
+    synonyms: []
+  - name: reference_roll_5s
+    type: FLOAT
+    description: Reference roll 5s.
+    synonyms: []
+  - name: tte_10s
+    type: FLOAT
+    description: Tte 10s.
+    synonyms: []
+  - name: forward_10s
+    type: FLOAT
+    description: Forward 10s.
+    synonyms: []
+  - name: short_rate_10s
+    type: FLOAT
+    description: Short rate 10s.
+    synonyms: []
+  - name: stock_roll_10s
+    type: FLOAT
+    description: Stock roll 10s.
+    synonyms: []
+  - name: reference_roll_10s
+    type: FLOAT
+    description: Reference roll 10s.
+    synonyms: []
+  - name: tte_30s
+    type: FLOAT
+    description: Tte 30s.
+    synonyms: []
+  - name: forward_30s
+    type: FLOAT
+    description: Forward 30s.
+    synonyms: []
+  - name: short_rate_30s
+    type: FLOAT
+    description: Short rate 30s.
+    synonyms: []
+  - name: stock_roll_30s
+    type: FLOAT
+    description: Stock roll 30s.
+    synonyms: []
+  - name: reference_roll_30s
+    type: FLOAT
+    description: Reference roll 30s.
+    synonyms: []
+  - name: tte_1m
+    type: FLOAT
+    description: Tte 1m.
+    synonyms: []
+  - name: forward_1m
+    type: FLOAT
+    description: Forward 1m.
+    synonyms: []
+  - name: short_rate_1m
+    type: FLOAT
+    description: Short rate 1m.
+    synonyms: []
+  - name: stock_roll_1m
+    type: FLOAT
+    description: Stock roll 1m.
+    synonyms: []
+  - name: reference_roll_1m
+    type: FLOAT
+    description: Reference roll 1m.
+    synonyms: []
+  - name: tte_5m
+    type: FLOAT
+    description: Tte 5m.
+    synonyms: []
+  - name: forward_5m
+    type: FLOAT
+    description: Forward 5m.
+    synonyms: []
+  - name: short_rate_5m
+    type: FLOAT
+    description: Short rate 5m.
+    synonyms: []
+  - name: stock_roll_5m
+    type: FLOAT
+    description: Stock roll 5m.
+    synonyms: []
+  - name: reference_roll_5m
+    type: FLOAT
+    description: Reference roll 5m.
+    synonyms: []
+  - name: tte_10m
+    type: FLOAT
+    description: Tte 10m.
+    synonyms: []
+  - name: forward_10m
+    type: FLOAT
+    description: Forward 10m.
+    synonyms: []
+  - name: short_rate_10m
+    type: FLOAT
+    description: Short rate 10m.
+    synonyms: []
+  - name: stock_roll_10m
+    type: FLOAT
+    description: Stock roll 10m.
+    synonyms: []
+  - name: reference_roll_10m
+    type: FLOAT
+    description: Reference roll 10m.
+    synonyms: []
+  - name: tte_30m
+    type: FLOAT
+    description: Tte 30m.
+    synonyms: []
+  - name: forward_30m
+    type: FLOAT
+    description: Forward 30m.
+    synonyms: []
+  - name: short_rate_30m
+    type: FLOAT
+    description: Short rate 30m.
+    synonyms: []
+  - name: stock_roll_30m
+    type: FLOAT
+    description: Stock roll 30m.
+    synonyms: []
+  - name: reference_roll_30m
+    type: FLOAT
+    description: Reference roll 30m.
+    synonyms: []
+  - name: tte_1h
+    type: FLOAT
+    description: Tte 1h.
+    synonyms: []
+  - name: forward_1h
+    type: FLOAT
+    description: Forward 1h.
+    synonyms: []
+  - name: short_rate_1h
+    type: FLOAT
+    description: Short rate 1h.
+    synonyms: []
+  - name: stock_roll_1h
+    type: FLOAT
+    description: Stock roll 1h.
+    synonyms: []
+  - name: reference_roll_1h
+    type: FLOAT
+    description: Reference roll 1h.
+    synonyms: []
+  - name: tte_eod
+    type: FLOAT
+    description: Tte eod.
+    synonyms: []
+  - name: forward_eod
+    type: FLOAT
+    description: Forward eod.
+    synonyms: []
+  - name: short_rate_eod
+    type: FLOAT
+    description: Short rate eod.
+    synonyms: []
+  - name: stock_roll_eod
+    type: FLOAT
+    description: Stock roll eod.
+    synonyms: []
+  - name: reference_roll_eod
+    type: FLOAT
+    description: Reference roll eod.
+    synonyms: []
+  - name: tte_1D
+    type: STRING
+    description: Tte 1d.
+    synonyms: []
+  - name: forward_1D
+    type: STRING
+    description: Forward 1d.
+    synonyms: []
+  - name: short_rate_1D
+    type: STRING
+    description: Short rate 1d.
+    synonyms: []
+  - name: stock_roll_1D
+    type: STRING
+    description: Stock roll 1d.
+    synonyms: []
+  - name: reference_roll_1D
+    type: STRING
+    description: Reference roll 1d.
+    synonyms: []
+  - name: tte_5D
+    type: STRING
+    description: Tte 5d.
+    synonyms: []
+  - name: forward_5D
+    type: STRING
+    description: Forward 5d.
+    synonyms: []
+  - name: short_rate_5D
+    type: STRING
+    description: Short rate 5d.
+    synonyms: []
+  - name: stock_roll_5D
+    type: STRING
+    description: Stock roll 5d.
+    synonyms: []
+  - name: reference_roll_5D
+    type: STRING
+    description: Reference roll 5d.
+    synonyms: []
+  - name: tte
+    type: FLOAT
+    description: Time to expiry in years.
+    synonyms:
+    - time to expiry
+    - days to expiry
+    - DTE
+  - name: forward
+    type: FLOAT
+    description: Forward price of the underlying.
+    synonyms:
+    - forward price
+    - fwd
+  - name: short_rate
+    type: FLOAT
+    description: Short-term interest rate used in pricing.
+    synonyms:
+    - rate
+    - risk-free rate
+  - name: stock_roll
+    type: FLOAT
+    description: Stock roll.
+    synonyms: []
+  - name: reference_roll
+    type: FLOAT
+    description: Reference roll.
+    synonyms: []
+  - name: is_expiry_trade
+    type: BOOLEAN
+    description: Whether this trade occurred on expiry day.
+    synonyms:
+    - expiry trade

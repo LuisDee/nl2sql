@@ -33,7 +33,7 @@ class TestSettings:
         import pytest
 
         with pytest.raises(ValidationError):
-            Settings()
+            Settings(_env_file=None)
 
     def test_settings_ignores_extra_env_vars(self, monkeypatch):
         """Settings should not crash on unknown env vars."""

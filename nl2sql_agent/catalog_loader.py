@@ -1,0 +1,200 @@
+"""Load and validate YAML catalog files.
+
+This module is used by:
+- Tests (to validate YAML structure)
+- The populate script (to load YAML into BQ embedding tables)
+- Future: the agent's metadata_loader tool (Track 03)
+
+Usage:
+    from nl2sql_agent.catalog_loader import load_catalog, load_examples
+"""
+
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from nl2sql_agent.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+CATALOG_DIR = Path(__file__).parent.parent / "catalog"
+EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
+
+REQUIRED_TABLE_KEYS = {"name", "dataset", "fqn", "layer", "description", "partition_field", "columns"}
+REQUIRED_COLUMN_KEYS = {"name", "type", "description"}
+REQUIRED_EXAMPLE_KEYS = {"question", "sql", "tables_used", "dataset", "complexity"}
+VALID_LAYERS = {"kpi", "data"}
+VALID_DATASETS = {"nl2sql_omx_kpi", "nl2sql_omx_data"}
+VALID_COMPLEXITIES = {"simple", "medium", "complex"}
+
+
+def load_yaml(path: Path) -> dict[str, Any]:
+    """Load a single YAML file.
+
+    Args:
+        path: Path to the YAML file.
+
+    Returns:
+        Parsed YAML content as a dict.
+
+    Raises:
+        FileNotFoundError: If the file doesn't exist.
+        yaml.YAMLError: If the YAML is malformed.
+    """
+    with open(path) as f:
+        return yaml.safe_load(f)
+
+
+def resolve_fqn(table_data: dict[str, Any], project: str) -> str:
+    """Resolve {project} placeholder in a table's fqn field.
+
+    Args:
+        table_data: The 'table' dict from a table YAML (must have 'fqn' key).
+        project: GCP project ID to substitute.
+
+    Returns:
+        Fully-qualified table name with project resolved.
+    """
+    return table_data["fqn"].replace("{project}", project)
+
+
+def resolve_example_sql(sql: str, project: str) -> str:
+    """Resolve {project} placeholder in example SQL.
+
+    Args:
+        sql: SQL string with {project} placeholders.
+        project: GCP project ID to substitute.
+
+    Returns:
+        SQL string with all {project} replaced.
+    """
+    return sql.replace("{project}", project)
+
+
+def validate_table_yaml(data: dict[str, Any], filepath: str = "") -> list[str]:
+    """Validate a table YAML file against the required schema.
+
+    Args:
+        data: Parsed YAML content.
+        filepath: Optional filepath for error messages.
+
+    Returns:
+        List of validation error strings. Empty list = valid.
+    """
+    errors: list[str] = []
+    prefix = f"{filepath}: " if filepath else ""
+
+    if "table" not in data:
+        errors.append(f"{prefix}Missing top-level 'table' key")
+        return errors
+
+    table = data["table"]
+    missing = REQUIRED_TABLE_KEYS - set(table.keys())
+    if missing:
+        errors.append(f"{prefix}Missing table keys: {missing}")
+
+    if table.get("layer") not in VALID_LAYERS:
+        errors.append(f"{prefix}Invalid layer: {table.get('layer')}. Must be one of {VALID_LAYERS}")
+
+    if table.get("dataset") not in VALID_DATASETS:
+        errors.append(f"{prefix}Invalid dataset: {table.get('dataset')}. Must be one of {VALID_DATASETS}")
+
+    fqn = table.get("fqn", "")
+    if "{project}" not in fqn:
+        errors.append(f"{prefix}fqn must contain {{project}} placeholder, got: {fqn}")
+
+    columns = table.get("columns", [])
+    if not isinstance(columns, list):
+        errors.append(f"{prefix}columns must be a list")
+    else:
+        for i, col in enumerate(columns):
+            col_missing = REQUIRED_COLUMN_KEYS - set(col.keys())
+            if col_missing:
+                errors.append(f"{prefix}Column {i} ({col.get('name', '?')}): missing keys {col_missing}")
+
+    return errors
+
+
+def validate_dataset_yaml(data: dict[str, Any], filepath: str = "") -> list[str]:
+    """Validate a dataset YAML file."""
+    errors: list[str] = []
+    prefix = f"{filepath}: " if filepath else ""
+
+    if "dataset" not in data:
+        errors.append(f"{prefix}Missing top-level 'dataset' key")
+        return errors
+
+    ds = data["dataset"]
+    if "name" not in ds:
+        errors.append(f"{prefix}Missing dataset.name")
+    if "tables" not in ds:
+        errors.append(f"{prefix}Missing dataset.tables")
+
+    return errors
+
+
+def validate_examples_yaml(data: dict[str, Any], filepath: str = "") -> list[str]:
+    """Validate an examples YAML file."""
+    errors: list[str] = []
+    prefix = f"{filepath}: " if filepath else ""
+
+    if "examples" not in data:
+        errors.append(f"{prefix}Missing top-level 'examples' key")
+        return errors
+
+    examples = data["examples"]
+    if not isinstance(examples, list):
+        errors.append(f"{prefix}examples must be a list")
+        return errors
+
+    for i, ex in enumerate(examples):
+        missing = REQUIRED_EXAMPLE_KEYS - set(ex.keys())
+        if missing:
+            errors.append(f"{prefix}Example {i}: missing keys {missing}")
+
+        if ex.get("complexity") not in VALID_COMPLEXITIES:
+            errors.append(f"{prefix}Example {i}: invalid complexity '{ex.get('complexity')}'")
+
+        if ex.get("dataset") not in VALID_DATASETS:
+            errors.append(f"{prefix}Example {i}: invalid dataset '{ex.get('dataset')}'")
+
+        sql = ex.get("sql", "")
+        if "{project}" not in sql:
+            errors.append(f"{prefix}Example {i}: SQL must use {{project}} placeholder for fully-qualified table names")
+
+    return errors
+
+
+def load_all_table_yamls() -> list[dict[str, Any]]:
+    """Load all table YAML files from catalog/kpi/ and catalog/data/.
+
+    Returns:
+        List of parsed table YAML dicts.
+    """
+    tables = []
+    for subdir in ["kpi", "data"]:
+        dir_path = CATALOG_DIR / subdir
+        if not dir_path.exists():
+            continue
+        for yaml_file in sorted(dir_path.glob("*.yaml")):
+            if yaml_file.name.startswith("_"):
+                continue  # Skip _dataset.yaml
+            data = load_yaml(yaml_file)
+            if "table" in data:
+                tables.append(data)
+    return tables
+
+
+def load_all_examples() -> list[dict[str, Any]]:
+    """Load all example YAML files from examples/.
+
+    Returns:
+        Flat list of all example dicts across all files.
+    """
+    all_examples = []
+    for yaml_file in sorted(EXAMPLES_DIR.glob("*.yaml")):
+        data = load_yaml(yaml_file)
+        if "examples" in data and isinstance(data["examples"], list):
+            all_examples.extend(data["examples"])
+    return all_examples

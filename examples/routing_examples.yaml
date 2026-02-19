@@ -1,0 +1,103 @@
+examples:
+  # --- Disambiguation: KPI vs Data for same table name ---
+  - question: "What was the edge on our market trades?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "edge = KPI metric -> KPI.markettrade, NOT data.markettrade"
+    validated: false
+    validated_by: ""
+
+  - question: "What was the theo price for EMBRACB options?"
+    sql: |
+      SELECT
+        strike,
+        ROUND(tv, 4) AS theo,
+        ROUND(delta, 4) AS delta,
+        ROUND(vol, 4) AS vol
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = '2026-02-17'
+        AND symbol = 'EMBRACB'
+      ORDER BY strike
+      LIMIT 50
+    tables_used: [theodata]
+    dataset: nl2sql_omx_data
+    complexity: simple
+    routing_signal: "theo/vol -> data.theodata (only exists in data)"
+    validated: false
+    validated_by: ""
+
+  - question: "How many trades did we do by symbol across all types?"
+    sql: |
+      SELECT symbol, COUNT(*) AS trade_count, ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      UNION ALL
+      SELECT symbol, COUNT(*), ROUND(SUM(instant_pnl), 2)
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      UNION ALL
+      SELECT symbol, COUNT(*), ROUND(SUM(instant_pnl), 2)
+      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    tables_used: [markettrade, quotertrade, clicktrade]
+    dataset: nl2sql_omx_kpi
+    complexity: complex
+    routing_signal: "all types by symbol -> UNION across KPI tables"
+    validated: false
+    validated_by: ""
+
+  - question: "What's in the swing data?"
+    sql: |
+      SELECT *
+      FROM `{project}.nl2sql_omx_data.swingdata`
+      WHERE trade_date = '2026-02-17'
+      LIMIT 20
+    tables_used: [swingdata]
+    dataset: nl2sql_omx_data
+    complexity: simple
+    routing_signal: "swing -> data.swingdata (only exists in data)"
+    validated: false
+    validated_by: ""
+
+  - question: "What does the order book look like for EMBRACB?"
+    sql: |
+      SELECT *
+      FROM `{project}.nl2sql_omx_data.marketdepth`
+      WHERE trade_date = '2026-02-17'
+        AND symbol = 'EMBRACB'
+      LIMIT 20
+    tables_used: [marketdepth]
+    dataset: nl2sql_omx_data
+    complexity: simple
+    routing_signal: "order book / depth -> data.marketdepth (NOT marketdata)"
+    validated: false
+    validated_by: ""
+
+  - question: "Show me market data feed for EMBRACB"
+    sql: |
+      SELECT *
+      FROM `{project}.nl2sql_omx_data.marketdata`
+      WHERE trade_date = '2026-02-17'
+        AND symbol = 'EMBRACB'
+      LIMIT 20
+    tables_used: [marketdata]
+    dataset: nl2sql_omx_data
+    complexity: simple
+    routing_signal: "market data / price feed -> data.marketdata (NOT marketdepth)"
+    validated: false
+    validated_by: ""

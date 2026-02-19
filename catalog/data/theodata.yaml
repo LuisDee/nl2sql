@@ -1,0 +1,348 @@
+table:
+  name: theodata
+  dataset: nl2sql_omx_data
+  fqn: '{project}.nl2sql_omx_data.theodata'
+  layer: data
+  description: Theo pricing snapshots containing theoretical value, Greeks, and volatility surface parameters per instrument.
+    UNIQUE to the data layer -- not available as a KPI table. Use this for theo/delta/vol/vega lookups by strike, symbol,
+    and term. Partitioned by trade_date.
+  partition_field: trade_date
+  cluster_fields:
+  - symbol
+  - portfolio
+  - term
+  row_count_approx: 0
+  columns:
+  - name: kafka_partition
+    type: INTEGER
+    description: Kafka partition the record was consumed from.
+    synonyms: []
+  - name: kafka_offset
+    type: INTEGER
+    description: Kafka offset of the record.
+    synonyms: []
+  - name: event_date
+    type: DATE
+    description: Event date.
+    synonyms: []
+  - name: theo_event_tx_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_event_tx_timestamp.'
+    synonyms: []
+  - name: theo_event_tx_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: theo_event_tx_timestamp_ns.'
+    synonyms: []
+  - name: when_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: when_timestamp.'
+    synonyms: []
+  - name: when_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: when_timestamp_ns.'
+    synonyms: []
+  - name: source_event_timestamp
+    type: TIMESTAMP
+    description: 'Timestamp field: source_event_timestamp.'
+    synonyms: []
+  - name: source_event_timestamp_ns
+    type: INTEGER
+    description: 'Timestamp field: source_event_timestamp_ns.'
+    synonyms: []
+  - name: theo_compute_timestamp_start
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_compute_timestamp_start.'
+    synonyms: []
+  - name: theo_compute_timestamp_start_ns
+    type: INTEGER
+    description: 'Timestamp field: theo_compute_timestamp_start_ns.'
+    synonyms: []
+  - name: theo_compute_timestamp_stop
+    type: TIMESTAMP
+    description: 'Timestamp field: theo_compute_timestamp_stop.'
+    synonyms: []
+  - name: theo_compute_timestamp_stop_ns
+    type: INTEGER
+    description: 'Timestamp field: theo_compute_timestamp_stop_ns.'
+    synonyms: []
+  - name: theo_compute_type
+    type: STRING
+    description: Type of theo computation (e.g. full recompute, delta update).
+    synonyms: []
+  - name: instrument_hash
+    type: STRING
+    description: Unique hash identifier for the instrument.
+    synonyms:
+    - instrument id
+    - instrument key
+  - name: curve_id
+    type: INTEGER
+    description: Volatility curve identifier.
+    synonyms:
+    - vol curve
+  - name: carry_id
+    type: INTEGER
+    description: Carry/dividend curve identifier.
+    synonyms:
+    - dividend curve
+  - name: stream_id
+    type: INTEGER
+    description: Data stream identifier.
+    synonyms: []
+  - name: tv
+    type: FLOAT
+    description: Theoretical value (fair value) of the option.
+    synonyms:
+    - theo
+    - theoretical value
+    - fair value
+    - machine price
+    - TV
+  - name: tv_offset
+    type: FLOAT
+    description: Offset applied to theoretical value.
+    synonyms:
+    - theo offset
+  - name: delta
+    type: FLOAT
+    description: Option delta at time of trade, sensitivity to underlying price.
+    synonyms:
+    - delta exposure
+    - hedge ratio
+  - name: gamma
+    type: FLOAT
+    description: Option gamma at time of trade, rate of change of delta.
+    synonyms:
+    - gamma exposure
+    - convexity
+  - name: vega
+    type: FLOAT
+    description: Option vega at time of trade, sensitivity to implied volatility.
+    synonyms:
+    - vol sensitivity
+    - vega exposure
+  - name: theta
+    type: FLOAT
+    description: Option theta at time of trade, time decay per day.
+    synonyms:
+    - time decay
+    - theta decay
+  - name: rho
+    type: FLOAT
+    description: Option rho, sensitivity to interest rate changes.
+    synonyms:
+    - rate sensitivity
+  - name: tte
+    type: FLOAT
+    description: Time to expiry in years.
+    synonyms:
+    - time to expiry
+    - days to expiry
+    - DTE
+  - name: raw_delta
+    type: FLOAT
+    description: Raw (unadjusted) option delta.
+    synonyms:
+    - unadjusted delta
+  - name: raw_gamma
+    type: FLOAT
+    description: Raw (unadjusted) option gamma.
+    synonyms:
+    - unadjusted gamma
+  - name: vol
+    type: FLOAT
+    description: Implied volatility at time of trade.
+    synonyms:
+    - implied volatility
+    - IV
+    - sigma
+    - implied vol
+  - name: norm_strike
+    type: FLOAT
+    description: Normalized strike (moneyness measure).
+    synonyms:
+    - moneyness
+    - delta bucket
+    - normalized strike
+  - name: under
+    type: FLOAT
+    description: Underlying price at time of trade.
+    synonyms:
+    - underlying
+    - spot
+    - underlying price
+  - name: roll
+    type: FLOAT
+    description: Roll adjustment value.
+    synonyms:
+    - calendar roll
+    - roll value
+  - name: forward
+    type: FLOAT
+    description: Forward price of the underlying.
+    synonyms:
+    - forward price
+    - fwd
+  - name: short_rate
+    type: FLOAT
+    description: Short-term interest rate used in pricing.
+    synonyms:
+    - rate
+    - risk-free rate
+  - name: offset_id
+    type: INTEGER
+    description: Theo offset identifier.
+    synonyms: []
+  - name: greek_atm
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_atm.'
+    synonyms: []
+  - name: greek_skew
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_skew.'
+    synonyms: []
+  - name: greek_call_skew
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_call_skew.'
+    synonyms: []
+  - name: greek_put_k
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_put_k.'
+    synonyms: []
+  - name: greek_call_k
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_call_k.'
+    synonyms: []
+  - name: greek_put_a
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_put_a.'
+    synonyms: []
+  - name: greek_call_a
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_call_a.'
+    synonyms: []
+  - name: greek_put_b
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_put_b.'
+    synonyms: []
+  - name: greek_call_b
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_call_b.'
+    synonyms: []
+  - name: greek_datm
+    type: FLOAT
+    description: 'Volatility surface parameter: greek_datm.'
+    synonyms: []
+  - name: param_atm
+    type: FLOAT
+    description: 'Volatility surface parameter: param_atm.'
+    synonyms: []
+  - name: param_skew
+    type: FLOAT
+    description: 'Volatility surface parameter: param_skew.'
+    synonyms: []
+  - name: param_call_skew
+    type: FLOAT
+    description: 'Volatility surface parameter: param_call_skew.'
+    synonyms: []
+  - name: param_put_k
+    type: FLOAT
+    description: 'Volatility surface parameter: param_put_k.'
+    synonyms: []
+  - name: param_call_k
+    type: FLOAT
+    description: 'Volatility surface parameter: param_call_k.'
+    synonyms: []
+  - name: param_s_vol
+    type: FLOAT
+    description: 'Volatility surface parameter: param_s_vol.'
+    synonyms: []
+  - name: datasource_pid
+    type: INTEGER
+    description: 'Data provenance field: datasource_pid.'
+    synonyms: []
+  - name: datasource_hostname
+    type: STRING
+    description: 'Data provenance field: datasource_hostname.'
+    synonyms: []
+  - name: streamsource_stream_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_stream_id.'
+    synonyms: []
+  - name: streamsource_event_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_event_id.'
+    synonyms: []
+  - name: streamsource_message_id
+    type: INTEGER
+    description: 'Data provenance field: streamsource_message_id.'
+    synonyms: []
+  - name: strike
+    type: FLOAT
+    description: Option strike price.
+    synonyms:
+    - exercise price
+    - strike price
+    - K
+  - name: option_type
+    type: INTEGER
+    description: Option type code (call/put).
+    synonyms:
+    - call put
+    - C/P
+  - name: option_type_name
+    type: STRING
+    description: Option type name (Call or Put).
+    synonyms:
+    - call put name
+  - name: expiry_timestamp
+    type: TIMESTAMP
+    description: Expiration timestamp of the option contract.
+    synonyms:
+    - expiry
+    - expiration
+    - maturity date
+  - name: mako_symbol
+    type: STRING
+    description: Internal Mako system symbol for the instrument.
+    synonyms:
+    - internal symbol
+  - name: currency
+    type: INTEGER
+    description: Currency identifier for the instrument.
+    synonyms:
+    - ccy
+  - name: inst_type_name
+    type: STRING
+    description: Instrument type name (e.g. Option, Future, Spread).
+    synonyms:
+    - instrument type
+    - product type
+  - name: term
+    type: STRING
+    description: Expiry term or tenor label (e.g. monthly, weekly).
+    synonyms:
+    - tenor
+    - expiry term
+    - maturity
+  - name: trade_date
+    type: DATE
+    description: Business date of the trade, used for partitioning.
+    synonyms:
+    - date
+    - business date
+    - trading date
+  - name: portfolio
+    type: STRING
+    description: Trading portfolio or book the trade belongs to.
+    synonyms:
+    - book
+    - trading book
+    - strategy
+  - name: symbol
+    type: STRING
+    description: Exchange symbol or ticker for the instrument.
+    synonyms:
+    - ticker
+    - product
+    - instrument

@@ -1,0 +1,32 @@
+routing_descriptions:
+
+  kpi_vs_data_general: >
+    The nl2sql_omx_kpi dataset (gold layer) has KPI-enriched trade data with
+    computed metrics: edge_bps, instant_pnl, slippage, delta_bucket,
+    required_edge_bps. The nl2sql_omx_data dataset (silver layer) has raw
+    trade and market data with exact timestamps, prices, sizes, and execution
+    details. Both datasets share some table names (brokertrade, clicktrade,
+    markettrade, quotertrade). When the question asks about performance, edge,
+    PnL, or slippage, use kpi. When the question asks about raw execution data,
+    exact timestamps, or market data, use data.
+
+  kpi_table_selection: >
+    The nl2sql_omx_kpi dataset has 5 tables, one per trade origin: markettrade
+    (exchange trades, the default), quotertrade (auto-quoter fills), brokertrade
+    (broker trades, has account field for broker comparison), clicktrade (manual
+    click trades), otoswing (OTO swing trades). When a question doesn't specify
+    trade type, use markettrade. When comparing brokers or mentioning account
+    names, use brokertrade. When asking about all trades or total PnL, UNION
+    ALL across all 5 tables.
+
+  theodata_routing: >
+    Questions about theoretical pricing, implied volatility (IV, vol, sigma),
+    delta, vega, gamma, theta, greeks, fair value, machine price, or theo
+    should route to nl2sql_omx_data.theodata. This is the ONLY table with
+    options pricing theory data. It is in the data dataset, not kpi.
+
+  market_data_routing: >
+    Questions about market prices, exchange feeds, top-of-book, or market
+    snapshots go to nl2sql_omx_data.marketdata. Questions about order book
+    depth, bid/ask levels, or book shape go to nl2sql_omx_data.marketdepth.
+    Neither of these exist in the kpi dataset.

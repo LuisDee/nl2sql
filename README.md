@@ -42,10 +42,23 @@ docker compose run --rm agent
 
 - `nl2sql_agent/`: Main Python package.
     - `agent.py`: ADK agent definitions (`root_agent`, `nl2sql_agent`).
-    - `config.py`: Configuration loading.
-    - `protocols.py`: Interfaces for external dependencies.
+    - `config.py`: Configuration loading (pydantic-settings, reads `.env`).
+    - `catalog_loader.py`: YAML catalog loader and validator.
+    - `protocols.py`: Interfaces for external dependencies (`BigQueryProtocol`, `EmbeddingProtocol`).
     - `clients.py`: Concrete implementations of protocols.
+    - `logging_config.py`: Structured JSON logging via structlog.
+- `catalog/`: YAML metadata catalog -- table schemas, column descriptions, routing rules. See [`catalog/README.md`](catalog/README.md).
+- `examples/`: Validated Q->SQL example pairs for few-shot retrieval.
+- `scripts/`: Embedding pipeline tooling (`run_embeddings.py`, `populate_embeddings.py`).
 - `setup/`: SQL scripts and schema extraction tools.
 - `schemas/`: Extracted JSON schemas (not in Git).
-- `catalog/`: YAML metadata catalog (Track 02).
 - `tests/`: Unit tests.
+
+## Metadata System
+
+The agent uses a **two-layer metadata** architecture:
+
+1. **YAML Catalog** (`catalog/`): Version-controlled table/column descriptions, synonyms, and routing rules.
+2. **BigQuery Embeddings** (`nl2sql_metadata` dataset): Vector embeddings for semantic search -- routes natural language questions to the right tables and retrieves relevant few-shot examples.
+
+See [`catalog/README.md`](catalog/README.md) for full documentation on how to add tables, update embeddings, and manage the metadata pipeline.

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Environment
+nl2sql_agent/.env
+nl2sql_agent/.env-prod
+
+# Sample data (large, not for version control)
+sample_data/
+sample_data.tar.gz
+
+# Extracted schemas (regeneratable)
+schemas/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# pytest
+.pytest_cache/

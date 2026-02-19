@@ -3,10 +3,11 @@ services:
     build: .
     volumes:
       - .:/app                    # Mount source code for live development
+      - ~/.config/gcloud:/root/.config/gcloud:ro  # Google Cloud ADC credentials
     env_file:
       - nl2sql_agent/.env         # Load environment variables
     stdin_open: true              # Required for interactive adk run
     tty: true                     # Required for interactive adk run
     ports:
       - "8000:8000"               # For adk web (when used)
-    command: adk run nl2sql_agent  # Default: terminal chat mode
+    command: adk web --host 0.0.0.0 .  # Web UI on port 8000, bind all interfaces

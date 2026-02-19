@@ -17,37 +17,105 @@ dataset:
     - marketdata
     - marketdepth
 
-  routing:
-    - patterns: ["theo", "theoretical", "fair value", "TV", "machine price", "vol surface"]
-      table: theodata
-      notes: "Theoretical options pricing snapshots"
+  proto_sources:
+    markettrade:
+      proto: "MarketTrade.proto"
+      description: "Raw exchange/market trade execution data direct from matching engine"
+    quotertrade:
+      proto: "QuoterTrade.proto"
+      description: "Raw auto-quoter activity: timestamps, quoting levels, sizes, fills"
+    brokertrade:
+      proto: "OffFloorData.proto"
+      description: "Raw broker/voice trade execution data including broker account details"
+    clicktrade:
+      proto: "PosData.proto"
+      description: "Raw manual click trade data with position type indicators"
+    swingdata:
+      proto: "SwingData.proto"
+      description: "Raw OTO swing trade data with latency and timing statistics"
+    theodata:
+      proto: "Theoreticals.proto"
+      description: "Theoretical pricing snapshots with all Greeks, IV, forward price, vol surface parameters"
+    marketdata:
+      proto: "MarketData.proto"
+      description: "Exchange market data feed snapshots: top-of-book prices, volumes, trade counts"
+    marketdepth:
+      proto: "MarketDepth.proto"
+      description: "Full order book depth: multiple price levels with bid/ask sizes at each level"
 
-    - patterns: ["market data", "market feed", "exchange data", "price feed"]
+  enum_reference:
+    market_state:
+      description: "Market session state for marketdepth and marketdata tables"
+      values: {"OPEN": 20, "CLOSED": 24}
+    currency_code:
+      description: "Currency identifier used across trade and market data tables"
+      values: {"USD": 2, "EUR": 4}
+    exch_code:
+      description: "Exchange code identifying the venue where the trade or quote occurred"
+      notes: "Numeric exchange identifiers. Refer to exchange reference data for full mapping."
+    position_type:
+      description: "Distinguishes position adjustments from actual trades in clicktrade"
+      values: {"POSITION": 80, "TRADE": 84}
+    trade_side:
+      description: "Direction of the trade"
+      values: {"BUY": 66, "SELL": 83, "UNKNOWN": 0, "NULL_BUYSELL": 88}
+      alternate_labels: ["BUY", "SELL", "BUYSELL_BUY", "BUYSELL_SELL"]
+
+  routing:
+    - patterns: ["theo", "theoretical", "fair value", "TV", "machine price", "vol surface", "implied vol", "IV", "sigma", "greeks", "delta surface", "vega surface", "gamma surface", "theta", "rho", "forward price", "time to expiry", "tte"]
+      table: theodata
+      notes: "Theoretical options pricing snapshots. The ONLY source for Greeks, IV, and vol surface data."
+
+    - patterns: ["market data", "market feed", "exchange data", "price feed", "top of book", "last traded price", "market snapshot"]
       table: marketdata
       notes: "Market data feed snapshots"
 
-    - patterns: ["order book", "depth", "market depth", "bid ask", "bid/ask", "levels"]
+    - patterns: ["order book", "depth", "market depth", "bid ask", "bid/ask", "levels", "book shape", "liquidity depth", "bid ask spread"]
       table: marketdepth
       notes: "Order book depth / market depth snapshots"
 
-    - patterns: ["swing", "swing data", "OTO swing data"]
+    - patterns: ["swing", "swing data", "OTO swing data", "swing latency", "how fast did we swing", "swing timing"]
       table: swingdata
-      notes: "Raw swing trade data"
+      notes: "Raw swing trade data with latency statistics"
 
-    - patterns: ["raw trade", "execution detail", "fill detail", "exact timestamp"]
+    - patterns: ["raw trade", "execution detail", "fill detail", "exact timestamp", "raw market trade", "exchange execution"]
       table: markettrade
       notes: "Raw trade execution details (not KPI enriched)"
+
+    - patterns: ["quoting levels", "quoting activity", "what were we quoting", "quote timestamps", "quote sizes", "raw quoter", "quoter activity at"]
+      table: quotertrade
+      notes: "Raw quoter activity data: timestamps, levels, sizes. NOT performance metrics."
+
+    - patterns: ["raw broker", "broker execution detail", "broker fill timestamps", "voice execution"]
+      table: brokertrade
+      notes: "Raw broker trade execution details. NOT broker KPI metrics."
+
+    - patterns: ["raw click", "click execution", "manual trade timestamps", "position adjustment"]
+      table: clicktrade
+      notes: "Raw click/manual trade data with position type information."
 
   disambiguation:
     theodata_unique: >
       theodata exists ONLY in nl2sql_omx_data. It contains theoretical options
-      pricing: theo (fair value), delta, vol (implied volatility), vega, gamma
-      per strike per timestamp. Questions about "vol", "IV", "implied volatility",
-      "theo", "delta", "vega", "greeks", "fair value", or "machine price" should
-      route here.
+      pricing: theo (fair value), delta, vol (implied volatility), vega, gamma,
+      theta, rho, forward price, time to expiry (tte), vol surface parameters
+      (greek_atm, greek_skew, param_atm), and raw vs adjusted Greeks (raw_delta,
+      raw_gamma) per strike per timestamp. Questions about "vol", "IV", "implied
+      volatility", "theo", "delta", "vega", "greeks", "fair value", or "machine
+      price" should route here. Source proto: Theoreticals.proto.
 
     marketdata_vs_marketdepth: >
       marketdata has aggregated market data snapshots (top-of-book prices, volumes).
       marketdepth has full order book depth (multiple price levels, bid/ask sizes
       at each level). Use marketdata for "what was the market price" questions.
       Use marketdepth for "what did the order book look like" questions.
+
+    data_quotertrade_vs_kpi_quotertrade: >
+      data.quotertrade contains raw quoter activity: exact timestamps when quotes
+      were placed, quoting levels (prices), sizes offered, and fill information.
+      Use this when the trader asks "what levels were we quoting at 11:15" or
+      "what was the quoter doing for symbol X". kpi.quotertrade contains computed
+      performance metrics for quoter fills: edge_bps, instant_pnl, slippage,
+      delta_bucket. Use KPI when the trader asks "how did quoter fills perform"
+      or "what was edge on quoter trades". The key signal is whether the question
+      is about activity/timing (data) or performance/metrics (kpi).

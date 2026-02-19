@@ -16,39 +16,137 @@ dataset:
 
   shared_columns:
     trade_date:
-      description: "Date of the trade. Partition column. Always filter on this."
+      description: >
+        Date of the trade. This is the partition column on every KPI table and must
+        always appear in a WHERE clause to avoid full table scans. Format is DATE
+        (YYYY-MM-DD). When traders say "yesterday" or "last week", resolve to the
+        appropriate date range and filter on trade_date. Never omit this filter.
       synonyms: ["date", "trading date"]
     portfolio:
-      description: "Trading portfolio identifier"
+      description: >
+        Trading portfolio identifier. Each portfolio represents a distinct trading
+        strategy or desk within the firm. Common values include MON, WHITE, RED,
+        BROADWAY, FIXEDINCOME_US, US_D1_OPT, AMM_OIL, FIPROP_US, EURODOLLARS,
+        STOCKS_EUR, STOCKS_EUR2, STOCKS_EUR4, INDEXPROP, EUPOWER. Used to segment
+        performance by strategy.
       synonyms: ["book", "portfolio name"]
+      example_values: ["MON", "WHITE", "RED", "BROADWAY", "FIXEDINCOME_US", "US_D1_OPT", "AMM_OIL", "FIPROP_US", "EURODOLLARS", "STOCKS_EUR", "STOCKS_EUR2", "STOCKS_EUR4", "INDEXPROP", "EUPOWER"]
     symbol:
-      description: "Underlying instrument symbol"
+      description: >
+        Underlying instrument symbol (e.g. AAPL, TSLA, SPX). This identifies the
+        root product the option is written on. Traders may refer to it as the
+        "underlying", "ticker", or "product". Use this column when filtering by
+        instrument name or grouping performance by product.
       synonyms: ["underlying", "ticker", "product"]
     term:
-      description: "Option expiry/term"
+      description: >
+        Option expiry or term label. Identifies which expiration cycle the option
+        belongs to (e.g. "Mar25", "Jun25"). Traders often say "expiry", "expiration",
+        or "maturity". Use this to filter or group trades by option term. Format is
+        typically a short month-year string.
       synonyms: ["expiry", "expiration", "maturity"]
     instrument_hash:
-      description: "Unique hash identifying the specific option contract"
+      description: >
+        Unique hash identifying the specific option contract. This is a deterministic
+        hash of the contract's key attributes (symbol, strike, term, put/call). Use it
+        to join across tables or to identify exact contracts. Traders rarely reference
+        this directly but it is essential for precise contract-level queries.
       synonyms: ["contract id", "instrument id"]
     edge_bps:
       description: >
         Difference between machine fair value (theo) and actual trade price,
-        measured in basis points. Positive = traded better than fair value.
+        measured in basis points. Positive = traded better than fair value (captured
+        edge), negative = traded worse. This is the primary performance metric traders
+        care about. Calculated as ((theo - trade_price) / trade_price) * 10000 for
+        buys, inverted for sells. Always present on every KPI row.
       synonyms: ["edge", "the edge", "how much edge", "trading edge"]
     required_edge_bps:
-      description: "Minimum edge threshold set by risk management for this trade"
+      description: >
+        Minimum edge threshold set by risk management for this trade. The firm requires
+        a certain amount of edge before a trade is considered acceptable. Comparing
+        edge_bps to required_edge_bps reveals whether the trade met the firm's edge
+        hurdle. If edge_bps < required_edge_bps, the trade underperformed the threshold.
       synonyms: ["required edge", "edge requirement", "minimum edge", "edge threshold"]
     instant_pnl:
-      description: "Immediate profit/loss from the trade at execution time"
+      description: >
+        Immediate profit or loss from the trade at execution time, measured in the
+        trade's native currency. This represents the mark-to-market PnL at the instant
+        of execution, before any subsequent market moves. Positive = profitable trade,
+        negative = loss. Commonly aggregated via SUM to get total PnL for a period,
+        portfolio, or symbol.
       synonyms: ["PnL", "instant PnL", "profit", "loss", "P&L", "pnl"]
     delta_bucket:
       description: >
-        Standard delta categorisation bucket. Groups trades by moneyness.
+        Standard delta categorisation bucket that groups trades by moneyness of the
+        option at the time of trade. Delta measures how much the option price moves
+        per unit move in the underlying. Common buckets are 0-25 (far OTM), 25-40
+        (moderate OTM), 40-60 (near ATM), and 60+ (ITM). Used to analyze performance
+        by moneyness segment.
       synonyms: ["delta range", "moneyness bucket"]
       example_values: ["0-25", "25-40", "40-60", "60+"]
     slippage:
-      description: "Execution slippage metric -- difference from expected fill"
+      description: >
+        Execution slippage metric measuring the difference between expected fill price
+        and actual fill price. Positive slippage means the trade executed worse than
+        expected. This is further decomposed into delta_slippage, vol_slippage,
+        roll_slippage, and other_slippage at various time intervals. The top-level
+        slippage column is the aggregate measure.
       synonyms: ["slip", "execution slippage"]
+
+  enum_reference:
+    trade_side:
+      description: "Direction of the trade"
+      values: ["BUY", "SELL"]
+      raw_codes: {"66": "BUY", "83": "SELL", "0": "UNKNOWN", "88": "NULL_BUYSELL"}
+      alternate_labels: ["BUYSELL_BUY", "BUYSELL_SELL"]
+    portfolio:
+      description: "Trading portfolio / strategy desk"
+      values: ["MON", "WHITE", "RED", "BROADWAY", "FIXEDINCOME_US", "US_D1_OPT", "AMM_OIL", "FIPROP_US", "EURODOLLARS", "STOCKS_EUR", "STOCKS_EUR2", "STOCKS_EUR4", "INDEXPROP", "EUPOWER"]
+    algorithm:
+      description: "Algorithm or execution strategy that originated the trade"
+      values: ["OST_MQ", "OST_X", "ZB_TAK"]
+      notes: "OST_MQ = Quoter, OST_X = Korea Market, ZB_TAK = Taker"
+
+  interval_expansion:
+    description: >
+      All KPI tables share a standard set of time-bucketed slippage columns. For each
+      interval, a family of slippage decomposition columns is generated (e.g.
+      delta_slippage_1s, delta_slippage_5s, ..., delta_slippage_1h).
+    intraday_intervals: ["1s", "5s", "10s", "30s", "1m", "5m", "10m", "30m", "1h"]
+    multiday_intervals:
+      standard: ["1D", "5D"]
+      ice_arb_only: ["10D", "20D", "50D", "80D"]
+    column_families:
+      - adjusted_tv
+      - tv_change
+      - tv_change_buysell
+      - delta_slippage
+      - delta_slippage_per_unit
+      - roll_slippage
+      - roll_slippage_per_unit
+      - vol_slippage
+      - vol_slippage_per_unit
+      - other_slippage
+      - other_slippage_per_unit
+      - vol_path_estimate
+      - total_slippage
+    table_specific:
+      brokertrade: ["tv_offset_slippage", "tv_offset_slippage_per_unit"]
+      otoswing: ["delta_slippage_fired_at", "roll_slippage_fired_at", "vol_slippage_fired_at", "other_slippage_fired_at"]
+
+  combo_logic:
+    description: >
+      KPI tables can contain combo (multi-leg) trades. The kpi_combos.sql pipeline
+      aggregates individual leg rows (is_parent=False) into parent combo rows
+      (is_parent=True). When querying combo trades, filter on is_parent=True to get
+      the aggregated view, or is_parent=False to see individual legs.
+    parent_indicator: "is_parent"
+    summed_columns: ["tv", "delta", "gamma", "vega", "theta", "rho", "all slippage PnL columns"]
+    averaged_columns: ["under"]
+    notes: >
+      The parent row replaces its original values with the summed leg values.
+      When traders ask about combo performance, default to is_parent=True unless
+      they specifically want leg-level detail.
 
   routing:
     - patterns: ["market trade", "exchange trade", "generic trades"]

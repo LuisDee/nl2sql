@@ -15,162 +15,264 @@ table:
   columns:
   - name: kafka_partition
     type: INTEGER
-    description: Kafka partition the record was consumed from.
+    description: Kafka partition number from which this record was consumed. Used internally for data pipeline tracking
+      and replay. Not typically needed for analytical queries but useful for debugging data ingestion issues.
+    source: "MarketTrade.proto::kafka_partition"
     synonyms: []
   - name: kafka_offset
     type: INTEGER
-    description: Kafka offset of the record.
+    description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+      pipeline replay. Not typically needed for analytical queries but useful for debugging data ingestion ordering.
+    source: "MarketTrade.proto::kafka_offset"
     synonyms: []
   - name: instrument_hash
     type: STRING
-    description: Unique hash identifier for the instrument.
+    description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
+      defining attributes (symbol, strike, expiry, type). Used as the primary join key across all data and KPI tables.
+      Every instrument has exactly one hash that is consistent across all systems.
+    source: "VtCommon.proto::instrumentHash"
     synonyms:
     - instrument id
     - instrument key
   - name: algo
     type: STRING
-    description: Algorithm or strategy name used for the trade.
+    description: Name of the originating algorithm or trading strategy that was monitoring this instrument when the
+      market trade occurred. Identifies which specific algorithm within the portfolio was tracking this instrument
+      and recorded the market trade event.
+    source: "VtCommon.proto::algo"
     synonyms:
     - strategy
     - algo name
     - trading algo
   - name: ref_curve_id
     type: INTEGER
-    description: Reference volatility curve identifier.
+    description: Identifier of the volatility curve active at the time of the last theoServer callback before this
+      market trade. Used to trace which vol surface the VT was using when it observed this trade and computed edge.
+    source: "VtCommon.proto::refCurveId"
     synonyms:
     - ref curve
+    - reference curve
   - name: ref_carry_id
     type: INTEGER
-    description: Reference carry/dividend curve identifier.
+    description: Identifier of the carry/dividend curve active at the time of the last theoServer callback before this
+      market trade. Can represent either roll or short rate depending on configuration. Used for tracing rate
+      assumptions in edge calculations.
+    source: "VtCommon.proto::refCarryId"
     synonyms:
     - ref carry
+    - reference carry
   - name: ref_tv
     type: FLOAT
-    description: Reference theoretical value used at time of trade.
+    description: Theoretical value of the instrument on the last vol curve update (last theoServer callback), calculated
+      using refBasePrice. This is the reference fair value used to compute the edge seen on this market trade. Not the
+      same as the live TV at time of trade -- see tv for that.
+    source: "VtCommon.proto::refTv"
     synonyms:
     - reference theo
     - ref fair value
   - name: ref_delta
     type: FLOAT
-    description: Reference delta used in KPI computation.
+    description: Delta of the instrument on the last vol curve update (last theoServer callback). Used as the reference
+      hedge ratio for delta-gamma adjusting the theo to current underlying prices. Feeds into the edge calculation
+      for this market trade.
+    source: "VtCommon.proto::refDelta"
     synonyms:
     - reference delta
   - name: ref_gamma
     type: FLOAT
-    description: Reference gamma used in KPI computation.
+    description: Gamma of the instrument on the last vol curve update (last theoServer callback). Used alongside ref_delta
+      for second-order adjustment of the theoretical value to current underlying prices when computing edge on this
+      market trade.
+    source: "VtCommon.proto::refGamma"
     synonyms:
     - reference gamma
   - name: ref_base_price
     type: FLOAT
-    description: Reference base (underlying) price.
+    description: Unadjusted raw base value (underlying price) on the last vol curve update (last theoServer callback).
+      The value corresponds to the relevant side dependent on the direction of the trade. Used as the anchor point
+      for delta-gamma adjustment of the reference theo.
+    source: "VtCommon.proto::refBasePrice"
     synonyms:
     - ref underlying
     - reference price
+    - ref base
   - name: ref_roll
     type: FLOAT
-    description: Reference roll value.
+    description: Roll/carry adjustment value on the last curve update, reflecting the cost of rolling a position forward
+      (dividends, interest, basis). Used in the edge calculation to properly account for carry costs when comparing
+      theo to market trade price.
+    source: "VtCommon.proto::refRoll"
     synonyms:
     - reference roll
   - name: raw_bv_bid
     type: FLOAT
-    description: Raw base value bid price.
+    description: Raw (unadjusted) base value bid price before any layered base, inflight deflection, or internal TV
+      adjustments. Represents the raw underlying bid that feeds into the pricing chain. Compare with layered_base_bid
+      to see the effect of adjustments.
+    source: "VtCommon.proto::rawBvBid"
     synonyms:
     - bv bid
+    - raw base bid
   - name: raw_bv_bid_size
     type: INTEGER
-    description: Raw base value bid size.
+    description: Size (in contracts/lots) available at the raw base value bid price. Indicates the depth of underlying
+      liquidity on the bid side before adjustments.
+    source: "VtCommon.proto::rawBvBidSize"
     synonyms: []
   - name: raw_bv_ask
     type: FLOAT
-    description: Raw base value ask price.
+    description: Raw (unadjusted) base value ask price before any layered base, inflight deflection, or internal TV
+      adjustments. Represents the raw underlying ask that feeds into the pricing chain. Compare with layered_base_ask
+      to see the effect of adjustments.
+    source: "VtCommon.proto::rawBvAsk"
     synonyms:
     - bv ask
+    - raw base ask
   - name: raw_bv_ask_size
     type: INTEGER
-    description: Raw base value ask size.
+    description: Size (in contracts/lots) available at the raw base value ask price. Indicates the depth of underlying
+      liquidity on the ask side before adjustments.
+    source: "VtCommon.proto::rawBvAskSize"
     synonyms: []
   - name: layered_base_bid
     type: FLOAT
-    description: Layered base bid price after adjustments.
-    synonyms: []
+    description: Layered base bid price after applying all internal adjustments (ODR, inflight deflection, NHR). This
+      is the adjusted underlying bid used for edge calculation. The difference from raw_bv_bid shows the total
+      impact of all adjustment layers.
+    source: "VtCommon.proto::layeredBaseBid"
+    synonyms:
+    - adjusted base bid
   - name: layered_base_bid_size
     type: INTEGER
-    description: Layered base bid size.
+    description: Size (in contracts/lots) available at the layered base bid price after adjustments. Represents the
+      adjusted underlying bid depth used for edge and sizing calculations.
+    source: "VtCommon.proto::layeredBaseBidSize"
     synonyms: []
   - name: layered_base_ask
     type: FLOAT
-    description: Layered base ask price after adjustments.
-    synonyms: []
+    description: Layered base ask price after applying all internal adjustments (ODR, inflight deflection, NHR). This
+      is the adjusted underlying ask used for edge calculation. The difference from raw_bv_ask shows the total
+      impact of all adjustment layers.
+    source: "VtCommon.proto::layeredBaseAsk"
+    synonyms:
+    - adjusted base ask
   - name: layered_base_ask_size
     type: INTEGER
-    description: Layered base ask size.
+    description: Size (in contracts/lots) available at the layered base ask price after adjustments. Represents the
+      adjusted underlying ask depth used for edge and sizing calculations.
+    source: "VtCommon.proto::layeredBaseAskSize"
     synonyms: []
   - name: layered_base_adjustment
     type: FLOAT
-    description: Layered base adjustment.
-    synonyms: []
+    description: Total layered base adjustment applied to the raw base value. Represents the aggregate of multiple
+      pricing adjustments that shift the base value used in edge calculations for this market trade.
+    source: "VtCommon.proto::layeredBaseAdjustment"
+    synonyms:
+    - base adjustment
   - name: odr_adjustment
     type: FLOAT
-    description: Odr adjustment.
-    synonyms: []
+    description: Order-driven-repricing (ODR) adjustment applied to the base value. ODR adjusts the effective underlying
+      price based on recent order flow or market microstructure signals. Part of the layered adjustment chain between
+      raw_bv and the final TV.
+    source: "VtCommon.proto::odrAdjustment"
+    synonyms:
+    - odr
   - name: inflight_deflection_tv_adjustment_bid
     type: FLOAT
-    description: Inflight deflection tv adjustment bid.
-    synonyms: []
+    description: Inflight deflection adjustment applied to the theoretical value on the bid side. Accounts for the
+      estimated market impact of Mako's own orders that are currently in-flight (sent but not yet confirmed).
+    source: "VtCommon.proto::inflightDeflectionTvAdjustmentBid"
+    synonyms:
+    - inflight bid adjustment
   - name: inflight_deflection_tv_adjustment_ask
     type: FLOAT
-    description: Inflight deflection tv adjustment ask.
-    synonyms: []
+    description: Inflight deflection adjustment applied to the theoretical value on the ask side. Accounts for the
+      estimated market impact of Mako's own orders that are currently in-flight (sent but not yet confirmed).
+    source: "VtCommon.proto::inflightDeflectionTvAdjustmentAsk"
+    synonyms:
+    - inflight ask adjustment
   - name: internal_tv_adjustment_bid
     type: FLOAT
-    description: Internal tv adjustment bid.
+    description: Internal theoretical value adjustment on the bid side, reflecting additional proprietary offsets applied
+      by the pricing infrastructure. These adjustments capture trader views, model corrections, or microstructure effects.
+    source: "VtCommon.proto::internalTvAdjustmentBid"
     synonyms: []
   - name: internal_tv_adjustment_ask
     type: FLOAT
-    description: Internal tv adjustment ask.
+    description: Internal theoretical value adjustment on the ask side, reflecting additional proprietary offsets applied
+      by the pricing infrastructure. These adjustments capture trader views, model corrections, or microstructure effects.
+    source: "VtCommon.proto::internalTvAdjustmentAsk"
     synonyms: []
   - name: nhr_adjustment_bid
     type: FLOAT
-    description: Nhr adjustment bid.
+    description: Non-hedge-ratio (NHR) adjustment on the bid side. Captures adjustments related to hedging inefficiencies
+      or delta-neutral deviations. Part of the layered adjustment chain that modifies the effective theo.
+    source: "VtCommon.proto::nhrAdjustmentBid"
     synonyms: []
   - name: nhr_adjustment_ask
     type: FLOAT
-    description: Nhr adjustment ask.
+    description: Non-hedge-ratio (NHR) adjustment on the ask side. Captures adjustments related to hedging inefficiencies
+      or delta-neutral deviations. Part of the layered adjustment chain that modifies the effective theo.
+    source: "VtCommon.proto::nhrAdjustmentAsk"
     synonyms: []
   - name: base_edge_bid
     type: FLOAT
-    description: Base edge on the bid side.
+    description: Base edge on the bid side, representing the raw difference between the theoretical value and the market
+      bid price before fees and other deductions. Used for pre-fee edge analysis of market trades observed by the VT.
+    source: "VtCommon.proto::baseEdgeBid"
     synonyms:
     - bid edge
+    - bid-side edge
   - name: base_edge_ask
     type: FLOAT
-    description: Base edge on the ask side.
+    description: Base edge on the ask side, representing the raw difference between the market ask price and the
+      theoretical value before fees and other deductions. Used for pre-fee edge analysis of market trades observed
+      by the VT.
+    source: "VtCommon.proto::baseEdgeAsk"
     synonyms:
     - ask edge
+    - ask-side edge
   - name: fees
     type: FLOAT
-    description: Trading fees (exchange + clearing).
+    description: Total trading fees comprising exchange fees and clearing costs for this market trade. Used for net
+      edge calculation when determining whether observed market trades were profitable relative to Mako's theo.
+    source: "VtCommon.proto::fees"
     synonyms:
     - exchange fees
     - transaction costs
+    - trading costs
   - name: roll
     type: FLOAT
-    description: Roll adjustment value.
+    description: Roll/carry adjustment value reflecting the cost of rolling a position forward (dividends, interest,
+      basis). Used in slippage attribution to separate carry-related PnL from pure trading edge.
+    source: "VtCommon.proto::roll"
     synonyms:
     - calendar roll
     - roll value
+    - carry cost
   - name: bv_side
     type: STRING
-    description: Side of the base value update (bid/ask).
-    synonyms: []
+    description: Side of the base value update (bid or ask) that was relevant for this market trade's edge calculation.
+      Indicates which side of the underlying book the VT was referencing.
+    source: "VtCommon.proto::bvSide"
+    synonyms:
+    - base value side
   - name: delta_adjusted_base_price
     type: FLOAT
-    description: Delta at adjusted_base_price after trade.
+    description: Equal to the raw base value (relevant side depending on trade direction) plus ODR and layered base
+      adjustments. This is the fully adjusted underlying price used to delta-gamma adjust the reference theo to
+      compute the live theoretical value at time of the market trade.
+    source: "VtCommon.proto::deltaAdjustedBasePrice"
     synonyms:
     - delta adjusted_base_price
+    - adjusted base price
   - name: tv
     type: FLOAT
-    description: Theoretical value (fair value) of the option.
+    description: Theoretical value the VT saw at time of the market trade. In the case of MarketTrade, it is the
+      delta/gamma-adjusted refTv, including inflightDeflection offsets, derived from the unadjusted raw baseval mid
+      base price. The fair value against which the market trade price is compared for edge calculation. Also called
+      theo or fair value.
+    source: "VtCommon.proto::tv"
     synonyms:
     - theo
     - theoretical value
@@ -179,44 +281,68 @@ table:
     - TV
   - name: base_sequence_number
     type: STRING
-    description: Base sequence number.
+    description: Sequence number of the base (underlying) instrument's market data event at the time of this market trade.
+      Used for correlating market trades to specific underlying price movements and ensuring correct event ordering.
+    source: "VtCommon.proto::baseSequenceNumber"
     synonyms: []
   - name: option_sequence_number
     type: INTEGER
-    description: Option sequence number.
+    description: Sequence number of the option instrument's market data event associated with this market trade. Used for
+      correlating market trades to specific option book changes and ensuring correct event ordering.
+    source: "VtCommon.proto::optionSequenceNumber"
     synonyms: []
   - name: base_instrument_hash
     type: STRING
-    description: Base instrument hash.
-    synonyms: []
+    description: SHA256 hash identifier of the base (underlying) instrument. Links this market trade to the underlying's
+      market data and depth records. Different from instrument_hash which identifies the traded option.
+    source: "VtCommon.proto::baseInstrumentHash"
+    synonyms:
+    - base hash
   - name: hardware_nic_rx_timestamp
     type: TIMESTAMP
-    description: Hardware NIC receive timestamp for latency measurement.
+    description: Hardware NIC receive timestamp recording when the market trade notification packet physically arrived
+      at Mako's network interface card. The earliest possible timestamp on Mako's side. Used as the baseline for
+      measuring trade-notification processing latency.
+    source: "VtCommon.proto::hardwareNicRxTimestamp"
     synonyms:
     - nic timestamp
+    - wire time
   - name: hardware_nic_rx_timestamp_ns
     type: INTEGER
-    description: 'Timestamp field: hardware_nic_rx_timestamp_ns.'
+    description: Nanosecond component of the hardware NIC receive timestamp, providing sub-microsecond precision for
+      the exact moment the market trade packet arrived at the network card. Combine with hardware_nic_rx_timestamp
+      for full nanosecond-precision timing.
+    source: "VtCommon.proto::hardwareNicRxTimestamp"
     synonyms: []
   - name: event_timestamp
     type: TIMESTAMP
-    description: Timestamp of the event.
+    description: Timestamp of when the trade event packet was processed by the VT. For MarketTrade, this is the moment
+      the VT finished processing the trade notification from the exchange feed, not when it decided to trade. Used
+      for timeline analysis and processing latency measurement.
+    source: "VtCommon.proto::eventTimestamp"
     synonyms:
     - event time
+    - process time
   - name: event_timestamp_ns
     type: INTEGER
-    description: 'Timestamp field: event_timestamp_ns.'
+    description: Nanosecond component of the event timestamp, providing sub-microsecond precision for when the market
+      trade was processed. Combine with event_timestamp for full nanosecond-precision timing.
+    source: "VtCommon.proto::eventTimestamp"
     synonyms: []
   - name: trade_price
     type: FLOAT
-    description: Execution price of the trade.
+    description: Execution price of the market trade as reported by the exchange feed. The price at which the trade
+      occurred on the exchange. Compare with tv to measure the edge observed in this market trade.
+    source: "MarketTrade.proto::tradePrice"
     synonyms:
     - fill price
     - execution price
     - price
   - name: trade_size
     type: INTEGER
-    description: Number of contracts traded.
+    description: Number of contracts (lots) traded in this market trade as reported by the exchange feed. Represents
+      the total quantity executed at the trade_price. Used for volume analysis and trade size distribution studies.
+    source: "MarketTrade.proto::tradeSize"
     synonyms:
     - fill size
     - quantity
@@ -224,226 +350,381 @@ table:
     - volume
   - name: trade_aggressor_side
     type: STRING
-    description: Which side was the aggressor (taker) in the trade.
+    description: An estimate of the direction of the trade calculated by comparing the theoretical value to the trade
+      price. If tradePrice > TV then aggressor side = BUY, if tradePrice < TV then aggressor side = SELL. This is
+      Mako's internal estimate, which may differ from the exchange-reported aggressor (see exch_aggressor_side).
+    source: "MarketTrade.proto::tradeAggressorSide"
+    example_values:
+    - BUY   # ASCII 66
+    - SELL  # ASCII 83
     synonyms:
     - aggressor
     - taker side
+    - aggressor direction
   - name: edge
     type: FLOAT
-    description: Edge.
-    synonyms: []
+    description: Edge seen in this market trade by the VT, computed as the difference between the trade price and the
+      theoretical value at time of trade. The TV used is delta-gamma adjusted refTV including all internal adjustments,
+      priced off the midpoint delta-adjusted baseval. Positive edge means favourable for Mako if it was our trade.
+    source: "MarketTrade.proto::edge"
+    synonyms:
+    - trade edge
+    - observed edge
   - name: is_mako_trade
     type: INTEGER
-    description: Whether this was a Mako (our) trade vs. market trade.
+    description: Flag indicating whether this was a Mako (our) trade versus a purely external market trade. When 1
+      (or true), Mako was a party to this trade. When 0 (or false), this was a trade between other market
+      participants that Mako observed but did not participate in. Used for filtering to only our trades.
+    source: "MarketTrade.proto::isMakoTrade"
+    example_values:
+    - 1  # Mako trade
+    - 0  # External trade
     synonyms:
     - our trade
+    - mako trade flag
   - name: counterparty_id
     type: STRING
-    description: Counterparty or market participant on the other side.
+    description: Exchange-assigned identifier for the counterparty or market participant on the other side of this
+      trade. Availability depends on the exchange -- some provide counterparty IDs, others do not. Used for
+      counterparty flow analysis and identifying recurring trading counterparties.
+    source: "MarketTrade.proto::counterpartyId"
     synonyms:
     - counter party
     - other side
+    - counterparty
   - name: exchange_timestamp
     type: TIMESTAMP
-    description: Timestamp from the exchange matching engine.
+    description: Timestamp provided by the exchange for this market trade, either the sending time or matching-engine
+      time depending on the exchange protocol. Represents the authoritative exchange time when this trade occurred.
+      Use for precise trade timing and exchange-level latency analysis.
+    source: "MarketTrade.proto::exchangeTimestamp"
     synonyms:
     - exchange time
+    - matching engine time
   - name: exchange_timestamp_ns
     type: INTEGER
-    description: 'Timestamp field: exchange_timestamp_ns.'
+    description: Nanosecond component of the exchange timestamp, providing sub-microsecond precision for the exact
+      moment the exchange matched this trade. Combine with exchange_timestamp for full nanosecond-precision timing.
+    source: "MarketTrade.proto::exchangeTimestamp"
     synonyms: []
   - name: is_active_instrument
     type: BOOLEAN
-    description: Whether the instrument was actively quoted.
-    synonyms: []
+    description: Flag indicating whether this instrument was actively tradable by the algorithm logging this data at
+      the time of the market trade. If false, the instrument may have been disabled or set up incorrectly, and
+      therefore the edge metrics for this trade may not be reliable. Use for data quality filtering.
+    source: "MarketTrade.proto::isActiveInstrument"
+    synonyms:
+    - actively quoted
+    - is active
   - name: bv_update_sequence_number
     type: INTEGER
-    description: Bv update sequence number.
+    description: Sequence number of the base value update event at the time of this market trade. Used for correlating
+      trades to specific underlying price updates and ensuring correct event ordering.
+    source: "VtCommon.proto::bvUpdateSequenceNumber"
     synonyms: []
   - name: bv_update_instrument_hash
     type: STRING
-    description: Bv update instrument hash.
+    description: SHA256 hash of the instrument whose base value update was active at the time of this market trade.
+      May differ from instrument_hash if the underlying is a different instrument.
+    source: "VtCommon.proto::bvUpdateInstrumentHash"
     synonyms: []
   - name: underlying_sequence_number
     type: INTEGER
-    description: 'Underlying-related field: underlying_sequence_number.'
+    description: Sequence number of the underlying instrument's market data event associated with this market trade.
+      Used for correlating trades to specific underlying price movements.
+    source: "VtCommon.proto::underlyingSequenceNumber"
     synonyms: []
   - name: underlying_instrument_hash
     type: STRING
-    description: 'Underlying-related field: underlying_instrument_hash.'
+    description: SHA256 hash identifier of the underlying instrument. Links this market trade to the underlying's
+      market data and depth records. Used for cross-referencing with the underlying's price state at trade time.
+    source: "VtCommon.proto::underlyingInstrumentHash"
     synonyms: []
   - name: first_fill_sequence_number
     type: INTEGER
-    description: First fill sequence number.
-    synonyms: []
+    description: Sequence number of the first recorded fill that contributed to this market trade. When a market trade
+      consists of multiple fills, this identifies the earliest fill in the sequence. Used for reconstructing the
+      full fill chain and measuring fill span duration.
+    source: "MarketTrade.proto::firstFillSequenceNumber"
+    synonyms:
+    - first fill seq
   - name: last_fill_sequence_number
     type: INTEGER
-    description: Last fill sequence number.
-    synonyms: []
+    description: Sequence number of the last recorded fill that contributed to this market trade. Together with
+      first_fill_sequence_number, defines the range of fills that make up this trade. Used for reconstructing the
+      full fill chain and measuring fill span.
+    source: "MarketTrade.proto::lastFillSequenceNumber"
+    synonyms:
+    - last fill seq
   - name: contains_implied_fills
     type: BOOLEAN
-    description: Contains implied fills.
-    synonyms: []
+    description: Flag indicating whether any of the fills that contribute to the trade_size stem from an implied order
+      fill (i.e. fills derived from strategy/combo market matching rather than direct outright matching). Does not
+      indicate how much volume was implied. Used for filtering trades with synthetic components.
+    source: "MarketTrade.proto::containsImpliedFills"
+    synonyms:
+    - has implied fills
+    - implied fill flag
   - name: is_bv_invalid
     type: BOOLEAN
-    description: Whether the base value was invalid at time of trade.
+    description: Flag indicating whether the base value (underlying price) was invalid or stale at the time of the
+      market trade. When true, the edge calculation may be unreliable. Used for data quality filtering.
+    source: "VtCommon.proto::isBvInvalid"
     synonyms: []
   - name: underlying_exe_exch
     type: INTEGER
-    description: 'Underlying-related field: underlying_exe_exch.'
+    description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
+      analysis to understand which exchange's underlying price was driving the edge calculation.
+    source: "VtCommon.proto::underlyingExeExch"
     synonyms: []
   - name: underlying_exe_exch_name
     type: STRING
-    description: 'Underlying-related field: underlying_exe_exch_name.'
-    synonyms: []
+    description: Human-readable name of the exchange where the underlying instrument executes. Derived from the numeric
+      underlying_exe_exch code. Used for filtering and grouping by the underlying's execution venue.
+    source: "VtCommon.proto::underlyingExeExchName"
+    synonyms:
+    - underlying exchange
   - name: is_spark
     type: BOOLEAN
-    description: Whether this is a Spark (fast-path) event.
-    synonyms: []
+    description: Flag indicating whether this market trade event was processed via the Spark fast-path pipeline.
+      Spark is Mako's ultra-low-latency path that bypasses certain software layers for speed. Used for performance
+      comparison between processing paths.
+    source: "VtCommon.proto::isSpark"
+    synonyms:
+    - fast path
   - name: ref_inst_curve_id
     type: INTEGER
-    description: Ref inst curve id.
+    description: Reference instrument volatility curve identifier, tracking the vol curve version used for this specific
+      instrument at the time of the market trade. May differ from ref_curve_id in multi-instrument scenarios.
+    source: "VtCommon.proto::refInstCurveId"
     synonyms: []
   - name: ref_inst_carry_id
     type: INTEGER
-    description: Ref inst carry id.
+    description: Reference instrument carry/dividend curve identifier, tracking the carry curve version used for this
+      specific instrument at the time of the market trade.
+    source: "VtCommon.proto::refInstCarryId"
     synonyms: []
   - name: is_ref_theo_invalid
     type: BOOLEAN
-    description: Whether the reference theo was invalid.
+    description: Flag indicating whether the reference theoretical value (ref_tv) was invalid or stale at the time of
+      the market trade. When true, the edge calculation chain is potentially unreliable. Used for data quality filtering.
+    source: "VtCommon.proto::isRefTheoInvalid"
     synonyms: []
   - name: lb_enabled
     type: BOOLEAN
-    description: Whether lean-back mode was enabled.
-    synonyms: []
+    description: Flag indicating whether lean-back mode was enabled for this instrument at the time of the market trade.
+      Lean-back mode adjusts the VT's aggression. Used for analysing whether lean-back affected the VT's response
+      to this market trade.
+    source: "VtCommon.proto::lbEnabled"
+    synonyms:
+    - lean-back
+    - lean back mode
   - name: edge_model_type
     type: INTEGER
-    description: Edge model type used for this instrument.
+    description: Numeric code identifying the edge model type used for this instrument when computing edge on the
+      market trade. Different edge models calculate edge differently.
+    source: "VtCommon.proto::edgeModelType"
     synonyms: []
   - name: edge_model_type_name
     type: STRING
-    description: Edge model type used for this instrument.
-    synonyms: []
+    description: Human-readable name of the edge model type used for this instrument when computing edge on the market
+      trade. Derived from the numeric edge_model_type code. Used for filtering and grouping.
+    source: "VtCommon.proto::edgeModelTypeName"
+    synonyms:
+    - edge model
   - name: streamsource_stream_id
     type: INTEGER
-    description: 'Data provenance field: streamsource_stream_id.'
+    description: Stream identifier from the event streaming infrastructure, indicating which logical stream this record
+      originated from. Used for data provenance, replay, and pipeline debugging.
+    source: "MarketTrade.proto::streamsource_stream_id"
     synonyms: []
   - name: streamsource_event_id
     type: INTEGER
-    description: 'Data provenance field: streamsource_event_id.'
+    description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
+      for ordering events. Used for data provenance and ensuring correct event ordering.
+    source: "MarketTrade.proto::streamsource_event_id"
     synonyms: []
   - name: streamsource_message_id
     type: INTEGER
-    description: 'Data provenance field: streamsource_message_id.'
+    description: Message identifier within the source stream event, used when a single event contains multiple messages.
+      Provides the finest-grained provenance tracking for individual records.
+    source: "MarketTrade.proto::streamsource_message_id"
     synonyms: []
   - name: datasource_pid
     type: INTEGER
-    description: 'Data provenance field: datasource_pid.'
+    description: Process ID of the data source application that produced this record. Used for data provenance tracking
+      and debugging.
+    source: "MarketTrade.proto::datasource_pid"
     synonyms: []
   - name: datasource_hostname
     type: STRING
-    description: 'Data provenance field: datasource_hostname.'
+    description: Hostname of the server running the data source application that produced this record. Used for data
+      provenance tracking and debugging.
+    source: "MarketTrade.proto::datasource_hostname"
     synonyms: []
   - name: bid_price_0
     type: FLOAT
-    description: Best bid price at level 0.
+    description: Top-of-book bid price (best bid) at depth level 0 before the market trade. The unadjusted bid-side
+      top-of-book price the VT observed at the time of this trade. Used for spread analysis and assessing the book
+      state surrounding the trade event.
+    source: "VtCommon.proto::bid_price_0"
     synonyms:
     - bid 0
+    - best bid
   - name: ask_price_0
     type: FLOAT
-    description: Best ask price at level 0.
+    description: Top-of-book ask price (best offer) at depth level 0 before the market trade. The unadjusted ask-side
+      top-of-book price the VT observed at the time of this trade. Used for spread analysis and assessing the book
+      state surrounding the trade event.
+    source: "VtCommon.proto::ask_price_0"
     synonyms:
     - ask 0
+    - best ask
   - name: ask_volume_0
     type: INTEGER
-    description: Ask volume at level 0.
+    description: Number of contracts (lots) resting at the best ask (depth level 0) before the market trade. The
+      unadjusted top-of-book ask volume before the trade. Used for assessing available ask-side liquidity.
+    source: "VtCommon.proto::ask_volume_0"
     synonyms:
     - ask size 0
+    - best ask size
   - name: bid_volume_0
     type: INTEGER
-    description: Bid volume at level 0.
+    description: Number of contracts (lots) resting at the best bid (depth level 0) before the market trade. The
+      unadjusted top-of-book bid volume before the trade. Used for assessing available bid-side liquidity.
+    source: "VtCommon.proto::bid_volume_0"
     synonyms:
     - bid size 0
+    - best bid size
   - name: ref_theoevent_stream_id
     type: STRING
-    description: Ref theoevent stream id.
+    description: Stream identifier of the theo event that provided the reference theoretical values (ref_tv, ref_delta,
+      ref_gamma) used for this market trade's edge calculation. Used for tracing back to the exact theo computation.
+    source: "MarketTrade.proto::refTheoeventStreamId"
     synonyms: []
   - name: ref_theoevent_event_id
     type: STRING
-    description: Ref theoevent event id.
+    description: Event identifier of the theo event that provided the reference theoretical values for this market trade.
+      Together with ref_theoevent_stream_id, uniquely identifies the exact theo snapshot used for edge calculation.
+    source: "MarketTrade.proto::refTheoeventEventId"
     synonyms: []
   - name: exch_aggressor_side
     type: STRING
-    description: Which side was the aggressor (taker) in the trade.
+    description: The direction of the trade as determined by the exchange's price interface, or N/A if not provided by
+      the exchange. This is the exchange-reported aggressor side, which may differ from trade_aggressor_side (Mako's
+      internal estimate based on TV comparison). Use this for exchange-official aggressor attribution.
+    source: "MarketTrade.proto::exchAggressorSide"
+    example_values:
+    - BUY   # ASCII 66
+    - SELL  # ASCII 83
     synonyms:
-    - aggressor
-    - taker side
+    - exchange aggressor
+    - exchange taker side
   - name: strike
     type: FLOAT
-    description: Option strike price.
+    description: Option strike price (exercise price) at which the holder can buy (call) or sell (put) the underlying.
+      A key defining attribute of the option contract. Used for filtering to specific strikes and for moneyness
+      analysis.
+    source: "MarketTrade.proto::strike"
     synonyms:
     - exercise price
     - strike price
     - K
   - name: option_type
     type: INTEGER
-    description: Option type code (call/put).
+    description: Numeric code indicating whether the option is a call or put. Used as the raw integer representation.
+      Prefer option_type_name for readability in queries.
+    source: "MarketTrade.proto::optionType"
     synonyms:
     - call put
     - C/P
   - name: option_type_name
     type: STRING
-    description: Option type name (Call or Put).
+    description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
+      from the numeric option_type code. Use for filtering and grouping by option direction.
+    source: "MarketTrade.proto::optionTypeName"
+    example_values:
+    - Call
+    - Put
     synonyms:
     - call put name
+    - option direction
   - name: expiry_timestamp
     type: TIMESTAMP
-    description: Expiration timestamp of the option contract.
+    description: Expiration timestamp of the option contract, indicating the exact date and time at which the option
+      ceases to exist. Used for term structure analysis and expiry grouping.
+    source: "MarketTrade.proto::expiryTimestamp"
     synonyms:
     - expiry
     - expiration
     - maturity date
   - name: mako_symbol
     type: STRING
-    description: Internal Mako system symbol for the instrument.
+    description: Internal Mako system symbol for the instrument, used as the canonical identifier within Mako's trading
+      infrastructure. May differ from the exchange symbol. Use for joining with internal systems.
+    source: "MarketTrade.proto::makoSymbol"
     synonyms:
     - internal symbol
   - name: currency
     type: INTEGER
-    description: Currency identifier for the instrument.
+    description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
+      EUR=4, GBP=1, JPY=7. Used for multi-currency aggregation and filtering.
+    source: "MarketTrade.proto::currency"
+    example_values:
+    - 2  # USD
+    - 4  # EUR
     synonyms:
     - ccy
+    - currency code
   - name: inst_type_name
     type: STRING
-    description: Instrument type name (e.g. Option, Future, Spread).
+    description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
+      or other instrument class. Use for filtering queries to specific instrument categories.
+    source: "MarketTrade.proto::instTypeName"
+    example_values:
+    - OPTION
+    - COMBO
+    - FUTURE
     synonyms:
     - instrument type
     - product type
+    - security type
   - name: term
     type: STRING
-    description: Expiry term or tenor label (e.g. monthly, weekly).
+    description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly, quarterly).
+      Used for term structure analysis and grouping instruments by expiry bucket.
+    source: "MarketTrade.proto::term"
     synonyms:
     - tenor
     - expiry term
     - maturity
+    - expiry cycle
   - name: trade_date
     type: DATE
-    description: Business date of the trade, used for partitioning.
+    description: Business date of the trading session, used as the primary partition column for this table. Always
+      filter on trade_date for efficient queries. Represents the logical trading day.
+    source: "MarketTrade.proto::tradeDate"
     synonyms:
     - date
     - business date
     - trading date
   - name: portfolio
     type: STRING
-    description: Trading portfolio or book the trade belongs to.
+    description: Name of the Mako trading portfolio or book to which the monitoring algo belongs. Used for filtering
+      market trade observations by portfolio. Note that for is_mako_trade=0 (external trades), the portfolio is
+      the one that was monitoring, not participating.
+    source: "VtCommon.proto::portfolio"
     synonyms:
     - book
     - trading book
     - strategy
   - name: symbol
     type: STRING
-    description: Exchange symbol or ticker for the instrument.
+    description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
+      human-readable identifier used by traders when referring to instruments. Used for filtering and grouping.
+    source: "VtCommon.proto::symbol"
     synonyms:
     - ticker
     - product
     - instrument
+    - underlying symbol

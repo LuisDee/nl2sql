@@ -184,3 +184,109 @@ examples:
     routing_signal: "raw quoter execution -> data.quotertrade (NOT kpi)"
     validated: false
     validated_by: ""
+
+  # --- Swing latency analysis ---
+  - question: "What was the average swing latency breakdown?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS swing_count,
+        ROUND(AVG(latency_stats_prcx), 0) AS avg_price_decode_us,
+        ROUND(AVG(latency_stats_prcs), 0) AS avg_feed_decoder_us,
+        ROUND(AVG(latency_stats_vtio), 0) AS avg_vt_decision_us,
+        ROUND(AVG(latency_stats_bkio), 0) AS avg_dma_us,
+        ROUND(AVG(latency_stats_itio), 0) AS avg_order_send_us
+      FROM `{project}.nl2sql_omx_data.swingdata`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY swing_count DESC
+    tables_used: [swingdata]
+    dataset: nl2sql_omx_data
+    complexity: medium
+    routing_signal: "swing latency / how fast -> data.swingdata (latency stats)"
+    validated: false
+    validated_by: ""
+
+  - question: "What were the swing takeout reasons today?"
+    sql: |
+      SELECT
+        takeout_category,
+        takeout_type,
+        COUNT(*) AS swing_count,
+        ROUND(AVG(swing_edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_data.swingdata`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY takeout_category, takeout_type
+      ORDER BY swing_count DESC
+    tables_used: [swingdata]
+    dataset: nl2sql_omx_data
+    complexity: medium
+    routing_signal: "takeout reason / why swing -> data.swingdata"
+    validated: false
+    validated_by: ""
+
+  # --- Market depth spread analysis ---
+  - question: "What was the bid-ask spread for a symbol?"
+    sql: |
+      SELECT
+        symbol,
+        term,
+        strike,
+        ROUND(AVG(ask_price_0 - bid_price_0), 4) AS avg_spread,
+        ROUND(AVG(bid_volume_0), 0) AS avg_bid_size,
+        ROUND(AVG(ask_volume_0), 0) AS avg_ask_size
+      FROM `{project}.nl2sql_omx_data.marketdepth`
+      WHERE trade_date = '2026-02-17'
+        AND symbol = 'EMBRACB'
+        AND bid_price_0 > 0 AND ask_price_0 > 0
+      GROUP BY symbol, term, strike
+      ORDER BY avg_spread DESC
+      LIMIT 20
+    tables_used: [marketdepth]
+    dataset: nl2sql_omx_data
+    complexity: medium
+    routing_signal: "bid-ask spread / spread analysis -> data.marketdepth"
+    validated: false
+    validated_by: ""
+
+  # --- Theo vol surface by term ---
+  - question: "Show the vol smile by strike for a specific expiry"
+    sql: |
+      SELECT
+        strike,
+        ROUND(vol, 4) AS implied_vol,
+        ROUND(delta, 4) AS delta,
+        ROUND(vega, 4) AS vega,
+        ROUND(gamma, 6) AS gamma
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = '2026-02-17'
+        AND symbol = 'EMBRACB'
+        AND term = 'DEC25'
+      ORDER BY strike
+      LIMIT 100
+    tables_used: [theodata]
+    dataset: nl2sql_omx_data
+    complexity: medium
+    routing_signal: "vol smile / vol by strike for expiry -> data.theodata"
+    validated: false
+    validated_by: ""
+
+  - question: "What was the forward price for different expiries?"
+    sql: |
+      SELECT
+        term,
+        ROUND(AVG(forward), 4) AS avg_forward,
+        ROUND(AVG(under), 4) AS avg_underlying,
+        ROUND(AVG(short_rate), 6) AS avg_rate,
+        ROUND(AVG(tte), 4) AS avg_tte
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = '2026-02-17'
+        AND symbol = 'EMBRACB'
+      GROUP BY term
+      ORDER BY avg_tte
+    tables_used: [theodata]
+    dataset: nl2sql_omx_data
+    complexity: medium
+    routing_signal: "forward price / term structure -> data.theodata"
+    validated: false
+    validated_by: ""

@@ -34,3 +34,12 @@
 - **Wave:** 5
 - **Complexity:** L
 - **Dependencies:** 04_agent_logic
+
+---
+
+## [~] Track: Metadata Enrichment
+- **ID:** 06_metadata_enrichment
+- **Wave:** 3
+- **Complexity:** L
+- **Dependencies:** 02_context_layer
+- **Notes:** Can run in parallel with Track 04. Enriches YAML catalog + BQ embeddings from kpi-findings and proto-findings source files.

@@ -299,3 +299,201 @@ examples:
     routing_signal: "delta slippage -> KPI markettrade"
     validated: false
     validated_by: ""
+
+  # --- Slippage at specific intervals ---
+  - question: "Compare 5-second vs 5-minute total slippage for market trades"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(AVG(total_slippage_5s), 4) AS avg_slip_5s,
+        ROUND(AVG(total_slippage_5m), 4) AS avg_slip_5m,
+        ROUND(AVG(total_slippage_5m) - AVG(total_slippage_5s), 4) AS slip_divergence
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY slip_divergence DESC
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "slippage comparison across intervals -> KPI markettrade"
+    validated: false
+    validated_by: ""
+
+  - question: "What was the vol slippage at 10 minutes for the quoter?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS fill_count,
+        ROUND(SUM(vol_slippage_10m), 2) AS total_vol_slip_10m,
+        ROUND(AVG(vol_slippage_per_unit_10m), 4) AS avg_vol_slip_unit_10m
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_vol_slip_10m DESC
+    tables_used: [quotertrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "vol slippage at interval -> KPI quotertrade"
+    validated: false
+    validated_by: ""
+
+  # --- Quoter mark-to-mid / skew PnL ---
+  - question: "What was the quoter skew PnL today?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS fill_count,
+        ROUND(SUM(mark_to_mid_pnl), 2) AS total_skew_pnl,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(SUM(instant_pnl_mid_tv), 2) AS total_mid_pnl
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_skew_pnl DESC
+    tables_used: [quotertrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "skew pnl / mark to mid -> KPI quotertrade (unique column)"
+    validated: false
+    validated_by: ""
+
+  # --- Broker fee-adjusted PnL ---
+  - question: "What were broker fees by fee method?"
+    sql: |
+      SELECT
+        fee_method,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS gross_pnl,
+        ROUND(SUM(instant_pnl_w_fees), 2) AS net_pnl,
+        ROUND(SUM(instant_pnl) - SUM(instant_pnl_w_fees), 2) AS total_fees
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY fee_method
+      ORDER BY total_fees DESC
+    tables_used: [brokertrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "broker fees / fee method -> KPI brokertrade (unique columns)"
+    validated: false
+    validated_by: ""
+
+  - question: "How did the tv offset affect broker trade slippage?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(tv_offset_slippage), 2) AS total_tv_offset_slip,
+        ROUND(SUM(tv_offset_slippage_5m), 2) AS total_tv_offset_slip_5m,
+        ROUND(SUM(total_slippage_5m), 2) AS total_slip_5m
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY total_tv_offset_slip DESC
+    tables_used: [brokertrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "tv offset slippage -> KPI brokertrade (unique column)"
+    validated: false
+    validated_by: ""
+
+  # --- OTO swing fired-at metrics ---
+  - question: "Compare swing fill price vs fired price PnL"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS swing_count,
+        ROUND(SUM(instant_pnl), 2) AS pnl_at_fill,
+        ROUND(SUM(instant_pnl_fired_at), 2) AS pnl_at_fire,
+        ROUND(SUM(instant_pnl) - SUM(instant_pnl_fired_at), 2) AS fill_improvement
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY fill_improvement DESC
+    tables_used: [otoswing]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "fired-at vs fill PnL -> KPI otoswing (unique fired_at columns)"
+    validated: false
+    validated_by: ""
+
+  - question: "What was the delta slippage fired-at for swings at 1 hour?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS swing_count,
+        ROUND(SUM(delta_slippage_1h), 2) AS delta_slip_fill,
+        ROUND(SUM(delta_slippage_fired_at_1h), 2) AS delta_slip_fired
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY delta_slip_fired DESC
+    tables_used: [otoswing]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "fired-at slippage at interval -> KPI otoswing"
+    validated: false
+    validated_by: ""
+
+  # --- Roll slippage decomposition ---
+  - question: "Break down the roll slippage across intervals for market trades"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(roll_slippage_1s), 2) AS roll_1s,
+        ROUND(SUM(roll_slippage_1m), 2) AS roll_1m,
+        ROUND(SUM(roll_slippage_5m), 2) AS roll_5m,
+        ROUND(SUM(roll_slippage_30m), 2) AS roll_30m,
+        ROUND(SUM(roll_slippage_1h), 2) AS roll_1h
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
+      ORDER BY roll_1h DESC
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "roll slippage decomposition -> KPI markettrade"
+    validated: false
+    validated_by: ""
+
+  # --- Algorithm-based filtering ---
+  - question: "How did the OST_MQ algo perform on market trades?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(instant_edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+        AND algo = 'OST_MQ'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "algo filter -> KPI markettrade (algo column)"
+    validated: false
+    validated_by: ""
+
+  # --- Portfolio WHITE special case ---
+  - question: "How did the WHITE portfolio perform on market trades?"
+    sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(instant_edge), 4) AS avg_edge,
+        ROUND(AVG(total_slippage_5m), 4) AS avg_slip_5m
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = '2026-02-17'
+        AND portfolio = 'WHITE'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    tables_used: [markettrade]
+    dataset: nl2sql_omx_kpi
+    complexity: medium
+    routing_signal: "WHITE portfolio -> KPI markettrade (special TV handling for WHITE)"
+    validated: false
+    validated_by: ""

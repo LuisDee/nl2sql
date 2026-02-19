@@ -9,6 +9,10 @@ routing_descriptions:
     markettrade, quotertrade). When the question asks about performance, edge,
     PnL, or slippage, use kpi. When the question asks about raw execution data,
     exact timestamps, or market data, use data.
+    Proto source differences: KPI tables are derived from the same raw proto messages
+    (MarketTrade.proto, QuoterTrade.proto, OffFloorData.proto, PosData.proto, SwingData.proto)
+    but enriched with computed metrics (instant_edge, instant_pnl, slippage decomposition).
+    Data tables contain the raw fields directly from the protobuf messages.
 
   kpi_table_selection: >
     The nl2sql_omx_kpi dataset has 5 tables, one per trade origin: markettrade
@@ -24,9 +28,60 @@ routing_descriptions:
     delta, vega, gamma, theta, greeks, fair value, machine price, or theo
     should route to nl2sql_omx_data.theodata. This is the ONLY table with
     options pricing theory data. It is in the data dataset, not kpi.
+    theodata contains all Greeks (delta, gamma, vega, theta, rho), implied volatility (vol/IV/sigma),
+    forward price, time to expiry (tte), vol surface parameters (greek_atm, greek_skew, param_atm, etc.),
+    and raw vs adjusted Greeks (raw_delta, raw_gamma). Source: Theoreticals.proto.
 
   market_data_routing: >
     Questions about market prices, exchange feeds, top-of-book, or market
     snapshots go to nl2sql_omx_data.marketdata. Questions about order book
     depth, bid/ask levels, or book shape go to nl2sql_omx_data.marketdepth.
     Neither of these exist in the kpi dataset.
+
+  disambiguation_table: >
+    Question pattern to correct table mapping:
+    "how did we do on market trades" -> kpi.markettrade (Performance question = KPI).
+    "what did the quoter fill" -> kpi.quotertrade (Fill performance = KPI quoter).
+    "what levels were we quoting at 11:15" -> data.quotertrade (Raw activity = data quoter).
+    "manual trades performance" -> kpi.clicktrade (Manual click activity = clicktrade).
+    "broker fees today" -> kpi.brokertrade (Costs/fees are primary in brokertrade).
+    "sweep performance" -> kpi.otoswing (Order sweeps = otoswing).
+    "exchange executions" -> kpi.markettrade (Exchange side view, default KPI table).
+    "what was the implied vol for symbol X" -> data.theodata (Greeks/vol = theodata ONLY).
+    "order book depth for symbol X" -> data.marketdepth (Book levels = marketdepth ONLY).
+    "how fast did we swing" -> data.swingdata (Latency stats = swingdata ONLY).
+
+  interval_expansion: >
+    All KPI tables share a standard set of time-bucketed slippage columns at 9 intraday intervals:
+    1s, 5s, 10s, 30s, 1m, 5m, 10m, 30m, 1h. Multiday intervals (1D, 5D, and for ICE/ARB: 10D, 20D, 50D, 80D)
+    also exist country-dependently. For each interval, these column families are expanded:
+    adjusted_tv, tv_change, tv_change_buysell, delta_slippage, delta_slippage_per_unit,
+    roll_slippage, roll_slippage_per_unit, vol_slippage, vol_slippage_per_unit,
+    other_slippage, other_slippage_per_unit, vol_path_estimate, total_slippage.
+    Brokertrade additionally has tv_offset_slippage and tv_offset_slippage_per_unit per interval.
+    Otoswing additionally has delta/roll/vol/other_slippage_fired_at per interval.
+
+  combo_logic: >
+    KPI tables can contain combo (multi-leg) trades. The kpi_combos.sql pipeline aggregates
+    individual leg rows (is_parent=False) into parent combo rows (is_parent=True).
+    Summed columns: tv, delta, gamma, vega, theta, rho, all slippage PnL columns.
+    Averaged columns: under (should be same for all legs).
+    The parent row replaces its original values with the summed leg values.
+
+  data_pipeline: >
+    Data flows through: Kafka -> BigQuery External Tables (Raw Layer) -> *_normalized.sql
+    (standardize names/types) -> *_raw_pivoted_join (attach market state/slippage data) ->
+    *_calculations.sql (compute PnL, Edge, Greeks) -> kpi_combos (roll up combo legs) ->
+    Final mart tables. Partitioned by trade_date (daily) or trade_partition_number (intraday, 0-1440).
+
+  enum_reference: >
+    Key enum values across all tables:
+    Trade Side: BUY, SELL, 66 (BUY), 83 (SELL), BUYSELL_BUY, BUYSELL_SELL, UNKNOWN=0, NULL_BUYSELL=88.
+    Portfolios: MON, WHITE, RED, BROADWAY, FIXEDINCOME_US, US_D1_OPT, AMM_OIL, FIPROP_US,
+    EURODOLLARS, STOCKS_EUR, STOCKS_EUR2, STOCKS_EUR4, INDEXPROP, EUPOWER.
+    Algorithms: OST_MQ (Quoter), OST_X (Korea Market), ZB_TAK (Taker).
+    Fee Methods (brokertrade only): Per Lot, Per Trade, No Fee, bp of Premium, Pct of Premium,
+    bp of Underlying Price Per Lot, Per 1000 Lot x CSize.
+    Market State (marketdepth): OPEN=20, CLOSED=24.
+    Currency: USD=2, EUR=4.
+    Position Type (clicktrade): POSITION=80, TRADE=84.

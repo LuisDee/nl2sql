@@ -43,3 +43,12 @@
 - **Complexity:** L
 - **Dependencies:** 02_context_layer
 - **Notes:** Can run in parallel with Track 04. Enriches YAML catalog + BQ embeddings from kpi-findings and proto-findings source files.
+
+---
+
+## [~] Track: Fix Missing DB Dependencies
+- **ID:** 07_dependency_fix
+- **Wave:** 1
+- **Complexity:** S
+- **Dependencies:** []
+- **Description:** Adds db-dtypes to resolve runtime errors in execute_sql tool when handling timestamps.

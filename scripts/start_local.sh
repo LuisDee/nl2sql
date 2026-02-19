@@ -2,7 +2,7 @@
 # Start the NL2SQL agent locally via ADK.
 #
 # Usage:
-#   scripts/start_local.sh        # Web UI on :8000 (default)
+#   scripts/start_local.sh        # Web UI on :8001 (default)
 #   scripts/start_local.sh -t     # Terminal / interactive mode
 #
 set -euo pipefail
@@ -82,7 +82,7 @@ if [ "$MODE" = "terminal" ]; then
   cd "$REPO_ROOT"
   exec adk run nl2sql_agent
 else
-  printf "${BOLD}Starting NL2SQL agent (web UI on http://localhost:8000)...${NC}\n"
+  printf "${BOLD}Starting NL2SQL agent (web UI on http://localhost:8001)...${NC}\n"
   cd "$REPO_ROOT"
-  exec adk web nl2sql_agent
+  exec adk web --port 8001 nl2sql_agent
 fi

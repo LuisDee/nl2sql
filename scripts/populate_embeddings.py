@@ -23,16 +23,26 @@ from nl2sql_agent.clients import LiveBigQueryClient
 setup_logging()
 logger = get_logger(__name__)
 
+# BigQuery DML has a ~12MB query size limit; 500 rows per batch stays well under
+BATCH_SIZE = 500
+
 
 def _escape_sql_string(value: str) -> str:
-    """Escape single quotes for use in BigQuery SQL string literals."""
-    return value.replace("\\", "\\\\").replace("'", "\\'")
+    """Escape backslashes, single quotes, and newlines for BigQuery."""
+    return value.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r")
+
+
+def _batched(iterable: list, n: int):
+    """Yield successive n-sized chunks from iterable."""
+    for i in range(0, len(iterable), n):
+        yield iterable[i : i + n]
 
 
 def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], settings: Settings) -> int:
     """Insert column-level descriptions into column_embeddings table.
 
     Idempotent: MERGE on (dataset_name, table_name, column_name).
+    Batched: groups rows into UNNEST-based MERGE statements for throughput.
 
     Args:
         bq: BigQuery client (protocol).
@@ -43,7 +53,9 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
         Number of columns inserted/updated.
     """
     fqn = f"{settings.gcp_project}.{settings.metadata_dataset}"
-    count = 0
+
+    # Flatten all columns into a single list of row dicts
+    rows = []
     for table_data in tables:
         t = table_data["table"]
         dataset_name = t["dataset"]
@@ -52,31 +64,61 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
         for col in t.get("columns", []):
             col_name = col["name"]
             col_type = col.get("type", "STRING")
-            description = _escape_sql_string(col.get("description", "").strip())
+            description = col.get("description", "").strip()
             synonyms = col.get("synonyms") or []
-            synonyms_str = ", ".join(f"'{_escape_sql_string(s)}'" for s in synonyms)
-            synonyms_array = f"[{synonyms_str}]" if synonyms_str else "[]"
+            rows.append(
+                {
+                    "dataset_name": dataset_name,
+                    "table_name": table_name,
+                    "column_name": col_name,
+                    "column_type": col_type,
+                    "description": description,
+                    "synonyms": synonyms,
+                }
+            )
 
-            sql = f"""
-            MERGE `{fqn}.column_embeddings` AS target
-            USING (SELECT '{dataset_name}' AS dataset_name, '{table_name}' AS table_name,
-                          '{col_name}' AS column_name) AS source
-            ON target.dataset_name = source.dataset_name
-               AND target.table_name = source.table_name
-               AND target.column_name = source.column_name
-            WHEN MATCHED THEN
-              UPDATE SET description = '{description}',
-                         column_type = '{col_type}',
-                         synonyms = {synonyms_array},
-                         embedding = NULL,
-                         updated_at = CURRENT_TIMESTAMP()
-            WHEN NOT MATCHED THEN
-              INSERT (dataset_name, table_name, column_name, column_type, description, synonyms)
-              VALUES (source.dataset_name, source.table_name, source.column_name,
-                      '{col_type}', '{description}', {synonyms_array});
-            """
-            bq.execute_query(sql)
-            count += 1
+    count = 0
+    for batch in _batched(rows, BATCH_SIZE):
+        struct_rows = []
+        for r in batch:
+            desc = _escape_sql_string(r["description"])
+            synonyms_str = ", ".join(f"'{_escape_sql_string(s)}'" for s in r["synonyms"])
+            synonyms_array = f"[{synonyms_str}]" if synonyms_str else "CAST([] AS ARRAY<STRING>)"
+            struct_rows.append(
+                f"STRUCT('{r['dataset_name']}' AS dataset_name, "
+                f"'{r['table_name']}' AS table_name, "
+                f"'{r['column_name']}' AS column_name, "
+                f"'{r['column_type']}' AS column_type, "
+                f"'{desc}' AS description, "
+                f"{synonyms_array} AS synonyms)"
+            )
+
+        unnest_list = ",\n            ".join(struct_rows)
+
+        sql = f"""
+        MERGE `{fqn}.column_embeddings` AS target
+        USING (
+            SELECT * FROM UNNEST([
+            {unnest_list}
+            ])
+        ) AS source
+        ON target.dataset_name = source.dataset_name
+           AND target.table_name = source.table_name
+           AND target.column_name = source.column_name
+        WHEN MATCHED THEN
+          UPDATE SET description = source.description,
+                     column_type = source.column_type,
+                     synonyms = source.synonyms,
+                     embedding = NULL,
+                     updated_at = CURRENT_TIMESTAMP()
+        WHEN NOT MATCHED THEN
+          INSERT (dataset_name, table_name, column_name, column_type, description, synonyms)
+          VALUES (source.dataset_name, source.table_name, source.column_name,
+                  source.column_type, source.description, source.synonyms);
+        """
+        bq.execute_query(sql)
+        count += len(batch)
+        logger.info("column_embeddings_batch", batch_size=len(batch), total=count)
 
     logger.info("populated_column_embeddings", count=count)
     return count
@@ -86,6 +128,7 @@ def populate_query_memory(bq: BigQueryProtocol, examples: list[dict], settings: 
     """Insert validated Q->SQL pairs into query_memory table.
 
     Resolves {project} in SQL before storing. Idempotent: MERGE on question.
+    Batched: groups rows into UNNEST-based MERGE statements for throughput.
 
     Args:
         bq: BigQuery client (protocol).
@@ -96,37 +139,69 @@ def populate_query_memory(bq: BigQueryProtocol, examples: list[dict], settings: 
         Number of examples inserted/updated.
     """
     fqn = f"{settings.gcp_project}.{settings.metadata_dataset}"
-    count = 0
+
+    # Pre-resolve all examples
+    rows = []
     for ex in examples:
-        question = _escape_sql_string(ex["question"])
         resolved_sql = resolve_example_sql(ex["sql"], settings.gcp_project)
-        sql_query = _escape_sql_string(resolved_sql.strip())
-        tables_str = ", ".join(f"'{t}'" for t in ex["tables_used"])
-        dataset = ex["dataset"]
-        complexity = ex.get("complexity", "simple")
-        routing_signal = _escape_sql_string(ex.get("routing_signal", ""))
-        validated_by = ex.get("validated_by", "")
+        rows.append(
+            {
+                "question": ex["question"],
+                "sql_query": resolved_sql.strip(),
+                "tables_used": ex["tables_used"],
+                "dataset": ex["dataset"],
+                "complexity": ex.get("complexity", "simple"),
+                "routing_signal": ex.get("routing_signal", ""),
+                "validated_by": ex.get("validated_by", ""),
+            }
+        )
+
+    count = 0
+    for batch in _batched(rows, BATCH_SIZE):
+        struct_rows = []
+        for r in batch:
+            question = _escape_sql_string(r["question"])
+            sql_query = _escape_sql_string(r["sql_query"])
+            tables_str = ", ".join(f"'{t}'" for t in r["tables_used"])
+            routing_signal = _escape_sql_string(r["routing_signal"])
+
+            struct_rows.append(
+                f"STRUCT('{question}' AS question, "
+                f"'{sql_query}' AS sql_query, "
+                f"[{tables_str}] AS tables_used, "
+                f"'{r['dataset']}' AS dataset, "
+                f"'{r['complexity']}' AS complexity, "
+                f"'{routing_signal}' AS routing_signal, "
+                f"'{r['validated_by']}' AS validated_by)"
+            )
+
+        unnest_list = ",\n            ".join(struct_rows)
 
         merge_sql = f"""
         MERGE `{fqn}.query_memory` AS target
-        USING (SELECT '{question}' AS question) AS source
+        USING (
+            SELECT * FROM UNNEST([
+            {unnest_list}
+            ])
+        ) AS source
         ON target.question = source.question
         WHEN MATCHED THEN
-          UPDATE SET sql_query = '{sql_query}',
-                     tables_used = [{tables_str}],
-                     dataset = '{dataset}',
-                     complexity = '{complexity}',
-                     routing_signal = '{routing_signal}',
-                     validated_by = '{validated_by}',
+          UPDATE SET sql_query = source.sql_query,
+                     tables_used = source.tables_used,
+                     dataset = source.dataset,
+                     complexity = source.complexity,
+                     routing_signal = source.routing_signal,
+                     validated_by = source.validated_by,
                      embedding = NULL,
                      validated_at = CURRENT_TIMESTAMP()
         WHEN NOT MATCHED THEN
           INSERT (question, sql_query, tables_used, dataset, complexity, routing_signal, validated_by)
-          VALUES (source.question, '{sql_query}', [{tables_str}],
-                  '{dataset}', '{complexity}', '{routing_signal}', '{validated_by}');
+          VALUES (source.question, source.sql_query, source.tables_used,
+                  source.dataset, source.complexity, source.routing_signal, source.validated_by);
         """
         bq.execute_query(merge_sql)
-        count += 1
+        count += len(batch)
+        logger.info("query_memory_batch", batch_size=len(batch), total=count)
 
     logger.info("populated_query_memory", count=count)
     return count

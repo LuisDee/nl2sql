@@ -9,5 +9,5 @@ services:
     stdin_open: true              # Required for interactive adk run
     tty: true                     # Required for interactive adk run
     ports:
-      - "8000:8000"               # For adk web (when used)
-    command: adk web --host 0.0.0.0 .  # Web UI on port 8000, bind all interfaces
+      - "8001:8001"               # For adk web (when used)
+    command: adk web --host 0.0.0.0 --port 8001 .  # Web UI on port 8001, bind all interfaces

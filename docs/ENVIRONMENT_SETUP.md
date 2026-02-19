@@ -415,6 +415,15 @@ FROM `PROJECT.nl2sql_metadata.schema_embeddings`
 WHERE ARRAY_LENGTH(embedding) > 0;
 ```
 
+
+### "Total rows is smaller than min allowed 5000" (Vector Index)
+
+BigQuery requires a minimum of 5,000 rows to create a `TREE_AH` vector index. For metadata tables (like `schema_embeddings`), you will likely have fewer rows.
+
+- **Status**: This is NOT a blocker.
+- **Behavior**: `VECTOR_SEARCH` will automatically fall back to a flat scan if no index exists. For small tables, this is extremely fast.
+- **Action**: You can safely ignore errors from `python scripts/run_embeddings.py --step create-indexes` if your metadata catalog is small. Once you exceed 5,000 rows, re-run the command to enable the index.
+
 ### "Connection refused" on LiteLLM
 
 The LiteLLM proxy isn't running or isn't reachable.

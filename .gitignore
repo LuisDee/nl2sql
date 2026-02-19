@@ -7,8 +7,17 @@ dist/
 build/
 
 # Environment
+.env
+.env.prod
 nl2sql_agent/.env
 nl2sql_agent/.env-prod
+nl2sql_agent/.env.dev
+
+# ADK session data
+nl2sql_agent/.adk/
+
+# Git bundles
+*.bundle
 
 # Sample data (large, not for version control)
 sample_data/

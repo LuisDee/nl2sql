@@ -1,4 +1,0 @@
-{"project": "cloud-data-n-base-d4b3", "location": "europe-west2", "event": "bigquery_client_initialised", "level": "info", "timestamp": "2026-02-19T12:33:22.036346Z"}
-{"service_type": "LiveBigQueryClient", "event": "tools_bq_service_initialised", "level": "info", "timestamp": "2026-02-19T12:33:22.036590Z"}
-{"root_agent": "mako_assistant", "sub_agents": ["nl2sql_agent"], "model": "gemini-3-flash-preview", "tool_count": 7, "event": "agents_initialised", "level": "info", "timestamp": "2026-02-19T12:33:22.037313Z"}
-SQL is valid for the first batch.

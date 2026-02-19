@@ -304,12 +304,131 @@ class EvalRunner:
 
         return report
 
+    def run_online(self) -> EvalReport:
+        """Online mode: run agent pipeline and compare results."""
+        from nl2sql_agent.agent import nl2sql_agent
+        from nl2sql_agent.tools import execute_sql as original_execute_sql
+        from nl2sql_agent.tools._deps import get_bq_service
+
+        report = EvalReport()
+        bq = get_bq_service()
+
+        # Hook into execute_sql to capture generated SQL
+        captured_sql: list[str] = []
+
+        def capture_execute_sql(sql_query: str) -> dict:
+            captured_sql.append(sql_query)
+            return original_execute_sql(sql_query)
+
+        # Patch the tool in the agent
+        original_tool_idx = -1
+        for i, tool in enumerate(nl2sql_agent.tools):
+            if hasattr(tool, "__name__") and tool.__name__ == "execute_sql":
+                original_tool_idx = i
+                nl2sql_agent.tools[i] = capture_execute_sql
+                break
+        
+        if original_tool_idx == -1:
+            print("WARNING: Could not find execute_sql tool in agent. SQL capture will fail.")
+
+        print(f"Running online evaluation for {len(self.queries)} queries...")
+
+        for q in self.queries:
+            print(f"Query {q['id']}: {q['question']}")
+            captured_sql.clear()
+            
+            # Run Agent
+            try:
+                nl2sql_agent.run(input=q["question"])
+            except Exception as e:
+                print(f"  Agent failed: {e}")
+                report.results.append(EvalResult(
+                    query_id=q["id"],
+                    question=q["question"],
+                    category=q["category"],
+                    expected_tables=q["expected_tables"],
+                    error=f"Agent runtime error: {str(e)}"
+                ))
+                continue
+
+            # Check if SQL was generated
+            if not captured_sql:
+                print("  No SQL generated.")
+                report.results.append(EvalResult(
+                    query_id=q["id"],
+                    question=q["question"],
+                    category=q["category"],
+                    expected_tables=q["expected_tables"],
+                    routing_correct=False,
+                    error="No SQL generated"
+                ))
+                continue
+
+            # We use the LAST generated SQL if multiple were attempted
+            predicted_sql = captured_sql[-1]
+            resolved_gold_sql = resolve_example_sql(q["gold_sql"], self.project)
+            
+            # Execute Gold
+            try:
+                gold_df = bq.execute_query(resolved_gold_sql)
+            except Exception as e:
+                print(f"  Gold SQL failed: {e}")
+                report.results.append(EvalResult(
+                    query_id=q["id"],
+                    question=q["question"],
+                    category=q["category"],
+                    expected_tables=q["expected_tables"],
+                    error=f"Gold SQL error: {str(e)}"
+                ))
+                continue
+
+            # Execute Predicted
+            try:
+                predicted_df = bq.execute_query(predicted_sql)
+                execution_match = compare_result_sets(gold_df, predicted_df)
+            except Exception as e:
+                print(f"  Predicted SQL failed: {e}")
+                report.results.append(EvalResult(
+                    query_id=q["id"],
+                    question=q["question"],
+                    category=q["category"],
+                    expected_tables=q["expected_tables"],
+                    predicted_tables=list(_extract_tables(predicted_sql)),
+                    routing_correct=True,
+                    syntax_valid=False,
+                    error=str(e),
+                    component_match_score=compute_component_match(resolved_gold_sql, predicted_sql)
+                ))
+                continue
+
+            # Success path
+            tables = _extract_tables(predicted_sql)
+            result = EvalResult(
+                query_id=q["id"],
+                question=q["question"],
+                category=q["category"],
+                expected_tables=q["expected_tables"],
+                predicted_tables=list(tables),
+                routing_correct=True,
+                syntax_valid=True,
+                execution_match=execution_match,
+                component_match_score=compute_component_match(resolved_gold_sql, predicted_sql)
+            )
+            report.results.append(result)
+            print(f"  Match: {execution_match}")
+
+        # Restore original tool
+        if original_tool_idx != -1:
+            nl2sql_agent.tools[original_tool_idx] = original_execute_sql
+
+        return report
+
 
 def main():
     parser = argparse.ArgumentParser(description="NL2SQL evaluation runner")
     parser.add_argument(
         "--mode",
-        choices=["offline"],
+        choices=["offline", "online"],
         default="offline",
         help="Evaluation mode",
     )
@@ -321,7 +440,15 @@ def main():
     if args.mode == "offline":
         report = runner.run_offline()
         print(report.to_markdown())
-        # Exit code reflects all-pass
+        sys.exit(0 if report.routing_accuracy == 1.0 else 1)
+    elif args.mode == "online":
+        report = runner.run_online()
+        print(report.to_markdown())
+        sys.exit(0 if report.routing_accuracy > 0.9 and report.execution_accuracy > 0.9 else 1)
+    else:
+        # Fallback to offline
+        report = runner.run_offline()
+        print(report.to_markdown())
         sys.exit(0 if report.routing_accuracy == 1.0 else 1)
 
 

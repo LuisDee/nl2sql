@@ -1,0 +1,1016 @@
+# Gold Standard Evaluation Queries
+# 50 queries across 9 categories covering all 13 tables.
+# All SQL uses {project} placeholder, resolved at runtime.
+
+queries:
+  # ============================================================
+  # Category: kpi_basic (8 queries)
+  # Tests basic KPI table queries — one per table + aggregations
+  # ============================================================
+  - id: "eval_001"
+    question: "What was the total instant PnL for market trades today?"
+    category: "kpi_basic"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "generic PnL -> default markettrade"
+    gold_sql: |
+      SELECT
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        COUNT(*) AS trade_count
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+    complexity: "simple"
+    tags: ["markettrade", "pnl", "aggregation"]
+
+  - id: "eval_002"
+    question: "How did the quoter perform today in terms of edge?"
+    category: "kpi_basic"
+    expected_tables: ["quotertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "quoter edge -> kpi.quotertrade"
+    gold_sql: |
+      SELECT
+        COUNT(*) AS fill_count,
+        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+    complexity: "simple"
+    tags: ["quotertrade", "edge", "aggregation"]
+
+  - id: "eval_003"
+    question: "How have broker trades performed today?"
+    category: "kpi_basic"
+    expected_tables: ["brokertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "broker performance -> kpi.brokertrade"
+    gold_sql: |
+      SELECT
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = CURRENT_DATE()
+    complexity: "simple"
+    tags: ["brokertrade", "pnl", "aggregation"]
+
+  - id: "eval_004"
+    question: "What was the edge on our click trades?"
+    category: "kpi_basic"
+    expected_tables: ["clicktrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "click trade edge -> kpi.clicktrade"
+    gold_sql: |
+      SELECT
+        COUNT(*) AS trade_count,
+        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      WHERE trade_date = CURRENT_DATE()
+    complexity: "simple"
+    tags: ["clicktrade", "edge", "aggregation"]
+
+  - id: "eval_005"
+    question: "Show me OTO swing trade performance"
+    category: "kpi_basic"
+    expected_tables: ["otoswing"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "OTO swing -> kpi.otoswing"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["otoswing", "pnl", "aggregation"]
+
+  - id: "eval_006"
+    question: "Show me PnL breakdown by symbol for market trades"
+    category: "kpi_basic"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "PnL by symbol -> kpi.markettrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["markettrade", "pnl", "symbol", "groupby"]
+
+  - id: "eval_007"
+    question: "What was the average edge by portfolio for market trades?"
+    category: "kpi_basic"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "edge by portfolio -> kpi.markettrade"
+    gold_sql: |
+      SELECT
+        portfolio,
+        COUNT(*) AS trade_count,
+        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY portfolio
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["markettrade", "edge", "portfolio", "groupby"]
+
+  - id: "eval_008"
+    question: "What was instant PnL by symbol for quoter trades?"
+    category: "kpi_basic"
+    expected_tables: ["quotertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "PnL by symbol for quoter -> kpi.quotertrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(instant_pnl), 2) AS avg_pnl
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["quotertrade", "pnl", "symbol", "groupby"]
+
+  # ============================================================
+  # Category: data_basic (8 queries)
+  # Tests data-layer tables: theodata, marketdata, marketdepth, swingdata, raw trades
+  # ============================================================
+  - id: "eval_009"
+    question: "What is the implied vol for EMBRACB options?"
+    category: "data_basic"
+    expected_tables: ["theodata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "implied vol -> data.theodata"
+    gold_sql: |
+      SELECT
+        strike,
+        ROUND(vol, 4) AS implied_vol,
+        ROUND(tv, 4) AS theo_price,
+        ROUND(delta, 4) AS delta
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = CURRENT_DATE()
+        AND symbol = 'EMBRACB'
+      ORDER BY strike
+      LIMIT 50
+    complexity: "simple"
+    tags: ["theodata", "vol", "greeks"]
+
+  - id: "eval_010"
+    question: "What are the greeks for EMBRACB?"
+    category: "data_basic"
+    expected_tables: ["theodata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "greeks -> data.theodata"
+    gold_sql: |
+      SELECT
+        strike,
+        ROUND(delta, 4) AS delta,
+        ROUND(gamma, 6) AS gamma,
+        ROUND(vega, 4) AS vega,
+        ROUND(theta, 4) AS theta,
+        ROUND(vol, 4) AS vol,
+        ROUND(tv, 4) AS theo
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = CURRENT_DATE()
+        AND symbol = 'EMBRACB'
+      ORDER BY strike
+      LIMIT 50
+    complexity: "simple"
+    tags: ["theodata", "greeks", "delta", "gamma"]
+
+  - id: "eval_011"
+    question: "What was the market data for EMBRACB today?"
+    category: "data_basic"
+    expected_tables: ["marketdata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "market data / price feed -> data.marketdata"
+    gold_sql: |
+      SELECT
+        symbol, term, strike,
+        bid_price, ask_price, last_price
+      FROM `{project}.nl2sql_omx_data.marketdata`
+      WHERE trade_date = CURRENT_DATE()
+        AND symbol = 'EMBRACB'
+      LIMIT 20
+    complexity: "simple"
+    tags: ["marketdata", "prices"]
+
+  - id: "eval_012"
+    question: "Show me the order book depth for EMBRACB"
+    category: "data_basic"
+    expected_tables: ["marketdepth"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "order book / depth -> data.marketdepth"
+    gold_sql: |
+      SELECT
+        symbol, term, strike,
+        bid_price_0, bid_volume_0,
+        ask_price_0, ask_volume_0
+      FROM `{project}.nl2sql_omx_data.marketdepth`
+      WHERE trade_date = CURRENT_DATE()
+        AND symbol = 'EMBRACB'
+      LIMIT 20
+    complexity: "simple"
+    tags: ["marketdepth", "orderbook"]
+
+  - id: "eval_013"
+    question: "What's in the swing data today?"
+    category: "data_basic"
+    expected_tables: ["swingdata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "swing -> data.swingdata"
+    gold_sql: |
+      SELECT
+        symbol, trade_side, trade_price, trade_size,
+        takeout_category, takeout_type
+      FROM `{project}.nl2sql_omx_data.swingdata`
+      WHERE trade_date = CURRENT_DATE()
+      LIMIT 20
+    complexity: "simple"
+    tags: ["swingdata", "raw"]
+
+  - id: "eval_014"
+    question: "Show me the raw execution details for market trades"
+    category: "data_basic"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "raw execution / fill detail -> data.markettrade"
+    gold_sql: |
+      SELECT
+        symbol, term, strike,
+        trade_price, trade_size, trade_side
+      FROM `{project}.nl2sql_omx_data.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      LIMIT 20
+    complexity: "simple"
+    tags: ["markettrade", "raw", "data_layer"]
+
+  - id: "eval_015"
+    question: "Show raw quoter trade execution details"
+    category: "data_basic"
+    expected_tables: ["quotertrade"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "raw quoter execution -> data.quotertrade"
+    gold_sql: |
+      SELECT
+        symbol, term, strike,
+        trade_price, trade_size, trade_side
+      FROM `{project}.nl2sql_omx_data.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      LIMIT 20
+    complexity: "simple"
+    tags: ["quotertrade", "raw", "data_layer"]
+
+  - id: "eval_016"
+    question: "Show raw click trade execution details"
+    category: "data_basic"
+    expected_tables: ["clicktrade"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "raw click execution -> data.clicktrade"
+    gold_sql: |
+      SELECT
+        symbol, term, strike,
+        trade_price, trade_size, trade_side
+      FROM `{project}.nl2sql_omx_data.clicktrade`
+      WHERE trade_date = CURRENT_DATE()
+      LIMIT 20
+    complexity: "simple"
+    tags: ["clicktrade", "raw", "data_layer"]
+
+  # ============================================================
+  # Category: disambiguation (8 queries)
+  # Tests kpi.quotertrade vs data.quotertrade, same-name tables
+  # ============================================================
+  - id: "eval_017"
+    question: "What was the quoter edge and PnL?"
+    category: "disambiguation"
+    expected_tables: ["quotertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "quoter edge/PnL -> kpi.quotertrade (NOT data.quotertrade)"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS fill_count,
+        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["quotertrade", "disambiguation", "kpi_vs_data"]
+
+  - id: "eval_018"
+    question: "What levels was the quoter quoting at today?"
+    category: "disambiguation"
+    expected_tables: ["quotertrade"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "quoting levels / raw activity -> data.quotertrade"
+    gold_sql: |
+      SELECT
+        symbol, trade_price, trade_size, trade_side
+      FROM `{project}.nl2sql_omx_data.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      LIMIT 20
+    complexity: "simple"
+    tags: ["quotertrade", "disambiguation", "kpi_vs_data"]
+
+  - id: "eval_019"
+    question: "What was the edge on our market trades?"
+    category: "disambiguation"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "edge = KPI metric -> kpi.markettrade (NOT data.markettrade)"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["markettrade", "disambiguation", "kpi_vs_data"]
+
+  - id: "eval_020"
+    question: "What was the fill price for market trades?"
+    category: "disambiguation"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "fill price / raw detail -> data.markettrade"
+    gold_sql: |
+      SELECT
+        symbol, term, strike,
+        trade_price, trade_size, trade_side
+      FROM `{project}.nl2sql_omx_data.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      LIMIT 20
+    complexity: "simple"
+    tags: ["markettrade", "disambiguation", "kpi_vs_data"]
+
+  - id: "eval_021"
+    question: "What was the theo price for EMBRACB options?"
+    category: "disambiguation"
+    expected_tables: ["theodata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "theo/vol -> data.theodata (only exists in data)"
+    gold_sql: |
+      SELECT
+        strike,
+        ROUND(tv, 4) AS theo,
+        ROUND(delta, 4) AS delta,
+        ROUND(vol, 4) AS vol
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = CURRENT_DATE()
+        AND symbol = 'EMBRACB'
+      ORDER BY strike
+      LIMIT 50
+    complexity: "simple"
+    tags: ["theodata", "disambiguation", "unique_table"]
+
+  - id: "eval_022"
+    question: "How fast were our swings executing?"
+    category: "disambiguation"
+    expected_tables: ["swingdata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "swing speed/latency -> data.swingdata (NOT kpi.otoswing)"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS swing_count,
+        ROUND(AVG(latency_stats_vtio), 0) AS avg_vt_decision_us,
+        ROUND(AVG(latency_stats_itio), 0) AS avg_order_send_us
+      FROM `{project}.nl2sql_omx_data.swingdata`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY swing_count DESC
+    complexity: "medium"
+    tags: ["swingdata", "disambiguation", "latency"]
+
+  - id: "eval_023"
+    question: "What was the swing PnL compared to the fired price?"
+    category: "disambiguation"
+    expected_tables: ["otoswing"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "swing PnL / performance -> kpi.otoswing (NOT data.swingdata)"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS swing_count,
+        ROUND(SUM(instant_pnl), 2) AS pnl_fill,
+        ROUND(SUM(instant_pnl_fired_at), 2) AS pnl_fired
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY pnl_fill DESC
+    complexity: "medium"
+    tags: ["otoswing", "disambiguation", "fired_at"]
+
+  - id: "eval_024"
+    question: "Show me market data feed for EMBRACB"
+    category: "disambiguation"
+    expected_tables: ["marketdata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "market data / price feed -> data.marketdata (NOT marketdepth)"
+    gold_sql: |
+      SELECT
+        symbol, term, strike,
+        bid_price, ask_price, last_price
+      FROM `{project}.nl2sql_omx_data.marketdata`
+      WHERE trade_date = CURRENT_DATE()
+        AND symbol = 'EMBRACB'
+      LIMIT 20
+    complexity: "simple"
+    tags: ["marketdata", "disambiguation", "depth_vs_data"]
+
+  # ============================================================
+  # Category: union_all (4 queries)
+  # Tests UNION ALL across KPI tables for aggregate views
+  # ============================================================
+  - id: "eval_025"
+    question: "What was total PnL across all trade types?"
+    category: "union_all"
+    expected_tables: ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "all trades / total PnL -> UNION ALL across all KPI"
+    gold_sql: |
+      SELECT 'markettrade' AS trade_type, ROUND(SUM(instant_pnl), 2) AS total_pnl, COUNT(*) AS count
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'quotertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'brokertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'clicktrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'otoswing', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = CURRENT_DATE()
+      ORDER BY total_pnl DESC
+    complexity: "complex"
+    tags: ["union_all", "all_kpi", "pnl"]
+
+  - id: "eval_026"
+    question: "How many trades did we do across all types today?"
+    category: "union_all"
+    expected_tables: ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "all trades count -> UNION ALL"
+    gold_sql: |
+      SELECT 'markettrade' AS trade_type, COUNT(*) AS trade_count
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'quotertrade', COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'brokertrade', COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'clicktrade', COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'otoswing', COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = CURRENT_DATE()
+      ORDER BY trade_count DESC
+    complexity: "complex"
+    tags: ["union_all", "all_kpi", "count"]
+
+  - id: "eval_027"
+    question: "How many trades did we do by symbol across market and quoter?"
+    category: "union_all"
+    expected_tables: ["markettrade", "quotertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "cross-table symbol comparison -> UNION KPI tables"
+    gold_sql: |
+      SELECT symbol, 'markettrade' AS source, COUNT(*) AS trade_count, ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      UNION ALL
+      SELECT symbol, 'quotertrade', COUNT(*), ROUND(SUM(instant_pnl), 2)
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    complexity: "complex"
+    tags: ["union_all", "partial_kpi", "symbol"]
+
+  - id: "eval_028"
+    question: "Compare average edge across all trade types"
+    category: "union_all"
+    expected_tables: ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "compare edge all types -> UNION ALL"
+    gold_sql: |
+      SELECT 'markettrade' AS trade_type, ROUND(AVG(edge), 4) AS avg_edge, COUNT(*) AS count
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'quotertrade', ROUND(AVG(edge), 4), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'brokertrade', ROUND(AVG(edge), 4), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'clicktrade', ROUND(AVG(edge), 4), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      WHERE trade_date = CURRENT_DATE()
+      UNION ALL
+      SELECT 'otoswing', ROUND(AVG(edge), 4), COUNT(*)
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = CURRENT_DATE()
+      ORDER BY avg_edge DESC
+    complexity: "complex"
+    tags: ["union_all", "all_kpi", "edge"]
+
+  # ============================================================
+  # Category: slippage_intervals (5 queries)
+  # Tests delta_slippage at various time intervals
+  # ============================================================
+  - id: "eval_029"
+    question: "What was the delta slippage at 1 minute for market trades by symbol?"
+    category: "slippage_intervals"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "delta slippage 1m -> kpi.markettrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(AVG(delta_slippage_1m), 4) AS avg_delta_slip_1m
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY avg_delta_slip_1m DESC
+    complexity: "medium"
+    tags: ["slippage", "1m", "markettrade"]
+
+  - id: "eval_030"
+    question: "Compare 5-second vs 5-minute total slippage for market trades"
+    category: "slippage_intervals"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "slippage comparison across intervals -> kpi.markettrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(AVG(total_slippage_5s), 4) AS avg_slip_5s,
+        ROUND(AVG(total_slippage_5m), 4) AS avg_slip_5m,
+        ROUND(AVG(total_slippage_5m) - AVG(total_slippage_5s), 4) AS slip_divergence
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY slip_divergence DESC
+    complexity: "medium"
+    tags: ["slippage", "5s", "5m", "comparison"]
+
+  - id: "eval_031"
+    question: "What was the vol slippage at 10 minutes for the quoter?"
+    category: "slippage_intervals"
+    expected_tables: ["quotertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "vol slippage at interval -> kpi.quotertrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS fill_count,
+        ROUND(SUM(vol_slippage_10m), 2) AS total_vol_slip_10m,
+        ROUND(AVG(vol_slippage_per_unit_10m), 4) AS avg_vol_slip_unit_10m
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY total_vol_slip_10m DESC
+    complexity: "medium"
+    tags: ["slippage", "vol", "10m", "quotertrade"]
+
+  - id: "eval_032"
+    question: "Break down the roll slippage across intervals for market trades"
+    category: "slippage_intervals"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "roll slippage decomposition -> kpi.markettrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(roll_slippage_1s), 2) AS roll_1s,
+        ROUND(SUM(roll_slippage_1m), 2) AS roll_1m,
+        ROUND(SUM(roll_slippage_5m), 2) AS roll_5m,
+        ROUND(SUM(roll_slippage_30m), 2) AS roll_30m,
+        ROUND(SUM(roll_slippage_1h), 2) AS roll_1h
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY roll_1h DESC
+    complexity: "medium"
+    tags: ["slippage", "roll", "intervals", "markettrade"]
+
+  - id: "eval_033"
+    question: "What was the delta slippage fired-at for swings at 1 hour?"
+    category: "slippage_intervals"
+    expected_tables: ["otoswing"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "fired-at slippage at interval -> kpi.otoswing"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS swing_count,
+        ROUND(SUM(delta_slippage_1h), 2) AS delta_slip_fill,
+        ROUND(SUM(delta_slippage_fired_at_1h), 2) AS delta_slip_fired
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY delta_slip_fired DESC
+    complexity: "medium"
+    tags: ["slippage", "fired_at", "1h", "otoswing"]
+
+  # ============================================================
+  # Category: broker_comparison (3 queries)
+  # Tests BGC vs MGN, fee_method, account grouping
+  # ============================================================
+  - id: "eval_034"
+    question: "Compare BGC vs MGN broker performance"
+    category: "broker_comparison"
+    expected_tables: ["brokertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "BGC vs MGN -> kpi.brokertrade with account filter"
+    gold_sql: |
+      SELECT
+        account,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = CURRENT_DATE()
+        AND account IN ('BGC', 'MGN')
+      GROUP BY account
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["brokertrade", "account", "comparison"]
+
+  - id: "eval_035"
+    question: "What were broker fees by fee method?"
+    category: "broker_comparison"
+    expected_tables: ["brokertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "broker fees / fee method -> kpi.brokertrade"
+    gold_sql: |
+      SELECT
+        fee_method,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS gross_pnl,
+        ROUND(SUM(instant_pnl_w_fees), 2) AS net_pnl,
+        ROUND(SUM(instant_pnl) - SUM(instant_pnl_w_fees), 2) AS total_fees
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY fee_method
+      ORDER BY total_fees DESC
+    complexity: "medium"
+    tags: ["brokertrade", "fees", "fee_method"]
+
+  - id: "eval_036"
+    question: "How did broker trades perform by account and symbol?"
+    category: "broker_comparison"
+    expected_tables: ["brokertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "broker by account+symbol -> kpi.brokertrade"
+    gold_sql: |
+      SELECT
+        account,
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY account, symbol
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["brokertrade", "account", "symbol", "multi_group"]
+
+  # ============================================================
+  # Category: special_cases (5 queries)
+  # Tests portfolio WHITE, algo filter, ATM options, empty table, PnL w/ fees
+  # ============================================================
+  - id: "eval_037"
+    question: "How did the WHITE portfolio perform on market trades?"
+    category: "special_cases"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "WHITE portfolio -> kpi.markettrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+        AND portfolio = 'WHITE'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["markettrade", "portfolio", "WHITE"]
+
+  - id: "eval_038"
+    question: "How did the OST_MQ algo perform on market trades?"
+    category: "special_cases"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "algo filter -> kpi.markettrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        ROUND(AVG(edge), 4) AS avg_edge
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+        AND algo = 'OST_MQ'
+      GROUP BY symbol
+      ORDER BY total_pnl DESC
+    complexity: "medium"
+    tags: ["markettrade", "algo", "filter"]
+
+  - id: "eval_039"
+    question: "What are the ATM options greeks?"
+    category: "special_cases"
+    expected_tables: ["theodata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "ATM / delta range -> data.theodata"
+    gold_sql: |
+      SELECT
+        symbol, strike,
+        ROUND(delta, 4) AS delta,
+        ROUND(vol, 4) AS vol,
+        ROUND(tv, 4) AS theo,
+        ROUND(vega, 4) AS vega,
+        ROUND(gamma, 6) AS gamma
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = CURRENT_DATE()
+        AND ABS(delta) BETWEEN 0.40 AND 0.60
+      ORDER BY symbol, strike
+      LIMIT 50
+    complexity: "medium"
+    tags: ["theodata", "ATM", "delta_range"]
+
+  - id: "eval_040"
+    question: "What was PnL including fees vs without fees for market trades?"
+    category: "special_cases"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "PnL with/without fees -> kpi.markettrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS trade_count,
+        ROUND(SUM(instant_pnl), 2) AS pnl_no_fees,
+        ROUND(SUM(instant_pnl_w_fees), 2) AS pnl_with_fees,
+        ROUND(SUM(instant_pnl) - SUM(instant_pnl_w_fees), 2) AS total_fees
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY pnl_no_fees DESC
+    complexity: "medium"
+    tags: ["markettrade", "fees", "pnl_comparison"]
+
+  - id: "eval_041"
+    question: "What was the quoter skew PnL today?"
+    category: "special_cases"
+    expected_tables: ["quotertrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "skew pnl / mark to mid -> kpi.quotertrade"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS fill_count,
+        ROUND(SUM(mark_to_mid_pnl), 2) AS total_skew_pnl,
+        ROUND(SUM(instant_pnl), 2) AS total_pnl
+      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY total_skew_pnl DESC
+    complexity: "medium"
+    tags: ["quotertrade", "skew", "mark_to_mid"]
+
+  # ============================================================
+  # Category: complex_patterns (5 queries)
+  # Tests subqueries, date ranges, multi-column sort, CTEs
+  # ============================================================
+  - id: "eval_042"
+    question: "Show me the best and worst trades by edge today"
+    category: "complex_patterns"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "best/worst by edge -> kpi.markettrade with subqueries"
+    gold_sql: |
+      (
+        SELECT 'best' AS category, symbol, term, strike, ROUND(edge, 4) AS edge, ROUND(instant_pnl, 2) AS pnl
+        FROM `{project}.nl2sql_omx_kpi.markettrade`
+        WHERE trade_date = CURRENT_DATE()
+        ORDER BY edge DESC
+        LIMIT 5
+      )
+      UNION ALL
+      (
+        SELECT 'worst', symbol, term, strike, ROUND(edge, 4), ROUND(instant_pnl, 2)
+        FROM `{project}.nl2sql_omx_kpi.markettrade`
+        WHERE trade_date = CURRENT_DATE()
+        ORDER BY edge ASC
+        LIMIT 5
+      )
+    complexity: "complex"
+    tags: ["markettrade", "subquery", "best_worst"]
+
+  - id: "eval_043"
+    question: "Show the vol smile by strike for EMBRACB DEC25 expiry"
+    category: "complex_patterns"
+    expected_tables: ["theodata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "vol smile / vol by strike for expiry -> data.theodata"
+    gold_sql: |
+      SELECT
+        strike,
+        ROUND(vol, 4) AS implied_vol,
+        ROUND(delta, 4) AS delta,
+        ROUND(vega, 4) AS vega,
+        ROUND(gamma, 6) AS gamma
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = CURRENT_DATE()
+        AND symbol = 'EMBRACB'
+        AND term = 'DEC25'
+      ORDER BY strike
+      LIMIT 100
+    complexity: "medium"
+    tags: ["theodata", "vol_smile", "term_filter"]
+
+  - id: "eval_044"
+    question: "What was the forward price for different expiries for EMBRACB?"
+    category: "complex_patterns"
+    expected_tables: ["theodata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "forward price / term structure -> data.theodata"
+    gold_sql: |
+      SELECT
+        term,
+        ROUND(AVG(forward), 4) AS avg_forward,
+        ROUND(AVG(under), 4) AS avg_underlying,
+        ROUND(AVG(short_rate), 6) AS avg_rate,
+        ROUND(AVG(tte), 4) AS avg_tte
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = CURRENT_DATE()
+        AND symbol = 'EMBRACB'
+      GROUP BY term
+      ORDER BY avg_tte
+    complexity: "medium"
+    tags: ["theodata", "forward", "term_structure"]
+
+  - id: "eval_045"
+    question: "What was the bid-ask spread for EMBRACB options?"
+    category: "complex_patterns"
+    expected_tables: ["marketdepth"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "bid-ask spread -> data.marketdepth"
+    gold_sql: |
+      SELECT
+        symbol, term, strike,
+        ROUND(AVG(ask_price_0 - bid_price_0), 4) AS avg_spread,
+        ROUND(AVG(bid_volume_0), 0) AS avg_bid_size,
+        ROUND(AVG(ask_volume_0), 0) AS avg_ask_size
+      FROM `{project}.nl2sql_omx_data.marketdepth`
+      WHERE trade_date = CURRENT_DATE()
+        AND symbol = 'EMBRACB'
+        AND bid_price_0 > 0 AND ask_price_0 > 0
+      GROUP BY symbol, term, strike
+      ORDER BY avg_spread DESC
+      LIMIT 20
+    complexity: "medium"
+    tags: ["marketdepth", "spread", "aggregation"]
+
+  - id: "eval_046"
+    question: "Compare swing fill price vs fired price PnL"
+    category: "complex_patterns"
+    expected_tables: ["otoswing"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "fired-at vs fill PnL -> kpi.otoswing"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS swing_count,
+        ROUND(SUM(instant_pnl), 2) AS pnl_at_fill,
+        ROUND(SUM(instant_pnl_fired_at), 2) AS pnl_at_fire,
+        ROUND(SUM(instant_pnl) - SUM(instant_pnl_fired_at), 2) AS fill_improvement
+      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY fill_improvement DESC
+    complexity: "medium"
+    tags: ["otoswing", "fired_at", "comparison"]
+
+  # ============================================================
+  # Category: edge_cases (4 queries)
+  # Tests yesterday, missing symbol, "all trades", delta bucket
+  # ============================================================
+  - id: "eval_047"
+    question: "What was our PnL yesterday?"
+    category: "edge_cases"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "yesterday + generic PnL -> default markettrade with date offset"
+    gold_sql: |
+      SELECT
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        COUNT(*) AS trade_count
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)
+    complexity: "simple"
+    tags: ["markettrade", "yesterday", "date_offset"]
+
+  - id: "eval_048"
+    question: "Which market trades had edge above 0.5 today?"
+    category: "edge_cases"
+    expected_tables: ["markettrade"]
+    expected_dataset: "nl2sql_omx_kpi"
+    expected_routing_signal: "edge threshold filter -> kpi.markettrade"
+    gold_sql: |
+      SELECT
+        symbol, term, strike,
+        ROUND(edge, 4) AS edge,
+        ROUND(instant_pnl, 2) AS instant_pnl,
+        trade_size
+      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      WHERE trade_date = CURRENT_DATE()
+        AND edge > 0.5
+      ORDER BY edge DESC
+      LIMIT 20
+    complexity: "simple"
+    tags: ["markettrade", "edge", "threshold"]
+
+  - id: "eval_049"
+    question: "Show all symbols available in theodata"
+    category: "edge_cases"
+    expected_tables: ["theodata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "what symbols in theodata -> data.theodata"
+    gold_sql: |
+      SELECT DISTINCT symbol, COUNT(*) AS row_count
+      FROM `{project}.nl2sql_omx_data.theodata`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY row_count DESC
+    complexity: "simple"
+    tags: ["theodata", "symbols", "distinct"]
+
+  - id: "eval_050"
+    question: "What was the average swing latency breakdown today?"
+    category: "edge_cases"
+    expected_tables: ["swingdata"]
+    expected_dataset: "nl2sql_omx_data"
+    expected_routing_signal: "swing latency / how fast -> data.swingdata"
+    gold_sql: |
+      SELECT
+        symbol,
+        COUNT(*) AS swing_count,
+        ROUND(AVG(latency_stats_prcx), 0) AS avg_price_decode_us,
+        ROUND(AVG(latency_stats_prcs), 0) AS avg_feed_decoder_us,
+        ROUND(AVG(latency_stats_vtio), 0) AS avg_vt_decision_us,
+        ROUND(AVG(latency_stats_bkio), 0) AS avg_dma_us,
+        ROUND(AVG(latency_stats_itio), 0) AS avg_order_send_us
+      FROM `{project}.nl2sql_omx_data.swingdata`
+      WHERE trade_date = CURRENT_DATE()
+      GROUP BY symbol
+      ORDER BY swing_count DESC
+    complexity: "medium"
+    tags: ["swingdata", "latency", "breakdown"]

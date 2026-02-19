@@ -1,0 +1,272 @@
+[
+  {
+    "name": "edge_routes_to_kpi_markettrade",
+    "data": [
+      {
+        "query": "What was the average edge today?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to kpi.markettrade since 'edge' is a KPI metric"
+      }
+    ]
+  },
+  {
+    "name": "vol_routes_to_data_theodata",
+    "data": [
+      {
+        "query": "What is the implied vol for EMBRACB?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to data.theodata since vol/IV is ONLY in theodata"
+      }
+    ]
+  },
+  {
+    "name": "broker_routes_to_kpi_brokertrade",
+    "data": [
+      {
+        "query": "Compare BGC vs MGN broker performance",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to kpi.brokertrade since broker names mentioned"
+      }
+    ]
+  },
+  {
+    "name": "raw_quoter_routes_to_data_quotertrade",
+    "data": [
+      {
+        "query": "What levels was the quoter quoting at today?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to data.quotertrade (raw activity, NOT kpi.quotertrade)"
+      }
+    ]
+  },
+  {
+    "name": "quoter_pnl_routes_to_kpi_quotertrade",
+    "data": [
+      {
+        "query": "What was the quoter edge and PnL?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to kpi.quotertrade (edge/PnL are KPI metrics)"
+      }
+    ]
+  },
+  {
+    "name": "order_book_routes_to_marketdepth",
+    "data": [
+      {
+        "query": "What does the order book look like for EMBRACB?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to data.marketdepth (order book = depth)"
+      }
+    ]
+  },
+  {
+    "name": "market_data_routes_to_marketdata",
+    "data": [
+      {
+        "query": "Show me market data feed for EMBRACB",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to data.marketdata (NOT marketdepth)"
+      }
+    ]
+  },
+  {
+    "name": "swing_latency_routes_to_swingdata",
+    "data": [
+      {
+        "query": "How fast were our swings executing?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to data.swingdata (latency only in data layer)"
+      }
+    ]
+  },
+  {
+    "name": "swing_pnl_routes_to_kpi_otoswing",
+    "data": [
+      {
+        "query": "What was the swing PnL compared to the fired price?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to kpi.otoswing (PnL/fired_at are KPI metrics)"
+      }
+    ]
+  },
+  {
+    "name": "click_trade_edge_routes_to_kpi",
+    "data": [
+      {
+        "query": "What was the edge on our click trades?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to kpi.clicktrade (edge is KPI)"
+      }
+    ]
+  },
+  {
+    "name": "total_pnl_uses_union_all",
+    "data": [
+      {
+        "query": "What was total PnL across all trade types?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should UNION ALL across all 5 KPI tables"
+      }
+    ]
+  },
+  {
+    "name": "greeks_routes_to_theodata",
+    "data": [
+      {
+        "query": "What are the greeks for EMBRACB?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to data.theodata (greeks/delta/gamma/vega)"
+      }
+    ]
+  },
+  {
+    "name": "slippage_routes_to_kpi",
+    "data": [
+      {
+        "query": "What was the delta slippage at 1 minute for market trades?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to kpi.markettrade (slippage is KPI metric)"
+      }
+    ]
+  },
+  {
+    "name": "yesterday_default_markettrade",
+    "data": [
+      {
+        "query": "What was our PnL yesterday?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should default to kpi.markettrade with DATE_SUB for yesterday"
+      }
+    ]
+  },
+  {
+    "name": "raw_execution_routes_to_data_markettrade",
+    "data": [
+      {
+        "query": "Show me the raw execution details for market trades",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should route to data.markettrade (raw execution, NOT kpi)"
+      }
+    ]
+  }
+]

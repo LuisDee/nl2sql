@@ -90,6 +90,15 @@ class Settings(BaseSettings):
         description="Number of results for vector search queries",
     )
 
+    # --- Semantic Cache (Track 05) ---
+    semantic_cache_threshold: float = Field(
+        default=0.05,
+        description=(
+            "Maximum COSINE distance for a semantic cache hit. "
+            "0.05 ≈ 0.95 similarity — very tight, only near-exact paraphrases."
+        ),
+    )
+
 
 # Singleton instance — import this everywhere
 settings = Settings()

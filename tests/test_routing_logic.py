@@ -10,8 +10,10 @@ from nl2sql_agent.prompts import build_nl2sql_instruction
 
 
 def _get_prompt():
-    """Get the built instruction text."""
-    return build_nl2sql_instruction(MagicMock())
+    """Get the built instruction text with empty state."""
+    ctx = MagicMock()
+    ctx.state = {}
+    return build_nl2sql_instruction(ctx)
 
 
 class TestKpiRouting:

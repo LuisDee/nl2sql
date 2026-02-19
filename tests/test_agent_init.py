@@ -35,12 +35,12 @@ class TestAgentStructure:
         assert "trading data" in desc
         assert "bigquery" in desc
 
-    def test_nl2sql_agent_has_six_tools(self):
-        """nl2sql_agent must have 6 tools wired in."""
+    def test_nl2sql_agent_has_seven_tools(self):
+        """nl2sql_agent must have 7 tools wired in (including semantic cache)."""
         from nl2sql_agent.agent import nl2sql_agent
 
         assert nl2sql_agent.tools is not None
-        assert len(nl2sql_agent.tools) == 6
+        assert len(nl2sql_agent.tools) == 7
 
     def test_root_agent_instruction_mentions_delegation(self):
         """Root agent instruction must tell it to delegate data questions."""

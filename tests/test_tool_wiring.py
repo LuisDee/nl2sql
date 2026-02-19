@@ -5,13 +5,13 @@ from unittest.mock import patch, MagicMock
 
 class TestToolWiring:
     @patch("nl2sql_agent.clients.LiveBigQueryClient")
-    def test_nl2sql_agent_has_six_tools(self, mock_client_class):
+    def test_nl2sql_agent_has_seven_tools(self, mock_client_class):
         mock_client_class.return_value = MagicMock()
 
         from nl2sql_agent.agent import nl2sql_agent
 
         assert nl2sql_agent.tools is not None
-        assert len(nl2sql_agent.tools) == 6
+        assert len(nl2sql_agent.tools) == 7
 
     @patch("nl2sql_agent.clients.LiveBigQueryClient")
     def test_root_agent_still_has_sub_agents(self, mock_client_class):

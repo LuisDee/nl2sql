@@ -1,7 +1,7 @@
 """ADK callbacks for the NL2SQL agent.
 
 Provides before_tool_callback and after_tool_callback for guardrails,
-structured logging, and state management.
+structured logging, retry tracking, and state management.
 
 ADK v1.20.0 callback signatures:
   before_tool_callback(tool, args, tool_context) -> Optional[dict]
@@ -16,6 +16,8 @@ from google.adk.tools.tool_context import ToolContext
 from nl2sql_agent.logging_config import get_logger
 
 logger = get_logger(__name__)
+
+MAX_DRY_RUN_RETRIES = 3
 
 
 def before_tool_guard(
@@ -59,7 +61,7 @@ def after_tool_log(
     tool_context: ToolContext,
     tool_response: dict,
 ) -> dict | None:
-    """Log tool results after execution."""
+    """Log tool results and manage retry/session state."""
     tool_name = tool.name
     status = tool_response.get("status", "unknown") if tool_response else "unknown"
 
@@ -74,5 +76,50 @@ def after_tool_log(
             else 0
         ),
     )
+
+    # --- Retry tracking for dry_run_sql ---
+    if tool_name == "dry_run_sql":
+        attempts = tool_context.state.get("dry_run_attempts", 0)
+        if status == "valid":
+            tool_context.state["dry_run_attempts"] = 0
+            logger.info("dry_run_retry_reset", reason="valid_result")
+        else:
+            attempts += 1
+            tool_context.state["dry_run_attempts"] = attempts
+            logger.warning(
+                "dry_run_retry_increment",
+                attempt=attempts,
+                max_retries=MAX_DRY_RUN_RETRIES,
+            )
+            if attempts >= MAX_DRY_RUN_RETRIES:
+                tool_context.state["max_retries_reached"] = True
+                logger.error(
+                    "dry_run_max_retries_reached", attempts=attempts
+                )
+                # Augment the response with escalation hint
+                return {
+                    **(tool_response or {}),
+                    "max_retries_reached": True,
+                    "escalation_hint": (
+                        f"SQL validation has failed {attempts} times. "
+                        "Stop retrying and explain the error to the user. "
+                        "Ask if they can rephrase the question or provide more context."
+                    ),
+                }
+
+    # --- Reset retry counter on successful execute ---
+    if tool_name == "execute_sql" and status == "success":
+        tool_context.state["dry_run_attempts"] = 0
+        tool_context.state["max_retries_reached"] = False
+
+        # --- Session state: persist last query for follow-ups ---
+        sql = args.get("sql_query", "")
+        rows = tool_response.get("rows", [])
+        tool_context.state["last_query_sql"] = sql
+        tool_context.state["last_results_summary"] = {
+            "row_count": tool_response.get("row_count", 0),
+            "preview": rows[:5],
+        }
+        logger.info("session_state_persisted", sql_len=len(sql), row_count=len(rows))
 
     return None  # Don't modify the response

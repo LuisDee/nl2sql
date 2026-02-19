@@ -10,9 +10,11 @@ from nl2sql_agent.tools.metadata_loader import load_yaml_metadata
 from nl2sql_agent.tools.sql_validator import dry_run_sql
 from nl2sql_agent.tools.sql_executor import execute_sql
 from nl2sql_agent.tools.learning_loop import save_validated_query
+from nl2sql_agent.tools.semantic_cache import check_semantic_cache
 
 __all__ = [
     "init_bq_service",
+    "check_semantic_cache",
     "vector_search_tables",
     "fetch_few_shot_examples",
     "load_yaml_metadata",

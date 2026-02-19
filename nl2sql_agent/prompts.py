@@ -23,6 +23,39 @@ def build_nl2sql_instruction(ctx: ReadonlyContext) -> str:
     kpi = settings.kpi_dataset
     data = settings.data_dataset
 
+    # Build optional follow-up context from session state
+    follow_up_section = ""
+    state = ctx.state if hasattr(ctx, "state") and ctx.state else {}
+    last_sql = state.get("last_query_sql")
+    if last_sql:
+        summary = state.get("last_results_summary", {})
+        row_count = summary.get("row_count", "?")
+        follow_up_section = f"""
+
+## FOLLOW-UP CONTEXT
+
+The previous query in this session was:
+```sql
+{last_sql}
+```
+It returned {row_count} rows. If the user asks a follow-up question (e.g. "break that
+down by symbol", "filter to WHITE portfolio"), you can reuse the same table without
+re-running vector_search_tables. Modify the previous SQL directly.
+"""
+
+    # Build retry-aware guidance
+    retry_attempts = state.get("dry_run_attempts", 0)
+    retry_section = ""
+    if retry_attempts > 0:
+        retry_section = f"""
+
+## RETRY STATUS
+
+dry_run_sql has failed {retry_attempts} time(s) in this session. You have
+{3 - retry_attempts} attempt(s) remaining before you must stop and explain
+the error to the user.
+"""
+
     return f"""You are a SQL expert for Mako Group, an options market-making firm.
 Your job is to answer natural language questions about trading data by generating
 and executing BigQuery Standard SQL queries.
@@ -32,6 +65,7 @@ the user says "today". For "yesterday", use DATE_SUB('{today}', INTERVAL 1 DAY).
 
 ## TOOL USAGE ORDER (follow this EVERY TIME)
 
+0. **check_semantic_cache** — Check if this exact question was answered before (skip to step 5 if cache hit)
 1. **vector_search_tables** — Find which table(s) are relevant to the question
 2. **load_yaml_metadata** — Load column descriptions, synonyms, and business rules for those tables
 3. **fetch_few_shot_examples** — Find similar past validated queries for reference
@@ -41,7 +75,7 @@ the user says "today". For "yesterday", use DATE_SUB('{today}', INTERVAL 1 DAY).
 
 If dry_run_sql fails, read the error message carefully, fix the SQL, and retry.
 You may retry up to 3 times. After 3 failures, explain the error to the user.
-
+{retry_section}
 ## DATASET AND TABLE REFERENCE
 
 There are two datasets:
@@ -116,4 +150,4 @@ After executing a query successfully:
 - You are a READ-ONLY agent. Never generate or execute data modification queries.
 - If a user asks you to modify, delete, or create data, politely refuse.
 - Stick to the datasets and tables listed above. Do not query other datasets.
-"""
+{follow_up_section}"""

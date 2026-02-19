@@ -7,9 +7,11 @@ from nl2sql_agent.prompts import build_nl2sql_instruction
 
 
 class TestBuildInstruction:
-    def _make_ctx(self):
-        """Create a mock ReadonlyContext."""
-        return MagicMock()
+    def _make_ctx(self, state=None):
+        """Create a mock ReadonlyContext with optional state."""
+        ctx = MagicMock()
+        ctx.state = state or {}
+        return ctx
 
     def test_returns_string(self):
         result = build_nl2sql_instruction(self._make_ctx())
@@ -87,3 +89,51 @@ class TestBuildInstruction:
     def test_contains_retry_instruction(self):
         result = build_nl2sql_instruction(self._make_ctx())
         assert "retry" in result.lower() or "3 times" in result or "3 failures" in result
+
+    def test_contains_cache_step(self):
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "check_semantic_cache" in result
+
+    def test_cache_step_before_vector_search(self):
+        result = build_nl2sql_instruction(self._make_ctx())
+        cache_pos = result.find("check_semantic_cache")
+        vector_pos = result.find("vector_search_tables")
+        assert cache_pos < vector_pos
+
+
+class TestFollowUpContext:
+    def _make_ctx(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state or {}
+        return ctx
+
+    def test_follow_up_context_when_state_present(self):
+        state = {
+            "last_query_sql": "SELECT symbol FROM `p.d.markettrade`",
+            "last_results_summary": {"row_count": 42, "preview": []},
+        }
+        result = build_nl2sql_instruction(self._make_ctx(state))
+        assert "FOLLOW-UP CONTEXT" in result
+        assert "SELECT symbol FROM" in result
+        assert "42 rows" in result
+
+    def test_no_follow_up_when_state_empty(self):
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "FOLLOW-UP CONTEXT" not in result
+
+
+class TestRetryGuidance:
+    def _make_ctx(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state or {}
+        return ctx
+
+    def test_retry_status_shown_when_attempts_exist(self):
+        state = {"dry_run_attempts": 2}
+        result = build_nl2sql_instruction(self._make_ctx(state))
+        assert "RETRY STATUS" in result
+        assert "failed 2 time(s)" in result
+
+    def test_no_retry_status_when_zero_attempts(self):
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "RETRY STATUS" not in result

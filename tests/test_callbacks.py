@@ -2,7 +2,11 @@
 
 from unittest.mock import MagicMock
 
-from nl2sql_agent.callbacks import before_tool_guard, after_tool_log
+from nl2sql_agent.callbacks import (
+    MAX_DRY_RUN_RETRIES,
+    after_tool_log,
+    before_tool_guard,
+)
 
 
 class TestBeforeToolGuard:
@@ -93,11 +97,16 @@ class TestAfterToolLog:
         tool.name = name
         return tool
 
+    def _make_context(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state if state is not None else {}
+        return ctx
+
     def test_returns_none_for_passthrough(self):
         tool = self._make_tool()
         tool_response = {"status": "success", "row_count": 5}
 
-        result = after_tool_log(tool, {}, MagicMock(), tool_response)
+        result = after_tool_log(tool, {}, self._make_context(), tool_response)
 
         assert result is None
 
@@ -105,13 +114,117 @@ class TestAfterToolLog:
         tool = self._make_tool()
         tool_response = {"status": "error", "error_message": "timeout"}
 
-        result = after_tool_log(tool, {}, MagicMock(), tool_response)
+        result = after_tool_log(tool, {}, self._make_context(), tool_response)
 
         assert result is None
 
     def test_handles_none_response(self):
         tool = self._make_tool()
 
-        result = after_tool_log(tool, {}, MagicMock(), None)
+        result = after_tool_log(tool, {}, self._make_context(), None)
 
         assert result is None
+
+
+class TestRetryTracking:
+    def _make_tool(self, name="dry_run_sql"):
+        tool = MagicMock()
+        tool.name = name
+        return tool
+
+    def _make_context(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state if state is not None else {}
+        return ctx
+
+    def test_retry_counter_increments_on_dry_run_failure(self):
+        tool = self._make_tool()
+        ctx = self._make_context()
+        response = {"status": "invalid", "error_message": "syntax error"}
+
+        after_tool_log(tool, {}, ctx, response)
+
+        assert ctx.state["dry_run_attempts"] == 1
+
+    def test_retry_counter_increments_consecutively(self):
+        tool = self._make_tool()
+        ctx = self._make_context({"dry_run_attempts": 1})
+        response = {"status": "invalid", "error_message": "another error"}
+
+        after_tool_log(tool, {}, ctx, response)
+
+        assert ctx.state["dry_run_attempts"] == 2
+
+    def test_retry_counter_resets_on_success(self):
+        tool = self._make_tool()
+        ctx = self._make_context({"dry_run_attempts": 2})
+        response = {"status": "valid", "estimated_bytes": 1024}
+
+        after_tool_log(tool, {}, ctx, response)
+
+        assert ctx.state["dry_run_attempts"] == 0
+
+    def test_max_retries_adds_escalation_hint(self):
+        tool = self._make_tool()
+        ctx = self._make_context({"dry_run_attempts": MAX_DRY_RUN_RETRIES - 1})
+        response = {"status": "invalid", "error_message": "persistent error"}
+
+        result = after_tool_log(tool, {}, ctx, response)
+
+        assert result is not None
+        assert result["max_retries_reached"] is True
+        assert "escalation_hint" in result
+        assert "Stop retrying" in result["escalation_hint"]
+
+    def test_retry_counter_resets_after_execute(self):
+        tool = MagicMock()
+        tool.name = "execute_sql"
+        ctx = self._make_context({"dry_run_attempts": 2})
+        response = {"status": "success", "row_count": 10, "rows": []}
+
+        after_tool_log(tool, {"sql_query": "SELECT 1"}, ctx, response)
+
+        assert ctx.state["dry_run_attempts"] == 0
+        assert ctx.state["max_retries_reached"] is False
+
+
+class TestSessionState:
+    def _make_context(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state if state is not None else {}
+        return ctx
+
+    def test_execute_success_persists_last_query(self):
+        tool = MagicMock()
+        tool.name = "execute_sql"
+        ctx = self._make_context()
+        sql = "SELECT symbol, COUNT(*) FROM t GROUP BY symbol"
+        rows = [{"symbol": "A", "count": 10}, {"symbol": "B", "count": 5}]
+        response = {"status": "success", "row_count": 2, "rows": rows}
+
+        after_tool_log(tool, {"sql_query": sql}, ctx, response)
+
+        assert ctx.state["last_query_sql"] == sql
+
+    def test_execute_failure_does_not_persist(self):
+        tool = MagicMock()
+        tool.name = "execute_sql"
+        ctx = self._make_context()
+        response = {"status": "error", "error_message": "timeout"}
+
+        after_tool_log(tool, {"sql_query": "SELECT 1"}, ctx, response)
+
+        assert "last_query_sql" not in ctx.state
+
+    def test_results_summary_limited_to_5_rows(self):
+        tool = MagicMock()
+        tool.name = "execute_sql"
+        ctx = self._make_context()
+        rows = [{"val": i} for i in range(20)]
+        response = {"status": "success", "row_count": 20, "rows": rows}
+
+        after_tool_log(tool, {"sql_query": "SELECT 1"}, ctx, response)
+
+        summary = ctx.state["last_results_summary"]
+        assert summary["row_count"] == 20
+        assert len(summary["preview"]) == 5

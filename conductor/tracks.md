@@ -29,7 +29,7 @@
 
 ---
 
-## [ ] Track: Eval & Hardening (Phase E/F)
+## [x] Track: Eval & Hardening (Phase E/F)
 - **ID:** 05_eval_hardening
 - **Wave:** 5
 - **Complexity:** L

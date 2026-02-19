@@ -1,0 +1,15 @@
+# Implementation Plan: 07_dependency_fix
+
+## Tasks
+
+### [x] 1. Update pyproject.toml [commit: 3a80ba7]
+- **Description**: Add `db-dtypes>=1.0.0` to the dependencies section.
+- **Verification**: `grep db-dtypes pyproject.toml`
+
+### 2. Rebuild Docker Image
+- **Description**: Rebuild the `agent` service to install the new dependency.
+- **Verification**: `docker compose build agent`
+
+### 3. Verify Fix
+- **Description**: Run a script that uses `execute_sql` to query a timestamp.
+- **Verification**: `python3 verify_db_dtypes.py` (script to be created during implementation)

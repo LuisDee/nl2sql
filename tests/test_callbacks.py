@@ -15,11 +15,16 @@ class TestBeforeToolGuard:
         tool.name = name
         return tool
 
+    def _make_context(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state if state is not None else {}
+        return ctx
+
     def test_allows_select_query(self):
         tool = self._make_tool()
         args = {"sql_query": "SELECT * FROM table"}
 
-        result = before_tool_guard(tool, args, MagicMock())
+        result = before_tool_guard(tool, args, self._make_context())
 
         assert result is None
 
@@ -27,7 +32,7 @@ class TestBeforeToolGuard:
         tool = self._make_tool()
         args = {"sql_query": "WITH cte AS (SELECT 1) SELECT * FROM cte"}
 
-        result = before_tool_guard(tool, args, MagicMock())
+        result = before_tool_guard(tool, args, self._make_context())
 
         assert result is None
 
@@ -35,7 +40,7 @@ class TestBeforeToolGuard:
         tool = self._make_tool()
         args = {"sql_query": "INSERT INTO table VALUES (1)"}
 
-        result = before_tool_guard(tool, args, MagicMock())
+        result = before_tool_guard(tool, args, self._make_context())
 
         assert result is not None
         assert result["status"] == "error"
@@ -44,7 +49,7 @@ class TestBeforeToolGuard:
         tool = self._make_tool("dry_run_sql")
         args = {"sql_query": "DROP TABLE important_table"}
 
-        result = before_tool_guard(tool, args, MagicMock())
+        result = before_tool_guard(tool, args, self._make_context())
 
         assert result is not None
         assert "Blocked" in result["error_message"]
@@ -54,7 +59,7 @@ class TestBeforeToolGuard:
         tool = self._make_tool("vector_search_tables")
         args = {"question": "what was the edge?"}
 
-        result = before_tool_guard(tool, args, MagicMock())
+        result = before_tool_guard(tool, args, self._make_context())
 
         assert result is None
 
@@ -62,7 +67,7 @@ class TestBeforeToolGuard:
         tool = self._make_tool()
         args = {"sql_query": "DELETE FROM table WHERE 1=1"}
 
-        result = before_tool_guard(tool, args, MagicMock())
+        result = before_tool_guard(tool, args, self._make_context())
 
         assert result is not None
 
@@ -70,7 +75,7 @@ class TestBeforeToolGuard:
         tool = self._make_tool()
         args = {"sql_query": "UPDATE table SET x = 1"}
 
-        result = before_tool_guard(tool, args, MagicMock())
+        result = before_tool_guard(tool, args, self._make_context())
 
         assert result is not None
 
@@ -78,7 +83,7 @@ class TestBeforeToolGuard:
         tool = self._make_tool()
         args = {"sql_query": ""}
 
-        result = before_tool_guard(tool, args, MagicMock())
+        result = before_tool_guard(tool, args, self._make_context())
 
         assert result is None
 
@@ -86,7 +91,7 @@ class TestBeforeToolGuard:
         tool = self._make_tool()
         args = {"sql_query": "ALTER TABLE foo ADD COLUMN bar INT"}
 
-        result = before_tool_guard(tool, args, MagicMock())
+        result = before_tool_guard(tool, args, self._make_context())
 
         assert result is not None
 
@@ -216,7 +221,7 @@ class TestSessionState:
 
         assert "last_query_sql" not in ctx.state
 
-    def test_results_summary_limited_to_5_rows(self):
+    def test_results_summary_limited_to_3_rows(self):
         tool = MagicMock()
         tool.name = "execute_sql"
         ctx = self._make_context()
@@ -227,4 +232,4 @@ class TestSessionState:
 
         summary = ctx.state["last_results_summary"]
         assert summary["row_count"] == 20
-        assert len(summary["preview"]) == 5
+        assert len(summary["preview"]) == 3

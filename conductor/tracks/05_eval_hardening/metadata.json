@@ -1,14 +1,15 @@
 {
   "track_id": "05_eval_hardening",
-  "status": "new",
+  "status": "completed",
   "complexity": "L",
   "wave": 5,
   "cc_version_at_brief": "v1",
   "cc_version_current": "v1",
   "dependencies": ["04_agent_logic"],
-  "interfaces_owned": ["run_eval", "loop_agent"],
-  "interfaces_consumed": ["tools", "bigquery"],
+  "interfaces_owned": ["check_semantic_cache"],
+  "interfaces_consumed": ["bigquery", "metadata.query_memory"],
   "created_at": "2026-02-18T00:00:00Z",
+  "completed_at": "2026-02-18T00:00:00Z",
   "requirements": [
     "E.1 Gold Eval Set",
     "E.2 Eval Runner",

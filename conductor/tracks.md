@@ -37,7 +37,7 @@
 
 ---
 
-## [~] Track: Metadata Enrichment
+## [x] Track: Metadata Enrichment
 - **ID:** 06_metadata_enrichment
 - **Wave:** 3
 - **Complexity:** L
@@ -55,9 +55,18 @@
 
 ---
 
-## [ ] Track: Loop Fix & Performance Optimization
+## [x] Track: Loop Fix & Performance Optimization
 - **ID:** 08_loop_and_performance_fix
 - **Wave:** 6
 - **Complexity:** M
 - **Dependencies:** 04_agent_logic, 05_eval_hardening
 - **Description:** Fixes infinite reasoning loops and optimizes performance by reducing LLM round-trips and context size.
+
+---
+
+## [x] Track: Production Hardening (Serialization + Smart Loop Prevention)
+- **ID:** 09_production_hardening
+- **Wave:** 7
+- **Complexity:** M
+- **Dependencies:** 08_loop_and_performance_fix
+- **Description:** Fixes JSON serialization crash for BQ Timestamp/Date/Decimal types and replaces blunt tool call counter with hash-based repetition detection.

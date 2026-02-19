@@ -77,7 +77,7 @@ class TestSemanticCacheSQL:
 
 class TestSemanticCacheThreshold:
     def test_threshold_from_settings(self, mock_bq):
-        """Cache should use settings.semantic_cache_threshold."""
+        """Cache should use settings.semantic_cache_threshold (0.10)."""
         mock_bq.set_query_response(
             "query_memory",
             [
@@ -86,7 +86,7 @@ class TestSemanticCacheThreshold:
                     "cached_sql": "SELECT 1",
                     "tables_used": [],
                     "cached_dataset": "",
-                    "distance": 0.04,  # Below default 0.05 threshold
+                    "distance": 0.08,  # Below default 0.10 threshold
                 }
             ],
         )
@@ -103,7 +103,7 @@ class TestSemanticCacheThreshold:
                     "cached_sql": "SELECT 1",
                     "tables_used": [],
                     "cached_dataset": "",
-                    "distance": 0.06,  # Above default 0.05 threshold
+                    "distance": 0.12,  # Above default 0.10 threshold
                 }
             ],
         )

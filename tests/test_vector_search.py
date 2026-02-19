@@ -1,12 +1,20 @@
 """Tests for vector search tools."""
 
-from nl2sql_agent.tools.vector_search import vector_search_tables, fetch_few_shot_examples
+from nl2sql_agent.tools._deps import clear_vector_cache
+from nl2sql_agent.tools.vector_search import fetch_few_shot_examples, vector_search_tables
+
+# The combined query contains both "schema_embeddings" and "query_memory",
+# so we use "question_embedding" as the mock keyword to match the CTE name.
 
 
 class TestVectorSearchTables:
+    def setup_method(self):
+        clear_vector_cache()
+
     def test_returns_results_on_success(self, mock_bq):
-        mock_bq.set_query_response("schema_embeddings", [
+        mock_bq.set_query_response("question_embedding", [
             {
+                "search_type": "schema",
                 "source_type": "table",
                 "layer": "kpi",
                 "dataset_name": "nl2sql_omx_kpi",
@@ -40,7 +48,8 @@ class TestVectorSearchTables:
 
         assert "COSINE" in mock_bq.last_query
 
-    def test_returns_error_dict_on_exception(self, mock_bq):
+    def test_returns_error_dict_on_total_failure(self, mock_bq):
+        """Both combined and fallback fail -> error dict."""
         original_method = mock_bq.query_with_params
 
         def exploding_query(*args, **kwargs):
@@ -63,7 +72,11 @@ class TestVectorSearchTables:
 
 
 class TestFetchFewShotExamples:
+    def setup_method(self):
+        clear_vector_cache()
+
     def test_returns_examples_on_success(self, mock_bq):
+        """Cache miss path: independent query to query_memory."""
         mock_bq.set_query_response("query_memory", [
             {
                 "past_question": "what was edge yesterday?",

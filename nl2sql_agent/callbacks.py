@@ -8,16 +8,28 @@ ADK v1.20.0 callback signatures:
   after_tool_callback(tool, args, tool_context, tool_response) -> Optional[dict]
 """
 
+import hashlib
+import json
 from typing import Any
 
 from google.adk.tools.base_tool import BaseTool
 from google.adk.tools.tool_context import ToolContext
 
+from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 MAX_DRY_RUN_RETRIES = 3
+
+
+def _tool_call_hash(tool_name: str, args: dict) -> str:
+    """Create a stable hash of tool name + args for repetition detection."""
+    try:
+        key = json.dumps({"tool": tool_name, "args": args}, sort_keys=True, default=str)
+    except (TypeError, ValueError):
+        key = f"{tool_name}:{str(args)}"
+    return hashlib.md5(key.encode()).hexdigest()[:12]
 
 
 def before_tool_guard(
@@ -51,6 +63,65 @@ def before_tool_guard(
                     "Only SELECT/WITH queries are permitted."
                 ),
             }
+
+    # Hard circuit breaker: block SQL tools after max retries
+    if tool_name in ("dry_run_sql", "execute_sql"):
+        if tool_context.state.get("max_retries_reached"):
+            logger.warning("circuit_breaker_blocked", tool=tool_name)
+            return {
+                "status": "error",
+                "error_message": (
+                    "Max SQL retry attempts reached. "
+                    "Explain the error to the user."
+                ),
+                "blocked_by": "circuit_breaker",
+            }
+
+    # Reset state on new question
+    # (check_semantic_cache is always the first tool called per question)
+    if tool_name == "check_semantic_cache":
+        tool_context.state["tool_call_count"] = 0
+        tool_context.state["tool_call_history"] = []
+
+    # --- Repetition detection ---
+    call_hash = _tool_call_hash(tool_name, args)
+    history = tool_context.state.get("tool_call_history", [])
+    history.append(call_hash)
+    tool_context.state["tool_call_history"] = history
+
+    # Count consecutive identical hashes at tail
+    consecutive = 0
+    for h in reversed(history):
+        if h == call_hash:
+            consecutive += 1
+        else:
+            break
+
+    if consecutive >= settings.max_consecutive_repeats:
+        logger.warning(
+            "repetition_detected",
+            tool=tool_name,
+            consecutive=consecutive,
+        )
+        return {
+            "status": "error",
+            "error_message": (
+                f"Loop detected: {tool_name} called {consecutive} times "
+                f"with identical arguments. Stop retrying and explain the error."
+            ),
+            "blocked_by": "repetition_detector",
+        }
+
+    # Safety net: absolute cap (very high, should never hit in practice)
+    call_count = tool_context.state.get("tool_call_count", 0) + 1
+    tool_context.state["tool_call_count"] = call_count
+    if call_count > settings.max_tool_calls_per_turn:
+        logger.warning("max_tool_calls_exceeded", count=call_count)
+        return {
+            "status": "error",
+            "error_message": f"Safety limit: {call_count} tool calls exceeded.",
+            "blocked_by": "max_tool_calls",
+        }
 
     return None  # Allow tool to proceed
 
@@ -118,7 +189,7 @@ def after_tool_log(
         tool_context.state["last_query_sql"] = sql
         tool_context.state["last_results_summary"] = {
             "row_count": tool_response.get("row_count", 0),
-            "preview": rows[:5],
+            "preview": rows[:3],
         }
         logger.info("session_state_persisted", sql_len=len(sql), row_count=len(rows))
 

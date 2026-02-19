@@ -1,14 +1,15 @@
 {
   "track_id": "04_agent_logic",
-  "status": "new",
+  "status": "completed",
   "complexity": "M",
   "wave": 4,
   "cc_version_at_brief": "v1",
   "cc_version_current": "v1",
   "dependencies": ["03_agent_tools"],
   "interfaces_owned": ["nl2sql_logic"],
-  "interfaces_consumed": ["tools"],
+  "interfaces_consumed": ["vector_search_tables", "fetch_few_shot_examples", "load_yaml_metadata", "dry_run_sql", "execute_sql", "save_validated_query"],
   "created_at": "2026-02-18T00:00:00Z",
+  "completed_at": "2026-02-18T00:00:00Z",
   "requirements": [
     "D.1 NL2SQL Prompt",
     "D.2 Root Prompt",

@@ -30,13 +30,14 @@ def build_nl2sql_instruction(ctx: ReadonlyContext) -> str:
     if last_sql:
         summary = state.get("last_results_summary", {})
         row_count = summary.get("row_count", "?")
+        last_sql_trimmed = last_sql[:500] + "..." if len(last_sql) > 500 else last_sql
         follow_up_section = f"""
 
 ## FOLLOW-UP CONTEXT
 
 The previous query in this session was:
 ```sql
-{last_sql}
+{last_sql_trimmed}
 ```
 It returned {row_count} rows. If the user asks a follow-up question (e.g. "break that
 down by symbol", "filter to WHITE portfolio"), you can reuse the same table without

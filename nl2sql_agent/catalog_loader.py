@@ -9,6 +9,7 @@ Usage:
     from nl2sql_agent.catalog_loader import load_catalog, load_examples
 """
 
+import functools
 from pathlib import Path
 from typing import Any
 
@@ -29,8 +30,11 @@ VALID_DATASETS = {"nl2sql_omx_kpi", "nl2sql_omx_data"}
 VALID_COMPLEXITIES = {"simple", "medium", "complex"}
 
 
+@functools.lru_cache(maxsize=50)
 def load_yaml(path: Path) -> dict[str, Any]:
-    """Load a single YAML file.
+    """Load a single YAML file (cached after first read).
+
+    Path objects are hashable, so they work as lru_cache keys.
 
     Args:
         path: Path to the YAML file.
@@ -44,6 +48,11 @@ def load_yaml(path: Path) -> dict[str, Any]:
     """
     with open(path) as f:
         return yaml.safe_load(f)
+
+
+def clear_yaml_cache() -> None:
+    """Clear the load_yaml LRU cache (for test isolation or hot-reload)."""
+    load_yaml.cache_clear()
 
 
 def resolve_fqn(table_data: dict[str, Any], project: str) -> str:

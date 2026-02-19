@@ -13,6 +13,7 @@ from google.cloud import bigquery
 
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
+from nl2sql_agent.serialization import sanitize_rows
 
 logger = get_logger(__name__)
 
@@ -100,12 +101,12 @@ class LiveBigQueryClient:
                 job_config=job_config,
                 timeout=settings.bq_query_timeout_seconds,
             )
-            rows = [
+            rows = sanitize_rows([
                 dict(row)
                 for row in query_job.result(
                     timeout=settings.bq_query_timeout_seconds
                 )
-            ]
+            ])
             logger.info("bq_query_with_params_complete", row_count=len(rows))
             return rows
         except Exception as e:

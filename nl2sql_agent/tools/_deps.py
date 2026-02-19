@@ -38,3 +38,34 @@ def get_bq_service() -> Any:
             "BigQuery service not initialised. Call init_bq_service() in agent.py before using tools."
         )
     return _bq_service
+
+
+# --- Per-question vector search result cache ---
+# Caches the combined vector search result so that vector_search_tables()
+# and fetch_few_shot_examples() share a single embedding call.
+
+_vector_cache_question: str | None = None
+_vector_cache_result: dict | None = None
+
+
+def cache_vector_result(question: str, result: dict) -> None:
+    """Store combined vector search result for the given question."""
+    global _vector_cache_question, _vector_cache_result
+    _vector_cache_question = question
+    _vector_cache_result = result
+    logger.info("vector_cache_stored", question=question[:80])
+
+
+def get_cached_vector_result(question: str) -> dict | None:
+    """Return cached result if the question matches, else None."""
+    if _vector_cache_question == question and _vector_cache_result is not None:
+        logger.info("vector_cache_hit", question=question[:80])
+        return _vector_cache_result
+    return None
+
+
+def clear_vector_cache() -> None:
+    """Reset the vector cache (for test isolation and session boundaries)."""
+    global _vector_cache_question, _vector_cache_result
+    _vector_cache_question = None
+    _vector_cache_result = None

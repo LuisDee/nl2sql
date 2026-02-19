@@ -6,6 +6,7 @@ and row limits to prevent runaway queries.
 
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
+from nl2sql_agent.serialization import sanitize_rows
 from nl2sql_agent.tools._deps import get_bq_service
 
 logger = get_logger(__name__)
@@ -54,7 +55,7 @@ def execute_sql(sql_query: str) -> dict:
 
     try:
         df = bq.execute_query(sql_query)
-        rows = df.to_dict(orient="records")
+        rows = sanitize_rows(df.to_dict(orient="records"))
         truncated = len(rows) >= max_rows
 
         logger.info(

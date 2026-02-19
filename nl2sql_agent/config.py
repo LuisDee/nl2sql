@@ -92,11 +92,21 @@ class Settings(BaseSettings):
 
     # --- Semantic Cache (Track 05) ---
     semantic_cache_threshold: float = Field(
-        default=0.05,
+        default=0.10,
         description=(
             "Maximum COSINE distance for a semantic cache hit. "
-            "0.05 ≈ 0.95 similarity — very tight, only near-exact paraphrases."
+            "0.10 ≈ 0.90 similarity — catches reasonable paraphrases."
         ),
+    )
+
+    # --- Loop Detection (Track 09) ---
+    max_consecutive_repeats: int = Field(
+        default=3,
+        description="Block after N consecutive identical tool calls (same tool + same args).",
+    )
+    max_tool_calls_per_turn: int = Field(
+        default=50,
+        description="Absolute safety net. Should never trigger in normal use.",
     )
 
 

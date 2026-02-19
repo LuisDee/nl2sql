@@ -121,6 +121,19 @@ class TestFollowUpContext:
         result = build_nl2sql_instruction(self._make_ctx())
         assert "FOLLOW-UP CONTEXT" not in result
 
+    def test_follow_up_sql_trimmed_to_500_chars(self):
+        long_sql = "SELECT " + "x, " * 300 + "y FROM t"
+        state = {
+            "last_query_sql": long_sql,
+            "last_results_summary": {"row_count": 1, "preview": []},
+        }
+        result = build_nl2sql_instruction(self._make_ctx(state))
+        assert "FOLLOW-UP CONTEXT" in result
+        # The full SQL should NOT appear (it's >500 chars)
+        assert long_sql not in result
+        # But a truncated version should
+        assert "..." in result
+
 
 class TestRetryGuidance:
     def _make_ctx(self, state=None):

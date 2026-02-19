@@ -21,7 +21,7 @@
 
 ---
 
-## [~] Track: Agent Logic (Phase D)
+## [x] Track: Agent Logic (Phase D)
 - **ID:** 04_agent_logic
 - **Wave:** 4
 - **Complexity:** M
@@ -52,3 +52,12 @@
 - **Complexity:** S
 - **Dependencies:** []
 - **Description:** Adds db-dtypes to resolve runtime errors in execute_sql tool when handling timestamps.
+
+---
+
+## [ ] Track: Loop Fix & Performance Optimization
+- **ID:** 08_loop_and_performance_fix
+- **Wave:** 6
+- **Complexity:** M
+- **Dependencies:** 04_agent_logic, 05_eval_hardening
+- **Description:** Fixes infinite reasoning loops and optimizes performance by reducing LLM round-trips and context size.

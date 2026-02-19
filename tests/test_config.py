@@ -18,8 +18,8 @@ class TestSettings:
     def test_settings_defaults(self):
         """Settings should have correct default values."""
         s = Settings()
-        assert s.litellm_model == "gemini-3-flash-preview"
-        assert s.litellm_model_complex == "gemini-3-pro-preview"
+        assert s.litellm_model == "openai/gemini-3-flash-preview"
+        assert s.litellm_model_complex == "openai/gemini-3-pro-preview"
         assert s.bq_location == "europe-west2"
         assert s.kpi_dataset == "nl2sql_omx_kpi"
         assert s.data_dataset == "nl2sql_omx_data"

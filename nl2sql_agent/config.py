@@ -32,12 +32,12 @@ class Settings(BaseSettings):
     litellm_api_key: str = Field(description="LiteLLM proxy API key")
     litellm_api_base: str = Field(description="LiteLLM proxy base URL")
     litellm_model: str = Field(
-        default="gemini-3-flash-preview",
-        description="Default LLM model string for LiteLLM proxy",
+        default="openai/gemini-3-flash-preview",
+        description="LLM model string. Must include provider prefix (e.g. openai/) for LiteLLM proxy.",
     )
     litellm_model_complex: str = Field(
-        default="gemini-3-pro-preview",
-        description="Complex query LLM model string for LiteLLM proxy",
+        default="openai/gemini-3-pro-preview",
+        description="Complex query LLM model string. Must include provider prefix (e.g. openai/) for LiteLLM proxy.",
     )
 
     # --- Google Cloud / BigQuery ---

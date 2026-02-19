@@ -29,3 +29,11 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["nl2sql_agent"]
 namespaces = false
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: requires live services (LiteLLM proxy, BigQuery)",
+]
+addopts = "-m 'not integration'"
+testpaths = ["tests"]
+asyncio_mode = "auto"

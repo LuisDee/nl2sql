@@ -12,8 +12,8 @@ import pytest
 _TEST_ENV = {
     "LITELLM_API_KEY": "test-key-not-real",
     "LITELLM_API_BASE": "http://localhost:4000",
-    "LITELLM_MODEL": "gemini-3-flash-preview",
-    "LITELLM_MODEL_COMPLEX": "gemini-3-pro-preview",
+    "LITELLM_MODEL": "openai/gemini-3-flash-preview",
+    "LITELLM_MODEL_COMPLEX": "openai/gemini-3-pro-preview",
     "GCP_PROJECT": "cloud-data-n-base-d4b3",
     "BQ_LOCATION": "europe-west2",
     "KPI_DATASET": "nl2sql_omx_kpi",

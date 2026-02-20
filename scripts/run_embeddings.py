@@ -80,6 +80,7 @@ def create_embedding_tables(bq: BigQueryProtocol, s: Settings) -> None:
           column_name STRING NOT NULL,
           column_type STRING NOT NULL,
           description STRING NOT NULL,
+          embedding_text STRING,
           synonyms ARRAY<STRING>,
           embedding ARRAY<FLOAT64>,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
@@ -242,14 +243,14 @@ def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
         )
         WHERE ARRAY_LENGTH(t.embedding) = 0;
         """,
-        # Column embeddings
+        # Column embeddings — uses enriched embedding_text when available
         f"""
         UPDATE `{fqn}.column_embeddings` t
         SET embedding = (
           SELECT ml_generate_embedding_result
           FROM ML.GENERATE_EMBEDDING(
             MODEL `{model}`,
-            (SELECT t.description AS content),
+            (SELECT COALESCE(t.embedding_text, t.description) AS content),
             STRUCT(TRUE AS flatten_json_output, 'RETRIEVAL_DOCUMENT' AS task_type)
           )
         )

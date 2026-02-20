@@ -10,7 +10,7 @@ A trader types: **"what was the average edge on market trades today?"**
 
 The agent needs to:
 1. Figure out which of our 12 BigQuery tables to query (there are 5 KPI tables and 7 data tables)
-2. Know what columns exist in that table and what they're called (e.g. the trader says "edge" but the column is called `edge_bps`)
+2. Know what columns exist in that table and what they're called (e.g. the trader says "edge" but the column is called `instant_edge`)
 3. Write correct SQL
 4. Validate it
 5. Run it
@@ -242,7 +242,7 @@ Why did it pick KPI markettrade over data markettrade? Because the description f
 The agent now loads the YAML catalog file for `kpi/markettrade.yaml`. This gives it:
 - All 774 column names and their types
 - Descriptions of what each column means
-- **Synonyms** — so it knows "edge" maps to the column called `edge_bps`
+- **Synonyms** — so it knows "edge" maps to the column called `instant_edge`
 - Business rules (e.g. "always filter on trade_date")
 
 This is plain file I/O — no embeddings involved here. The YAML catalog is the detailed reference manual.
@@ -267,14 +267,14 @@ The agent shows these to the LLM as "here's how similar questions were answered 
 The LLM now has everything it needs:
 - **Which table:** `nl2sql_omx_kpi.markettrade` (from step 1)
 - **What columns exist:** 774 columns with descriptions (from step 2)
-- **What "edge" means:** the column `edge_bps`, synonym "edge" (from step 2)
+- **What "edge" means:** the column `instant_edge`, synonym "edge" (from step 2)
 - **Example SQL patterns:** past queries on similar topics (from step 3)
 - **Rules:** always filter on trade_date, use ROUND(), add LIMIT, etc. (from system prompt)
 
 It generates:
 ```sql
 SELECT
-  ROUND(AVG(edge_bps), 4) AS avg_edge
+  ROUND(AVG(instant_edge), 4) AS avg_edge
 FROM `project.nl2sql_omx_kpi.markettrade`
 WHERE trade_date = '2026-02-19'
 ```
@@ -438,13 +438,13 @@ TRADER: "what was the average edge today?"
   |  → "use kpi.markettrade" + cache few-shot examples
   |
   |  Step 2: load_yaml_metadata("markettrade", "nl2sql_omx_kpi")
-  |  → 774 columns with descriptions, synonyms ("edge" = edge_bps)
+  |  → 774 columns with descriptions, synonyms ("edge" = instant_edge)
   |
   |  Step 3: fetch_few_shot_examples (CACHE HIT — instant, no BQ call)
   |  → "here's how similar PnL questions were answered before"
   |
   |  Step 4: LLM generates SQL using table + columns + examples
-  |  → SELECT ROUND(AVG(edge_bps), 4) FROM kpi.markettrade WHERE ...
+  |  → SELECT ROUND(AVG(instant_edge), 4) FROM kpi.markettrade WHERE ...
   |
   |  Step 5: dry_run_sql → validates syntax, checks permissions
   |
@@ -585,7 +585,7 @@ To add more few-shot examples the agent can learn from:
    - question: "What was the average edge by symbol today?"
      sql: |
        SELECT symbol,
-         ROUND(AVG(edge_bps), 4) AS avg_edge
+         ROUND(AVG(instant_edge), 4) AS avg_edge
        FROM `{project}.nl2sql_omx_kpi.markettrade`
        WHERE trade_date = '2026-02-17'
        GROUP BY symbol
@@ -642,6 +642,103 @@ ML.GENERATE_EMBEDDING          ← Vertex AI turns text into 768-dim vectors
     ↓
 VECTOR_SEARCH                  ← Cosine distance search at query time
 ```
+
+---
+
+## Part 9: Gemini CLI Integration (MCP Server)
+
+The NL2SQL agent can be used directly from Gemini CLI (or Claude Code) via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). The MCP server exposes a single tool — `ask_trading_data` — that wraps the entire ADK agent pipeline.
+
+### How It Works
+
+```
+Gemini CLI  ──stdio──>  MCP Server  ──>  ADK Runner  ──>  root_agent  ──>  nl2sql_agent  ──>  BigQuery
+                          (mcp_server.py)           (InMemoryRunner)        (7 tools)
+```
+
+The MCP server is a thin wrapper (~120 lines) around ADK's `InMemoryRunner`. When Gemini CLI calls `ask_trading_data`, the server:
+
+1. Creates a fresh ADK session
+2. Sends the question through `runner.run_async()`
+3. Emits progress notifications as each tool runs (so the trader sees "Searching for relevant tables...", "Validating SQL...", etc.)
+4. Returns the final response text
+
+### Gemini CLI Configuration
+
+Add to `~/.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "mako-trading": {
+      "command": "python",
+      "args": ["-m", "nl2sql_agent.mcp_server"],
+      "cwd": "/path/to/nl2sql-agent",
+      "timeout": 120000,
+      "trust": true
+    }
+  }
+}
+```
+
+### Claude Code Configuration
+
+Create `.mcp.json` at the repo root:
+
+```json
+{
+  "mcpServers": {
+    "mako-trading": {
+      "command": "python",
+      "args": ["-m", "nl2sql_agent.mcp_server"],
+      "env": { "LITELLM_API_KEY": "${LITELLM_API_KEY}" }
+    }
+  }
+}
+```
+
+### Prerequisites
+
+- **LiteLLM proxy** must be running (`scripts/start_local.sh` or manual start)
+- **GCP auth** via Application Default Credentials (`gcloud auth application-default login`)
+- **Python environment** with `nl2sql-agent` installed (`pip install -e .`)
+
+### Verification
+
+```bash
+# 1. Start the MCP server (should produce no stdout output — all logs to stderr)
+python -m nl2sql_agent.mcp_server 2>/dev/null &
+
+# 2. In Gemini CLI, ask a trading question:
+#    "what was the average edge on market trades today?"
+#    You should see progress notifications, then SQL + answer.
+
+# 3. ADK web still works alongside MCP:
+adk web --host 0.0.0.0 .
+```
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| "Error processing question" | LiteLLM proxy not running | Start the proxy: `scripts/start_local.sh` |
+| Server hangs on startup | Missing GCP credentials | Run `gcloud auth application-default login` |
+| No tool appears in Gemini CLI | Wrong `cwd` in settings.json | Must point to the repo root where `nl2sql_agent/` lives |
+| Garbled output | Logging going to stdout | Check that `structlog` is configured with `file=sys.stderr` |
+
+### Progress Notifications
+
+During execution, the trader sees real-time progress:
+
+| Step | Message |
+|------|---------|
+| 0 | Checking query cache... |
+| 1 | Searching for relevant tables... |
+| 2 | Loading column metadata... |
+| 3 | Finding similar past queries... |
+| 4 | Validating SQL syntax... |
+| 5 | Executing query against BigQuery... |
+| 6 | Saving validated query... |
 
 ---
 

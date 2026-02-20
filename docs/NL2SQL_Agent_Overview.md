@@ -58,7 +58,7 @@ BigQuery Results --> Formatted answer to trader
 
 ### KPI Dataset (`nl2sql_omx_kpi`) -- Gold Layer
 
-Performance metrics per trade. One table per trade origin, all sharing KPI columns (edge_bps, instant_pnl, delta_bucket, slippage intervals).
+Performance metrics per trade. One table per trade origin, all sharing KPI columns (instant_edge, instant_pnl, delta_bucket, slippage intervals).
 
 | Table | What It Contains | When to Use |
 |-------|-----------------|-------------|
@@ -102,7 +102,7 @@ The agent uses two complementary layers to understand what data exists and how t
 One YAML file per table stored in `catalog/`. Provides:
 
 - **Column descriptions**: what each column means in trading context
-- **Synonyms**: maps trader language to column names (e.g. "edge" -> `edge_bps`)
+- **Synonyms**: maps trader language to column names (e.g. "edge" -> `instant_edge`)
 - **Business rules**: how calculations work, what values mean
 - **Routing rules**: which table to use for which question type
 - **Disambiguation**: resolves overlapping table names across datasets
@@ -137,7 +137,7 @@ table:
   fqn: "{project}.nl2sql_omx_kpi.markettrade"
   partition_field: trade_date
   columns:
-    - name: edge_bps
+    - name: instant_edge
       type: FLOAT64
       description: >
         Edge captured in basis points. Positive = better than fair value.

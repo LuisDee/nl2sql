@@ -82,7 +82,7 @@ You may retry up to 3 times. After 3 failures, explain the error to the user.
 There are two datasets:
 
 ### `{project}.{kpi}` (Gold Layer — KPI Metrics)
-Performance metrics with computed columns: edge (edge_bps), instant_pnl,
+Performance metrics with computed columns: instant_edge (edge), instant_pnl,
 instant_pnl_w_fees, delta_slippage at multiple intervals, delta_bucket.
 **5 tables, one per trade origin:**
 - **markettrade** — Exchange trades. DEFAULT when trade type is unspecified.

@@ -79,3 +79,21 @@
 - **Complexity:** M
 - **Dependencies:** 09_production_hardening, 06_metadata_enrichment
 - **Description:** Adds trade type taxonomy, preferred timestamp columns, and ATM strike resolution patterns to YAML catalog metadata.
+
+---
+
+## [x] Track: Gemini CLI Integration (MCP Server)
+- **ID:** 11_gemini_cli_mcp
+- **Wave:** 9
+- **Complexity:** M
+- **Dependencies:** 09_production_hardening
+- **Description:** Exposes the NL2SQL agent as an MCP server with a single `ask_trading_data` tool. Gemini CLI connects via stdio transport. Includes Level 2 progress notifications.
+
+---
+
+## [x] Track: Column-Level Semantic Search (Two-Tier Retrieval)
+- **ID:** 12_column_semantic_search
+- **Wave:** 10
+- **Complexity:** L
+- **Dependencies:** 09_production_hardening, 10_metadata_gaps
+- **Description:** Adds column-level vector search to replace table-description-only routing. Single BQ query searches 4,631 column embeddings, aggregates to tables, returns top columns per table. Fixes phantom `edge_bps` column. Based on RESQL/TailorSQL/bidirectional retrieval research (2025).

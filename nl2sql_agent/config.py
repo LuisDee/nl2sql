@@ -87,7 +87,15 @@ class Settings(BaseSettings):
     )
     vector_search_top_k: int = Field(
         default=5,
-        description="Number of results for vector search queries",
+        description="Number of results for table-level vector search (schema_embeddings fallback)",
+    )
+    column_search_top_k: int = Field(
+        default=30,
+        description="Number of column-level results from vector search. Over-retrieves to let LLM filter.",
+    )
+    column_search_max_per_table: int = Field(
+        default=15,
+        description="Maximum columns returned per table from column search.",
     )
 
     # --- Semantic Cache (Track 05) ---

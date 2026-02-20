@@ -107,6 +107,72 @@ FROM VECTOR_SEARCH(
 ORDER BY distance ASC
 """
 
+# Column-level search: searches column_embeddings, aggregates by table,
+# and also pre-fetches few-shot examples in one round-trip.
+_COLUMN_SEARCH_SQL = """
+WITH question_embedding AS (
+    SELECT ml_generate_embedding_result AS embedding
+    FROM ML.GENERATE_EMBEDDING(
+        MODEL `{embedding_model}`,
+        (SELECT @question AS content),
+        STRUCT('RETRIEVAL_QUERY' AS task_type, TRUE AS flatten_json_output)
+    )
+),
+column_matches AS (
+    SELECT
+        base.dataset_name,
+        base.table_name,
+        base.column_name,
+        base.column_type,
+        base.description,
+        base.synonyms,
+        ROUND(distance, 4) AS distance
+    FROM VECTOR_SEARCH(
+        (SELECT * FROM `{metadata_dataset}.column_embeddings`),
+        'embedding',
+        (SELECT embedding FROM question_embedding),
+        top_k => {column_top_k},
+        distance_type => 'COSINE'
+    )
+),
+table_scores AS (
+    SELECT
+        'column_search' AS search_type,
+        dataset_name,
+        table_name,
+        MIN(distance) AS best_column_distance,
+        COUNT(*) AS matching_columns,
+        ARRAY_AGG(
+            STRUCT(column_name, column_type, description, synonyms, distance)
+            ORDER BY distance
+            LIMIT {max_per_table}
+        ) AS top_columns
+    FROM column_matches
+    GROUP BY dataset_name, table_name
+),
+example_results AS (
+    SELECT
+        'example' AS search_type,
+        base.question AS past_question,
+        base.sql_query,
+        base.tables_used,
+        base.dataset AS past_dataset,
+        base.complexity,
+        base.routing_signal,
+        ROUND(distance, 4) AS distance
+    FROM VECTOR_SEARCH(
+        (SELECT * FROM `{metadata_dataset}.query_memory`),
+        'embedding',
+        (SELECT embedding FROM question_embedding),
+        top_k => {example_top_k},
+        distance_type => 'COSINE'
+    )
+)
+SELECT * FROM table_scores
+ORDER BY best_column_distance ASC
+LIMIT {table_limit}
+"""
+
 # Fallback: examples-only search (used if cache miss after failed combined).
 _QUERY_MEMORY_SEARCH_SQL = """
 SELECT
@@ -286,3 +352,103 @@ def fetch_few_shot_examples(question: str) -> dict:
     except Exception as e:
         logger.error("fetch_few_shot_error", error=str(e))
         return {"status": "error", "error_message": str(e), "examples": []}
+
+
+def vector_search_columns(question: str) -> dict:
+    """Find relevant tables and columns for a natural language question.
+
+    Searches column-level embeddings to find the most relevant columns,
+    then aggregates by table to determine which tables to query. This
+    gives both table routing AND column selection in one step.
+
+    Returns tables ranked by their best column match, with top columns
+    per table including names, types, descriptions, and synonyms.
+    Also pre-fetches few-shot examples (cached for fetch_few_shot_examples).
+
+    Falls back to schema_embeddings (table-level) search if column
+    embeddings are empty or unavailable.
+
+    Args:
+        question: The trader's natural language question about trading data.
+
+    Returns:
+        Dict with 'status' and 'tables' (list of matching tables with
+        top_columns per table) and 'examples' (few-shot examples).
+    """
+    bq = get_bq_service()
+
+    fq_metadata = f"{settings.gcp_project}.{settings.metadata_dataset}"
+
+    # --- Primary: column-level search ---
+    column_sql = _COLUMN_SEARCH_SQL.format(
+        metadata_dataset=fq_metadata,
+        embedding_model=settings.embedding_model_ref,
+        column_top_k=settings.column_search_top_k,
+        max_per_table=settings.column_search_max_per_table,
+        example_top_k=settings.vector_search_top_k,
+        table_limit=10,
+    )
+
+    logger.info("vector_search_columns_start", question=question[:100])
+
+    try:
+        # Column search results — table_scores rows
+        table_rows = bq.query_with_params(
+            column_sql,
+            params=[{"name": "question", "type": "STRING", "value": question}],
+        )
+
+        # Separate column results from example results
+        tables = []
+        examples = []
+        for row in table_rows:
+            search_type = row.get("search_type", "")
+            if search_type == "column_search":
+                tables.append({
+                    "dataset_name": row["dataset_name"],
+                    "table_name": row["table_name"],
+                    "best_column_distance": row["best_column_distance"],
+                    "matching_columns": row["matching_columns"],
+                    "top_columns": row["top_columns"],
+                })
+            elif search_type == "example":
+                examples.append({
+                    "past_question": row.get("past_question", ""),
+                    "sql_query": row.get("sql_query", ""),
+                    "tables_used": row.get("tables_used", []),
+                    "past_dataset": row.get("past_dataset", ""),
+                    "complexity": row.get("complexity", ""),
+                    "routing_signal": row.get("routing_signal", ""),
+                    "distance": row.get("distance", 0),
+                })
+
+        # Sort tables by best column distance
+        tables.sort(key=lambda t: t["best_column_distance"])
+
+        # Cache examples for fetch_few_shot_examples()
+        cache_vector_result(question, {"examples": examples})
+
+        logger.info(
+            "vector_search_columns_complete",
+            table_count=len(tables),
+            example_count=len(examples),
+        )
+        return {"status": "success", "tables": tables, "examples": examples}
+
+    except Exception as e:
+        logger.warning("column_search_failed_falling_back", error=str(e))
+
+        # Fallback: table-level schema search
+        try:
+            fallback_result = vector_search_tables(question)
+            if fallback_result["status"] == "success":
+                return {
+                    "status": "success",
+                    "fallback": True,
+                    "tables": fallback_result["results"],
+                    "examples": [],
+                }
+            return fallback_result
+        except Exception as e2:
+            logger.error("vector_search_columns_error", error=str(e2))
+            return {"status": "error", "error_message": str(e2), "tables": [], "examples": []}

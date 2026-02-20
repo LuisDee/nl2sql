@@ -1,31 +1,25 @@
 # Track 10: Implementation Plan
 
-## Status: IN PROGRESS
+## Status: COMPLETE
 
-## Phase 1: Trade Type Taxonomy Metadata
+## Phase 1: Trade Type Taxonomy Metadata [checkpoint: ccd5b46]
 
-### Task 1.1: Update dataset-level YAML with taxonomy overview
-- Add `trade_taxonomy` section to `catalog/data/_dataset.yaml` and `catalog/kpi/_dataset.yaml`
-- Explain the relationship: markettrade is the superset, other tables are Mako-specific subsets
-- Add double-counting warning for cross-table aggregations
+### [x] Task 1.1: Update dataset-level YAML with taxonomy overview `ccd5b46`
+- Added `trade_taxonomy` section to `catalog/data/_dataset.yaml` and `catalog/kpi/_dataset.yaml`
+- Explains relationship: markettrade is the superset, other tables are Mako-specific subsets
+- Double-counting warning for cross-table aggregations
 
-### Task 1.2: Add `business_context` to each table YAML
-- `markettrade`: "All market trades across all participants. Includes Mako's own trades which also appear in otoswing, quotertrade, clicktrade, brokertrade."
-- `otoswing` / `swingdata`: "Mako's automated OTO swing takeouts. These trades also appear in markettrade."
-- `brokertrade`: "Mako's broker-facilitated trades. These trades also appear in markettrade."
-- `clicktrade`: "Mako's screen/click trades. These trades also appear in markettrade."
-- `quotertrade`: "Mako's quote fills. These trades also appear in markettrade."
-- `marketdepth`: "Order book depth snapshots. Not a trade table."
-- `marketdata`: "Market data ticks/snapshots. Not a trade table."
-- `theodata`: "Theoretical pricing data. Not a trade table."
+### [x] Task 1.2: Add `business_context` to each table YAML `ccd5b46`
+- All 12 table YAMLs updated with `business_context` field
+- All 12 table YAMLs updated with `preferred_timestamps` field (Phase 2 combined)
 
-### Task 1.3: Update system prompt to surface taxonomy
-- Add taxonomy context to `prompts.py` system instruction so the agent warns about double-counting
-- Alternatively: ensure `load_yaml_metadata` surfaces the `business_context` field prominently
+### [x] Task 1.3: Update system prompt to surface taxonomy `ccd5b46`
+- Added double-counting warning to routing rule 5 in `prompts.py`
+- Added timestamp column guidance to SQL generation rules
 
-## Phase 2: Preferred Timestamps Per Table
+## Phase 2: Preferred Timestamps Per Table [checkpoint: ccd5b46]
 
-### Task 2.1: Add `preferred_timestamps` to each table YAML
+### [x] Task 2.1: Add `preferred_timestamps` to each table YAML `ccd5b46`
 
 **Data Layer (`nl2sql_omx_data`):**
 
@@ -49,39 +43,23 @@
 | `otoswing` | `event_timestamp_ns` |
 | `quotertrade` | `event_timestamp_ns` |
 
-### Task 2.2: Surface preferred timestamps in metadata loader
-- When `load_yaml_metadata` returns table info, include `preferred_timestamps` prominently
-- Agent should see this before writing any time-filtered SQL
+### [x] Task 2.2: Surface preferred timestamps in metadata loader `ccd5b46`
+- No code change needed — metadata_loader returns full YAML as string, new fields auto-surfaced
 
-### Task 2.3: Add ATM strike resolution pattern
-- Add example queries in the catalog showing the pattern:
-  1. Query underlying price at target time
-  2. Find nearest strike to underlying price
-  3. Then query options data for that strike
-- This teaches the agent the correct approach via few-shot examples
+### [x] Task 2.3: Add ATM strike resolution pattern `ccd5b46`
+- Added complex example to `examples/data_examples.yaml`: CTE-based ATM resolution via theodata.under → nearest strike → marketdepth query
+- Added preferred timestamp usage example for marketdepth
 
-## Phase 3: Validation & Testing
+## Phase 3: Validation & Testing [checkpoint: ccd5b46]
 
-### Task 3.1: Update catalog validation tests
-- Assert every table YAML has `business_context` field
-- Assert every table YAML has `preferred_timestamps` field
-- Assert dataset YAMLs have `trade_taxonomy` section
+### [x] Task 3.1: Update catalog validation tests `ccd5b46`
+- 12 parametrized tests for `business_context` field presence
+- 12 parametrized tests for `preferred_timestamps` field presence
+- 2 parametrized tests for `trade_taxonomy` in dataset YAMLs
 
-### Task 3.2: Add prompt/metadata integration tests
-- Verify system prompt includes taxonomy warning
-- Verify metadata loader surfaces new fields
+### [x] Task 3.2: Add prompt/metadata integration tests `ccd5b46`
+- `test_contains_double_counting_warning` — verifies "double-count" in prompt
+- `test_contains_timestamp_guidance` — verifies DataTimestamp, EventTimestamp, event_timestamp_ns in prompt
 
-## Files to Modify
-- `catalog/data/_dataset.yaml`
-- `catalog/kpi/_dataset.yaml`
-- `catalog/data/*.yaml` (all 7 data table YAMLs)
-- `catalog/kpi/*.yaml` (all 5 KPI table YAMLs)
-- `nl2sql_agent/prompts.py` (taxonomy context)
-- `nl2sql_agent/tools/metadata_loader.py` (surface new fields)
-
-## Files to Create
-- None expected (all changes to existing files)
-
-## Dependencies
-- ~~Timestamp mappings from user (Phase 2 blocked)~~ RECEIVED
-- Trade taxonomy confirmation from user (Phase 1 ready)
+## Verification
+- 293 tests pass, 0 failures

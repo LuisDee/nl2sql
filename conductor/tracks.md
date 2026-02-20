@@ -73,7 +73,7 @@
 
 ---
 
-## [~] Track: Metadata Gaps (Trade Taxonomy + Preferred Timestamps)
+## [x] Track: Metadata Gaps (Trade Taxonomy + Preferred Timestamps)
 - **ID:** 10_metadata_gaps
 - **Wave:** 8
 - **Complexity:** M

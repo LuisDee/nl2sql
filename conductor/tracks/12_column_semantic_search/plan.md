@@ -59,7 +59,7 @@ Currently the `description` field is just the YAML column description. Enrich it
 
 ## Phase 2: Column Search SQL Template & Tool
 
-### Task 2.1: Write the column search SQL template
+### [x] Task 2.1: Write the column search SQL template `701e620`
 
 **File:** `nl2sql_agent/tools/vector_search.py`
 
@@ -137,7 +137,7 @@ LIMIT {table_limit}
 - `COUNT(*)` = secondary ranking signal (more matching columns = stronger signal)
 - Query_memory search remains in the same CTE (reuses the embedding)
 
-### Task 2.2: Implement `vector_search_columns` tool function
+### [x] Task 2.2: Implement `vector_search_columns` tool function `701e620`
 
 **File:** `nl2sql_agent/tools/vector_search.py`
 
@@ -190,7 +190,7 @@ def vector_search_columns(question: str) -> dict:
 - If column search raises an exception (table doesn't exist, no embeddings), fall back to the existing `vector_search_tables` (schema_embeddings) flow
 - Log the fallback for observability
 
-### Task 2.3: Write unit tests for column search
+### [x] Task 2.3: Write unit tests for column search `701e620`
 
 **File:** `tests/test_column_search.py` (new)
 

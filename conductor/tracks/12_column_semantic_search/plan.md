@@ -269,7 +269,7 @@ If tool count changed, update `TOOL_PROGRESS_MESSAGES` in `mcp_server.py` and re
 
 ## Phase 4: Embedding Pipeline Updates
 
-### Task 4.1: Add `embedding_text` column to table schema
+### [x] Task 4.1: Add `embedding_text` column to table schema `4856c75`
 
 **File:** `scripts/run_embeddings.py`
 
@@ -277,7 +277,7 @@ In the `create_tables()` function, add `embedding_text STRING` to the `column_em
 
 For existing deployments: use `ALTER TABLE ADD COLUMN IF NOT EXISTS` instead of `CREATE OR REPLACE` to avoid data loss.
 
-### Task 4.2: Build enriched text in populate pipeline
+### [x] Task 4.2: Build enriched text in populate pipeline `dec3860`
 
 **File:** `scripts/populate_embeddings.py`
 
@@ -295,7 +295,7 @@ embedding_text = ": ".join(parts[:1]) + ". " + ". ".join(parts[1:])
 
 Include `embedding_text` in the MERGE statement.
 
-### Task 4.3: Update embedding generation to use enriched text
+### [x] Task 4.3: Update embedding generation to use enriched text `4856c75`
 
 **File:** `scripts/run_embeddings.py`
 
@@ -316,7 +316,7 @@ WHERE ARRAY_LENGTH(t.embedding) = 0;
 
 Uses `COALESCE(embedding_text, description)` for backwards compatibility — existing rows without `embedding_text` still work.
 
-### Task 4.4: Document re-embedding requirement
+### [x] Task 4.4: Document re-embedding requirement `4856c75`
 
 After this track, ALL column embeddings need regeneration because the embedded text has changed. Document the steps:
 
@@ -335,7 +335,7 @@ python scripts/run_embeddings.py --step generate-embeddings
 
 ## Phase 5: Documentation & Integration
 
-### Task 5.1: Update HOW_IT_ALL_WORKS.md
+### [x] Task 5.1: Update HOW_IT_ALL_WORKS.md `ad278dd`
 
 - Update the flow diagram (Part 4) to show column search instead of table-only search
 - Add explanation of two-tier retrieval and why it's better
@@ -343,16 +343,16 @@ python scripts/run_embeddings.py --step generate-embeddings
 - Fix all `edge_bps` references
 - Add notes about re-running embedding pipeline after this track
 
-### Task 5.2: Update AGENTS.md files
+### [x] Task 5.2: Update AGENTS.md files (autopsy-managed, skipped)
 
 - `nl2sql_agent/tools/AGENTS.md` — document new tool and updated flow
 - `nl2sql_agent/AGENTS.md` — update tool count and data flow
 
-### Task 5.3: Update conductor/tracks.md
+### [x] Task 5.3: Update conductor/tracks.md
 
 Add Track 12 entry, mark as complete when done.
 
-### Task 5.4: Add MCP progress message for new tool
+### [x] Task 5.4: Add MCP progress message for new tool `7b14eaa`
 
 **File:** `nl2sql_agent/mcp_server.py`
 
@@ -367,7 +367,7 @@ Update/remove `vector_search_tables` entry if it's no longer directly exposed.
 
 ## Phase 6: Verification
 
-### Task 6.1: Run full unit test suite
+### [x] Task 6.1: Run full unit test suite (324 passed)
 
 ```bash
 pytest tests/ -v
@@ -375,13 +375,13 @@ pytest tests/ -v
 
 All existing tests must pass (with updates from Phase 3).
 
-### Task 6.2: Integration test with live BQ
+### [ ] Task 6.2: Integration test with live BQ (requires live services)
 
 ```bash
 pytest -m integration tests/integration/ -v
 ```
 
-### Task 6.3: Manual verification (after embedding pipeline run on target project)
+### [ ] Task 6.3: Manual verification (after embedding pipeline run on target project)
 
 1. Re-run embedding pipeline:
    ```bash

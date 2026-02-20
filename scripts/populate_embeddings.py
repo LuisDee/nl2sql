@@ -38,6 +38,33 @@ def _batched(iterable: list, n: int):
         yield iterable[i : i + n]
 
 
+def build_embedding_text(
+    table_name: str,
+    column_name: str,
+    column_type: str,
+    layer: str,
+    description: str,
+    synonyms: list[str] | None,
+) -> str:
+    """Build enriched text for column embedding.
+
+    Produces a single string optimised for semantic search that includes
+    table context, column metadata, description, and synonyms.
+
+    Format: "{table}.{col} ({type}, {layer}): {desc}. Also known as: {synonyms}"
+    """
+    header = f"{table_name}.{column_name} ({column_type}, {layer})"
+    parts = [header]
+    if description:
+        parts.append(description)
+    if synonyms:
+        parts.append(f"Also known as: {', '.join(synonyms)}")
+    # Join header with ": " then remaining parts with ". "
+    if len(parts) == 1:
+        return header
+    return f"{header}: {'. '.join(parts[1:])}"
+
+
 def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], settings: Settings) -> int:
     """Insert column-level descriptions into column_embeddings table.
 
@@ -61,11 +88,21 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
         dataset_name = t["dataset"]
         table_name = t["name"]
 
+        layer = t.get("layer", "")
+
         for col in t.get("columns", []):
             col_name = col["name"]
             col_type = col.get("type", "STRING")
             description = col.get("description", "").strip()
             synonyms = col.get("synonyms") or []
+            embedding_text = build_embedding_text(
+                table_name=table_name,
+                column_name=col_name,
+                column_type=col_type,
+                layer=layer,
+                description=description,
+                synonyms=synonyms,
+            )
             rows.append(
                 {
                     "dataset_name": dataset_name,
@@ -74,6 +111,7 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
                     "column_type": col_type,
                     "description": description,
                     "synonyms": synonyms,
+                    "embedding_text": embedding_text,
                 }
             )
 
@@ -82,6 +120,7 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
         struct_rows = []
         for r in batch:
             desc = _escape_sql_string(r["description"])
+            emb_text = _escape_sql_string(r["embedding_text"])
             synonyms_str = ", ".join(f"'{_escape_sql_string(s)}'" for s in r["synonyms"])
             synonyms_array = f"[{synonyms_str}]" if synonyms_str else "CAST([] AS ARRAY<STRING>)"
             struct_rows.append(
@@ -90,6 +129,7 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
                 f"'{r['column_name']}' AS column_name, "
                 f"'{r['column_type']}' AS column_type, "
                 f"'{desc}' AS description, "
+                f"'{emb_text}' AS embedding_text, "
                 f"{synonyms_array} AS synonyms)"
             )
 
@@ -109,12 +149,13 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
           UPDATE SET description = source.description,
                      column_type = source.column_type,
                      synonyms = source.synonyms,
+                     embedding_text = source.embedding_text,
                      embedding = NULL,
                      updated_at = CURRENT_TIMESTAMP()
         WHEN NOT MATCHED THEN
-          INSERT (dataset_name, table_name, column_name, column_type, description, synonyms)
+          INSERT (dataset_name, table_name, column_name, column_type, description, synonyms, embedding_text)
           VALUES (source.dataset_name, source.table_name, source.column_name,
-                  source.column_type, source.description, source.synonyms);
+                  source.column_type, source.description, source.synonyms, source.embedding_text);
         """
         bq.execute_query(sql)
         count += len(batch)

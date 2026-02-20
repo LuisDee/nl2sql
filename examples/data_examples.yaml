@@ -144,19 +144,7 @@ examples:
     validated: false
     validated_by: ""
 
-  # --- swingdata ---
-  - question: "What's in the swing data?"
-    sql: |
-      SELECT *
-      FROM `{project}.nl2sql_omx_data.swingdata`
-      WHERE trade_date = '2026-02-17'
-      LIMIT 20
-    tables_used: [swingdata]
-    dataset: nl2sql_omx_data
-    complexity: simple
-    routing_signal: "swing -> data.swingdata"
-    validated: false
-    validated_by: ""
+  # --- swingdata: see routing_examples.yaml for "What's in the swing data?" ---
 
   # --- raw trade data from data layer ---
   - question: "Show me the raw execution details for market trades"

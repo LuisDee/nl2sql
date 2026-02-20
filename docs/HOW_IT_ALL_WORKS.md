@@ -420,8 +420,8 @@ Every SQL query passes through `before_tool_guard` which blocks any INSERT/UPDAT
 ### Circuit breaker
 If `dry_run_sql` fails 3 times in a row, the circuit breaker blocks further SQL tool calls entirely. The agent must stop and explain the error instead of looping forever.
 
-### Tool call limit
-A global counter limits the agent to 15 tool calls per turn. If something goes wrong and the agent starts calling tools in a loop, it gets cut off.
+### Repetition detection
+If the agent calls the same tool with the same arguments 3 times in a row, it's stuck in a loop. The repetition detector (hash-based) blocks further calls and forces the agent to explain the error. A high safety net (50 total tool calls) exists as an absolute cap.
 
 ---
 
@@ -452,6 +452,195 @@ TRADER: "what was the average edge today?"
   |
   v
 ANSWER: "The average edge was 0.0234 bps across 1,247 market trades today."
+```
+
+---
+
+## Part 8: How to Refresh / Add Embeddings (Operations Guide)
+
+This section covers the day-to-day operations: when to re-run the embedding pipeline, how to do it, and how to set up for a new GCP project.
+
+### When Do You Need to Re-run?
+
+| Scenario | What to run |
+|----------|-------------|
+| Added/changed column descriptions in YAML catalog files | `populate_embeddings.py` then `run_embeddings.py --step generate-embeddings` |
+| Added/changed example queries in `examples/*.yaml` | Same as above |
+| Changed schema descriptions (table/dataset-level) | `run_embeddings.py --step populate-schema` then `--step generate-embeddings` |
+| Deploying to a new GCP project | Full pipeline: `run_embeddings.py --step all` then `populate_embeddings.py` then `--step generate-embeddings` |
+| Embedding model upgraded (e.g. text-embedding-006) | `run_embeddings.py --step generate-embeddings` (regenerates all) |
+
+### Step-by-Step: Refreshing After Metadata Changes
+
+This is the most common operation — you've updated YAML catalog files (added `business_context`, `preferred_timestamps`, column descriptions, synonyms) or added new example queries.
+
+```bash
+# 1. Ensure your .env is pointing at the right project
+cat nl2sql_agent/.env | grep GCP_PROJECT
+
+# 2. Merge YAML data into BigQuery (column_embeddings + query_memory)
+python scripts/populate_embeddings.py
+
+# 3. Generate embeddings for new/updated rows (WHERE embedding IS NULL)
+python scripts/run_embeddings.py --step generate-embeddings
+
+# 4. (Optional) Verify search quality
+python scripts/run_embeddings.py --step test-search
+```
+
+**What happens under the hood:**
+- `populate_embeddings.py` does a MERGE (upsert) — existing rows are updated, new rows inserted, embedding set to NULL on update
+- `run_embeddings.py --step generate-embeddings` only processes rows where `ARRAY_LENGTH(embedding) = 0` (idempotent)
+- Nothing is deleted — if you remove a YAML column, the old row stays in BQ (harmless, won't match searches well)
+
+### Step-by-Step: Setting Up a New GCP Project
+
+When deploying the agent to a different GCP project (e.g. from dev `melodic-stone-437916-t3` to prod `cloud-data-n-base-d4b3`):
+
+#### Prerequisites
+
+1. **Vertex AI connection** — needed to call the embedding model from BigQuery. Create it in the BigQuery console under "External connections" → "Cloud resource" → region `europe-west2` (or your region).
+
+2. **Embedding model** — create a BigQuery ML remote model pointing to the Vertex AI `text-embedding-005` endpoint:
+   ```sql
+   CREATE OR REPLACE MODEL `<project>.<dataset>.text_embedding_model`
+   REMOTE WITH CONNECTION `<project>.<region>.<connection-name>`
+   OPTIONS (ENDPOINT = 'text-embedding-005');
+   ```
+
+3. **IAM permissions** — the service account (or ADC user) needs:
+   - `bigquery.jobs.create` on the project
+   - `bigquery.tables.create`, `bigquery.tables.updateData` on the metadata dataset
+   - `bigquery.connections.use` on the Vertex AI connection
+
+#### Update `.env`
+
+Edit `nl2sql_agent/.env` with the new project's values:
+
+```env
+GCP_PROJECT=cloud-data-n-base-d4b3
+BQ_LOCATION=europe-west2
+
+KPI_DATASET=nl2sql_omx_kpi
+DATA_DATASET=nl2sql_omx_data
+METADATA_DATASET=nl2sql_metadata
+
+# These may differ per project — use the project where the model lives
+VERTEX_AI_CONNECTION=cloud-ai-d-base-a2df.europe-west2.vertex-ai-connection
+EMBEDDING_MODEL_REF=cloud-ai-d-base-a2df.nl2sql.text_embedding_model
+EMBEDDING_MODEL=text-embedding-005
+```
+
+**Key point:** `VERTEX_AI_CONNECTION` and `EMBEDDING_MODEL_REF` can reference a different project than `GCP_PROJECT`. This is common when a shared AI project hosts the embedding model for multiple data projects. The BigQuery connection handles cross-project access.
+
+#### Run the Full Pipeline
+
+```bash
+# 1. Create the metadata dataset (IF NOT EXISTS — safe to run repeatedly)
+python scripts/run_embeddings.py --step create-dataset
+
+# 2. Verify the embedding model is accessible from BQ
+python scripts/run_embeddings.py --step verify-model
+
+# 3. Create the 3 embedding tables (CREATE OR REPLACE — destructive!)
+python scripts/run_embeddings.py --step create-tables
+
+# 4. Populate schema_embeddings with table/dataset descriptions
+python scripts/run_embeddings.py --step populate-schema
+
+# 5. Populate column_embeddings + query_memory from YAML files
+python scripts/populate_embeddings.py
+
+# 6. Generate all embeddings (takes 3-5 minutes for ~4,700 rows)
+python scripts/run_embeddings.py --step generate-embeddings
+
+# 7. Create vector search indexes
+python scripts/run_embeddings.py --step create-indexes
+
+# 8. Run search quality tests
+python scripts/run_embeddings.py --step test-search
+```
+
+Or do steps 1-4 and 6-8 in one go:
+
+```bash
+python scripts/run_embeddings.py --step all
+python scripts/populate_embeddings.py
+python scripts/run_embeddings.py --step generate-embeddings
+```
+
+Note: `--step all` runs steps 1-8 of `run_embeddings.py` in order, but `populate_embeddings.py` is a separate script that must run between `populate-schema` and `generate-embeddings`.
+
+### Adding New Example Queries
+
+To add more few-shot examples the agent can learn from:
+
+1. **Add to the right file** in `examples/`:
+   - `kpi_examples.yaml` — KPI performance queries (edge, PnL, slippage)
+   - `data_examples.yaml` — Raw data queries (theo, market data, depth)
+   - `routing_examples.yaml` — Cross-dataset disambiguation, UNION ALL patterns
+
+2. **Follow the required format:**
+   ```yaml
+   - question: "What was the average edge by symbol today?"
+     sql: |
+       SELECT symbol,
+         ROUND(AVG(edge_bps), 4) AS avg_edge
+       FROM `{project}.nl2sql_omx_kpi.markettrade`
+       WHERE trade_date = '2026-02-17'
+       GROUP BY symbol
+       ORDER BY avg_edge DESC
+       LIMIT 20
+     tables_used: [markettrade]
+     dataset: nl2sql_omx_kpi
+     complexity: simple
+     routing_signal: "edge by symbol -> kpi.markettrade"
+     validated: true
+     validated_by: "trader_name"
+   ```
+
+   **Required fields:** `question`, `sql`, `tables_used`, `dataset`, `complexity`
+   **Important:** SQL must use `{project}` placeholder (resolved at runtime), never hardcoded project IDs
+   **Important:** Each question must be unique across all example files (the BQ MERGE uses `question` as the dedup key)
+
+3. **Run the refresh:**
+   ```bash
+   python scripts/populate_embeddings.py
+   python scripts/run_embeddings.py --step generate-embeddings
+   ```
+
+### Troubleshooting
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `Scalar subquery produced more than one element` | Duplicate `question` string across example YAML files | Find and remove the duplicate (questions must be unique) |
+| `Not found: Model` in verify-model | Embedding model doesn't exist in the referenced project | Create the model with `CREATE OR REPLACE MODEL` SQL above |
+| `Access Denied` on ML.GENERATE_EMBEDDING | Missing IAM permission on Vertex AI connection | Grant `bigquery.connections.use` to the service account |
+| `ARRAY_LENGTH(embedding) = 0` matches 0 rows | All embeddings already generated | This is fine — the step is idempotent |
+| Embedding generation takes >10 min | Too many rows with NULL embeddings | Normal for first run with 4,600+ column embeddings. Subsequent runs only process new/updated rows |
+
+### Architecture: How the Pieces Fit
+
+```
+nl2sql_agent/.env              ← Project-specific config (GCP_PROJECT, datasets, model refs)
+    ↓
+nl2sql_agent/config.py         ← Settings singleton reads .env, provides all refs
+    ↓
+scripts/run_embeddings.py      ← Creates BQ infrastructure (dataset, tables, schema descriptions, indexes)
+scripts/populate_embeddings.py ← Loads YAML catalog data into BQ tables
+    ↓
+catalog/kpi/*.yaml             ← Column definitions, descriptions, synonyms (source of truth)
+catalog/data/*.yaml
+examples/*.yaml                ← Validated Q→SQL pairs (source of truth)
+    ↓
+BigQuery tables:
+  {project}.{metadata_dataset}.schema_embeddings   ← 17 rows: table/dataset descriptions
+  {project}.{metadata_dataset}.column_embeddings   ← 4,631 rows: column descriptions + synonyms
+  {project}.{metadata_dataset}.query_memory        ← 53+ rows: validated Q→SQL pairs
+    ↓
+ML.GENERATE_EMBEDDING          ← Vertex AI turns text into 768-dim vectors
+    ↓
+VECTOR_SEARCH                  ← Cosine distance search at query time
 ```
 
 ---

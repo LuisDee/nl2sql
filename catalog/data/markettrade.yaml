@@ -380,16 +380,20 @@ table:
     - observed edge
   - name: is_mako_trade
     type: INTEGER
-    description: Flag indicating whether this was a Mako (our) trade versus a purely external market trade. When 1
-      (or true), Mako was a party to this trade. When 0 (or false), this was a trade between other market
-      participants that Mako observed but did not participate in. Used for filtering to only our trades.
+    description: >-
+      NOT IMPLEMENTED — always 0. This field was intended to flag whether a trade was executed by Mako
+      (reported by the exchange Virtual Trader) versus an external party, but the VT flag is not yet
+      populated. DO NOT filter on this column — it will exclude all rows. The data.markettrade table
+      contains both Mako and external trades; use other fields (e.g. portfolio) to distinguish.
     source: "MarketTrade.proto::isMakoTrade"
     example_values:
-    - 1  # Mako trade
-    - 0  # External trade
+    - 0
     synonyms:
     - our trade
     - mako trade flag
+    business_rules: >-
+      WARNING: Do NOT filter on is_mako_trade. It is always 0 (not implemented by VT).
+      Unlike KPI tables, data.markettrade contains both Mako and external trades.
   - name: counterparty_id
     type: STRING
     description: Exchange-assigned identifier for the counterparty or market participant on the other side of this
@@ -719,8 +723,8 @@ table:
   - name: portfolio
     type: STRING
     description: Name of the Mako trading portfolio or book to which the monitoring algo belongs. Used for filtering
-      market trade observations by portfolio. Note that for is_mako_trade=0 (external trades), the portfolio is
-      the one that was monitoring, not participating.
+      market trade observations by portfolio. For external trades, the portfolio is the one that was monitoring,
+      not participating.
     source: "VtCommon.proto::portfolio"
     synonyms:
     - book

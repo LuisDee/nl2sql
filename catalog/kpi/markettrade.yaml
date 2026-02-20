@@ -317,16 +317,18 @@ table:
   - name: is_mako_trade
     type: INTEGER
     description: >-
-      Boolean-like integer (0 or 1) indicating whether this trade was executed by Mako (our firm). Value 1
-      means this is a Mako execution; 0 means it was someone else's trade on the exchange that we
-      observed. Most analysis should filter on is_mako_trade = 1. Also called our trade.
+      NOT IMPLEMENTED — always 0. This field was intended to flag whether a trade was executed by Mako
+      (reported by the exchange Virtual Trader) versus an external party, but the VT flag is not yet
+      populated. DO NOT filter on this column — it will exclude all rows. All trades in the KPI tables
+      are Mako trades by definition (the pipeline only ingests Mako executions).
     synonyms:
     - our trade
     - mako execution
     example_values:
     - 0
-    - 1
-    business_rules: Filter is_mako_trade = 1 for our execution analysis. Value 0 = market trade by others.
+    business_rules: >-
+      WARNING: Do NOT filter on is_mako_trade. It is always 0 (not implemented). All rows in KPI
+      markettrade are Mako trades — no filter needed.
   - name: counterparty_id
     type: STRING
     description: >-

@@ -1,0 +1,27 @@
+{
+  "track_id": "12_column_semantic_search",
+  "status": "pending",
+  "complexity": "L",
+  "wave": 10,
+  "dependencies": ["09_production_hardening", "10_metadata_gaps"],
+  "interfaces_owned": ["vector_search_columns"],
+  "interfaces_consumed": ["column_embeddings", "query_memory", "schema_embeddings", "nl2sql_logic"],
+  "created_at": "2026-02-20T00:00:00Z",
+  "requirements": [
+    "Column-level semantic search via VECTOR_SEARCH on column_embeddings",
+    "Single BQ round-trip: column search + table aggregation + query_memory",
+    "Enriched embedding text: table.column (type, layer): description. synonyms",
+    "Over-retrieve top_k=30 columns, aggregate to top 5 tables with 15 columns each",
+    "Fallback to schema_embeddings if column search empty/fails",
+    "Fix phantom edge_bps column references throughout codebase",
+    "Update embedding pipeline to regenerate with enriched text"
+  ],
+  "test_prerequisites": ["09_production_hardening", "10_metadata_gaps"],
+  "research_references": [
+    "RESQL 2025: flat index of table.column:description chunks",
+    "TailorSQL VLDB 2025: separate column documents, 2x accuracy",
+    "Bidirectional Retrieval 2025: column-first rescues missed tables",
+    "Azure NL2SQL Best Practices: unified index with column entries",
+    "Death of Schema Linking 2024: over-retrieve, don't aggressively filter"
+  ]
+}

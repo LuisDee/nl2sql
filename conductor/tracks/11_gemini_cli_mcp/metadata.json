@@ -1,0 +1,17 @@
+{
+  "track_id": "11_gemini_cli_mcp",
+  "status": "complete",
+  "complexity": "M",
+  "wave": 9,
+  "dependencies": ["09_production_hardening"],
+  "interfaces_owned": ["mcp_server"],
+  "interfaces_consumed": ["nl2sql_logic", "adk_runner"],
+  "created_at": "2026-02-20T00:00:00Z",
+  "requirements": [
+    "Expose NL2SQL agent as MCP server with single ask_trading_data tool",
+    "Emit progress notifications during agent execution (Level 2 visibility)",
+    "Zero footprint on trader GEMINI.md — tool description handles routing",
+    "ADK web and existing entry points unaffected"
+  ],
+  "test_prerequisites": ["09_production_hardening"]
+}

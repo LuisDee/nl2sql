@@ -19,8 +19,8 @@ Root Agent (mako_assistant)
     v
 NL2SQL Sub-Agent (nl2sql_agent)
     |
-    |-- 1. vector_search_tables    --> Semantic search: which table(s)?
-    |-- 2. load_yaml_metadata      --> Column names, types, synonyms, rules
+    |-- 1. vector_search_columns   --> Semantic search: which tables + columns?
+    |-- 2. load_yaml_metadata      --> (optional) Full schema, business rules
     |-- 3. fetch_few_shot_examples --> Similar validated Q->SQL pairs
     |-- 4. [LLM generates SQL]
     |-- 5. dry_run_sql             --> Validate syntax, estimate cost
@@ -157,8 +157,8 @@ Three tables in the `nl2sql_metadata` dataset, all using `text-embedding-005` (7
 
 | Table | Rows | Purpose | Used By |
 |-------|------|---------|---------|
-| **schema_embeddings** | ~17 | Dataset and table descriptions | `vector_search_tables` |
-| **column_embeddings** | ~1000 | Column names + descriptions + synonyms | Future column routing |
+| **schema_embeddings** | ~17 | Dataset and table descriptions | `vector_search_columns` (fallback) |
+| **column_embeddings** | ~4,600 | Column names + descriptions + synonyms + enriched text | `vector_search_columns` (primary) |
 | **query_memory** | 30+ (growing) | Validated question->SQL pairs | `fetch_few_shot_examples` |
 
 ### Why Two Layers?
@@ -234,12 +234,12 @@ Future similar questions find this pair via VECTOR_SEARCH
 
 ## The 6-Tool Chain in Detail
 
-### 1. vector_search_tables(question)
+### 1. vector_search_columns(question)
 
-Finds which BigQuery tables are relevant to a question using semantic similarity against `schema_embeddings`.
+Finds which BigQuery tables and columns are relevant to a question using semantic similarity against `column_embeddings` (~4,600 rows). Returns tables ranked by their best column match, with top columns per table. Falls back to `schema_embeddings` if column search is unavailable.
 
 **Input:** Natural language question
-**Output:** Top-5 tables ranked by relevance with descriptions
+**Output:** Tables ranked by best column match, with top columns per table (names, types, descriptions, synonyms)
 
 ### 2. load_yaml_metadata(table_name, dataset_name)
 

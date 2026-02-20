@@ -199,48 +199,51 @@ If the closest match has distance <= 0.10 (very similar meaning), it's a **cache
 
 If no close match, it's a **cache miss**. Continue to step 1.
 
-### Step 1: Find the Right Table
+### Step 1: Find the Right Tables AND Columns
 
-**Tool:** `vector_search_tables`
+**Tool:** `vector_search_columns`
 
-Now the agent needs to figure out: which of our 12 tables should I query?
+Now the agent needs to figure out: which of our 12 tables should I query, and which columns are relevant?
 
 ```
 1. Take the question: "what was the average edge on market trades today?"
-2. Send it to BigQuery with our combined SQL query
+2. Send it to BigQuery with the column search SQL query
 3. Inside BigQuery, this happens:
 
    a) ML.GENERATE_EMBEDDING converts the question to 768 numbers
       (task_type = RETRIEVAL_QUERY)
 
    b) VECTOR_SEARCH compares those 768 numbers against every row in
-      schema_embeddings (17 rows). For each row, it computes:
+      column_embeddings (~4,600 rows). Each row is one column with an
+      enriched embedding like:
+      "markettrade.instant_edge (FLOAT64, kpi): Instantaneous edge at
+       trade. Also known as: edge, trading edge, capture"
 
-      cosine_distance(question_embedding, row_embedding) = ?
+   c) Top 30 column matches come back, then get AGGREGATED by table:
 
-   c) Results come back sorted by distance:
+      markettrade  (kpi)   → best_distance 0.08, 5 matching columns
+        - instant_edge (FLOAT64) — distance 0.08
+        - instant_pnl (FLOAT64)  — distance 0.15
+        - delta_bucket (STRING)  — distance 0.22
+        ...
+      quotertrade  (kpi)   → best_distance 0.18, 3 matching columns
+        ...
 
-      markettrade  (kpi)   → distance 0.12  ← closest match!
-      quotertrade  (kpi)   → distance 0.28
-      clicktrade   (kpi)   → distance 0.35
-      markettrade  (data)  → distance 0.42
-      theodata     (data)  → distance 0.71
-
-   d) At the same time, the combined query ALSO searches query_memory
-      for similar past questions (few-shot examples). These get cached
-      in Python memory for step 3.
+   d) At the same time, the query ALSO searches query_memory for similar
+      past questions (few-shot examples). These get cached in Python
+      memory for step 3.
 ```
 
-The agent now knows: **use `nl2sql_omx_kpi.markettrade`**.
+The agent now knows: **use `nl2sql_omx_kpi.markettrade`**, and the relevant columns are `instant_edge`, `instant_pnl`, `delta_bucket`, etc.
 
-Why did it pick KPI markettrade over data markettrade? Because the description for KPI markettrade mentions "edge", "instant_pnl", "performance metrics" — and the question asks about "average edge". The embedding for "edge" in the question is very close to the embedding for "edge" in the KPI markettrade description.
+Why column-level search? Because searching 4,600 individual columns catches concepts that table descriptions miss. If someone asks "what is the rho exposure?", column search finds `theodata.rho` directly — even though the table description for theodata never mentions "rho". This rescues routing failures that table-level search alone would miss.
 
-### Step 2: Load Column Metadata
+### Step 2: (Optional) Load Full Column Metadata
 
 **Tool:** `load_yaml_metadata`
 
-The agent now loads the YAML catalog file for `kpi/markettrade.yaml`. This gives it:
-- All 774 column names and their types
+If the agent needs columns not returned by the search (e.g., `trade_date` for date filtering, or business rules about how to interpret values), it loads the YAML catalog. This gives it:
+- All column names and their types
 - Descriptions of what each column means
 - **Synonyms** — so it knows "edge" maps to the column called `instant_edge`
 - Business rules (e.g. "always filter on trade_date")
@@ -433,17 +436,18 @@ TRADER: "what was the average edge today?"
   |  Step 0: check_semantic_cache
   |  Embed question → search query_memory → cache miss
   |
-  |  Step 1: vector_search_tables (COMBINED QUERY)
-  |  Embed question ONCE → search schema_embeddings + query_memory
-  |  → "use kpi.markettrade" + cache few-shot examples
+  |  Step 1: vector_search_columns (COMBINED COLUMN + EXAMPLE QUERY)
+  |  Embed question ONCE → search column_embeddings + query_memory
+  |  → "use kpi.markettrade, relevant columns: instant_edge, instant_pnl..."
+  |  + cache few-shot examples
   |
-  |  Step 2: load_yaml_metadata("markettrade", "nl2sql_omx_kpi")
-  |  → 774 columns with descriptions, synonyms ("edge" = instant_edge)
+  |  Step 2: (optional) load_yaml_metadata("markettrade", "nl2sql_omx_kpi")
+  |  → Full schema, business rules, preferred timestamps if needed
   |
   |  Step 3: fetch_few_shot_examples (CACHE HIT — instant, no BQ call)
   |  → "here's how similar PnL questions were answered before"
   |
-  |  Step 4: LLM generates SQL using table + columns + examples
+  |  Step 4: LLM generates SQL using columns + examples
   |  → SELECT ROUND(AVG(instant_edge), 4) FROM kpi.markettrade WHERE ...
   |
   |  Step 5: dry_run_sql → validates syntax, checks permissions

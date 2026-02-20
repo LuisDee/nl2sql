@@ -205,7 +205,7 @@ def vector_search_columns(question: str) -> dict:
 
 ## Phase 3: Wire Into Agent & Update Prompt
 
-### Task 3.1: Update agent tool list
+### [x] Task 3.1: Update agent tool list `7b14eaa`
 
 **File:** `nl2sql_agent/agent.py`
 
@@ -222,7 +222,7 @@ Option B: Add alongside — both tools available, prompt guides the agent to try
 
 **Recommendation: Option A** — simpler for the agent, fewer decisions. The fallback logic lives inside `vector_search_columns`.
 
-### Task 3.2: Update system prompt
+### [x] Task 3.2: Update system prompt `7b14eaa`
 
 **File:** `nl2sql_agent/prompts.py`
 
@@ -249,13 +249,13 @@ Update the SQL generation rules:
 
 Fix `edge_bps` references (Task 1.1).
 
-### Task 3.3: Update `__init__.py` exports
+### [x] Task 3.3: Update `__init__.py` exports `7b14eaa`
 
 **File:** `nl2sql_agent/tools/__init__.py`
 
 Add `vector_search_columns` to exports.
 
-### Task 3.4: Update tests for changed tool list
+### [x] Task 3.4: Update tests for changed tool list `7b14eaa`
 
 **File:** `tests/test_agent_init.py`
 

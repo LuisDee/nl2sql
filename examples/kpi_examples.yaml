@@ -5,10 +5,10 @@ examples:
       SELECT
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         COUNT(*) AS trade_count
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: simple
     routing_signal: "generic PnL question -> default to markettrade"
     validated: false
@@ -21,12 +21,12 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(AVG(edge), 4) AS avg_edge
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "PnL by symbol -> KPI markettrade"
     validated: false
@@ -39,13 +39,13 @@ examples:
         ROUND(edge, 4) AS edge,
         ROUND(instant_pnl, 2) AS instant_pnl,
         trade_size
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
         AND edge > 0.5
       ORDER BY edge DESC
       LIMIT 20
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: simple
     routing_signal: "edge threshold filter -> KPI markettrade"
     validated: false
@@ -58,12 +58,12 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(AVG(edge), 4) AS avg_edge,
         ROUND(SUM(instant_pnl), 2) AS total_pnl
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY portfolio
       ORDER BY total_pnl DESC
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "edge by portfolio -> KPI markettrade"
     validated: false
@@ -73,7 +73,7 @@ examples:
     sql: |
       (
         SELECT 'best' AS category, symbol, term, strike, ROUND(edge, 4) AS edge, ROUND(instant_pnl, 2) AS pnl
-        FROM `{project}.nl2sql_omx_kpi.markettrade`
+        FROM `{project}.{kpi_dataset}.markettrade`
         WHERE trade_date = '2026-02-17'
         ORDER BY edge DESC
         LIMIT 5
@@ -81,13 +81,13 @@ examples:
       UNION ALL
       (
         SELECT 'worst', symbol, term, strike, ROUND(edge, 4), ROUND(instant_pnl, 2)
-        FROM `{project}.nl2sql_omx_kpi.markettrade`
+        FROM `{project}.{kpi_dataset}.markettrade`
         WHERE trade_date = '2026-02-17'
         ORDER BY edge ASC
         LIMIT 5
       )
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "best/worst by edge -> KPI markettrade"
     validated: false
@@ -101,12 +101,12 @@ examples:
         ROUND(SUM(instant_pnl), 2) AS pnl_no_fees,
         ROUND(SUM(instant_pnl_w_fees), 2) AS pnl_with_fees,
         ROUND(SUM(instant_pnl) - SUM(instant_pnl_w_fees), 2) AS total_fees
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY pnl_no_fees DESC
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "PnL with/without fees -> KPI markettrade"
     validated: false
@@ -119,10 +119,10 @@ examples:
         COUNT(*) AS fill_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(AVG(edge), 4) AS avg_edge
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
     tables_used: [quotertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: simple
     routing_signal: "quoter performance/edge/PnL -> KPI quotertrade"
     validated: false
@@ -135,12 +135,12 @@ examples:
         COUNT(*) AS fill_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(AVG(edge), 4) AS avg_edge
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY portfolio
       ORDER BY total_pnl DESC
     tables_used: [quotertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "quoter fills breakdown -> KPI quotertrade"
     validated: false
@@ -153,12 +153,12 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(AVG(instant_pnl), 2) AS avg_pnl
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [quotertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "PnL by symbol for quoter -> KPI quotertrade"
     validated: false
@@ -171,10 +171,10 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(AVG(edge), 4) AS avg_edge
-      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      FROM `{project}.{kpi_dataset}.brokertrade`
       WHERE trade_date = '2026-02-17'
     tables_used: [brokertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: simple
     routing_signal: "broker performance -> KPI brokertrade"
     validated: false
@@ -187,10 +187,10 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(AVG(edge), 4) AS avg_edge,
         ROUND(SUM(instant_pnl), 2) AS total_pnl
-      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      FROM `{project}.{kpi_dataset}.clicktrade`
       WHERE trade_date = '2026-02-17'
     tables_used: [clicktrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: simple
     routing_signal: "click trade edge -> KPI clicktrade"
     validated: false
@@ -203,12 +203,12 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(AVG(edge), 4) AS avg_edge
-      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      FROM `{project}.{kpi_dataset}.clicktrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [clicktrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "click trade breakdown -> KPI clicktrade"
     validated: false
@@ -222,12 +222,12 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(AVG(edge), 4) AS avg_edge
-      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      FROM `{project}.{kpi_dataset}.otoswing`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [otoswing]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "OTO swing -> KPI otoswing"
     validated: false
@@ -237,27 +237,27 @@ examples:
   - question: "What was total PnL across all trade types?"
     sql: |
       SELECT 'markettrade' AS trade_type, ROUND(SUM(instant_pnl), 2) AS total_pnl, COUNT(*) AS count
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       UNION ALL
       SELECT 'quotertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       UNION ALL
       SELECT 'brokertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
-      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      FROM `{project}.{kpi_dataset}.brokertrade`
       WHERE trade_date = '2026-02-17'
       UNION ALL
       SELECT 'clicktrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
-      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      FROM `{project}.{kpi_dataset}.clicktrade`
       WHERE trade_date = '2026-02-17'
       UNION ALL
       SELECT 'otoswing', ROUND(SUM(instant_pnl), 2), COUNT(*)
-      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      FROM `{project}.{kpi_dataset}.otoswing`
       WHERE trade_date = '2026-02-17'
       ORDER BY total_pnl DESC
     tables_used: [markettrade, quotertrade, brokertrade, clicktrade, otoswing]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: complex
     routing_signal: "all trades / total PnL -> UNION ALL across all KPI"
     validated: false
@@ -266,17 +266,17 @@ examples:
   - question: "How many trades did we do by symbol across market and quoter?"
     sql: |
       SELECT symbol, 'markettrade' AS source, COUNT(*) AS trade_count, ROUND(SUM(instant_pnl), 2) AS total_pnl
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       UNION ALL
       SELECT symbol, 'quotertrade', COUNT(*), ROUND(SUM(instant_pnl), 2)
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [markettrade, quotertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: complex
     routing_signal: "cross-table symbol comparison -> UNION KPI tables"
     validated: false
@@ -289,12 +289,12 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(AVG(delta_slippage_1m), 4) AS avg_delta_slip_1m,
         ROUND(AVG(delta_slippage_1m_per_unit), 4) AS avg_delta_slip_1m_per_unit
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY avg_delta_slip_1m DESC
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "delta slippage -> KPI markettrade"
     validated: false
@@ -309,12 +309,12 @@ examples:
         ROUND(AVG(total_slippage_5s), 4) AS avg_slip_5s,
         ROUND(AVG(total_slippage_5m), 4) AS avg_slip_5m,
         ROUND(AVG(total_slippage_5m) - AVG(total_slippage_5s), 4) AS slip_divergence
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY slip_divergence DESC
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "slippage comparison across intervals -> KPI markettrade"
     validated: false
@@ -327,12 +327,12 @@ examples:
         COUNT(*) AS fill_count,
         ROUND(SUM(vol_slippage_10m), 2) AS total_vol_slip_10m,
         ROUND(AVG(vol_slippage_per_unit_10m), 4) AS avg_vol_slip_unit_10m
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_vol_slip_10m DESC
     tables_used: [quotertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "vol slippage at interval -> KPI quotertrade"
     validated: false
@@ -347,12 +347,12 @@ examples:
         ROUND(SUM(mark_to_mid_pnl), 2) AS total_skew_pnl,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(SUM(instant_pnl_mid_tv), 2) AS total_mid_pnl
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_skew_pnl DESC
     tables_used: [quotertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "skew pnl / mark to mid -> KPI quotertrade (unique column)"
     validated: false
@@ -367,12 +367,12 @@ examples:
         ROUND(SUM(instant_pnl), 2) AS gross_pnl,
         ROUND(SUM(instant_pnl_w_fees), 2) AS net_pnl,
         ROUND(SUM(instant_pnl) - SUM(instant_pnl_w_fees), 2) AS total_fees
-      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      FROM `{project}.{kpi_dataset}.brokertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY fee_method
       ORDER BY total_fees DESC
     tables_used: [brokertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "broker fees / fee method -> KPI brokertrade (unique columns)"
     validated: false
@@ -386,12 +386,12 @@ examples:
         ROUND(SUM(tv_offset_slippage), 2) AS total_tv_offset_slip,
         ROUND(SUM(tv_offset_slippage_5m), 2) AS total_tv_offset_slip_5m,
         ROUND(SUM(total_slippage_5m), 2) AS total_slip_5m
-      FROM `{project}.nl2sql_omx_kpi.brokertrade`
+      FROM `{project}.{kpi_dataset}.brokertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_tv_offset_slip DESC
     tables_used: [brokertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "tv offset slippage -> KPI brokertrade (unique column)"
     validated: false
@@ -406,12 +406,12 @@ examples:
         ROUND(SUM(instant_pnl), 2) AS pnl_at_fill,
         ROUND(SUM(instant_pnl_fired_at), 2) AS pnl_at_fire,
         ROUND(SUM(instant_pnl) - SUM(instant_pnl_fired_at), 2) AS fill_improvement
-      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      FROM `{project}.{kpi_dataset}.otoswing`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY fill_improvement DESC
     tables_used: [otoswing]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "fired-at vs fill PnL -> KPI otoswing (unique fired_at columns)"
     validated: false
@@ -424,12 +424,12 @@ examples:
         COUNT(*) AS swing_count,
         ROUND(SUM(delta_slippage_1h), 2) AS delta_slip_fill,
         ROUND(SUM(delta_slippage_fired_at_1h), 2) AS delta_slip_fired
-      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      FROM `{project}.{kpi_dataset}.otoswing`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY delta_slip_fired DESC
     tables_used: [otoswing]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "fired-at slippage at interval -> KPI otoswing"
     validated: false
@@ -446,12 +446,12 @@ examples:
         ROUND(SUM(roll_slippage_5m), 2) AS roll_5m,
         ROUND(SUM(roll_slippage_30m), 2) AS roll_30m,
         ROUND(SUM(roll_slippage_1h), 2) AS roll_1h
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY roll_1h DESC
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "roll slippage decomposition -> KPI markettrade"
     validated: false
@@ -465,13 +465,13 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(AVG(instant_edge), 4) AS avg_edge
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
         AND algo = 'OST_MQ'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "algo filter -> KPI markettrade (algo column)"
     validated: false
@@ -486,13 +486,13 @@ examples:
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(AVG(instant_edge), 4) AS avg_edge,
         ROUND(AVG(total_slippage_5m), 4) AS avg_slip_5m
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
         AND portfolio = 'WHITE'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "WHITE portfolio -> KPI markettrade (special TV handling for WHITE)"
     validated: false

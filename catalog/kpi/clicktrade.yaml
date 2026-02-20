@@ -1,7 +1,7 @@
 table:
   name: clicktrade
-  dataset: nl2sql_omx_kpi
-  fqn: '{project}.nl2sql_omx_kpi.clicktrade'
+  dataset: "{kpi_dataset}"
+  fqn: '{project}.{kpi_dataset}.clicktrade'
   layer: kpi
   description: >
     Manual click trade KPIs with time-bucketed slippage and Greeks. One row per manual "click" trade

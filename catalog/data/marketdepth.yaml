@@ -1,7 +1,7 @@
 table:
   name: marketdepth
-  dataset: nl2sql_omx_data
-  fqn: '{project}.nl2sql_omx_data.marketdepth'
+  dataset: "{data_dataset}"
+  fqn: '{project}.{data_dataset}.marketdepth'
   layer: data
   description: Order book depth snapshots with 5 levels of bid/ask prices, volumes, and order counts, plus implied prices.
     Use for spread analysis, liquidity analysis, and book shape studies. Partitioned by trade_date.

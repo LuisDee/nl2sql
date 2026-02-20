@@ -205,8 +205,8 @@ class TestExamplesValidation:
         """Examples must cover both KPI and data datasets."""
         examples = load_all_examples()
         datasets = {ex["dataset"] for ex in examples}
-        assert "nl2sql_omx_kpi" in datasets, "No KPI examples found"
-        assert "nl2sql_omx_data" in datasets, "No data examples found"
+        assert "{kpi_dataset}" in datasets, "No KPI examples found"
+        assert "{data_dataset}" in datasets, "No data examples found"
 
     def test_examples_use_project_placeholder_in_sql(self):
         """Every example SQL must use {project} placeholder."""

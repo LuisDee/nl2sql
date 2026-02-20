@@ -1,7 +1,7 @@
 table:
   name: quotertrade
-  dataset: nl2sql_omx_kpi
-  fqn: '{project}.nl2sql_omx_kpi.quotertrade'
+  dataset: "{kpi_dataset}"
+  fqn: '{project}.{kpi_dataset}.quotertrade'
   layer: kpi
   description: Performance metrics for quoter fills. NOT raw quoter activity — use data.quotertrade for timestamps/levels.
     Auto-quoter fill KPIs with time-bucketed slippage and Greeks. Captures fills on our resting quotes.

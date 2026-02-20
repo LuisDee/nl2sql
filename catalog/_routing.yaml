@@ -1,9 +1,9 @@
 routing_descriptions:
 
   kpi_vs_data_general: >
-    The nl2sql_omx_kpi dataset (gold layer) has KPI-enriched trade data with
+    The {kpi_dataset} dataset (gold layer) has KPI-enriched trade data with
     computed metrics: edge_bps, instant_pnl, slippage, delta_bucket,
-    required_edge_bps. The nl2sql_omx_data dataset (silver layer) has raw
+    required_edge_bps. The {data_dataset} dataset (silver layer) has raw
     trade and market data with exact timestamps, prices, sizes, and execution
     details. Both datasets share some table names (brokertrade, clicktrade,
     markettrade, quotertrade). When the question asks about performance, edge,
@@ -15,7 +15,7 @@ routing_descriptions:
     Data tables contain the raw fields directly from the protobuf messages.
 
   kpi_table_selection: >
-    The nl2sql_omx_kpi dataset has 5 tables, one per trade origin: markettrade
+    The {kpi_dataset} dataset has 5 tables, one per trade origin: markettrade
     (exchange trades, the default), quotertrade (auto-quoter fills), brokertrade
     (broker trades, has account field for broker comparison), clicktrade (manual
     click trades), otoswing (OTO swing trades). When a question doesn't specify
@@ -26,7 +26,7 @@ routing_descriptions:
   theodata_routing: >
     Questions about theoretical pricing, implied volatility (IV, vol, sigma),
     delta, vega, gamma, theta, greeks, fair value, machine price, or theo
-    should route to nl2sql_omx_data.theodata. This is the ONLY table with
+    should route to {data_dataset}.theodata. This is the ONLY table with
     options pricing theory data. It is in the data dataset, not kpi.
     theodata contains all Greeks (delta, gamma, vega, theta, rho), implied volatility (vol/IV/sigma),
     forward price, time to expiry (tte), vol surface parameters (greek_atm, greek_skew, param_atm, etc.),
@@ -34,8 +34,8 @@ routing_descriptions:
 
   market_data_routing: >
     Questions about market prices, exchange feeds, top-of-book, or market
-    snapshots go to nl2sql_omx_data.marketdata. Questions about order book
-    depth, bid/ask levels, or book shape go to nl2sql_omx_data.marketdepth.
+    snapshots go to {data_dataset}.marketdata. Questions about order book
+    depth, bid/ask levels, or book shape go to {data_dataset}.marketdepth.
     Neither of these exist in the kpi dataset.
 
   disambiguation_table: >

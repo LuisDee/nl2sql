@@ -7,12 +7,12 @@ examples:
         COUNT(*) AS trade_count,
         ROUND(AVG(edge), 4) AS avg_edge,
         ROUND(SUM(instant_pnl), 2) AS total_pnl
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [markettrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "edge = KPI metric -> KPI.markettrade, NOT data.markettrade"
     validated: false
@@ -25,13 +25,13 @@ examples:
         ROUND(tv, 4) AS theo,
         ROUND(delta, 4) AS delta,
         ROUND(vol, 4) AS vol
-      FROM `{project}.nl2sql_omx_data.theodata`
+      FROM `{project}.{data_dataset}.theodata`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
       ORDER BY strike
       LIMIT 50
     tables_used: [theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "theo/vol -> data.theodata (only exists in data)"
     validated: false
@@ -40,22 +40,22 @@ examples:
   - question: "How many trades did we do by symbol across all types?"
     sql: |
       SELECT symbol, COUNT(*) AS trade_count, ROUND(SUM(instant_pnl), 2) AS total_pnl
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
+      FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       UNION ALL
       SELECT symbol, COUNT(*), ROUND(SUM(instant_pnl), 2)
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       UNION ALL
       SELECT symbol, COUNT(*), ROUND(SUM(instant_pnl), 2)
-      FROM `{project}.nl2sql_omx_kpi.clicktrade`
+      FROM `{project}.{kpi_dataset}.clicktrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [markettrade, quotertrade, clicktrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: complex
     routing_signal: "all types by symbol -> UNION across KPI tables"
     validated: false
@@ -64,11 +64,11 @@ examples:
   - question: "What's in the swing data?"
     sql: |
       SELECT *
-      FROM `{project}.nl2sql_omx_data.swingdata`
+      FROM `{project}.{data_dataset}.swingdata`
       WHERE trade_date = '2026-02-17'
       LIMIT 20
     tables_used: [swingdata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "swing -> data.swingdata (only exists in data)"
     validated: false
@@ -77,12 +77,12 @@ examples:
   - question: "What does the order book look like for EMBRACB?"
     sql: |
       SELECT *
-      FROM `{project}.nl2sql_omx_data.marketdepth`
+      FROM `{project}.{data_dataset}.marketdepth`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
       LIMIT 20
     tables_used: [marketdepth]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "order book / depth -> data.marketdepth (NOT marketdata)"
     validated: false
@@ -91,12 +91,12 @@ examples:
   - question: "Show me market data feed for EMBRACB"
     sql: |
       SELECT *
-      FROM `{project}.nl2sql_omx_data.marketdata`
+      FROM `{project}.{data_dataset}.marketdata`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
       LIMIT 20
     tables_used: [marketdata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "market data / price feed -> data.marketdata (NOT marketdepth)"
     validated: false
@@ -110,11 +110,11 @@ examples:
         trade_price,
         trade_size,
         trade_side
-      FROM `{project}.nl2sql_omx_data.quotertrade`
+      FROM `{project}.{data_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       LIMIT 20
     tables_used: [quotertrade]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "quoting levels / raw activity -> data.quotertrade (NOT kpi.quotertrade)"
     validated: false
@@ -128,12 +128,12 @@ examples:
         ROUND(AVG(instant_edge), 4) AS avg_edge,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
         ROUND(SUM(mark_to_mid_pnl), 2) AS skew_pnl
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
+      FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY total_pnl DESC
     tables_used: [quotertrade]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "quoter edge / PnL / performance -> kpi.quotertrade (NOT data.quotertrade)"
     validated: false
@@ -147,12 +147,12 @@ examples:
         COUNT(*) AS swing_count,
         ROUND(AVG(latency_stats_vtio), 0) AS avg_vt_decision_us,
         ROUND(AVG(latency_stats_itio), 0) AS avg_order_send_us
-      FROM `{project}.nl2sql_omx_data.swingdata`
+      FROM `{project}.{data_dataset}.swingdata`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY swing_count DESC
     tables_used: [swingdata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "swing speed / latency -> data.swingdata (latency only in data, NOT kpi.otoswing)"
     validated: false
@@ -165,12 +165,12 @@ examples:
         COUNT(*) AS swing_count,
         ROUND(SUM(instant_pnl), 2) AS pnl_fill,
         ROUND(SUM(instant_pnl_fired_at), 2) AS pnl_fired
-      FROM `{project}.nl2sql_omx_kpi.otoswing`
+      FROM `{project}.{kpi_dataset}.otoswing`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY pnl_fill DESC
     tables_used: [otoswing]
-    dataset: nl2sql_omx_kpi
+    dataset: "{kpi_dataset}"
     complexity: medium
     routing_signal: "swing PnL / performance -> kpi.otoswing (NOT data.swingdata)"
     validated: false

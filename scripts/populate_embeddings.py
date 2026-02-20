@@ -14,6 +14,7 @@ from nl2sql_agent.catalog_loader import (
     load_all_table_yamls,
     load_all_examples,
     resolve_example_sql,
+    resolve_placeholders,
 )
 from nl2sql_agent.config import Settings
 from nl2sql_agent.logging_config import setup_logging, get_logger
@@ -85,7 +86,11 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
     rows = []
     for table_data in tables:
         t = table_data["table"]
-        dataset_name = t["dataset"]
+        dataset_name = resolve_placeholders(
+            t["dataset"],
+            kpi_dataset=settings.kpi_dataset,
+            data_dataset=settings.data_dataset,
+        )
         table_name = t["name"]
 
         layer = t.get("layer", "")
@@ -184,13 +189,23 @@ def populate_query_memory(bq: BigQueryProtocol, examples: list[dict], settings: 
     # Pre-resolve all examples
     rows = []
     for ex in examples:
-        resolved_sql = resolve_example_sql(ex["sql"], settings.gcp_project)
+        resolved_sql = resolve_example_sql(
+            ex["sql"],
+            settings.gcp_project,
+            kpi_dataset=settings.kpi_dataset,
+            data_dataset=settings.data_dataset,
+        )
+        resolved_dataset = resolve_placeholders(
+            ex["dataset"],
+            kpi_dataset=settings.kpi_dataset,
+            data_dataset=settings.data_dataset,
+        )
         rows.append(
             {
                 "question": ex["question"],
                 "sql_query": resolved_sql.strip(),
                 "tables_used": ex["tables_used"],
-                "dataset": ex["dataset"],
+                "dataset": resolved_dataset,
                 "complexity": ex.get("complexity", "simple"),
                 "routing_signal": ex.get("routing_signal", ""),
                 "validated_by": ex.get("validated_by", ""),

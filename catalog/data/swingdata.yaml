@@ -1,7 +1,7 @@
 table:
   name: swingdata
-  dataset: nl2sql_omx_data
-  fqn: '{project}.nl2sql_omx_data.swingdata'
+  dataset: "{data_dataset}"
+  fqn: '{project}.{data_dataset}.swingdata'
   layer: data
   description: Raw swing trade event data with full detail on every swing opportunity, including routed orders, fills, and
     latency statistics. Use for detailed swing execution analysis. Partitioned by trade_date.

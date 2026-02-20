@@ -1,7 +1,7 @@
 table:
   name: otoswing
-  dataset: nl2sql_omx_kpi
-  fqn: '{project}.nl2sql_omx_kpi.otoswing'
+  dataset: "{kpi_dataset}"
+  fqn: '{project}.{kpi_dataset}.otoswing'
   layer: kpi
   description: OTO (Order Take Out) swing trade KPIs measuring aggressive sweep performance where the system detects an opportunity
     in the underlying and routes orders to capture edge across multiple price levels. Each row represents one OTO sweep event.

@@ -1,7 +1,7 @@
 table:
   name: theodata
-  dataset: nl2sql_omx_data
-  fqn: '{project}.nl2sql_omx_data.theodata'
+  dataset: "{data_dataset}"
+  fqn: '{project}.{data_dataset}.theodata'
   layer: data
   description: Theo pricing snapshots containing theoretical value, Greeks, and volatility surface parameters per instrument.
     UNIQUE to the data layer -- not available as a KPI table. Use this for theo/delta/vol/vega lookups by strike, symbol,

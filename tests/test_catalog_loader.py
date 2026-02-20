@@ -5,36 +5,80 @@ from nl2sql_agent.catalog_loader import (
     validate_examples_yaml,
     resolve_fqn,
     resolve_example_sql,
+    resolve_placeholders,
 )
+
+
+class TestResolvePlaceholders:
+    """Test the general placeholder resolution helper."""
+
+    def test_resolves_project(self):
+        result = resolve_placeholders("{project}.ds.t", project="my-proj")
+        assert result == "my-proj.ds.t"
+
+    def test_resolves_kpi_dataset(self):
+        result = resolve_placeholders("{kpi_dataset}", kpi_dataset="nl2sql_omx_kpi")
+        assert result == "nl2sql_omx_kpi"
+
+    def test_resolves_data_dataset(self):
+        result = resolve_placeholders("{data_dataset}", data_dataset="nl2sql_brazil_data")
+        assert result == "nl2sql_brazil_data"
+
+    def test_resolves_all_three(self):
+        text = "{project}.{kpi_dataset}.markettrade"
+        result = resolve_placeholders(
+            text, project="p", kpi_dataset="kpi_ds", data_dataset="data_ds"
+        )
+        assert result == "p.kpi_ds.markettrade"
+
+    def test_skips_empty_values(self):
+        result = resolve_placeholders("{project}.{kpi_dataset}", project="p")
+        assert result == "p.{kpi_dataset}"
 
 
 class TestResolveFqn:
     """Test the FQN resolution helper."""
 
     def test_resolve_fqn_dev(self):
-        table_data = {"fqn": "{project}.nl2sql_omx_kpi.markettrade"}
-        result = resolve_fqn(table_data, "melodic-stone-437916-t3")
+        table_data = {"fqn": "{project}.{kpi_dataset}.markettrade"}
+        result = resolve_fqn(
+            table_data, "melodic-stone-437916-t3", kpi_dataset="nl2sql_omx_kpi"
+        )
         assert result == "melodic-stone-437916-t3.nl2sql_omx_kpi.markettrade"
 
     def test_resolve_fqn_prod(self):
-        table_data = {"fqn": "{project}.nl2sql_omx_kpi.markettrade"}
-        result = resolve_fqn(table_data, "cloud-data-n-base-d4b3")
+        table_data = {"fqn": "{project}.{kpi_dataset}.markettrade"}
+        result = resolve_fqn(
+            table_data, "cloud-data-n-base-d4b3", kpi_dataset="nl2sql_omx_kpi"
+        )
         assert result == "cloud-data-n-base-d4b3.nl2sql_omx_kpi.markettrade"
+
+    def test_resolve_fqn_different_exchange(self):
+        table_data = {"fqn": "{project}.{kpi_dataset}.markettrade"}
+        result = resolve_fqn(
+            table_data, "cloud-data-n-base-d4b3", kpi_dataset="nl2sql_brazil_kpi"
+        )
+        assert result == "cloud-data-n-base-d4b3.nl2sql_brazil_kpi.markettrade"
 
 
 class TestResolveExampleSql:
     """Test the example SQL resolution helper."""
 
     def test_resolve_single_table(self):
-        sql = "SELECT * FROM `{project}.nl2sql_omx_kpi.markettrade` WHERE trade_date = '2026-02-17'"
-        result = resolve_example_sql(sql, "melodic-stone-437916-t3")
+        sql = "SELECT * FROM `{project}.{kpi_dataset}.markettrade` WHERE trade_date = '2026-02-17'"
+        result = resolve_example_sql(
+            sql, "melodic-stone-437916-t3", kpi_dataset="nl2sql_omx_kpi"
+        )
         assert "melodic-stone-437916-t3.nl2sql_omx_kpi.markettrade" in result
         assert "{project}" not in result
+        assert "{kpi_dataset}" not in result
 
     def test_resolve_multiple_tables(self):
-        sql = """SELECT * FROM `{project}.nl2sql_omx_kpi.markettrade`
-        UNION ALL SELECT * FROM `{project}.nl2sql_omx_kpi.quotertrade`"""
-        result = resolve_example_sql(sql, "melodic-stone-437916-t3")
+        sql = """SELECT * FROM `{project}.{kpi_dataset}.markettrade`
+        UNION ALL SELECT * FROM `{project}.{kpi_dataset}.quotertrade`"""
+        result = resolve_example_sql(
+            sql, "melodic-stone-437916-t3", kpi_dataset="nl2sql_omx_kpi"
+        )
         assert result.count("melodic-stone-437916-t3") == 2
         assert "{project}" not in result
 
@@ -47,8 +91,8 @@ class TestValidateTableYaml:
         data = {
             "table": {
                 "name": "markettrade",
-                "dataset": "nl2sql_omx_kpi",
-                "fqn": "{project}.nl2sql_omx_kpi.markettrade",
+                "dataset": "{kpi_dataset}",
+                "fqn": "{project}.{kpi_dataset}.markettrade",
                 "layer": "kpi",
                 "description": "KPI metrics for market trades",
                 "partition_field": "trade_date",
@@ -70,8 +114,8 @@ class TestValidateTableYaml:
         """Invalid layer value should produce an error."""
         data = {
             "table": {
-                "name": "test", "dataset": "nl2sql_omx_kpi",
-                "fqn": "{project}.nl2sql_omx_kpi.test",
+                "name": "test", "dataset": "{kpi_dataset}",
+                "fqn": "{project}.{kpi_dataset}.test",
                 "layer": "gold",
                 "description": "x", "partition_field": "trade_date",
                 "columns": [{"name": "a", "type": "STRING", "description": "x"}],
@@ -98,8 +142,8 @@ class TestValidateTableYaml:
         """fqn without {project} placeholder should produce an error."""
         data = {
             "table": {
-                "name": "test", "dataset": "nl2sql_omx_kpi",
-                "fqn": "hardcoded-project.nl2sql_omx_kpi.test",
+                "name": "test", "dataset": "{kpi_dataset}",
+                "fqn": "hardcoded-project.{kpi_dataset}.test",
                 "layer": "kpi", "description": "x",
                 "partition_field": "trade_date",
                 "columns": [{"name": "a", "type": "STRING", "description": "x"}],
@@ -116,9 +160,9 @@ class TestValidateExamplesYaml:
         data = {
             "examples": [{
                 "question": "What was the PnL?",
-                "sql": "SELECT * FROM `{project}.nl2sql_omx_kpi.markettrade` WHERE trade_date = '2026-02-17'",
+                "sql": "SELECT * FROM `{project}.{kpi_dataset}.markettrade` WHERE trade_date = '2026-02-17'",
                 "tables_used": ["markettrade"],
-                "dataset": "nl2sql_omx_kpi",
+                "dataset": "{kpi_dataset}",
                 "complexity": "simple",
             }]
         }
@@ -131,7 +175,7 @@ class TestValidateExamplesYaml:
                 "question": "What?",
                 "sql": "SELECT * FROM markettrade WHERE trade_date = '2026-02-17'",
                 "tables_used": ["markettrade"],
-                "dataset": "nl2sql_omx_kpi",
+                "dataset": "{kpi_dataset}",
                 "complexity": "simple",
             }]
         }

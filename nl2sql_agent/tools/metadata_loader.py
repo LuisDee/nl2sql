@@ -10,13 +10,14 @@ Depends on: catalog_loader module from Track 02.
 import yaml
 
 from nl2sql_agent.catalog_loader import load_yaml, CATALOG_DIR
+from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 # Map of unique table names to their YAML file paths (relative to CATALOG_DIR).
 # For tables that exist in BOTH datasets (markettrade, quotertrade, clicktrade),
-# they are NOT in this map — use _DATASET_TABLE_MAP with (dataset, table) instead.
+# they are NOT in this map — use _dataset_to_layer() with dataset name instead.
 _TABLE_YAML_MAP: dict[str, str] = {
     # KPI-only tables
     "brokertrade": "kpi/brokertrade.yaml",
@@ -28,36 +29,37 @@ _TABLE_YAML_MAP: dict[str, str] = {
     "marketdepth": "data/marketdepth.yaml",
 }
 
-# Aliases — resolve ambiguity for tables that exist in both datasets.
-_DATASET_TABLE_MAP: dict[tuple[str, str], str] = {
-    ("nl2sql_omx_kpi", "markettrade"): "kpi/markettrade.yaml",
-    ("nl2sql_omx_kpi", "quotertrade"): "kpi/quotertrade.yaml",
-    ("nl2sql_omx_kpi", "brokertrade"): "kpi/brokertrade.yaml",
-    ("nl2sql_omx_kpi", "clicktrade"): "kpi/clicktrade.yaml",
-    ("nl2sql_omx_kpi", "otoswing"): "kpi/otoswing.yaml",
-    ("nl2sql_omx_data", "theodata"): "data/theodata.yaml",
-    ("nl2sql_omx_data", "quotertrade"): "data/quotertrade.yaml",
-    ("nl2sql_omx_data", "markettrade"): "data/markettrade.yaml",
-    ("nl2sql_omx_data", "clicktrade"): "data/clicktrade.yaml",
-    ("nl2sql_omx_data", "swingdata"): "data/swingdata.yaml",
-    ("nl2sql_omx_data", "marketdata"): "data/marketdata.yaml",
-    ("nl2sql_omx_data", "marketdepth"): "data/marketdepth.yaml",
-}
+
+def _dataset_to_layer(dataset_name: str) -> str | None:
+    """Map a resolved dataset name to catalog layer (kpi or data).
+
+    Uses settings to support any exchange — the mapping is driven by
+    the KPI_DATASET and DATA_DATASET env vars, not hardcoded names.
+    """
+    if dataset_name == settings.kpi_dataset:
+        return "kpi"
+    if dataset_name == settings.data_dataset:
+        return "data"
+    return None
 
 
 def _resolve_yaml_path(table_name: str, dataset_name: str = "") -> str | None:
     """Resolve a table name + optional dataset to a YAML file path.
 
+    Uses dataset_to_layer() for dynamic resolution — works with any
+    exchange dataset name (OMX, Brazil, ICE, etc.) as long as the
+    KPI_DATASET/DATA_DATASET env vars match.
+
     Tries dataset+table first (most specific), then table alone.
     Returns None if no mapping found.
     """
-    # Try dataset+table combo first
+    # Try dataset-based resolution first (most specific)
     if dataset_name:
-        key = (dataset_name, table_name)
-        if key in _DATASET_TABLE_MAP:
-            return _DATASET_TABLE_MAP[key]
+        layer = _dataset_to_layer(dataset_name)
+        if layer:
+            return f"{layer}/{table_name}.yaml"
 
-    # Try direct table name
+    # Try direct table name (unique tables only)
     if table_name in _TABLE_YAML_MAP:
         return _TABLE_YAML_MAP[table_name]
 
@@ -72,21 +74,20 @@ def _resolve_yaml_path(table_name: str, dataset_name: str = "") -> str | None:
 def load_yaml_metadata(table_name: str, dataset_name: str) -> dict:
     """Load the YAML metadata catalog for a specific BigQuery table.
 
-    Use this tool AFTER vector_search_tables to get detailed column
+    Use this tool AFTER vector_search_columns to get detailed column
     descriptions, synonyms, business rules, and data types for the
     tables identified as relevant. This metadata is essential for
     generating correct SQL — it tells you exact column names, what
     they mean, what values they contain, and how calculations work.
 
-    For KPI tables (nl2sql_omx_kpi), the response also includes the
-    KPI dataset context with shared column definitions and routing rules.
+    For KPI tables, the response also includes the KPI dataset context
+    with shared column definitions and routing rules.
 
     Args:
         table_name: The table to load metadata for. Examples:
             'markettrade', 'theodata', 'quotertrade', 'brokertrade'.
         dataset_name: Dataset name to disambiguate tables that
-            exist in both KPI and data datasets. Examples:
-            'nl2sql_omx_kpi', 'nl2sql_omx_data'. Pass empty string
+            exist in both KPI and data datasets. Pass empty string
             if unknown.
 
     Returns:

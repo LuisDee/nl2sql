@@ -26,7 +26,7 @@ REQUIRED_TABLE_KEYS = {"name", "dataset", "fqn", "layer", "description", "partit
 REQUIRED_COLUMN_KEYS = {"name", "type", "description"}
 REQUIRED_EXAMPLE_KEYS = {"question", "sql", "tables_used", "dataset", "complexity"}
 VALID_LAYERS = {"kpi", "data"}
-VALID_DATASETS = {"nl2sql_omx_kpi", "nl2sql_omx_data"}
+VALID_DATASETS = {"{kpi_dataset}", "{data_dataset}"}
 VALID_COMPLEXITIES = {"simple", "medium", "complex"}
 
 
@@ -55,30 +55,76 @@ def clear_yaml_cache() -> None:
     load_yaml.cache_clear()
 
 
-def resolve_fqn(table_data: dict[str, Any], project: str) -> str:
-    """Resolve {project} placeholder in a table's fqn field.
+def resolve_placeholders(
+    text: str,
+    *,
+    project: str = "",
+    kpi_dataset: str = "",
+    data_dataset: str = "",
+) -> str:
+    """Resolve all catalog placeholders in a string.
+
+    Handles {project}, {kpi_dataset}, and {data_dataset} placeholders.
+    Only replaces placeholders for which a non-empty value is provided.
+    """
+    result = text
+    if project:
+        result = result.replace("{project}", project)
+    if kpi_dataset:
+        result = result.replace("{kpi_dataset}", kpi_dataset)
+    if data_dataset:
+        result = result.replace("{data_dataset}", data_dataset)
+    return result
+
+
+def resolve_fqn(
+    table_data: dict[str, Any],
+    project: str,
+    kpi_dataset: str = "",
+    data_dataset: str = "",
+) -> str:
+    """Resolve placeholders in a table's fqn field.
 
     Args:
         table_data: The 'table' dict from a table YAML (must have 'fqn' key).
         project: GCP project ID to substitute.
+        kpi_dataset: KPI dataset name (optional).
+        data_dataset: Data dataset name (optional).
 
     Returns:
-        Fully-qualified table name with project resolved.
+        Fully-qualified table name with placeholders resolved.
     """
-    return table_data["fqn"].replace("{project}", project)
+    return resolve_placeholders(
+        table_data["fqn"],
+        project=project,
+        kpi_dataset=kpi_dataset,
+        data_dataset=data_dataset,
+    )
 
 
-def resolve_example_sql(sql: str, project: str) -> str:
-    """Resolve {project} placeholder in example SQL.
+def resolve_example_sql(
+    sql: str,
+    project: str,
+    kpi_dataset: str = "",
+    data_dataset: str = "",
+) -> str:
+    """Resolve placeholders in example SQL.
 
     Args:
-        sql: SQL string with {project} placeholders.
+        sql: SQL string with placeholders.
         project: GCP project ID to substitute.
+        kpi_dataset: KPI dataset name (optional).
+        data_dataset: Data dataset name (optional).
 
     Returns:
-        SQL string with all {project} replaced.
+        SQL string with all placeholders replaced.
     """
-    return sql.replace("{project}", project)
+    return resolve_placeholders(
+        sql,
+        project=project,
+        kpi_dataset=kpi_dataset,
+        data_dataset=data_dataset,
+    )
 
 
 def validate_table_yaml(data: dict[str, Any], filepath: str = "") -> list[str]:

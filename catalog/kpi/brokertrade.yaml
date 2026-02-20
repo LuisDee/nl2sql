@@ -1,7 +1,7 @@
 table:
   name: brokertrade
-  dataset: nl2sql_omx_kpi
-  fqn: '{project}.nl2sql_omx_kpi.brokertrade'
+  dataset: "{kpi_dataset}"
+  fqn: '{project}.{kpi_dataset}.brokertrade'
   layer: kpi
   description: >-
     Broker-routed (voice/OTC) trade KPIs with time-bucketed slippage and fee accounting.

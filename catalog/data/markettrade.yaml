@@ -1,10 +1,10 @@
 table:
   name: markettrade
-  dataset: nl2sql_omx_data
-  fqn: '{project}.nl2sql_omx_data.markettrade'
+  dataset: "{data_dataset}"
+  fqn: '{project}.{data_dataset}.markettrade'
   layer: data
   description: Raw market trade execution details from the exchange feed. Contains trade price, size, aggressor side, and
-    full instrument reference data. NOT a KPI table -- use nl2sql_omx_kpi.markettrade for edge/slippage metrics. Partitioned
+    full instrument reference data. NOT a KPI table -- use {kpi_dataset}.markettrade for edge/slippage metrics. Partitioned
     by trade_date.
   business_context: >
     All market trades from ALL participants (Mako + counterparties). This is the superset —

@@ -1,5 +1,5 @@
 dataset:
-  name: nl2sql_omx_data
+  name: "{data_dataset}"
   layer: data
   description: >
     Raw OMX options trading and market data. Silver layer.
@@ -110,7 +110,7 @@ dataset:
 
   disambiguation:
     theodata_unique: >
-      theodata exists ONLY in nl2sql_omx_data. It contains theoretical options
+      theodata exists ONLY in {data_dataset}. It contains theoretical options
       pricing: theo (fair value), delta, vol (implied volatility), vega, gamma,
       theta, rho, forward price, time to expiry (tte), vol surface parameters
       (greek_atm, greek_skew, param_atm), and raw vs adjusted Greeks (raw_delta,

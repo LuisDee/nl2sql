@@ -1,7 +1,7 @@
 table:
   name: marketdata
-  dataset: nl2sql_omx_data
-  fqn: '{project}.nl2sql_omx_data.marketdata'
+  dataset: "{data_dataset}"
+  fqn: '{project}.{data_dataset}.marketdata'
   layer: data
   description: Market data feed snapshots containing trade and quote events from the exchange. Each row is a market data event
     (trade, quote update, etc.) with exchange timestamps and instrument details. Partitioned by trade_date.

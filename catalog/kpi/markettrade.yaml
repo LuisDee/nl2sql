@@ -1,7 +1,7 @@
 table:
   name: markettrade
-  dataset: nl2sql_omx_kpi
-  fqn: '{project}.nl2sql_omx_kpi.markettrade'
+  dataset: "{kpi_dataset}"
+  fqn: '{project}.{kpi_dataset}.markettrade'
   layer: kpi
   description: >-
     Exchange/market trade KPIs with time-bucketed slippage and Greeks. This is the DEFAULT table when

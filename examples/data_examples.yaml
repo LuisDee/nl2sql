@@ -7,13 +7,13 @@ examples:
         ROUND(vol, 4) AS implied_vol,
         ROUND(tv, 4) AS theo_price,
         ROUND(delta, 4) AS delta
-      FROM `{project}.nl2sql_omx_data.theodata`
+      FROM `{project}.{data_dataset}.theodata`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
       ORDER BY strike
       LIMIT 50
     tables_used: [theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "implied vol / IV -> data.theodata"
     validated: false
@@ -29,13 +29,13 @@ examples:
         ROUND(theta, 4) AS theta,
         ROUND(vol, 4) AS vol,
         ROUND(tv, 4) AS theo
-      FROM `{project}.nl2sql_omx_data.theodata`
+      FROM `{project}.{data_dataset}.theodata`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
       ORDER BY strike
       LIMIT 50
     tables_used: [theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "greeks / delta / vega -> data.theodata"
     validated: false
@@ -48,13 +48,13 @@ examples:
         ROUND(vol, 4) AS implied_vol,
         ROUND(delta, 4) AS delta,
         ROUND(tv, 4) AS theo
-      FROM `{project}.nl2sql_omx_data.theodata`
+      FROM `{project}.{data_dataset}.theodata`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
       ORDER BY strike
       LIMIT 100
     tables_used: [theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "vol surface -> data.theodata"
     validated: false
@@ -69,13 +69,13 @@ examples:
         ROUND(tv, 4) AS theo,
         ROUND(vega, 4) AS vega,
         ROUND(gamma, 6) AS gamma
-      FROM `{project}.nl2sql_omx_data.theodata`
+      FROM `{project}.{data_dataset}.theodata`
       WHERE trade_date = '2026-02-17'
         AND ABS(delta) BETWEEN 0.40 AND 0.60
       ORDER BY symbol, strike
       LIMIT 50
     tables_used: [theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "ATM / delta range -> data.theodata"
     validated: false
@@ -88,13 +88,13 @@ examples:
         ROUND(tv, 4) AS theo_value,
         ROUND(delta, 4) AS delta,
         ROUND(vol, 4) AS vol
-      FROM `{project}.nl2sql_omx_data.theodata`
+      FROM `{project}.{data_dataset}.theodata`
       WHERE trade_date = '2026-02-17'
         AND ABS(delta) > 0.9
       ORDER BY symbol, strike
       LIMIT 50
     tables_used: [theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "fair value / theo / ITM -> data.theodata"
     validated: false
@@ -103,12 +103,12 @@ examples:
   - question: "Show me all symbols available in theodata"
     sql: |
       SELECT DISTINCT symbol, COUNT(*) AS row_count
-      FROM `{project}.nl2sql_omx_data.theodata`
+      FROM `{project}.{data_dataset}.theodata`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY row_count DESC
     tables_used: [theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "what symbols in theodata -> data.theodata"
     validated: false
@@ -118,12 +118,12 @@ examples:
   - question: "What was the market data for a specific symbol today?"
     sql: |
       SELECT *
-      FROM `{project}.nl2sql_omx_data.marketdata`
+      FROM `{project}.{data_dataset}.marketdata`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
       LIMIT 20
     tables_used: [marketdata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "market data / market price -> data.marketdata"
     validated: false
@@ -133,12 +133,12 @@ examples:
   - question: "Show me the order book depth for a symbol"
     sql: |
       SELECT *
-      FROM `{project}.nl2sql_omx_data.marketdepth`
+      FROM `{project}.{data_dataset}.marketdepth`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
       LIMIT 20
     tables_used: [marketdepth]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "order book / depth / bid ask -> data.marketdepth"
     validated: false
@@ -150,11 +150,11 @@ examples:
   - question: "Show me the raw execution details for market trades"
     sql: |
       SELECT *
-      FROM `{project}.nl2sql_omx_data.markettrade`
+      FROM `{project}.{data_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       LIMIT 20
     tables_used: [markettrade]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "raw execution / fill detail -> data.markettrade (NOT kpi)"
     validated: false
@@ -163,11 +163,11 @@ examples:
   - question: "Show raw quoter trade execution details"
     sql: |
       SELECT *
-      FROM `{project}.nl2sql_omx_data.quotertrade`
+      FROM `{project}.{data_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       LIMIT 20
     tables_used: [quotertrade]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: simple
     routing_signal: "raw quoter execution -> data.quotertrade (NOT kpi)"
     validated: false
@@ -184,12 +184,12 @@ examples:
         ROUND(AVG(latency_stats_vtio), 0) AS avg_vt_decision_us,
         ROUND(AVG(latency_stats_bkio), 0) AS avg_dma_us,
         ROUND(AVG(latency_stats_itio), 0) AS avg_order_send_us
-      FROM `{project}.nl2sql_omx_data.swingdata`
+      FROM `{project}.{data_dataset}.swingdata`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
       ORDER BY swing_count DESC
     tables_used: [swingdata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "swing latency / how fast -> data.swingdata (latency stats)"
     validated: false
@@ -202,12 +202,12 @@ examples:
         takeout_type,
         COUNT(*) AS swing_count,
         ROUND(AVG(swing_edge), 4) AS avg_edge
-      FROM `{project}.nl2sql_omx_data.swingdata`
+      FROM `{project}.{data_dataset}.swingdata`
       WHERE trade_date = '2026-02-17'
       GROUP BY takeout_category, takeout_type
       ORDER BY swing_count DESC
     tables_used: [swingdata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "takeout reason / why swing -> data.swingdata"
     validated: false
@@ -223,7 +223,7 @@ examples:
         ROUND(AVG(ask_price_0 - bid_price_0), 4) AS avg_spread,
         ROUND(AVG(bid_volume_0), 0) AS avg_bid_size,
         ROUND(AVG(ask_volume_0), 0) AS avg_ask_size
-      FROM `{project}.nl2sql_omx_data.marketdepth`
+      FROM `{project}.{data_dataset}.marketdepth`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
         AND bid_price_0 > 0 AND ask_price_0 > 0
@@ -231,7 +231,7 @@ examples:
       ORDER BY avg_spread DESC
       LIMIT 20
     tables_used: [marketdepth]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "bid-ask spread / spread analysis -> data.marketdepth"
     validated: false
@@ -246,14 +246,14 @@ examples:
         ROUND(delta, 4) AS delta,
         ROUND(vega, 4) AS vega,
         ROUND(gamma, 6) AS gamma
-      FROM `{project}.nl2sql_omx_data.theodata`
+      FROM `{project}.{data_dataset}.theodata`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
         AND term = 'DEC25'
       ORDER BY strike
       LIMIT 100
     tables_used: [theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "vol smile / vol by strike for expiry -> data.theodata"
     validated: false
@@ -267,13 +267,13 @@ examples:
         ROUND(AVG(under), 4) AS avg_underlying,
         ROUND(AVG(short_rate), 6) AS avg_rate,
         ROUND(AVG(tte), 4) AS avg_tte
-      FROM `{project}.nl2sql_omx_data.theodata`
+      FROM `{project}.{data_dataset}.theodata`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'EMBRACB'
       GROUP BY term
       ORDER BY avg_tte
     tables_used: [theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "forward price / term structure -> data.theodata"
     validated: false
@@ -284,7 +284,7 @@ examples:
     sql: |
       WITH underlying_price AS (
         SELECT ROUND(AVG(under), 2) AS atm_price
-        FROM `{project}.nl2sql_omx_data.theodata`
+        FROM `{project}.{data_dataset}.theodata`
         WHERE trade_date = '2026-02-17'
           AND symbol = 'BETS'
           AND term = 'Apr-2026'
@@ -292,7 +292,7 @@ examples:
       ),
       nearest_strike AS (
         SELECT DISTINCT strike
-        FROM `{project}.nl2sql_omx_data.marketdepth`
+        FROM `{project}.{data_dataset}.marketdepth`
         WHERE trade_date = '2026-02-17'
           AND symbol = 'BETS'
           AND term = 'Apr-2026'
@@ -307,7 +307,7 @@ examples:
         md.ask_price_0, md.ask_size_0, md.ask_orders_0,
         md.bid_price_1, md.bid_size_1,
         md.ask_price_1, md.ask_size_1
-      FROM `{project}.nl2sql_omx_data.marketdepth` md
+      FROM `{project}.{data_dataset}.marketdepth` md
       CROSS JOIN nearest_strike ns
       WHERE md.trade_date = '2026-02-17'
         AND md.symbol = 'BETS'
@@ -317,7 +317,7 @@ examples:
       ORDER BY md.putcall, md.DataTimestamp DESC
       LIMIT 20
     tables_used: [marketdepth, theodata]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: complex
     routing_signal: "ATM strike + order book depth -> find ATM via theodata.under, then query marketdepth. ALWAYS resolve ATM by querying underlying price first, never guess."
     validated: false
@@ -333,14 +333,14 @@ examples:
         bid_price_0, bid_size_0,
         ask_price_0, ask_size_0,
         ROUND(ask_price_0 - bid_price_0, 4) AS spread
-      FROM `{project}.nl2sql_omx_data.marketdepth`
+      FROM `{project}.{data_dataset}.marketdepth`
       WHERE trade_date = '2026-02-17'
         AND symbol = 'BETS'
         AND DataTimestamp >= TIMESTAMP('2026-02-17 16:00:00')
       ORDER BY DataTimestamp DESC
       LIMIT 20
     tables_used: [marketdepth]
-    dataset: nl2sql_omx_data
+    dataset: "{data_dataset}"
     complexity: medium
     routing_signal: "market depth at close -> use DataTimestamp (preferred primary timestamp) for time filtering, NOT ExchangeTimestamp"
     validated: false

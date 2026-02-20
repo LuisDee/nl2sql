@@ -1,5 +1,5 @@
 dataset:
-  name: nl2sql_omx_kpi
+  name: "{kpi_dataset}"
   layer: kpi
   description: >
     KPI (Key Performance Indicators) for OMX options trading. Gold layer.
@@ -188,7 +188,7 @@ dataset:
 
   disambiguation:
     kpi_vs_data_same_table_name: >
-      Both nl2sql_omx_kpi and nl2sql_omx_data contain tables with the same names
+      Both {kpi_dataset} and {data_dataset} contain tables with the same names
       (brokertrade, clicktrade, markettrade, quotertrade). The KPI dataset has
       enriched performance metrics (edge_bps, instant_pnl, slippage, delta_bucket).
       The data dataset has raw trade execution details (exact timestamps, prices,

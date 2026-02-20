@@ -1,7 +1,7 @@
 table:
   name: quotertrade
-  dataset: nl2sql_omx_data
-  fqn: '{project}.nl2sql_omx_data.quotertrade'
+  dataset: "{data_dataset}"
+  fqn: '{project}.{data_dataset}.quotertrade'
   layer: data
   description: "Raw quoter activity with timestamps, levels, and sizes. NOT the same as kpi.quotertrade which has performance
     metrics (edge, PnL, slippage). This table contains the full lifecycle of quoter fills including quote management fields

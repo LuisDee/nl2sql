@@ -5,6 +5,13 @@ table:
   layer: data
   description: Market data feed snapshots containing trade and quote events from the exchange. Each row is a market data event
     (trade, quote update, etc.) with exchange timestamps and instrument details. Partitioned by trade_date.
+  business_context: >
+    Market data feed snapshots. Not a trade table — contains exchange price/volume data
+    for all instruments across all participants.
+  preferred_timestamps:
+    primary: DataTimestamp
+    fallback: [HardwareNicRxTimestamp, MakoIngressTimestamp, SoftwareRxTimestamp, ExchangeTimestamp]
+    notes: "Use DataTimestamp for time-range filters. Fallback chain for latency analysis. Do NOT use ExchangeTimestamp as primary — it may contain epoch values."
   partition_field: trade_date
   cluster_fields:
   - symbol

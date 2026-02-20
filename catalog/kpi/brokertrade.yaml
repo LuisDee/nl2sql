@@ -19,6 +19,13 @@ table:
   - kpi_brokertrade_normalized.sql
   - kpi_brokertrade_calculations.sql
   proto_source: 'OffFloorData.proto :: BrokerTrade'
+  business_context: >
+    Mako's broker-facilitated (voice/OTC) trades only. These trades also appear in
+    kpi.markettrade. Do NOT sum with markettrade or you will double-count.
+  preferred_timestamps:
+    primary: event_timestamp_ns
+    fallback: []
+    notes: "Use event_timestamp_ns for all time-range filters on KPI brokertrade."
   partition_field: trade_date
   cluster_fields:
   - symbol

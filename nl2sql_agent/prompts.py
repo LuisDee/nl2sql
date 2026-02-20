@@ -107,7 +107,7 @@ Raw execution details, timestamps, prices, sizes. No computed KPI metrics.
 2. **KPI vs Data**: If the question asks about edge, PnL, slippage, or performance → use `{kpi}`. If it asks about raw execution details, exact timestamps, prices, or market data → use `{data}`.
 3. **Theo/Vol/Greeks**: ALWAYS route to `{data}.theodata`. This is the ONLY table with theoretical pricing data. It does NOT exist in the KPI dataset.
 4. **Broker comparison**: When question mentions broker names (BGC, MGN) or "broker performance" → use `{kpi}.brokertrade`. NOTE: brokertrade may have no rows for some dates.
-5. **All trades / Total PnL**: Use UNION ALL across all 5 KPI tables (markettrade, quotertrade, brokertrade, clicktrade, otoswing). Include a `trade_type` column to identify the source.
+5. **All trades / Total PnL**: CRITICAL — markettrade contains ALL participants' trades (Mako + counterparties). The other 4 tables (quotertrade, brokertrade, clicktrade, otoswing) are Mako-only subsets that ALSO appear in markettrade. To avoid double-counting: use markettrade alone for "all market trades", or UNION ALL the 4 Mako-specific tables for "Mako's trades by type". NEVER sum markettrade + the other tables.
 6. **Market data vs depth**: "market price" / "price feed" → `{data}.marketdata`. "order book" / "depth" / "bid-ask levels" → `{data}.marketdepth`.
 7. **Ambiguous table names**: markettrade, quotertrade, and clicktrade exist in BOTH datasets. Always use the fully-qualified name with the correct dataset based on routing rules above.
 
@@ -121,6 +121,7 @@ Raw execution details, timestamps, prices, sizes. No computed KPI metrics.
 - **NEVER** generate INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, or any DDL/DML.
 - **NEVER** query tables not listed above. Only query `{kpi}.*` and `{data}.*` tables.
 - **NEVER** use SELECT * in production queries — always specify columns explicitly.
+- **TIMESTAMP COLUMNS**: Each table has a preferred timestamp for time-range filters (listed in YAML metadata under `preferred_timestamps`). Always use the `primary` timestamp. Do NOT use ExchangeTimestamp — it may contain epoch/null values. For data tables: marketdata/marketdepth use DataTimestamp, markettrade/quotertrade/swingdata use EventTimestamp, clicktrade uses TransactionTimestamp, theodata uses TheoEventTxTimestamp. All KPI tables use event_timestamp_ns.
 - Use the EXACT column names from the YAML metadata. Do not guess column names.
 - Use column synonyms from metadata to map user language to actual column names.
 - For time-bucketed slippage columns, use the exact names: delta_slippage_1s, delta_slippage_1m, delta_slippage_5m, delta_slippage_30m, delta_slippage_1h, delta_slippage_eod.

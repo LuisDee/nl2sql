@@ -11,6 +11,13 @@ table:
     kpi.quotertrade contains performance metrics (edge_bps, instant_pnl, slippage, delta_bucket). Route to data.quotertrade
     for questions about quoting levels, residual sizes, tv_bid/tv_ask, or quote update timing. Route to kpi.quotertrade
     for questions about quoter edge, PnL, or slippage."
+  business_context: >
+    Mako's raw quoter activity and fills only. These trades also appear in markettrade.
+    Do NOT sum with markettrade or you will double-count.
+  preferred_timestamps:
+    primary: EventTimestamp
+    fallback: [HardwareNicRxTimestamp]
+    notes: "Use EventTimestamp for time-range filters."
   partition_field: trade_date
   cluster_fields:
   - symbol

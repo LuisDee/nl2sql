@@ -108,6 +108,69 @@ class TestYamlCatalogValidation:
             )
 
 
+class TestMetadataGaps:
+    """Validate Track 10 metadata additions: business_context, preferred_timestamps, trade_taxonomy."""
+
+    @pytest.mark.parametrize("subdir,table", [
+        ("kpi", "markettrade"), ("kpi", "quotertrade"), ("kpi", "brokertrade"),
+        ("kpi", "clicktrade"), ("kpi", "otoswing"),
+        ("data", "theodata"), ("data", "marketdata"), ("data", "marketdepth"),
+        ("data", "swingdata"), ("data", "markettrade"), ("data", "quotertrade"),
+        ("data", "clicktrade"),
+    ])
+    def test_table_has_business_context(self, subdir, table):
+        """Every table YAML must have a business_context field."""
+        path = CATALOG_DIR / subdir / f"{table}.yaml"
+        data = load_yaml(path)
+        table_data = data["table"]
+        assert "business_context" in table_data, (
+            f"{subdir}/{table}.yaml missing business_context"
+        )
+        assert len(table_data["business_context"].strip()) > 10, (
+            f"{subdir}/{table}.yaml business_context is too short"
+        )
+
+    @pytest.mark.parametrize("subdir,table", [
+        ("kpi", "markettrade"), ("kpi", "quotertrade"), ("kpi", "brokertrade"),
+        ("kpi", "clicktrade"), ("kpi", "otoswing"),
+        ("data", "theodata"), ("data", "marketdata"), ("data", "marketdepth"),
+        ("data", "swingdata"), ("data", "markettrade"), ("data", "quotertrade"),
+        ("data", "clicktrade"),
+    ])
+    def test_table_has_preferred_timestamps(self, subdir, table):
+        """Every table YAML must have preferred_timestamps with a primary field."""
+        path = CATALOG_DIR / subdir / f"{table}.yaml"
+        data = load_yaml(path)
+        table_data = data["table"]
+        assert "preferred_timestamps" in table_data, (
+            f"{subdir}/{table}.yaml missing preferred_timestamps"
+        )
+        ts = table_data["preferred_timestamps"]
+        assert "primary" in ts, (
+            f"{subdir}/{table}.yaml preferred_timestamps missing 'primary'"
+        )
+        assert len(ts["primary"]) > 0, (
+            f"{subdir}/{table}.yaml preferred_timestamps.primary is empty"
+        )
+
+    @pytest.mark.parametrize("subdir", ["kpi", "data"])
+    def test_dataset_has_trade_taxonomy(self, subdir):
+        """Dataset YAMLs must have a trade_taxonomy section."""
+        path = CATALOG_DIR / subdir / "_dataset.yaml"
+        data = load_yaml(path)
+        ds = data["dataset"]
+        assert "trade_taxonomy" in ds, (
+            f"{subdir}/_dataset.yaml missing trade_taxonomy"
+        )
+        taxonomy = ds["trade_taxonomy"]
+        assert "description" in taxonomy, (
+            f"{subdir}/_dataset.yaml trade_taxonomy missing description"
+        )
+        assert "markettrade" in taxonomy, (
+            f"{subdir}/_dataset.yaml trade_taxonomy missing markettrade entry"
+        )
+
+
 class TestExamplesValidation:
     """Validate example query YAML files."""
 

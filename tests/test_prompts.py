@@ -150,3 +150,22 @@ class TestRetryGuidance:
     def test_no_retry_status_when_zero_attempts(self):
         result = build_nl2sql_instruction(self._make_ctx())
         assert "RETRY STATUS" not in result
+
+
+class TestTradeTaxonomyInPrompt:
+    def _make_ctx(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state or {}
+        return ctx
+
+    def test_contains_double_counting_warning(self):
+        """Prompt must warn about double-counting markettrade + Mako tables."""
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "double-count" in result.lower()
+
+    def test_contains_timestamp_guidance(self):
+        """Prompt must include preferred timestamp column guidance."""
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "DataTimestamp" in result
+        assert "EventTimestamp" in result
+        assert "event_timestamp_ns" in result

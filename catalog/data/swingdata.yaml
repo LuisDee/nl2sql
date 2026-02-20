@@ -5,6 +5,13 @@ table:
   layer: data
   description: Raw swing trade event data with full detail on every swing opportunity, including routed orders, fills, and
     latency statistics. Use for detailed swing execution analysis. Partitioned by trade_date.
+  business_context: >
+    Mako's automated OTO swing trade events. Related to markettrade (swing fills also
+    appear there). Contains latency stats and swing-specific fields not in markettrade.
+  preferred_timestamps:
+    primary: EventTimestamp
+    fallback: [HardwareNicRxTimestamp]
+    notes: "Use EventTimestamp for time-range filters."
   partition_field: trade_date
   cluster_fields:
   - symbol

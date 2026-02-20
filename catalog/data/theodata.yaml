@@ -6,6 +6,13 @@ table:
   description: Theo pricing snapshots containing theoretical value, Greeks, and volatility surface parameters per instrument.
     UNIQUE to the data layer -- not available as a KPI table. Use this for theo/delta/vol/vega lookups by strike, symbol,
     and term. Partitioned by trade_date.
+  business_context: >
+    Theoretical pricing snapshots. Not a trade table. UNIQUE to the data layer — the
+    only source for Greeks, IV, vol surface, and theo (fair value) data.
+  preferred_timestamps:
+    primary: TheoEventTxTimestamp
+    fallback: [WhenTimestamp]
+    notes: "Use TheoEventTxTimestamp for time-range filters. WhenTimestamp as fallback."
   partition_field: trade_date
   cluster_fields:
   - symbol

@@ -15,6 +15,13 @@ table:
     Manual click trades. Derived from posdata filtered by algorithm inclusion list.
     Source SQL: kpi_clicktrade_normalized.sql, kpi_clicktrade_calculations.sql.
     Proto source: PosData.proto :: PositionEvent.
+  business_context: >
+    Mako's manual screen/click trades only. These trades also appear in kpi.markettrade.
+    Do NOT sum with markettrade or you will double-count.
+  preferred_timestamps:
+    primary: event_timestamp_ns
+    fallback: []
+    notes: "Use event_timestamp_ns for all time-range filters on KPI clicktrade."
   partition_field: trade_date
   cluster_fields:
   - symbol

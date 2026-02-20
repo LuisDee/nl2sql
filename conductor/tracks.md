@@ -70,3 +70,12 @@
 - **Complexity:** M
 - **Dependencies:** 08_loop_and_performance_fix
 - **Description:** Fixes JSON serialization crash for BQ Timestamp/Date/Decimal types and replaces blunt tool call counter with hash-based repetition detection.
+
+---
+
+## [~] Track: Metadata Gaps (Trade Taxonomy + Preferred Timestamps)
+- **ID:** 10_metadata_gaps
+- **Wave:** 8
+- **Complexity:** M
+- **Dependencies:** 09_production_hardening, 06_metadata_enrichment
+- **Description:** Adds trade type taxonomy, preferred timestamp columns, and ATM strike resolution patterns to YAML catalog metadata.

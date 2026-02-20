@@ -9,6 +9,13 @@ table:
     Use this table for quoter fill analysis, quoter performance, quoter edge. Partitioned by trade_date.
     Unlike markettrade, tv_change columns use mid_tv as the base reference, not tv.
     Source proto is QuoterTrade.proto (QuoterTrade message).
+  business_context: >
+    Mako's auto-quoter fills only. These trades also appear in kpi.markettrade.
+    Do NOT sum with markettrade or you will double-count.
+  preferred_timestamps:
+    primary: event_timestamp_ns
+    fallback: []
+    notes: "Use event_timestamp_ns for all time-range filters on KPI quotertrade."
   partition_field: trade_date
   cluster_fields:
   - symbol

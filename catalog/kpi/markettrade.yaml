@@ -13,6 +13,14 @@ table:
     -> calculate KPIs -> aggregate combos -> mart. Always filter on trade_date (partition column).
     Cluster fields are symbol and portfolio. NOT for quoter fills, broker trades, click trades, or OTO
     sweep trades — those have separate KPI tables.
+  business_context: >
+    All market trades from ALL participants (Mako + counterparties). This is the superset —
+    Mako's own trades (which appear in quotertrade, brokertrade, clicktrade, otoswing) are
+    also included here. Do NOT sum this with Mako-specific KPI tables or you will double-count.
+  preferred_timestamps:
+    primary: event_timestamp_ns
+    fallback: []
+    notes: "Use event_timestamp_ns for all time-range filters on KPI markettrade."
   partition_field: trade_date
   cluster_fields:
   - symbol

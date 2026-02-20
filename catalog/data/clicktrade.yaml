@@ -6,6 +6,13 @@ table:
   description: Raw click trade execution details from the Mako position management system (PosData). Contains full detail
     on manual click trade executions including position management fields, transaction bitmasks, and combo/leg information.
     Use nl2sql_omx_kpi.clicktrade for edge/slippage analysis. Partitioned by trade_date.
+  business_context: >
+    Mako's manual screen/click trades only. These trades also appear in markettrade.
+    Do NOT sum with markettrade or you will double-count.
+  preferred_timestamps:
+    primary: TransactionTimestamp
+    fallback: []
+    notes: "Use TransactionTimestamp for all time-range filters on click trades."
   partition_field: trade_date
   cluster_fields:
   - symbol

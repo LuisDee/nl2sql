@@ -7,6 +7,13 @@ table:
     in the underlying and routes orders to capture edge across multiple price levels. Each row represents one OTO sweep event.
     Contains routed_price, routed_size, swing_edge, avg_trade_price, and time-bucketed slippage with unique fired_at variants
     that measure PnL relative to the routed/fired price (separate from the average filled price). Partitioned by trade_date.
+  business_context: >
+    Mako's automated OTO swing takeouts only. These trades also appear in kpi.markettrade.
+    Do NOT sum with markettrade or you will double-count.
+  preferred_timestamps:
+    primary: event_timestamp_ns
+    fallback: []
+    notes: "Use event_timestamp_ns for all time-range filters on KPI otoswing."
   partition_field: trade_date
   cluster_fields:
   - symbol

@@ -17,6 +17,20 @@ dataset:
     - marketdata
     - marketdepth
 
+  trade_taxonomy:
+    description: >
+      CRITICAL: markettrade contains ALL market trades across all participants — it is
+      the superset. quotertrade, clicktrade, and swingdata contain only Mako's own
+      trades, which ALSO appear in markettrade. Do not sum these with markettrade or
+      you will double-count. marketdata, marketdepth, and theodata are NOT trade tables.
+    markettrade: "All market trades from all participants. Superset."
+    quotertrade: "Mako's raw quoter activity and fills only. Subset of markettrade."
+    clicktrade: "Mako's manual click trades only. Subset of markettrade."
+    swingdata: "Mako's OTO swing trade events. Related to markettrade."
+    theodata: "Theoretical pricing snapshots. Not a trade table."
+    marketdata: "Market data feed snapshots. Not a trade table."
+    marketdepth: "Order book depth snapshots. Not a trade table."
+
   proto_sources:
     markettrade:
       proto: "MarketTrade.proto"

@@ -6,6 +6,14 @@ table:
   description: Raw market trade execution details from the exchange feed. Contains trade price, size, aggressor side, and
     full instrument reference data. NOT a KPI table -- use nl2sql_omx_kpi.markettrade for edge/slippage metrics. Partitioned
     by trade_date.
+  business_context: >
+    All market trades from ALL participants (Mako + counterparties). This is the superset —
+    Mako's own trades (which appear in quotertrade, clicktrade, swingdata) are also included here.
+    Do NOT sum this with Mako-specific tables or you will double-count.
+  preferred_timestamps:
+    primary: EventTimestamp
+    fallback: [HardwareNicRxTimestamp]
+    notes: "Use EventTimestamp for time-range filters. HardwareNicRxTimestamp for precise latency analysis."
   partition_field: trade_date
   cluster_fields:
   - symbol

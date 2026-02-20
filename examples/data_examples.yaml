@@ -290,3 +290,70 @@ examples:
     routing_signal: "forward price / term structure -> data.theodata"
     validated: false
     validated_by: ""
+
+  # --- ATM strike resolution pattern ---
+  - question: "Show me the order book depth for the ATM strike on BETS Apr-2026 at close"
+    sql: |
+      WITH underlying_price AS (
+        SELECT ROUND(AVG(under), 2) AS atm_price
+        FROM `{project}.nl2sql_omx_data.theodata`
+        WHERE trade_date = '2026-02-17'
+          AND symbol = 'BETS'
+          AND term = 'Apr-2026'
+          AND TheoEventTxTimestamp >= TIMESTAMP('2026-02-17 16:00:00')
+      ),
+      nearest_strike AS (
+        SELECT DISTINCT strike
+        FROM `{project}.nl2sql_omx_data.marketdepth`
+        WHERE trade_date = '2026-02-17'
+          AND symbol = 'BETS'
+          AND term = 'Apr-2026'
+        ORDER BY ABS(strike - (SELECT atm_price FROM underlying_price))
+        LIMIT 1
+      )
+      SELECT
+        md.DataTimestamp,
+        md.strike,
+        md.putcall,
+        md.bid_price_0, md.bid_size_0, md.bid_orders_0,
+        md.ask_price_0, md.ask_size_0, md.ask_orders_0,
+        md.bid_price_1, md.bid_size_1,
+        md.ask_price_1, md.ask_size_1
+      FROM `{project}.nl2sql_omx_data.marketdepth` md
+      CROSS JOIN nearest_strike ns
+      WHERE md.trade_date = '2026-02-17'
+        AND md.symbol = 'BETS'
+        AND md.term = 'Apr-2026'
+        AND md.strike = ns.strike
+        AND md.DataTimestamp >= TIMESTAMP('2026-02-17 16:20:00')
+      ORDER BY md.putcall, md.DataTimestamp DESC
+      LIMIT 20
+    tables_used: [marketdepth, theodata]
+    dataset: nl2sql_omx_data
+    complexity: complex
+    routing_signal: "ATM strike + order book depth -> find ATM via theodata.under, then query marketdepth. ALWAYS resolve ATM by querying underlying price first, never guess."
+    validated: false
+    validated_by: ""
+
+  # --- Preferred timestamp example ---
+  - question: "What was the market depth at close for a given symbol?"
+    sql: |
+      SELECT
+        DataTimestamp,
+        strike,
+        putcall,
+        bid_price_0, bid_size_0,
+        ask_price_0, ask_size_0,
+        ROUND(ask_price_0 - bid_price_0, 4) AS spread
+      FROM `{project}.nl2sql_omx_data.marketdepth`
+      WHERE trade_date = '2026-02-17'
+        AND symbol = 'BETS'
+        AND DataTimestamp >= TIMESTAMP('2026-02-17 16:00:00')
+      ORDER BY DataTimestamp DESC
+      LIMIT 20
+    tables_used: [marketdepth]
+    dataset: nl2sql_omx_data
+    complexity: medium
+    routing_signal: "market depth at close -> use DataTimestamp (preferred primary timestamp) for time filtering, NOT ExchangeTimestamp"
+    validated: false
+    validated_by: ""

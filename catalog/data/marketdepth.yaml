@@ -5,6 +5,13 @@ table:
   layer: data
   description: Order book depth snapshots with 5 levels of bid/ask prices, volumes, and order counts, plus implied prices.
     Use for spread analysis, liquidity analysis, and book shape studies. Partitioned by trade_date.
+  business_context: >
+    Order book depth snapshots with multiple price levels. Not a trade table — contains
+    bid/ask depth data for all instruments across all participants.
+  preferred_timestamps:
+    primary: DataTimestamp
+    fallback: [HardwareNicRxTimestamp, MakoIngressTimestamp, SoftwareRxTimestamp, ExchangeTimestamp]
+    notes: "Use DataTimestamp for time-range filters. Do NOT use ExchangeTimestamp as primary — it may contain epoch/null values."
   partition_field: trade_date
   cluster_fields:
   - symbol

@@ -14,6 +14,21 @@ dataset:
     - otoswing
     - quotertrade
 
+  trade_taxonomy:
+    description: >
+      CRITICAL: markettrade contains ALL market trades across all participants — it is
+      the superset. The other 4 tables (quotertrade, brokertrade, clicktrade, otoswing)
+      contain only Mako's own trades, which ALSO appear in markettrade. When aggregating
+      "total PnL across all trade types", you MUST NOT sum markettrade + the others
+      because that double-counts Mako's trades. Either use markettrade alone (all trades)
+      or UNION the 4 Mako-specific tables (quotertrade, brokertrade, clicktrade, otoswing)
+      for Mako-only totals.
+    markettrade: "All market trades from all participants (Mako + counterparties). Superset."
+    quotertrade: "Mako's auto-quoter fills only. Subset of markettrade."
+    brokertrade: "Mako's broker-facilitated (voice/OTC) trades only. Subset of markettrade."
+    clicktrade: "Mako's manual screen/click trades only. Subset of markettrade."
+    otoswing: "Mako's automated OTO swing takeouts only. Subset of markettrade."
+
   shared_columns:
     trade_date:
       description: >

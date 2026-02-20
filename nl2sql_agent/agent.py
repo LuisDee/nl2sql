@@ -18,7 +18,7 @@ from nl2sql_agent.callbacks import before_tool_guard, after_tool_log
 from nl2sql_agent.tools import (
     init_bq_service,
     check_semantic_cache,
-    vector_search_tables,
+    vector_search_columns,
     fetch_few_shot_examples,
     load_yaml_metadata,
     dry_run_sql,
@@ -58,7 +58,7 @@ nl2sql_agent = LlmAgent(
     generate_content_config=GenerateContentConfig(temperature=0.1),
     tools=[
         check_semantic_cache,
-        vector_search_tables,
+        vector_search_columns,
         fetch_few_shot_examples,
         load_yaml_metadata,
         dry_run_sql,

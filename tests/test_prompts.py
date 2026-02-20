@@ -54,7 +54,7 @@ class TestBuildInstruction:
 
     def test_contains_tool_usage_order(self):
         result = build_nl2sql_instruction(self._make_ctx())
-        assert "vector_search_tables" in result
+        assert "vector_search_columns" in result
         assert "load_yaml_metadata" in result
         assert "fetch_few_shot_examples" in result
         assert "dry_run_sql" in result
@@ -97,7 +97,7 @@ class TestBuildInstruction:
     def test_cache_step_before_vector_search(self):
         result = build_nl2sql_instruction(self._make_ctx())
         cache_pos = result.find("check_semantic_cache")
-        vector_pos = result.find("vector_search_tables")
+        vector_pos = result.find("vector_search_columns")
         assert cache_pos < vector_pos
 
 

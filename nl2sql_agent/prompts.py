@@ -41,7 +41,7 @@ The previous query in this session was:
 ```
 It returned {row_count} rows. If the user asks a follow-up question (e.g. "break that
 down by symbol", "filter to WHITE portfolio"), you can reuse the same table without
-re-running vector_search_tables. Modify the previous SQL directly.
+re-running vector_search_columns. Modify the previous SQL directly.
 """
 
     # Build retry-aware guidance
@@ -67,10 +67,10 @@ the user says "today". For "yesterday", use DATE_SUB('{today}', INTERVAL 1 DAY).
 ## TOOL USAGE ORDER (follow this EVERY TIME)
 
 0. **check_semantic_cache** — Check if this exact question was answered before (skip to step 5 if cache hit)
-1. **vector_search_tables** — Find which table(s) are relevant to the question
-2. **load_yaml_metadata** — Load column descriptions, synonyms, and business rules for those tables
+1. **vector_search_columns** — Find relevant tables AND columns via semantic search. Returns top columns per table with names, types, descriptions, and synonyms.
+2. **(OPTIONAL) load_yaml_metadata** — Only if you need full schema, business rules, or preferred timestamps not covered by column search results
 3. **fetch_few_shot_examples** — Find similar past validated queries for reference
-4. **Write the SQL** using metadata + examples as context (see SQL Rules below)
+4. **Write the SQL** using column descriptions + examples as context (see SQL Rules below)
 5. **dry_run_sql** — Validate syntax and estimate cost
 6. **execute_sql** — Run the validated query and return results
 
@@ -122,8 +122,9 @@ Raw execution details, timestamps, prices, sizes. No computed KPI metrics.
 - **NEVER** query tables not listed above. Only query `{kpi}.*` and `{data}.*` tables.
 - **NEVER** use SELECT * in production queries — always specify columns explicitly.
 - **TIMESTAMP COLUMNS**: Each table has a preferred timestamp for time-range filters (listed in YAML metadata under `preferred_timestamps`). Always use the `primary` timestamp. Do NOT use ExchangeTimestamp — it may contain epoch/null values. For data tables: marketdata/marketdepth use DataTimestamp, markettrade/quotertrade/swingdata use EventTimestamp, clicktrade uses TransactionTimestamp, theodata uses TheoEventTxTimestamp. All KPI tables use event_timestamp_ns.
-- Use the EXACT column names from the YAML metadata. Do not guess column names.
-- Use column synonyms from metadata to map user language to actual column names.
+- Use the column names from vector_search_columns results. The top_columns include exact column names, types, descriptions, and synonyms.
+- If you need columns not returned by the search (e.g., trade_date for filtering), call load_yaml_metadata for the full schema.
+- Do not guess column names — if unsure, search or load metadata first.
 - For time-bucketed slippage columns, use the exact names: delta_slippage_1s, delta_slippage_1m, delta_slippage_5m, delta_slippage_30m, delta_slippage_1h, delta_slippage_eod.
 
 ## CLARIFICATION RULES

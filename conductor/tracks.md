@@ -136,7 +136,7 @@
 
 ---
 
-## [~] Track: Routing Consolidation & Pipeline Testing
+## [x] Track: Routing Consolidation & Pipeline Testing
 - **ID:** 17_routing_and_pipeline
 - **Wave:** 14
 - **Complexity:** M

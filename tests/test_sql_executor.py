@@ -63,6 +63,26 @@ class TestExecuteSql:
         assert "warning" in result
         assert "truncated" in result["warning"].lower()
 
+    def test_adds_limit_when_only_in_subquery(self, mock_bq):
+        """LIMIT inside a subquery should NOT prevent adding outer LIMIT."""
+        sql = "SELECT * FROM (SELECT id FROM my_table LIMIT 5) sub"
+        execute_sql(sql)
+
+        # The outer query has no LIMIT, so one should be appended
+        query = mock_bq.last_query
+        # Count LIMIT occurrences — should be 2 (subquery + appended outer)
+        assert query.upper().count("LIMIT") == 2
+
+    def test_no_false_match_on_limit_column_name(self, mock_bq):
+        """Column names containing LIMIT (e.g. LIMIT_VALUE) should not prevent adding LIMIT."""
+        sql = "SELECT limit_value, x FROM my_table"
+        execute_sql(sql)
+
+        # The naive check sees "LIMIT" in "LIMIT_VALUE" and skips adding LIMIT.
+        # After the fix, an outer LIMIT should be appended.
+        query = mock_bq.last_query
+        assert query.rstrip().upper().endswith(f"LIMIT {1000}")
+
     def test_returns_error_on_exception(self, mock_bq):
         original_method = mock_bq.execute_query
 

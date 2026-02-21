@@ -4,6 +4,8 @@ Executes validated SQL and returns results. Enforces read-only (SELECT only)
 and row limits to prevent runaway queries.
 """
 
+import re
+
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
 from nl2sql_agent.serialization import sanitize_rows
@@ -42,10 +44,10 @@ def execute_sql(sql_query: str) -> dict:
             ),
         }
 
-    # --- Add LIMIT if not present ---
+    # --- Add LIMIT if not present at outer query level ---
     max_rows = settings.bq_max_result_rows
-    upper = stripped.upper()
-    if "LIMIT" not in upper:
+    has_outer_limit = bool(re.search(r'\bLIMIT\s+\d+\s*$', stripped, re.IGNORECASE))
+    if not has_outer_limit:
         sql_query = f"{stripped}\nLIMIT {max_rows}"
         logger.info("execute_sql_limit_added", limit=max_rows)
 

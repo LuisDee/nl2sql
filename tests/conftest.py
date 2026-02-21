@@ -41,7 +41,7 @@ class MockBigQueryService:
     """Mock BigQuery service implementing BigQueryProtocol for tests.
 
     Implements all protocol methods: execute_query, dry_run_query,
-    get_table_schema, query_with_params.
+    query_with_params.
     """
 
     def __init__(self):
@@ -91,10 +91,6 @@ class MockBigQueryService:
                 return response
 
         return self._default_dry_run_response
-
-    def get_table_schema(self, dataset: str, table: str) -> list[dict]:
-        """Mock get_table_schema (matching existing protocol)."""
-        return []
 
     def set_query_response(self, keyword: str, rows: list[dict[str, Any]]) -> None:
         """Set a response for queries containing the given keyword."""

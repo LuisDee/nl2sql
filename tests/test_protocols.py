@@ -50,15 +50,6 @@ class TestFakeBigQueryClient:
         assert result["valid"] is True
         assert result["error"] is None
 
-    def test_get_table_schema_returns_registered_schema(self):
-        """get_table_schema should return the schema registered via add_schema."""
-        client = FakeBigQueryClient()
-        schema = [{"name": "id", "type": "INT64", "mode": "REQUIRED", "description": ""}]
-        client.add_schema("nl2sql_omx_data", "theodata", schema)
-
-        result = client.get_table_schema("nl2sql_omx_data", "theodata")
-        assert result == schema
-
 
 class TestFakeEmbeddingClient:
     """Verify FakeEmbeddingClient satisfies EmbeddingProtocol."""

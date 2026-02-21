@@ -65,17 +65,6 @@ class BigQueryProtocol(Protocol):
         """
         ...
 
-    def get_table_schema(self, dataset: str, table: str) -> list[dict]:
-        """Get schema for a table.
-
-        Args:
-            dataset: BigQuery dataset name.
-            table: Table name.
-
-        Returns:
-            List of dicts with keys: name, type, mode, description.
-        """
-        ...
 
     def query_with_params(
         self, sql: str, params: list[dict[str, Any]] | None = None

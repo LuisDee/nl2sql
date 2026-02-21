@@ -64,19 +64,6 @@ class LiveBigQueryClient:
                 "error": str(e),
             }
 
-    def get_table_schema(self, dataset: str, table: str) -> list[dict]:
-        """Get schema for a table."""
-        table_ref = f"{self._project}.{dataset}.{table}"
-        bq_table = self._client.get_table(table_ref)
-        return [
-            {
-                "name": field.name,
-                "type": field.field_type,
-                "mode": field.mode,
-                "description": field.description or "",
-            }
-            for field in bq_table.schema
-        ]
 
     def query_with_params(
         self, sql: str, params: list[dict[str, Any]] | None = None

@@ -3,7 +3,11 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from nl2sql_agent.tools.metadata_loader import load_yaml_metadata, _resolve_yaml_path
+from nl2sql_agent.tools.metadata_loader import (
+    load_yaml_metadata,
+    _resolve_yaml_path,
+    _discover_table_yaml_map,
+)
 
 
 class TestResolveYamlPath:
@@ -32,6 +36,61 @@ class TestResolveYamlPath:
     def test_case_insensitive_match(self):
         path = _resolve_yaml_path("TheOData")
         assert path == "data/theodata.yaml"
+
+
+    def test_resolves_brazil_kpi_via_registry(self):
+        """Exchange registry lookup: Brazil KPI dataset."""
+        path = _resolve_yaml_path("markettrade", "nl2sql_brazil_kpi")
+        assert path == "kpi/markettrade.yaml"
+
+    def test_resolves_asx_data_via_registry(self):
+        """Exchange registry lookup: ASX data dataset."""
+        path = _resolve_yaml_path("theodata", "nl2sql_asx_data")
+        assert path == "data/theodata.yaml"
+
+    def test_resolves_unknown_dataset_via_suffix_heuristic(self):
+        """Suffix heuristic: nl2sql_newexchange_kpi → kpi."""
+        path = _resolve_yaml_path("markettrade", "nl2sql_newexchange_kpi")
+        assert path == "kpi/markettrade.yaml"
+
+
+class TestDiscoverTableYamlMap:
+    """_discover_table_yaml_map should scan catalog dirs dynamically."""
+
+    def test_discovers_kpi_tables(self):
+        table_map = _discover_table_yaml_map()
+        # brokertrade and otoswing are KPI-only
+        assert "brokertrade" in table_map
+        assert table_map["brokertrade"] == "kpi/brokertrade.yaml"
+        assert "otoswing" in table_map
+        assert table_map["otoswing"] == "kpi/otoswing.yaml"
+
+    def test_discovers_data_tables(self):
+        table_map = _discover_table_yaml_map()
+        assert "theodata" in table_map
+        assert table_map["theodata"] == "data/theodata.yaml"
+        assert "marketdepth" in table_map
+        assert table_map["marketdepth"] == "data/marketdepth.yaml"
+
+    def test_skips_dataset_yaml(self):
+        """_dataset.yaml files should not be in the map."""
+        table_map = _discover_table_yaml_map()
+        assert "_dataset" not in table_map
+
+    def test_discovers_all_unique_tables(self):
+        table_map = _discover_table_yaml_map()
+        # 5 kpi + 7 data = 12 files, 3 overlap → 9 unique keys
+        assert len(table_map) >= 9
+
+    def test_shared_tables_resolved_by_dataset(self):
+        """Tables in both layers (e.g. markettrade) are in map;
+        disambiguation uses _dataset_to_layer, not the map."""
+        table_map = _discover_table_yaml_map()
+        # markettrade exists in both — map has one entry (data wins)
+        assert "markettrade" in table_map
+        # _resolve_yaml_path with dataset still works for both
+        assert _resolve_yaml_path("markettrade", "nl2sql_omx_kpi") == "kpi/markettrade.yaml"
+        assert _resolve_yaml_path("markettrade", "nl2sql_omx_data") == "data/markettrade.yaml"
 
 
 class TestLoadYamlMetadata:

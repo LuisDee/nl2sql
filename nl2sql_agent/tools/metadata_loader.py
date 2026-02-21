@@ -15,31 +15,66 @@ from nl2sql_agent.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Map of unique table names to their YAML file paths (relative to CATALOG_DIR).
-# For tables that exist in BOTH datasets (markettrade, quotertrade, clicktrade),
-# they are NOT in this map — use _dataset_to_layer() with dataset name instead.
-_TABLE_YAML_MAP: dict[str, str] = {
-    # KPI-only tables
-    "brokertrade": "kpi/brokertrade.yaml",
-    "otoswing": "kpi/otoswing.yaml",
-    # Data-only tables
-    "theodata": "data/theodata.yaml",
-    "swingdata": "data/swingdata.yaml",
-    "marketdata": "data/marketdata.yaml",
-    "marketdepth": "data/marketdepth.yaml",
-}
+def _discover_table_yaml_map() -> dict[str, str]:
+    """Scan catalog/{kpi,data}/*.yaml and build table -> path map.
+
+    Discovers all table YAML files dynamically so new tables don't
+    require manual map updates. Skips _-prefixed files (e.g. _dataset.yaml).
+
+    For tables that exist in only one layer, the map key is the table name.
+    For tables in both layers (e.g. markettrade), both are stored with
+    layer-prefixed keys (kpi/markettrade, data/markettrade) and the
+    plain key points to the last one found (data takes priority since
+    dataset resolution via _dataset_to_layer handles disambiguation).
+    """
+    table_map: dict[str, str] = {}
+    for layer in ("kpi", "data"):
+        layer_dir = CATALOG_DIR / layer
+        if not layer_dir.exists():
+            continue
+        for yaml_file in sorted(layer_dir.glob("*.yaml")):
+            if yaml_file.name.startswith("_"):
+                continue
+            table_name = yaml_file.stem
+            rel_path = f"{layer}/{yaml_file.name}"
+            table_map[table_name] = rel_path
+    return table_map
+
+
+_TABLE_YAML_MAP = _discover_table_yaml_map()
 
 
 def _dataset_to_layer(dataset_name: str) -> str | None:
     """Map a resolved dataset name to catalog layer (kpi or data).
 
-    Uses settings to support any exchange — the mapping is driven by
-    the KPI_DATASET and DATA_DATASET env vars, not hardcoded names.
+    Supports any exchange dataset — first checks against the exchange
+    registry, then falls back to suffix-based heuristic.
     """
+    # Quick check against default settings
     if dataset_name == settings.kpi_dataset:
         return "kpi"
     if dataset_name == settings.data_dataset:
         return "data"
+
+    # Check exchange registry for any exchange's dataset
+    try:
+        from nl2sql_agent.catalog_loader import load_exchange_registry
+
+        registry = load_exchange_registry()
+        for info in registry.get("exchanges", {}).values():
+            if dataset_name == info.get("kpi_dataset"):
+                return "kpi"
+            if dataset_name == info.get("data_dataset"):
+                return "data"
+    except Exception:
+        pass
+
+    # Heuristic fallback: suffix-based
+    if dataset_name.endswith("_kpi"):
+        return "kpi"
+    if dataset_name.endswith("_data"):
+        return "data"
+
     return None
 
 

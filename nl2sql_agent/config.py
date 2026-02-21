@@ -90,7 +90,7 @@ class Settings(BaseSettings):
         description="Number of results for table-level vector search (schema_embeddings fallback)",
     )
     column_search_top_k: int = Field(
-        default=30,
+        default=30,  # ~0.6% of 4,631 columns; aggregates to ~3-5 tables after dedup
         description="Number of column-level results from vector search. Over-retrieves to let LLM filter.",
     )
     column_search_max_per_table: int = Field(

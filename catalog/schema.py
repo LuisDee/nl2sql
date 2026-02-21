@@ -43,7 +43,7 @@ class ColumnSchema(BaseModel):
     category: Category | None = None
     typical_aggregation: Aggregation | None = None
     filterable: bool | None = None
-    example_values: list[str] | None = None
+    example_values: list[str | int | float | bool] | None = None
     comprehensive: bool | None = None
     formula: str | None = None
     related_columns: list[str] | None = None
@@ -55,9 +55,11 @@ class ColumnSchema(BaseModel):
 
     @field_validator("example_values")
     @classmethod
-    def _cap_example_values(cls, v: list[str] | None) -> list[str] | None:
-        if v is not None and len(v) > 10:
-            msg = f"example_values has {len(v)} items, max is 10"
+    def _cap_example_values(
+        cls, v: list[str | int | float | bool] | None
+    ) -> list[str | int | float | bool] | None:
+        if v is not None and len(v) > 25:
+            msg = f"example_values has {len(v)} items, max is 25"
             raise ValueError(msg)
         return v
 

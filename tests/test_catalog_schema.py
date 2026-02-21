@@ -123,6 +123,24 @@ class TestColumnSchema:
         )
         assert col.comprehensive is True
 
+    def test_example_values_accepts_mixed_types(self):
+        """example_values accepts booleans and ints from YAML parsing."""
+        col = ColumnSchema(
+            name="is_snapshot",
+            type="BOOLEAN",
+            description="Full snapshot flag.",
+            example_values=[True, False],
+        )
+        assert col.example_values == [True, False]
+
+        col2 = ColumnSchema(
+            name="market_state",
+            type="INTEGER",
+            description="Market state code.",
+            example_values=[20, 24],
+        )
+        assert col2.example_values == [20, 24]
+
     def test_synonyms_as_list(self):
         """synonyms field accepts a list of strings."""
         col = ColumnSchema(
@@ -148,14 +166,14 @@ class TestColumnSchema:
                 related_columns=["a", "b", "c", "d", "e", "f"],
             )
 
-    def test_example_values_max_ten(self):
-        """example_values is capped at 10 entries."""
-        with pytest.raises(ValueError, match="example_values.*max is 10"):
+    def test_example_values_max_twentyfive(self):
+        """example_values is capped at 25 entries (tier 1 comprehensive threshold)."""
+        with pytest.raises(ValueError, match="example_values.*max is 25"):
             ColumnSchema(
                 name="foo",
                 type="STRING",
                 description="test",
-                example_values=[str(i) for i in range(11)],
+                example_values=[str(i) for i in range(26)],
             )
 
 

@@ -66,7 +66,7 @@ dependencies = [
 
 **Run:** `uv sync` to install new dev deps.
 
-### [ ] Task 1.2: Run ruff autofix pass on entire codebase
+### [x] Task 1.2: Run ruff autofix pass on entire codebase `a79c4bc`
 
 **Commands:**
 ```bash

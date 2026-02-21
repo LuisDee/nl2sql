@@ -331,7 +331,7 @@ clean: ## Remove build artifacts and caches
 
 ## Phase 5: Root Cleanup & Developer Experience
 
-### [ ] Task 5.1: Move misplaced root files
+### [x] Task 5.1: Move misplaced root files `82e41ae`
 
 **Commands (git mv to preserve history):**
 ```bash
@@ -342,7 +342,7 @@ git mv raw_sql_init.sql setup/raw_sql_init.sql
 
 **After moving:** Search for any markdown links referencing these files and update them.
 
-### [ ] Task 5.2: Update .gitignore
+### [x] Task 5.2: Update .gitignore `82e41ae`
 
 **File:** `.gitignore`
 
@@ -375,7 +375,7 @@ coverage.xml
 git rm -r --cached nl2sql_agent.egg-info/
 ```
 
-### [ ] Task 5.3: Add coverage configuration to pyproject.toml
+### [x] Task 5.3: Add coverage configuration to pyproject.toml `2e8f0fd`
 
 **File:** `pyproject.toml`
 
@@ -395,7 +395,7 @@ exclude_lines = [
 ]
 ```
 
-### [ ] Task 5.4: Create .editorconfig
+### [x] Task 5.4: Create .editorconfig `82e41ae`
 
 **Create:** `.editorconfig`
 
@@ -420,7 +420,7 @@ indent_size = 2
 indent_style = tab
 ```
 
-### [ ] Task 5.5: Create .python-version
+### [x] Task 5.5: Create .python-version `82e41ae`
 
 **Create:** `.python-version`
 
@@ -430,7 +430,7 @@ indent_style = tab
 
 This pins the Python version for `uv python install` and makes the required version explicit.
 
-### [ ] Task 5.6: Upgrade README.md
+### [x] Task 5.6: Upgrade README.md `82e41ae`
 
 **File:** `README.md`
 
@@ -447,7 +447,7 @@ Rewrite to include these sections:
 
 Keep it under 150 lines. Senior engineers value concise READMEs.
 
-### [ ] Task 5.7: Create CONTRIBUTING.md
+### [x] Task 5.7: Create CONTRIBUTING.md `82e41ae`
 
 **Create:** `CONTRIBUTING.md`
 

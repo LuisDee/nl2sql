@@ -129,7 +129,7 @@ Expected: many warnings but hopefully zero errors with the permissive config. If
 
 ## Phase 2: Pre-commit Hooks
 
-### [ ] Task 2.1: Create .pre-commit-config.yaml
+### [x] Task 2.1: Create .pre-commit-config.yaml `cc4e41c`
 
 **Create:** `.pre-commit-config.yaml`
 
@@ -163,7 +163,7 @@ repos:
 
 **Note:** Mypy is intentionally NOT in pre-commit (too slow for every commit). It runs in `make ci` / `act` instead.
 
-### [ ] Task 2.2: Install and run pre-commit on all files
+### [x] Task 2.2: Install and run pre-commit on all files `cc4e41c`
 
 **Commands:**
 ```bash

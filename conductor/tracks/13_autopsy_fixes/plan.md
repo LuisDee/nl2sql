@@ -30,7 +30,7 @@ tool_context.state["max_retries_reached"] = False
 
 **Test:** Extend `tests/test_callbacks.py` — verify that after triggering max retries, a new `check_semantic_cache` call resets the state and allows `dry_run_sql` again.
 
-### [ ] Task 1.3: Fix incorrect column names in example YAML files
+### [x] Task 1.3: Fix incorrect column names in example YAML files `0358a72`
 
 Multiple wrong column names in few-shot examples poison the LLM's SQL generation:
 

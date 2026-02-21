@@ -181,7 +181,7 @@ Fix any issues found (trailing whitespace, end-of-file, YAML issues).
 
 ## Phase 3: GitHub Actions CI + Local `act` Runner
 
-### [ ] Task 3.1: Create reusable uv setup action
+### [x] Task 3.1: Create reusable uv setup action `5085443`
 
 **Create:** `.github/actions/setup-uv/action.yml`
 
@@ -204,7 +204,7 @@ runs:
       shell: bash
 ```
 
-### [ ] Task 3.2: Create CI workflow
+### [x] Task 3.2: Create CI workflow `5085443`
 
 **Create:** `.github/workflows/ci.yml`
 
@@ -252,7 +252,7 @@ jobs:
 - Coverage threshold enforced
 - Only unit tests run in CI (integration tests need live services)
 
-### [ ] Task 3.3: Configure act for local CI
+### [x] Task 3.3: Configure act for local CI `5085443`
 
 **Prerequisite:** `brew install act` (user already requested this)
 

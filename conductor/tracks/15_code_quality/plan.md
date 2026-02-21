@@ -48,7 +48,7 @@ if exchange_datasets and best.get("cached_dataset"):
 
 **Run:** `pytest tests/test_cache_exchange.py tests/test_semantic_cache.py -v` — expect all green.
 
-### [ ] Task 1.3: Update prompt to pass exchange datasets to cache
+### [x] Task 1.3: Update prompt to pass exchange datasets to cache `fd59608`
 
 **File:** `nl2sql_agent/prompts.py`
 

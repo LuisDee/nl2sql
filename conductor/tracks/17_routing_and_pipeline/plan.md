@@ -221,20 +221,20 @@ Similar approach: mock BQ client, verify SQL generation and row structure for th
 
 ## Phase 5: Verification
 
-### [ ] Task 5.1: Verify prompt output unchanged
+### [x] Task 5.1: Verify prompt output unchanged
 
 **Manual check:**
 1. Generate the prompt with the old hardcoded code (save to file)
 2. Generate the prompt with the new YAML-driven code (save to file)
 3. Diff them — should be semantically identical (whitespace/ordering changes OK)
 
-### [ ] Task 5.2: Run full test suite
+### [x] Task 5.2: Run full test suite
 
 **Command:** `pytest tests/ -v`
 
 **Expected:** 380+ tests passing (370 existing + ~10-15 new).
 
-### [ ] Task 5.3: Run drift detection
+### [x] Task 5.3: Run drift detection
 
 **Command:** `pytest tests/test_routing_consistency.py -v`
 

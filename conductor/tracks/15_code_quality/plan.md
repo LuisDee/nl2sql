@@ -242,7 +242,7 @@ LITELLM_API_BASE=http://localhost:4000
 
 **Test:** `pytest tests/ -v` — all existing tests still pass (no test should be calling the removed method from production code paths).
 
-### [ ] Task 4.2: Document thread safety constraints in _deps.py
+### [x] Task 4.2: Document thread safety constraints in _deps.py `67a0f49`
 
 **File:** `nl2sql_agent/tools/_deps.py`
 

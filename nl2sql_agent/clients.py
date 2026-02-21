@@ -42,7 +42,8 @@ class LiveBigQueryClient:
     def execute_query(self, sql: str) -> pd.DataFrame:
         """Execute a SQL query and return results as a DataFrame."""
         logger.info("bigquery_execute", sql_preview=sql[:200])
-        results = self._client.query(sql).to_dataframe()
+        job = self._client.query(sql)
+        results = job.result(timeout=settings.bq_query_timeout_seconds).to_dataframe()
         logger.info("bigquery_results", rows=len(results))
         return results
 

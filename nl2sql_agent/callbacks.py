@@ -82,6 +82,8 @@ def before_tool_guard(
     if tool_name == "check_semantic_cache":
         tool_context.state["tool_call_count"] = 0
         tool_context.state["tool_call_history"] = []
+        tool_context.state["dry_run_attempts"] = 0
+        tool_context.state["max_retries_reached"] = False
 
     # --- Repetition detection ---
     call_hash = _tool_call_hash(tool_name, args)

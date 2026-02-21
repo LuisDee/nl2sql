@@ -233,3 +233,77 @@ class TestSessionState:
         summary = ctx.state["last_results_summary"]
         assert summary["row_count"] == 20
         assert len(summary["preview"]) == 3
+
+
+class TestCircuitBreakerReset:
+    """Circuit breaker state must reset when a new question arrives."""
+
+    def _make_tool(self, name="check_semantic_cache"):
+        tool = MagicMock()
+        tool.name = name
+        return tool
+
+    def _make_context(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state if state is not None else {}
+        return ctx
+
+    def test_new_question_resets_dry_run_attempts(self):
+        """check_semantic_cache must reset dry_run_attempts to 0."""
+        ctx = self._make_context({
+            "dry_run_attempts": 3,
+            "max_retries_reached": True,
+            "tool_call_count": 5,
+            "tool_call_history": ["abc", "def"],
+        })
+        tool = self._make_tool("check_semantic_cache")
+
+        before_tool_guard(tool, {"question": "new question"}, ctx)
+
+        assert ctx.state["dry_run_attempts"] == 0
+
+    def test_new_question_resets_max_retries_reached(self):
+        """check_semantic_cache must reset max_retries_reached to False."""
+        ctx = self._make_context({
+            "dry_run_attempts": 3,
+            "max_retries_reached": True,
+            "tool_call_count": 5,
+            "tool_call_history": ["abc", "def"],
+        })
+        tool = self._make_tool("check_semantic_cache")
+
+        before_tool_guard(tool, {"question": "new question"}, ctx)
+
+        assert ctx.state["max_retries_reached"] is False
+
+    def test_circuit_breaker_allows_sql_after_reset(self):
+        """After reset, dry_run_sql should NOT be blocked by circuit breaker."""
+        ctx = self._make_context({
+            "dry_run_attempts": 3,
+            "max_retries_reached": True,
+            "tool_call_count": 5,
+            "tool_call_history": ["abc", "def"],
+        })
+
+        # Step 1: New question resets state
+        cache_tool = self._make_tool("check_semantic_cache")
+        before_tool_guard(cache_tool, {"question": "new question"}, ctx)
+
+        # Step 2: dry_run_sql should now be allowed
+        dry_run_tool = self._make_tool("dry_run_sql")
+        result = before_tool_guard(dry_run_tool, {"sql_query": "SELECT 1"}, ctx)
+
+        assert result is None  # None means allowed
+
+    def test_non_cache_tool_does_not_reset_circuit_breaker(self):
+        """Only check_semantic_cache resets — other tools must not."""
+        ctx = self._make_context({
+            "dry_run_attempts": 3,
+            "max_retries_reached": True,
+        })
+        tool = self._make_tool("vector_search_tables")
+
+        before_tool_guard(tool, {"question": "test"}, ctx)
+
+        assert ctx.state["dry_run_attempts"] == 3
+        assert ctx.state["max_retries_reached"] is True

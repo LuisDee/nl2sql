@@ -276,7 +276,7 @@ jobs:
 
 ## Phase 4: Makefile
 
-### [ ] Task 4.1: Create Makefile with standard targets
+### [x] Task 4.1: Create Makefile with standard targets `b8353ec`
 
 **Create:** `Makefile`
 

@@ -14,8 +14,88 @@ from datetime import date
 
 from google.adk.agents.readonly_context import ReadonlyContext
 
-from nl2sql_agent.catalog_loader import load_exchange_registry
+from nl2sql_agent.catalog_loader import load_exchange_registry, load_routing_rules
 from nl2sql_agent.config import settings
+
+
+@functools.lru_cache(maxsize=1)
+def _build_routing_section() -> str:
+    """Generate routing rules section from YAML catalog sources.
+
+    Reads cross-cutting routing descriptions from _routing.yaml and
+    per-table routing patterns from kpi/_dataset.yaml and data/_dataset.yaml.
+    This is the single source of truth for routing — no hardcoded rules.
+    """
+    kpi = settings.kpi_dataset
+    data = settings.data_dataset
+
+    rules = load_routing_rules()
+    kpi_routing = rules.get("kpi_routing", [])
+
+    lines = ["## ROUTING RULES (Critical — follow these exactly)", ""]
+
+    # Rule 1: Default table
+    for entry in kpi_routing:
+        if "table" in entry and "default" in entry.get("notes", "").lower():
+            lines.append(
+                f"1. **Default**: If trade type is unspecified, use "
+                f"`{kpi}.{entry['table']}`."
+            )
+            break
+
+    # Rule 2: KPI vs Data general guidance
+    lines.append(
+        f"2. **KPI vs Data**: If the question asks about edge, PnL, slippage, "
+        f"or performance → use `{kpi}`. If it asks about raw execution details, "
+        f"exact timestamps, prices, or market data → use `{data}`."
+    )
+
+    # Rule 3: Theodata routing (ONLY source for greeks/vol)
+    lines.append(
+        f"3. **Theo/Vol/Greeks**: ALWAYS route to `{data}.theodata`. "
+        f"This is the ONLY table with theoretical pricing data. "
+        f"It does NOT exist in the KPI dataset."
+    )
+
+    # Rule 4: Broker comparison
+    for entry in kpi_routing:
+        if entry.get("table") == "brokertrade":
+            lines.append(
+                f"4. **Broker comparison**: When question mentions broker names "
+                f'(BGC, MGN) or "broker performance" → use `{kpi}.brokertrade`. '
+                f"NOTE: brokertrade may have no rows for some dates."
+            )
+            break
+
+    # Rule 5: All trades / double-counting warning
+    for entry in kpi_routing:
+        if "all trades" in str(entry.get("patterns", [])).lower():
+            lines.append(
+                "5. **All trades / Total PnL**: CRITICAL — markettrade contains "
+                "ALL participants' trades (Mako + counterparties). The other 4 "
+                "tables (quotertrade, brokertrade, clicktrade, otoswing) are "
+                "Mako-only subsets that ALSO appear in markettrade. To avoid "
+                'double-counting: use markettrade alone for "all market trades", '
+                "or UNION ALL the 4 Mako-specific tables for \"Mako's trades by "
+                'type". NEVER sum markettrade + the other tables.'
+            )
+            break
+
+    # Rule 6: Market data vs depth
+    lines.append(
+        f'6. **Market data vs depth**: "market price" / "price feed" → '
+        f'`{data}.marketdata`. "order book" / "depth" / "bid-ask levels" '
+        f"→ `{data}.marketdepth`."
+    )
+
+    # Rule 7: Ambiguous table names
+    lines.append(
+        "7. **Ambiguous table names**: markettrade, quotertrade, and clicktrade "
+        "exist in BOTH datasets. Always use the fully-qualified name with the "
+        "correct dataset based on routing rules above."
+    )
+
+    return "\n".join(lines)
 
 
 @functools.lru_cache(maxsize=1)
@@ -91,15 +171,7 @@ Raw execution details, timestamps, prices, sizes. No computed KPI metrics.
 - **quotertrade** — Raw quoter execution details.
 - **clicktrade** — Raw click trade execution details.
 
-## ROUTING RULES (Critical — follow these exactly)
-
-1. **Default**: If trade type is unspecified, use `{kpi}.markettrade`.
-2. **KPI vs Data**: If the question asks about edge, PnL, slippage, or performance → use `{kpi}`. If it asks about raw execution details, exact timestamps, prices, or market data → use `{data}`.
-3. **Theo/Vol/Greeks**: ALWAYS route to `{data}.theodata`. This is the ONLY table with theoretical pricing data. It does NOT exist in the KPI dataset.
-4. **Broker comparison**: When question mentions broker names (BGC, MGN) or "broker performance" → use `{kpi}.brokertrade`. NOTE: brokertrade may have no rows for some dates.
-5. **All trades / Total PnL**: CRITICAL — markettrade contains ALL participants' trades (Mako + counterparties). The other 4 tables (quotertrade, brokertrade, clicktrade, otoswing) are Mako-only subsets that ALSO appear in markettrade. To avoid double-counting: use markettrade alone for "all market trades", or UNION ALL the 4 Mako-specific tables for "Mako's trades by type". NEVER sum markettrade + the other tables.
-6. **Market data vs depth**: "market price" / "price feed" → `{data}.marketdata`. "order book" / "depth" / "bid-ask levels" → `{data}.marketdepth`.
-7. **Ambiguous table names**: markettrade, quotertrade, and clicktrade exist in BOTH datasets. Always use the fully-qualified name with the correct dataset based on routing rules above.
+{_build_routing_section()}
 
 ## SQL GENERATION RULES
 

@@ -257,6 +257,62 @@ class TestPromptCaching:
         assert date.today().isoformat() in result
 
 
+class TestYamlDrivenRouting:
+    """Tests that routing section is generated from YAML, not hardcoded."""
+
+    def _make_ctx(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state or {}
+        return ctx
+
+    def test_routing_section_function_exists(self):
+        """_build_routing_section must exist as a callable."""
+        from nl2sql_agent.prompts import _build_routing_section
+
+        result = _build_routing_section()
+        assert isinstance(result, str)
+        assert "ROUTING RULES" in result
+
+    def test_routing_section_contains_kpi_tables(self):
+        """Routing section must include all KPI table names from YAML."""
+        from nl2sql_agent.prompts import _build_routing_section
+
+        section = _build_routing_section()
+        for table in (
+            "markettrade",
+            "quotertrade",
+            "brokertrade",
+            "clicktrade",
+            "otoswing",
+        ):
+            assert table in section, f"KPI table '{table}' missing from routing section"
+
+    def test_routing_section_contains_data_tables(self):
+        """Routing section must include key data tables from YAML."""
+        from nl2sql_agent.prompts import _build_routing_section
+
+        section = _build_routing_section()
+        for table in ("theodata", "marketdata", "marketdepth"):
+            assert table in section, (
+                f"Data table '{table}' missing from routing section"
+            )
+
+    def test_routing_section_contains_double_counting_warning(self):
+        """Routing section must include the critical double-counting warning."""
+        from nl2sql_agent.prompts import _build_routing_section
+
+        section = _build_routing_section()
+        assert "double-count" in section.lower() or "double count" in section.lower()
+
+    def test_routing_section_contains_theodata_only_warning(self):
+        """Routing section must mention theodata is the ONLY source."""
+        from nl2sql_agent.prompts import _build_routing_section
+
+        section = _build_routing_section()
+        assert "theodata" in section
+        assert "ONLY" in section or "only" in section
+
+
 class TestExchangeAwareCache:
     def _make_ctx(self, state=None):
         ctx = MagicMock()

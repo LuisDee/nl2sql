@@ -45,7 +45,7 @@ Also add `clear_routing_cache()` for test isolation.
 
 ## Phase 2: YAML-Driven Prompt Routing
 
-### [ ] Task 2.1: Write tests for YAML-driven prompt (TDD red)
+### [x] Task 2.1: Write tests for YAML-driven prompt (TDD red) `7ef5561`
 
 **File:** `tests/test_prompts.py`
 
@@ -58,7 +58,7 @@ Add tests:
 
 **Run:** `pytest tests/test_prompts.py -v` — new tests fail.
 
-### [ ] Task 2.2: Refactor prompts.py routing section (TDD green)
+### [x] Task 2.2: Refactor prompts.py routing section (TDD green) `7ef5561`
 
 **File:** `nl2sql_agent/prompts.py`
 

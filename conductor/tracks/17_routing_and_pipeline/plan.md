@@ -104,7 +104,7 @@ def _routing_section() -> str:
 
 ## Phase 3: YAML-Driven Embedding Descriptions
 
-### [ ] Task 3.1: Refactor run_embeddings.py descriptions
+### [x] Task 3.1: Refactor run_embeddings.py descriptions `bafa534`
 
 **File:** `scripts/run_embeddings.py`
 
@@ -135,7 +135,7 @@ def _build_table_descriptions(s: Settings) -> list[dict]:
 
 **Keep:** The SQL INSERT structure unchanged. Only the data source changes (hardcoded strings → YAML reads).
 
-### [ ] Task 3.2: Write drift detection test
+### [x] Task 3.2: Write drift detection test `bafa534`
 
 **File:** `tests/test_routing_consistency.py`
 

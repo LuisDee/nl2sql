@@ -172,7 +172,7 @@ def test_routing_yaml_and_dataset_yaml_consistent():
 
 ## Phase 4: Embedding Pipeline Tests
 
-### [ ] Task 4.1: Write unit tests for run_embeddings.py
+### [x] Task 4.1: Write unit tests for run_embeddings.py `96f988e`
 
 **Create:** `tests/test_run_embeddings.py`
 
@@ -207,7 +207,7 @@ Test each pipeline step WITHOUT executing BQ:
 
 **Approach:** Mock `get_bq_service()` and capture the SQL strings passed to it. Assert on structure, not exact SQL (use `in` and regex, not exact string match).
 
-### [ ] Task 4.2: Write unit tests for populate_embeddings.py
+### [x] Task 4.2: Write unit tests for populate_embeddings.py `96f988e`
 
 **Create:** `tests/test_populate_embeddings.py`
 

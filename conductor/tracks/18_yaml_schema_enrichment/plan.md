@@ -9,10 +9,10 @@
 - [x] Aggregation constrained to `Literal["SUM", "AVG", "WEIGHTED_AVG", "COUNT", "MIN", "MAX"]`
 - [x] Cross-field validation: `typical_aggregation` only allowed when `category == "measure"`, `comprehensive` only allowed when `example_values` present
 
-### Task 1.2: Write CI validation test
-- [ ] Create `tests/test_catalog_validation.py` — loads every YAML in `catalog/{kpi,data}/`, validates against Pydantic models
-- [ ] Test validates column-level fields when present (category enum, aggregation enum, etc.)
-- [ ] Test passes with current YAMLs (no enrichment yet — all new fields optional)
+### Task 1.2: Write CI validation test (6e3e36e)
+- [x] Create `tests/test_catalog_validation.py` — loads every YAML in `catalog/{kpi,data}/`, validates against Pydantic models
+- [x] Test validates column-level fields when present (category enum, aggregation enum, etc.)
+- [x] Test passes with current YAMLs (no enrichment yet — all new fields optional)
 
 ### Task 1.3: Create standalone validation script
 - [ ] Create `scripts/validate_catalog.py` — accepts file path(s) or `--all` flag

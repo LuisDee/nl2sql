@@ -58,13 +58,18 @@ def verify_embedding_model(bq: BigQueryProtocol, s: Settings) -> None:
     logger.info("verified_embedding_model", model_ref=s.embedding_model_ref, rows=len(result))
 
 
-def create_embedding_tables(bq: BigQueryProtocol, s: Settings) -> None:
-    """Step 3: Create the 3 embedding tables. Idempotent via CREATE OR REPLACE."""
+def create_embedding_tables(bq: BigQueryProtocol, s: Settings, force: bool = False) -> None:
+    """Step 3: Create the embedding tables.
+
+    By default uses CREATE TABLE IF NOT EXISTS (safe, preserves data).
+    Pass force=True to use CREATE OR REPLACE TABLE (destroys existing data).
+    """
     fqn = f"{s.gcp_project}.{s.metadata_dataset}"
+    create_stmt = "CREATE OR REPLACE TABLE" if force else "CREATE TABLE IF NOT EXISTS"
 
     sqls = [
         f"""
-        CREATE OR REPLACE TABLE `{fqn}.schema_embeddings` (
+        {create_stmt} `{fqn}.schema_embeddings` (
           id STRING DEFAULT GENERATE_UUID(),
           source_type STRING NOT NULL,
           layer STRING,
@@ -76,7 +81,7 @@ def create_embedding_tables(bq: BigQueryProtocol, s: Settings) -> None:
         );
         """,
         f"""
-        CREATE OR REPLACE TABLE `{fqn}.column_embeddings` (
+        {create_stmt} `{fqn}.column_embeddings` (
           id STRING DEFAULT GENERATE_UUID(),
           dataset_name STRING NOT NULL,
           table_name STRING NOT NULL,
@@ -90,7 +95,7 @@ def create_embedding_tables(bq: BigQueryProtocol, s: Settings) -> None:
         );
         """,
         f"""
-        CREATE OR REPLACE TABLE `{fqn}.query_memory` (
+        {create_stmt} `{fqn}.query_memory` (
           id STRING DEFAULT GENERATE_UUID(),
           question STRING NOT NULL,
           sql_query STRING NOT NULL,
@@ -440,6 +445,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run embedding infrastructure steps")
     parser.add_argument("--step", required=True, choices=list(STEPS.keys()) + ["all"],
                         help="Which step to run (or 'all')")
+    parser.add_argument("--force", action="store_true",
+                        help="Use CREATE OR REPLACE TABLE instead of IF NOT EXISTS (destroys data!)")
     args = parser.parse_args()
 
     settings = Settings()
@@ -448,9 +455,15 @@ def main() -> None:
     if args.step == "all":
         for step_name in ALL_STEPS_ORDER:
             logger.info("running_step", step=step_name)
-            STEPS[step_name](bq, settings)
+            if step_name == "create-tables":
+                create_embedding_tables(bq, settings, force=args.force)
+            else:
+                STEPS[step_name](bq, settings)
     else:
-        STEPS[args.step](bq, settings)
+        if args.step == "create-tables":
+            create_embedding_tables(bq, settings, force=args.force)
+        else:
+            STEPS[args.step](bq, settings)
 
     logger.info("done")
 

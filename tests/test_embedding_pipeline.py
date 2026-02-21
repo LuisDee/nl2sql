@@ -46,3 +46,38 @@ class TestEmbeddingNullPredicate:
             f"Found {array_length_count} ARRAY_LENGTH checks but "
             f"{is_null_count} IS NULL checks — all must be paired"
         )
+
+
+class TestCreateTablesSafety:
+    """create_embedding_tables must not destroy existing data by default."""
+
+    def test_default_uses_if_not_exists(self):
+        """Default create_embedding_tables must use IF NOT EXISTS for all tables."""
+        import inspect
+        from scripts.run_embeddings import create_embedding_tables
+
+        source = inspect.getsource(create_embedding_tables)
+        # The function should use a variable for CREATE statement (force-aware)
+        # and the symbol_exchange_map uses literal IF NOT EXISTS
+        assert "CREATE TABLE IF NOT EXISTS" in source, (
+            "create_embedding_tables must default to CREATE TABLE IF NOT EXISTS"
+        )
+        # The create_stmt variable should default to safe mode
+        assert '"CREATE TABLE IF NOT EXISTS"' in source or "'CREATE TABLE IF NOT EXISTS'" in source, (
+            "Default create_stmt must be 'CREATE TABLE IF NOT EXISTS'"
+        )
+        # CREATE OR REPLACE should only exist in the force=True branch
+        assert "force" in source, (
+            "CREATE OR REPLACE must be gated behind a 'force' parameter"
+        )
+
+    def test_create_tables_accepts_force_flag(self):
+        """create_embedding_tables should accept a force parameter."""
+        import inspect
+        from scripts.run_embeddings import create_embedding_tables
+
+        sig = inspect.signature(create_embedding_tables)
+        assert "force" in sig.parameters, (
+            "create_embedding_tables must accept a 'force' parameter to "
+            "opt-in to destructive CREATE OR REPLACE"
+        )

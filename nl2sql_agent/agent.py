@@ -4,6 +4,8 @@ The root_agent variable is REQUIRED by ADK convention.
 ADK discovers it automatically when running `adk run nl2sql_agent`.
 """
 
+from typing import Any
+
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
 from google.genai.types import GenerateContentConfig
@@ -35,7 +37,7 @@ logger = get_logger(__name__)
 _bq_initialized = False
 
 
-def _ensure_bq_initialized():
+def _ensure_bq_initialized() -> None:
     """Create and register the BQ client if not already done."""
     global _bq_initialized
     if _bq_initialized:
@@ -49,7 +51,9 @@ def _ensure_bq_initialized():
     _bq_initialized = True
 
 
-def _lazy_before_tool_guard(tool, args, tool_context):
+def _lazy_before_tool_guard(
+    tool: Any, args: dict[str, Any], tool_context: Any
+) -> dict[str, Any] | None:
     """Wrapper that ensures BQ is initialized before the first tool call."""
     _ensure_bq_initialized()
     return before_tool_guard(tool, args, tool_context)

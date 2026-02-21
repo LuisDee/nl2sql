@@ -10,6 +10,7 @@ stderr before importing the agent module.
 
 import logging
 import sys
+from typing import Any
 
 # --- Redirect ALL logging to stderr BEFORE any agent imports ---
 # structlog's PrintLoggerFactory prints to stdout by default.
@@ -70,7 +71,7 @@ _runner = InMemoryRunner(
 
 
 @mcp.tool()
-async def ask_trading_data(question: str, ctx: Context) -> str:
+async def ask_trading_data(question: str, ctx: Context[Any, Any, Any]) -> str:
     """Ask a natural-language question about Mako Group's trading data.
 
     Routes to the correct BigQuery table and returns results.

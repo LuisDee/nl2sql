@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 _bq_service: Any = None
 
 
-def init_bq_service(service) -> None:
+def init_bq_service(service: Any) -> None:
     """Set the shared BigQuery service for all tools.
 
     Args:
@@ -52,10 +52,10 @@ def get_bq_service() -> Any:
 # and fetch_few_shot_examples() share a single embedding call.
 
 _vector_cache_question: str | None = None
-_vector_cache_result: dict | None = None
+_vector_cache_result: dict[str, Any] | None = None
 
 
-def cache_vector_result(question: str, result: dict) -> None:
+def cache_vector_result(question: str, result: dict[str, Any]) -> None:
     """Store combined vector search result for the given question."""
     global _vector_cache_question, _vector_cache_result
     _vector_cache_question = question
@@ -63,7 +63,7 @@ def cache_vector_result(question: str, result: dict) -> None:
     logger.info("vector_cache_stored", question=question[:80])
 
 
-def get_cached_vector_result(question: str) -> dict | None:
+def get_cached_vector_result(question: str) -> dict[str, Any] | None:
     """Return cached result if the question matches, else None."""
     if _vector_cache_question == question and _vector_cache_result is not None:
         logger.info("vector_cache_hit", question=question[:80])

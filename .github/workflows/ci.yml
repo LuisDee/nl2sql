@@ -26,9 +26,14 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-uv
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Unit tests with coverage
         run: uv run pytest tests/ -v --cov=nl2sql_agent --cov-report=xml
       - name: Check coverage threshold

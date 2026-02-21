@@ -6,7 +6,7 @@ return values. All tools return dicts matching one of these shapes.
 
 from __future__ import annotations
 
-from typing import TypedDict
+from typing import Any, TypedDict
 
 # --- Shared ---
 
@@ -56,7 +56,7 @@ class ExchangeMultipleResult(TypedDict):
 
     status: str  # "multiple"
     message: str
-    matches: list[dict]
+    matches: list[dict[str, Any]]
 
 
 # --- Vector Search ---
@@ -66,22 +66,22 @@ class VectorSearchResult(TypedDict):
     """Returned by vector_search_tables."""
 
     status: str
-    results: list[dict]
+    results: list[dict[str, Any]]
 
 
 class ColumnSearchResult(TypedDict):
     """Returned by vector_search_columns."""
 
     status: str
-    tables: list[dict]
-    examples: list[dict]
+    tables: list[dict[str, Any]]
+    examples: list[dict[str, Any]]
 
 
 class FewShotResult(TypedDict):
     """Returned by fetch_few_shot_examples."""
 
     status: str
-    examples: list[dict]
+    examples: list[dict[str, Any]]
 
 
 # --- Metadata ---
@@ -125,7 +125,7 @@ class ExecuteSuccessResult(TypedDict, total=False):
 
     status: str  # "success"
     row_count: int
-    rows: list[dict]
+    rows: list[dict[str, Any]]
     warning: str
 
 

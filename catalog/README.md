@@ -360,3 +360,16 @@ Tests verify:
 - `resolve_fqn()` and `resolve_example_sql()` work for both dev and prod project IDs
 - Validation functions catch missing keys, invalid layers, invalid datasets
 - 30+ example queries exist across the 3 example files
+
+---
+
+## Design Decision: Self-Contained Table YAMLs
+
+Each table YAML file contains ALL columns for that table, including shared columns that appear across multiple KPI tables. This is intentional:
+
+- Each file is independently editable — changing a column description for one table doesn't affect others
+- Columns can diverge between tables over time (different descriptions, different business meanings)
+- No risk of shared reference breaking multiple files
+- Embedding generation treats each file as a standalone unit
+
+The trade-off is file size (~200-376KB per KPI file). This is acceptable because these files are read by code (not humans) and cached in memory.

@@ -8,6 +8,8 @@ BigQuery dataset pair (kpi + data). Three-tier resolution:
 3. Default fallback — returns the default exchange from registry
 """
 
+from typing import Any
+
 from nl2sql_agent.catalog_loader import load_exchange_registry
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
@@ -26,7 +28,7 @@ def _build_alias_map() -> dict[str, str]:
     return alias_map
 
 
-def _make_result(exchange: str, status: str = "resolved") -> dict:
+def _make_result(exchange: str, status: str = "resolved") -> dict[str, Any]:
     """Build a standard result dict for a resolved exchange."""
     registry = load_exchange_registry()
     info = registry["exchanges"][exchange]
@@ -38,13 +40,13 @@ def _make_result(exchange: str, status: str = "resolved") -> dict:
     }
 
 
-def _default_result() -> dict:
+def _default_result() -> dict[str, Any]:
     """Return the default exchange result."""
     registry = load_exchange_registry()
     return _make_result(registry["default_exchange"], status="default")
 
 
-def _symbol_lookup(identifier: str) -> dict | None:
+def _symbol_lookup(identifier: str) -> dict[str, Any] | None:
     """Tier 2: Look up a symbol in BQ symbol_exchange_map.
 
     Returns None if BQ is unavailable or symbol not found.

@@ -13,6 +13,8 @@ The embedding model and metadata dataset are configured via settings:
     settings.metadata_dataset     (e.g. nl2sql_metadata)
 """
 
+from typing import Any
+
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
 from nl2sql_agent.tools._deps import (
@@ -213,7 +215,9 @@ ORDER BY distance ASC
 """
 
 
-def _split_combined_rows(rows: list[dict]) -> tuple[list[dict], list[dict]]:
+def _split_combined_rows(
+    rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Split combined query rows into schema results and example results."""
     schema_rows = []
     example_rows = []
@@ -313,13 +317,13 @@ def vector_search_tables(question: str) -> VectorSearchResult | ErrorResult:
             logger.info(
                 "vector_search_tables_fallback_complete", result_count=len(rows)
             )
-            return {"status": "success", "results": rows}  # type: ignore[return-value]
+            return {"status": "success", "results": rows}
         except Exception as e2:
             logger.error("vector_search_tables_error", error=str(e2))
             return {"status": "error", "error_message": str(e2), "results": []}  # type: ignore[return-value]
 
 
-def fetch_few_shot_examples(question: str) -> FewShotResult:
+def fetch_few_shot_examples(question: str) -> FewShotResult | ErrorResult:
     """Find similar past validated SQL queries to use as few-shot examples.
 
     Use this tool AFTER vector_search_tables to find proven question->SQL
@@ -369,7 +373,7 @@ def fetch_few_shot_examples(question: str) -> FewShotResult:
         return {"status": "success", "examples": rows}
     except Exception as e:
         logger.error("fetch_few_shot_error", error=str(e))
-        return {"status": "error", "error_message": str(e), "examples": []}  # type: ignore[typeddict-unknown-key,return-value]
+        return {"status": "error", "error_message": str(e)}
 
 
 def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:

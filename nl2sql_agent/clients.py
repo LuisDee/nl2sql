@@ -47,7 +47,7 @@ class LiveBigQueryClient:
         logger.info("bigquery_results", rows=len(results))
         return results
 
-    def dry_run_query(self, sql: str) -> dict:
+    def dry_run_query(self, sql: str) -> dict[str, Any]:
         """Validate a SQL query via dry run."""
         job_config = bigquery.QueryJobConfig(dry_run=True, use_query_cache=False)
         try:

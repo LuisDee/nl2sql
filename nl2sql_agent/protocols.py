@@ -51,7 +51,7 @@ class BigQueryProtocol(Protocol):
         """
         ...
 
-    def dry_run_query(self, sql: str) -> dict:
+    def dry_run_query(self, sql: str) -> dict[str, Any]:
         """Validate a SQL query without executing it.
 
         Args:

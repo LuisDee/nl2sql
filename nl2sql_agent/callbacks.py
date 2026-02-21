@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 MAX_DRY_RUN_RETRIES = 3
 
 
-def _tool_call_hash(tool_name: str, args: dict) -> str:
+def _tool_call_hash(tool_name: str, args: dict[str, Any]) -> str:
     """Create a stable hash of tool name + args for repetition detection."""
     try:
         key = json.dumps({"tool": tool_name, "args": args}, sort_keys=True, default=str)
@@ -35,7 +35,7 @@ def _tool_call_hash(tool_name: str, args: dict) -> str:
 
 def before_tool_guard(
     tool: BaseTool, args: dict[str, Any], tool_context: ToolContext
-) -> dict | None:
+) -> dict[str, Any] | None:
     """Validate tool inputs before execution.
 
     Returns None to allow the tool to proceed normally.
@@ -125,8 +125,8 @@ def after_tool_log(
     tool: BaseTool,
     args: dict[str, Any],
     tool_context: ToolContext,
-    tool_response: dict,
-) -> dict | None:
+    tool_response: dict[str, Any],
+) -> dict[str, Any] | None:
     """Log tool results and manage retry/session state."""
     tool_name = tool.name
     status = tool_response.get("status", "unknown") if tool_response else "unknown"

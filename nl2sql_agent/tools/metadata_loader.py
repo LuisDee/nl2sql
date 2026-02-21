@@ -9,12 +9,13 @@ Depends on: catalog_loader module from Track 02.
 
 import yaml
 
-from nl2sql_agent.catalog_loader import load_yaml, CATALOG_DIR
+from nl2sql_agent.catalog_loader import CATALOG_DIR, load_yaml
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
 from nl2sql_agent.types import ErrorResult, MetadataSuccessResult
 
 logger = get_logger(__name__)
+
 
 def _discover_table_yaml_map() -> dict[str, str]:
     """Scan catalog/{kpi,data}/*.yaml and build table -> path map.
@@ -67,7 +68,7 @@ def _dataset_to_layer(dataset_name: str) -> str | None:
                 return "kpi"
             if dataset_name == info.get("data_dataset"):
                 return "data"
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     # Heuristic fallback: suffix-based
@@ -107,7 +108,9 @@ def _resolve_yaml_path(table_name: str, dataset_name: str = "") -> str | None:
     return None
 
 
-def load_yaml_metadata(table_name: str, dataset_name: str) -> MetadataSuccessResult | ErrorResult:
+def load_yaml_metadata(
+    table_name: str, dataset_name: str
+) -> MetadataSuccessResult | ErrorResult:
     """Load the YAML metadata catalog for a specific BigQuery table.
 
     Use this tool AFTER vector_search_columns to get detailed column
@@ -159,7 +162,9 @@ def load_yaml_metadata(table_name: str, dataset_name: str) -> MetadataSuccessRes
     try:
         content = load_yaml(full_path)
     except Exception as e:
-        logger.error("load_yaml_metadata_parse_error", path=str(full_path), error=str(e))
+        logger.error(
+            "load_yaml_metadata_parse_error", path=str(full_path), error=str(e)
+        )
         return {"status": "error", "error_message": f"Failed to parse YAML: {e}"}
 
     # If this is a KPI table, also load the KPI dataset context
@@ -169,7 +174,7 @@ def load_yaml_metadata(table_name: str, dataset_name: str) -> MetadataSuccessRes
             try:
                 dataset_context = load_yaml(dataset_yaml_path)
                 content["_kpi_dataset_context"] = dataset_context
-            except Exception:
+            except Exception:  # noqa: S110
                 pass  # Non-fatal — table metadata is still useful without dataset context
 
     # If this is a data table, also load the data dataset context
@@ -179,7 +184,7 @@ def load_yaml_metadata(table_name: str, dataset_name: str) -> MetadataSuccessRes
             try:
                 dataset_context = load_yaml(dataset_yaml_path)
                 content["_data_dataset_context"] = dataset_context
-            except Exception:
+            except Exception:  # noqa: S110
                 pass
 
     # Convert to YAML string for the LLM (more readable than nested dict repr)
@@ -195,6 +200,7 @@ def load_yaml_metadata(table_name: str, dataset_name: str) -> MetadataSuccessRes
     return {
         "status": "success",
         "table_name": table_name,
-        "dataset_name": dataset_name or content.get("table", {}).get("dataset", "unknown"),
+        "dataset_name": dataset_name
+        or content.get("table", {}).get("dataset", "unknown"),
         "metadata": metadata_str,
     }

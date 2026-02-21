@@ -66,7 +66,10 @@ select = [
     "RUF",  # ruff-specific rules
 ]
 ignore = [
-    "E501",  # line length (formatter handles this)
+    "E501",   # line length (formatter handles this)
+    "S608",   # hardcoded SQL — expected for SQL generation tools
+    "PT018",  # composite assertion — acceptable in our test style
+    "PT006",  # parametrize names wrong type — style preference
 ]
 
 [tool.ruff.lint.per-file-ignores]

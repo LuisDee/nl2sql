@@ -11,15 +11,15 @@ Usage:
 """
 
 from nl2sql_agent.catalog_loader import (
-    load_all_table_yamls,
     load_all_examples,
+    load_all_table_yamls,
     resolve_example_sql,
     resolve_placeholders,
 )
-from nl2sql_agent.config import Settings
-from nl2sql_agent.logging_config import setup_logging, get_logger
-from nl2sql_agent.protocols import BigQueryProtocol
 from nl2sql_agent.clients import LiveBigQueryClient
+from nl2sql_agent.config import Settings
+from nl2sql_agent.logging_config import get_logger, setup_logging
+from nl2sql_agent.protocols import BigQueryProtocol
 
 setup_logging()
 logger = get_logger(__name__)
@@ -30,7 +30,12 @@ BATCH_SIZE = 500
 
 def _escape_sql_string(value: str) -> str:
     """Escape backslashes, single quotes, and newlines for BigQuery."""
-    return value.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r")
+    return (
+        value.replace("\\", "\\\\")
+        .replace("'", "\\'")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+    )
 
 
 def _batched(iterable: list, n: int):
@@ -66,7 +71,9 @@ def build_embedding_text(
     return f"{header}: {'. '.join(parts[1:])}"
 
 
-def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], settings: Settings) -> int:
+def populate_column_embeddings(
+    bq: BigQueryProtocol, tables: list[dict], settings: Settings
+) -> int:
     """Insert column-level descriptions into column_embeddings table.
 
     Idempotent: MERGE on (dataset_name, table_name, column_name).
@@ -126,8 +133,12 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
         for r in batch:
             desc = _escape_sql_string(r["description"])
             emb_text = _escape_sql_string(r["embedding_text"])
-            synonyms_str = ", ".join(f"'{_escape_sql_string(s)}'" for s in r["synonyms"])
-            synonyms_array = f"[{synonyms_str}]" if synonyms_str else "CAST([] AS ARRAY<STRING>)"
+            synonyms_str = ", ".join(
+                f"'{_escape_sql_string(s)}'" for s in r["synonyms"]
+            )
+            synonyms_array = (
+                f"[{synonyms_str}]" if synonyms_str else "CAST([] AS ARRAY<STRING>)"
+            )
             struct_rows.append(
                 f"STRUCT('{r['dataset_name']}' AS dataset_name, "
                 f"'{r['table_name']}' AS table_name, "
@@ -170,7 +181,9 @@ def populate_column_embeddings(bq: BigQueryProtocol, tables: list[dict], setting
     return count
 
 
-def populate_query_memory(bq: BigQueryProtocol, examples: list[dict], settings: Settings) -> int:
+def populate_query_memory(
+    bq: BigQueryProtocol, examples: list[dict], settings: Settings
+) -> int:
     """Insert validated Q->SQL pairs into query_memory table.
 
     Resolves {project} in SQL before storing. Idempotent: MERGE on question.

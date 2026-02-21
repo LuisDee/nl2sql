@@ -5,8 +5,8 @@ Run with: pytest -m integration tests/integration/test_eval_gold_set.py -v
 """
 
 import pytest
-
 from eval.run_eval import load_gold_queries
+
 from nl2sql_agent.catalog_loader import resolve_example_sql
 
 _GOLD_QUERIES = load_gold_queries()

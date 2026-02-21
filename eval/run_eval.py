@@ -37,6 +37,7 @@ def load_gold_queries(path: Path | None = None) -> list[dict[str, Any]]:
 
 # --- SQL Component Extraction ---
 
+
 def _extract_tables(sql: str) -> set[str]:
     """Extract table names from fully-qualified BigQuery references."""
     pattern = r"`[^`]+\.(\w+)\.(\w+)`"
@@ -79,6 +80,7 @@ def _has_where(sql: str) -> bool:
 
 # --- Result Set Comparison ---
 
+
 def compare_result_sets(
     gold_df: pd.DataFrame,
     predicted_df: pd.DataFrame,
@@ -109,6 +111,7 @@ def compare_result_sets(
 
 
 # --- Metrics ---
+
 
 @dataclass
 class EvalResult:
@@ -204,6 +207,7 @@ class EvalReport:
 
 # --- Component Match ---
 
+
 def compute_component_match(gold_sql: str, predicted_sql: str) -> float:
     """Compute structural similarity between gold and predicted SQL.
 
@@ -243,12 +247,14 @@ def compute_component_match(gold_sql: str, predicted_sql: str) -> float:
 
 # --- Routing Accuracy ---
 
+
 def check_routing(expected_tables: list[str], predicted_tables: list[str]) -> bool:
     """Check if predicted tables match expected tables (set comparison)."""
     return set(expected_tables) == set(predicted_tables)
 
 
 # --- Offline Runner ---
+
 
 class EvalRunner:
     """Run gold query evaluation."""
@@ -352,26 +358,30 @@ class EvalRunner:
                         predicted_sql = event.tool_input.get("sql_query", "")
             except Exception as e:
                 print(f"  Agent failed: {e}")
-                report.results.append(EvalResult(
-                    query_id=q["id"],
-                    question=q["question"],
-                    category=q["category"],
-                    expected_tables=q["expected_tables"],
-                    error=f"Agent runtime error: {str(e)}"
-                ))
+                report.results.append(
+                    EvalResult(
+                        query_id=q["id"],
+                        question=q["question"],
+                        category=q["category"],
+                        expected_tables=q["expected_tables"],
+                        error=f"Agent runtime error: {e!s}",
+                    )
+                )
                 continue
 
             # Check if SQL was generated
             if not predicted_sql:
                 print("  No SQL generated.")
-                report.results.append(EvalResult(
-                    query_id=q["id"],
-                    question=q["question"],
-                    category=q["category"],
-                    expected_tables=q["expected_tables"],
-                    routing_correct=False,
-                    error="No SQL generated"
-                ))
+                report.results.append(
+                    EvalResult(
+                        query_id=q["id"],
+                        question=q["question"],
+                        category=q["category"],
+                        expected_tables=q["expected_tables"],
+                        routing_correct=False,
+                        error="No SQL generated",
+                    )
+                )
                 continue
 
             resolved_gold_sql = resolve_example_sql(q["gold_sql"], self.project)
@@ -381,13 +391,15 @@ class EvalRunner:
                 gold_df = bq.execute_query(resolved_gold_sql)
             except Exception as e:
                 print(f"  Gold SQL failed: {e}")
-                report.results.append(EvalResult(
-                    query_id=q["id"],
-                    question=q["question"],
-                    category=q["category"],
-                    expected_tables=q["expected_tables"],
-                    error=f"Gold SQL error: {str(e)}"
-                ))
+                report.results.append(
+                    EvalResult(
+                        query_id=q["id"],
+                        question=q["question"],
+                        category=q["category"],
+                        expected_tables=q["expected_tables"],
+                        error=f"Gold SQL error: {e!s}",
+                    )
+                )
                 continue
 
             # Execute Predicted
@@ -396,17 +408,21 @@ class EvalRunner:
                 execution_match = compare_result_sets(gold_df, predicted_df)
             except Exception as e:
                 print(f"  Predicted SQL failed: {e}")
-                report.results.append(EvalResult(
-                    query_id=q["id"],
-                    question=q["question"],
-                    category=q["category"],
-                    expected_tables=q["expected_tables"],
-                    predicted_tables=list(_extract_tables(predicted_sql)),
-                    routing_correct=True,
-                    syntax_valid=False,
-                    error=str(e),
-                    component_match_score=compute_component_match(resolved_gold_sql, predicted_sql)
-                ))
+                report.results.append(
+                    EvalResult(
+                        query_id=q["id"],
+                        question=q["question"],
+                        category=q["category"],
+                        expected_tables=q["expected_tables"],
+                        predicted_tables=list(_extract_tables(predicted_sql)),
+                        routing_correct=True,
+                        syntax_valid=False,
+                        error=str(e),
+                        component_match_score=compute_component_match(
+                            resolved_gold_sql, predicted_sql
+                        ),
+                    )
+                )
                 continue
 
             # Success path
@@ -420,7 +436,9 @@ class EvalRunner:
                 routing_correct=True,
                 syntax_valid=True,
                 execution_match=execution_match,
-                component_match_score=compute_component_match(resolved_gold_sql, predicted_sql)
+                component_match_score=compute_component_match(
+                    resolved_gold_sql, predicted_sql
+                ),
             )
             report.results.append(result)
             print(f"  Match: {execution_match}")
@@ -448,7 +466,11 @@ def main():
     elif args.mode == "online":
         report = runner.run_online()
         print(report.to_markdown())
-        sys.exit(0 if report.routing_accuracy > 0.9 and report.execution_accuracy > 0.9 else 1)
+        sys.exit(
+            0
+            if report.routing_accuracy > 0.9 and report.execution_accuracy > 0.9
+            else 1
+        )
     else:
         # Fallback to offline
         report = runner.run_offline()

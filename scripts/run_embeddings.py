@@ -17,13 +17,12 @@ Usage:
 
 import argparse
 import csv
-import sys
 from pathlib import Path
 
-from nl2sql_agent.config import Settings
-from nl2sql_agent.logging_config import setup_logging, get_logger
-from nl2sql_agent.protocols import BigQueryProtocol
 from nl2sql_agent.clients import LiveBigQueryClient
+from nl2sql_agent.config import Settings
+from nl2sql_agent.logging_config import get_logger, setup_logging
+from nl2sql_agent.protocols import BigQueryProtocol
 
 setup_logging()
 logger = get_logger(__name__)
@@ -39,7 +38,9 @@ def create_metadata_dataset(bq: BigQueryProtocol, s: Settings) -> None:
     );
     """
     bq.execute_query(sql)
-    logger.info("created_metadata_dataset", project=s.gcp_project, dataset=s.metadata_dataset)
+    logger.info(
+        "created_metadata_dataset", project=s.gcp_project, dataset=s.metadata_dataset
+    )
 
 
 def verify_embedding_model(bq: BigQueryProtocol, s: Settings) -> None:
@@ -55,10 +56,14 @@ def verify_embedding_model(bq: BigQueryProtocol, s: Settings) -> None:
     WHERE model_name = '{model_name}';
     """
     result = bq.execute_query(sql)
-    logger.info("verified_embedding_model", model_ref=s.embedding_model_ref, rows=len(result))
+    logger.info(
+        "verified_embedding_model", model_ref=s.embedding_model_ref, rows=len(result)
+    )
 
 
-def create_embedding_tables(bq: BigQueryProtocol, s: Settings, force: bool = False) -> None:
+def create_embedding_tables(
+    bq: BigQueryProtocol, s: Settings, force: bool = False
+) -> None:
     """Step 3: Create the embedding tables.
 
     By default uses CREATE TABLE IF NOT EXISTS (safe, preserves data).
@@ -293,7 +298,9 @@ def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
     automatically via GENERATED ALWAYS AS columns — this step is skipped.
     """
     if s.use_autonomous_embeddings:
-        logger.info("skipping_manual_embeddings", reason="autonomous embeddings enabled")
+        logger.info(
+            "skipping_manual_embeddings", reason="autonomous embeddings enabled"
+        )
         return
     fqn = f"{s.gcp_project}.{s.metadata_dataset}"
     model = s.embedding_model_ref
@@ -384,10 +391,26 @@ def test_vector_search(bq: BigQueryProtocol, s: Settings) -> None:
 
     test_cases = [
         ("TEST 1: edge -> KPI", "what was the edge on our trade?", "schema_embeddings"),
-        ("TEST 2: IV -> theodata", "how did implied vol change over the last month?", "schema_embeddings"),
-        ("TEST 3: broker -> brokertrade", "how have broker trades by BGC performed compared to MGN?", "schema_embeddings"),
-        ("TEST 4: depth -> marketdepth", "what did the order book look like for the ATM strike?", "schema_embeddings"),
-        ("TEST 5: few-shot retrieval", "show me PnL breakdown by symbol", "query_memory"),
+        (
+            "TEST 2: IV -> theodata",
+            "how did implied vol change over the last month?",
+            "schema_embeddings",
+        ),
+        (
+            "TEST 3: broker -> brokertrade",
+            "how have broker trades by BGC performed compared to MGN?",
+            "schema_embeddings",
+        ),
+        (
+            "TEST 4: depth -> marketdepth",
+            "what did the order book look like for the ATM strike?",
+            "schema_embeddings",
+        ),
+        (
+            "TEST 5: few-shot retrieval",
+            "show me PnL breakdown by symbol",
+            "query_memory",
+        ),
     ]
 
     for test_name, query_text, table in test_cases:
@@ -441,18 +464,30 @@ STEPS = {
 }
 
 ALL_STEPS_ORDER = [
-    "create-dataset", "verify-model", "create-tables",
-    "populate-schema", "populate-symbols",
-    "generate-embeddings", "create-indexes", "test-search",
+    "create-dataset",
+    "verify-model",
+    "create-tables",
+    "populate-schema",
+    "populate-symbols",
+    "generate-embeddings",
+    "create-indexes",
+    "test-search",
 ]
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run embedding infrastructure steps")
-    parser.add_argument("--step", required=True, choices=list(STEPS.keys()) + ["all"],
-                        help="Which step to run (or 'all')")
-    parser.add_argument("--force", action="store_true",
-                        help="Use CREATE OR REPLACE TABLE instead of IF NOT EXISTS (destroys data!)")
+    parser.add_argument(
+        "--step",
+        required=True,
+        choices=list(STEPS.keys()) + ["all"],  # noqa: RUF005
+        help="Which step to run (or 'all')",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Use CREATE OR REPLACE TABLE instead of IF NOT EXISTS (destroys data!)",
+    )
     args = parser.parse_args()
 
     settings = Settings()

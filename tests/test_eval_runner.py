@@ -1,19 +1,17 @@
 """Tests for the evaluation framework."""
 
 import pandas as pd
-import pytest
-
 from eval.run_eval import (
     EvalReport,
     EvalResult,
     EvalRunner,
+    _extract_tables,
     check_routing,
     compare_result_sets,
     compute_component_match,
     load_gold_queries,
-    _extract_tables,
 )
-from eval.validate_gold_set import validate_gold_set, ALL_CATEGORIES, ALL_TABLES
+from eval.validate_gold_set import ALL_CATEGORIES, ALL_TABLES, validate_gold_set
 
 
 class TestGoldSetLoading:
@@ -40,12 +38,12 @@ class TestGoldSetValidation:
         for q in queries:
             for t in q["expected_tables"]:
                 found.add(t)
-        assert ALL_TABLES <= found
+        assert found >= ALL_TABLES
 
     def test_all_9_categories_present(self):
         queries = load_gold_queries()
         found = {q["category"] for q in queries}
-        assert ALL_CATEGORIES <= found
+        assert found >= ALL_CATEGORIES
 
     def test_all_sql_has_project_placeholder(self):
         queries = load_gold_queries()
@@ -191,6 +189,7 @@ class TestOnlineEvalUsesRunner:
     def test_run_online_does_not_call_agent_run(self):
         """The broken nl2sql_agent.run() pattern must not be in run_online."""
         import inspect
+
         from eval.run_eval import EvalRunner
 
         source = inspect.getsource(EvalRunner.run_online)
@@ -202,6 +201,7 @@ class TestOnlineEvalUsesRunner:
     def test_run_online_uses_inmemory_runner(self):
         """run_online must use ADK's InMemoryRunner."""
         import inspect
+
         from eval.run_eval import EvalRunner
 
         source = inspect.getsource(EvalRunner.run_online)

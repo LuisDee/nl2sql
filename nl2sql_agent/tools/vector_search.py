@@ -20,7 +20,12 @@ from nl2sql_agent.tools._deps import (
     get_bq_service,
     get_cached_vector_result,
 )
-from nl2sql_agent.types import ColumnSearchResult, ErrorResult, FewShotResult, VectorSearchResult
+from nl2sql_agent.types import (
+    ColumnSearchResult,
+    ErrorResult,
+    FewShotResult,
+    VectorSearchResult,
+)
 
 logger = get_logger(__name__)
 
@@ -215,24 +220,28 @@ def _split_combined_rows(rows: list[dict]) -> tuple[list[dict], list[dict]]:
     for row in rows:
         search_type = row.get("search_type", "")
         if search_type == "schema":
-            schema_rows.append({
-                "source_type": row["source_type"],
-                "layer": row["layer"],
-                "dataset_name": row["dataset_name"],
-                "table_name": row["table_name"],
-                "description": row["description"],
-                "distance": row["distance"],
-            })
+            schema_rows.append(
+                {
+                    "source_type": row["source_type"],
+                    "layer": row["layer"],
+                    "dataset_name": row["dataset_name"],
+                    "table_name": row["table_name"],
+                    "description": row["description"],
+                    "distance": row["distance"],
+                }
+            )
         elif search_type == "example":
-            example_rows.append({
-                "past_question": row["table_name"],
-                "sql_query": row["description"],
-                "tables_used": row.get("tables_used", ""),
-                "past_dataset": row["dataset_name"],
-                "complexity": row.get("complexity", ""),
-                "routing_signal": row.get("routing_signal", ""),
-                "distance": row["distance"],
-            })
+            example_rows.append(
+                {
+                    "past_question": row["table_name"],
+                    "sql_query": row["description"],
+                    "tables_used": row.get("tables_used", ""),
+                    "past_dataset": row["dataset_name"],
+                    "complexity": row.get("complexity", ""),
+                    "routing_signal": row.get("routing_signal", ""),
+                    "distance": row["distance"],
+                }
+            )
     return schema_rows, example_rows
 
 
@@ -301,7 +310,9 @@ def vector_search_tables(question: str) -> VectorSearchResult | ErrorResult:
                 fallback_sql,
                 params=[{"name": "question", "type": "STRING", "value": question}],
             )
-            logger.info("vector_search_tables_fallback_complete", result_count=len(rows))
+            logger.info(
+                "vector_search_tables_fallback_complete", result_count=len(rows)
+            )
             return {"status": "success", "results": rows}
         except Exception as e2:
             logger.error("vector_search_tables_error", error=str(e2))
@@ -411,23 +422,27 @@ def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:
         for row in table_rows:
             search_type = row.get("search_type", "")
             if search_type == "column_search":
-                tables.append({
-                    "dataset_name": row["dataset_name"],
-                    "table_name": row["table_name"],
-                    "best_column_distance": row["best_column_distance"],
-                    "matching_columns": row["matching_columns"],
-                    "top_columns": row["top_columns"],
-                })
+                tables.append(
+                    {
+                        "dataset_name": row["dataset_name"],
+                        "table_name": row["table_name"],
+                        "best_column_distance": row["best_column_distance"],
+                        "matching_columns": row["matching_columns"],
+                        "top_columns": row["top_columns"],
+                    }
+                )
             elif search_type == "example":
-                examples.append({
-                    "past_question": row.get("past_question", ""),
-                    "sql_query": row.get("sql_query", ""),
-                    "tables_used": row.get("tables_used", []),
-                    "past_dataset": row.get("past_dataset", ""),
-                    "complexity": row.get("complexity", ""),
-                    "routing_signal": row.get("routing_signal", ""),
-                    "distance": row.get("distance", 0),
-                })
+                examples.append(
+                    {
+                        "past_question": row.get("past_question", ""),
+                        "sql_query": row.get("sql_query", ""),
+                        "tables_used": row.get("tables_used", []),
+                        "past_dataset": row.get("past_dataset", ""),
+                        "complexity": row.get("complexity", ""),
+                        "routing_signal": row.get("routing_signal", ""),
+                        "distance": row.get("distance", 0),
+                    }
+                )
 
         # Sort tables by best column distance
         tables.sort(key=lambda t: t["best_column_distance"])
@@ -458,4 +473,9 @@ def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:
             return fallback_result
         except Exception as e2:
             logger.error("vector_search_columns_error", error=str(e2))
-            return {"status": "error", "error_message": str(e2), "tables": [], "examples": []}
+            return {
+                "status": "error",
+                "error_message": str(e2),
+                "tables": [],
+                "examples": [],
+            }

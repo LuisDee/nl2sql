@@ -1,18 +1,16 @@
 """Tests for YAML catalog structure and content validation."""
 
-from pathlib import Path
-
 import pytest
 
 from nl2sql_agent.catalog_loader import (
     CATALOG_DIR,
     EXAMPLES_DIR,
-    validate_table_yaml,
+    load_all_examples,
+    load_all_table_yamls,
+    load_yaml,
     validate_dataset_yaml,
     validate_examples_yaml,
-    load_yaml,
-    load_all_table_yamls,
-    load_all_examples,
+    validate_table_yaml,
 )
 
 
@@ -38,18 +36,33 @@ class TestYamlCatalogStructure:
         path = CATALOG_DIR / "_routing.yaml"
         assert path.exists(), f"Missing: {path}"
 
-    @pytest.mark.parametrize("table", [
-        "brokertrade", "clicktrade", "markettrade", "otoswing", "quotertrade",
-    ])
+    @pytest.mark.parametrize(
+        "table",
+        [
+            "brokertrade",
+            "clicktrade",
+            "markettrade",
+            "otoswing",
+            "quotertrade",
+        ],
+    )
     def test_kpi_table_yaml_exists(self, table):
         """Every KPI table must have a YAML file."""
         path = CATALOG_DIR / "kpi" / f"{table}.yaml"
         assert path.exists(), f"Missing: {path}"
 
-    @pytest.mark.parametrize("table", [
-        "clicktrade", "markettrade", "quotertrade",
-        "theodata", "swingdata", "marketdata", "marketdepth",
-    ])
+    @pytest.mark.parametrize(
+        "table",
+        [
+            "clicktrade",
+            "markettrade",
+            "quotertrade",
+            "theodata",
+            "swingdata",
+            "marketdata",
+            "marketdepth",
+        ],
+    )
     def test_data_table_yaml_exists(self, table):
         """Every data table must have a YAML file."""
         path = CATALOG_DIR / "data" / f"{table}.yaml"
@@ -59,13 +72,23 @@ class TestYamlCatalogStructure:
 class TestYamlCatalogValidation:
     """Validate YAML content against the required schema."""
 
-    @pytest.mark.parametrize("subdir,table", [
-        ("kpi", "markettrade"), ("kpi", "quotertrade"), ("kpi", "brokertrade"),
-        ("kpi", "clicktrade"), ("kpi", "otoswing"),
-        ("data", "theodata"), ("data", "marketdata"), ("data", "marketdepth"),
-        ("data", "swingdata"), ("data", "markettrade"), ("data", "quotertrade"),
-        ("data", "clicktrade"),
-    ])
+    @pytest.mark.parametrize(
+        "subdir,table",
+        [
+            ("kpi", "markettrade"),
+            ("kpi", "quotertrade"),
+            ("kpi", "brokertrade"),
+            ("kpi", "clicktrade"),
+            ("kpi", "otoswing"),
+            ("data", "theodata"),
+            ("data", "marketdata"),
+            ("data", "marketdepth"),
+            ("data", "swingdata"),
+            ("data", "markettrade"),
+            ("data", "quotertrade"),
+            ("data", "clicktrade"),
+        ],
+    )
     def test_table_yaml_validates(self, subdir, table):
         """Each table YAML must pass structural validation."""
         path = CATALOG_DIR / subdir / f"{table}.yaml"
@@ -111,13 +134,23 @@ class TestYamlCatalogValidation:
 class TestMetadataGaps:
     """Validate Track 10 metadata additions: business_context, preferred_timestamps, trade_taxonomy."""
 
-    @pytest.mark.parametrize("subdir,table", [
-        ("kpi", "markettrade"), ("kpi", "quotertrade"), ("kpi", "brokertrade"),
-        ("kpi", "clicktrade"), ("kpi", "otoswing"),
-        ("data", "theodata"), ("data", "marketdata"), ("data", "marketdepth"),
-        ("data", "swingdata"), ("data", "markettrade"), ("data", "quotertrade"),
-        ("data", "clicktrade"),
-    ])
+    @pytest.mark.parametrize(
+        "subdir,table",
+        [
+            ("kpi", "markettrade"),
+            ("kpi", "quotertrade"),
+            ("kpi", "brokertrade"),
+            ("kpi", "clicktrade"),
+            ("kpi", "otoswing"),
+            ("data", "theodata"),
+            ("data", "marketdata"),
+            ("data", "marketdepth"),
+            ("data", "swingdata"),
+            ("data", "markettrade"),
+            ("data", "quotertrade"),
+            ("data", "clicktrade"),
+        ],
+    )
     def test_table_has_business_context(self, subdir, table):
         """Every table YAML must have a business_context field."""
         path = CATALOG_DIR / subdir / f"{table}.yaml"
@@ -130,13 +163,23 @@ class TestMetadataGaps:
             f"{subdir}/{table}.yaml business_context is too short"
         )
 
-    @pytest.mark.parametrize("subdir,table", [
-        ("kpi", "markettrade"), ("kpi", "quotertrade"), ("kpi", "brokertrade"),
-        ("kpi", "clicktrade"), ("kpi", "otoswing"),
-        ("data", "theodata"), ("data", "marketdata"), ("data", "marketdepth"),
-        ("data", "swingdata"), ("data", "markettrade"), ("data", "quotertrade"),
-        ("data", "clicktrade"),
-    ])
+    @pytest.mark.parametrize(
+        "subdir,table",
+        [
+            ("kpi", "markettrade"),
+            ("kpi", "quotertrade"),
+            ("kpi", "brokertrade"),
+            ("kpi", "clicktrade"),
+            ("kpi", "otoswing"),
+            ("data", "theodata"),
+            ("data", "marketdata"),
+            ("data", "marketdepth"),
+            ("data", "swingdata"),
+            ("data", "markettrade"),
+            ("data", "quotertrade"),
+            ("data", "clicktrade"),
+        ],
+    )
     def test_table_has_preferred_timestamps(self, subdir, table):
         """Every table YAML must have preferred_timestamps with a primary field."""
         path = CATALOG_DIR / subdir / f"{table}.yaml"
@@ -159,9 +202,7 @@ class TestMetadataGaps:
         path = CATALOG_DIR / subdir / "_dataset.yaml"
         data = load_yaml(path)
         ds = data["dataset"]
-        assert "trade_taxonomy" in ds, (
-            f"{subdir}/_dataset.yaml missing trade_taxonomy"
-        )
+        assert "trade_taxonomy" in ds, f"{subdir}/_dataset.yaml missing trade_taxonomy"
         taxonomy = ds["trade_taxonomy"]
         assert "description" in taxonomy, (
             f"{subdir}/_dataset.yaml trade_taxonomy missing description"
@@ -174,17 +215,27 @@ class TestMetadataGaps:
 class TestExamplesValidation:
     """Validate example query YAML files."""
 
-    @pytest.mark.parametrize("filename", [
-        "kpi_examples.yaml", "data_examples.yaml", "routing_examples.yaml",
-    ])
+    @pytest.mark.parametrize(
+        "filename",
+        [
+            "kpi_examples.yaml",
+            "data_examples.yaml",
+            "routing_examples.yaml",
+        ],
+    )
     def test_example_file_exists(self, filename):
         """Each example file must exist."""
         path = EXAMPLES_DIR / filename
         assert path.exists(), f"Missing: {path}"
 
-    @pytest.mark.parametrize("filename", [
-        "kpi_examples.yaml", "data_examples.yaml", "routing_examples.yaml",
-    ])
+    @pytest.mark.parametrize(
+        "filename",
+        [
+            "kpi_examples.yaml",
+            "data_examples.yaml",
+            "routing_examples.yaml",
+        ],
+    )
     def test_example_file_validates(self, filename):
         """Each example file must pass structural validation."""
         path = EXAMPLES_DIR / filename
@@ -197,9 +248,7 @@ class TestExamplesValidation:
     def test_at_least_30_examples_total(self):
         """Must have at least 30 validated examples across all files."""
         examples = load_all_examples()
-        assert len(examples) >= 30, (
-            f"Only {len(examples)} examples. Need at least 30."
-        )
+        assert len(examples) >= 30, f"Only {len(examples)} examples. Need at least 30."
 
     def test_examples_cover_kpi_and_data(self):
         """Examples must cover both KPI and data datasets."""

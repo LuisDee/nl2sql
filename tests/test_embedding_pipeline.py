@@ -22,8 +22,9 @@ class TestEmbeddingNullPredicate:
 
     def test_run_embeddings_schema_handles_null(self):
         """run_embeddings schema_embeddings UPDATE must handle NULL."""
-        from scripts.run_embeddings import generate_embeddings
         import inspect
+
+        from scripts.run_embeddings import generate_embeddings
 
         source = inspect.getsource(generate_embeddings)
         # The function builds SQL strings with WHERE clauses
@@ -35,8 +36,9 @@ class TestEmbeddingNullPredicate:
 
     def test_run_embeddings_all_updates_have_null_check(self):
         """Every WHERE ARRAY_LENGTH clause must be preceded by IS NULL."""
-        from scripts.run_embeddings import generate_embeddings
         import inspect
+
+        from scripts.run_embeddings import generate_embeddings
 
         source = inspect.getsource(generate_embeddings)
         # Every ARRAY_LENGTH check should have a corresponding IS NULL
@@ -53,14 +55,14 @@ class TestAutonomousEmbeddings:
 
     def test_config_has_autonomous_embeddings_setting(self):
         """Settings must have a use_autonomous_embeddings field."""
-        from nl2sql_agent.config import Settings
-        import inspect
 
-        sig = inspect.signature(Settings)
+        from nl2sql_agent.config import Settings
+
         # Check it exists as a field
-        assert hasattr(Settings, "model_fields") and "use_autonomous_embeddings" in Settings.model_fields, (
-            "Settings must have a use_autonomous_embeddings field"
-        )
+        assert (
+            hasattr(Settings, "model_fields")
+            and "use_autonomous_embeddings" in Settings.model_fields
+        ), "Settings must have a use_autonomous_embeddings field"
 
     def test_autonomous_embeddings_defaults_to_false(self):
         """use_autonomous_embeddings should default to False for backward compatibility."""
@@ -72,6 +74,7 @@ class TestAutonomousEmbeddings:
     def test_learning_loop_skips_embed_when_autonomous(self):
         """save_validated_query should skip embedding step when autonomous embeddings enabled."""
         import inspect
+
         from nl2sql_agent.tools.learning_loop import save_validated_query
 
         source = inspect.getsource(save_validated_query)
@@ -82,6 +85,7 @@ class TestAutonomousEmbeddings:
     def test_generate_embeddings_checks_autonomous(self):
         """generate_embeddings should check use_autonomous_embeddings setting."""
         import inspect
+
         from scripts.run_embeddings import generate_embeddings
 
         source = inspect.getsource(generate_embeddings)
@@ -96,6 +100,7 @@ class TestCreateTablesSafety:
     def test_default_uses_if_not_exists(self):
         """Default create_embedding_tables must use IF NOT EXISTS for all tables."""
         import inspect
+
         from scripts.run_embeddings import create_embedding_tables
 
         source = inspect.getsource(create_embedding_tables)
@@ -105,9 +110,10 @@ class TestCreateTablesSafety:
             "create_embedding_tables must default to CREATE TABLE IF NOT EXISTS"
         )
         # The create_stmt variable should default to safe mode
-        assert '"CREATE TABLE IF NOT EXISTS"' in source or "'CREATE TABLE IF NOT EXISTS'" in source, (
-            "Default create_stmt must be 'CREATE TABLE IF NOT EXISTS'"
-        )
+        assert (
+            '"CREATE TABLE IF NOT EXISTS"' in source
+            or "'CREATE TABLE IF NOT EXISTS'" in source
+        ), "Default create_stmt must be 'CREATE TABLE IF NOT EXISTS'"
         # CREATE OR REPLACE should only exist in the force=True branch
         assert "force" in source, (
             "CREATE OR REPLACE must be gated behind a 'force' parameter"
@@ -116,6 +122,7 @@ class TestCreateTablesSafety:
     def test_create_tables_accepts_force_flag(self):
         """create_embedding_tables should accept a force parameter."""
         import inspect
+
         from scripts.run_embeddings import create_embedding_tables
 
         sig = inspect.signature(create_embedding_tables)

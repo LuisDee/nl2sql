@@ -28,7 +28,7 @@ class TestContainsDml:
         assert "INSERT" in reason
 
     def test_semicolon_multi_statement_blocked(self):
-        is_blocked, reason = contains_dml("SELECT 1; DROP TABLE t")
+        is_blocked, _reason = contains_dml("SELECT 1; DROP TABLE t")
         assert is_blocked
 
     def test_delete_blocked(self):
@@ -37,27 +37,27 @@ class TestContainsDml:
         assert "DELETE" in reason
 
     def test_drop_blocked(self):
-        is_blocked, reason = contains_dml("DROP TABLE t")
+        is_blocked, _reason = contains_dml("DROP TABLE t")
         assert is_blocked
 
     def test_update_blocked(self):
-        is_blocked, reason = contains_dml("UPDATE t SET x = 1")
+        is_blocked, _reason = contains_dml("UPDATE t SET x = 1")
         assert is_blocked
 
     def test_truncate_blocked(self):
-        is_blocked, reason = contains_dml("TRUNCATE TABLE t")
+        is_blocked, _reason = contains_dml("TRUNCATE TABLE t")
         assert is_blocked
 
     def test_merge_blocked(self):
-        is_blocked, reason = contains_dml("MERGE INTO t USING s ON t.id = s.id")
+        is_blocked, _reason = contains_dml("MERGE INTO t USING s ON t.id = s.id")
         assert is_blocked
 
     def test_create_blocked(self):
-        is_blocked, reason = contains_dml("CREATE TABLE t (id INT)")
+        is_blocked, _reason = contains_dml("CREATE TABLE t (id INT)")
         assert is_blocked
 
     def test_alter_blocked(self):
-        is_blocked, reason = contains_dml("ALTER TABLE t ADD COLUMN x INT")
+        is_blocked, _reason = contains_dml("ALTER TABLE t ADD COLUMN x INT")
         assert is_blocked
 
     def test_returns_tuple(self):

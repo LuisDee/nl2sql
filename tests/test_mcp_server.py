@@ -9,12 +9,13 @@ loads with test values and LiveBigQueryClient is created (but never called).
 """
 
 from unittest.mock import AsyncMock, MagicMock, patch
-import pytest
 
+import pytest
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_event(*, is_final=False, text=None, function_calls=None):
     """Build a mock ADK event."""
@@ -47,11 +48,13 @@ def _make_event(*, is_final=False, text=None, function_calls=None):
 # Tool listing & schema
 # ---------------------------------------------------------------------------
 
+
 class TestToolListing:
     @pytest.mark.asyncio
     async def test_list_tools_returns_one_tool(self):
         """Server exposes exactly one tool named ask_trading_data."""
         from mcp.shared.memory import create_connected_server_and_client_session
+
         from nl2sql_agent.mcp_server import mcp
 
         async with create_connected_server_and_client_session(mcp) as client:
@@ -63,6 +66,7 @@ class TestToolListing:
     async def test_tool_schema_has_question_field(self):
         """Input schema requires a 'question' string parameter."""
         from mcp.shared.memory import create_connected_server_and_client_session
+
         from nl2sql_agent.mcp_server import mcp
 
         async with create_connected_server_and_client_session(mcp) as client:
@@ -77,24 +81,29 @@ class TestToolListing:
     async def test_tool_description_mentions_trading(self):
         """Description contains routing keywords for Gemini CLI."""
         from mcp.shared.memory import create_connected_server_and_client_session
+
         from nl2sql_agent.mcp_server import mcp
 
         async with create_connected_server_and_client_session(mcp) as client:
             result = await client.list_tools()
             desc = result.tools[0].description.lower()
             for keyword in ["trading", "pnl", "bigquery", "edge"]:
-                assert keyword in desc, f"Missing keyword '{keyword}' in tool description"
+                assert keyword in desc, (
+                    f"Missing keyword '{keyword}' in tool description"
+                )
 
 
 # ---------------------------------------------------------------------------
 # Tool invocation
 # ---------------------------------------------------------------------------
 
+
 class TestToolInvocation:
     @pytest.mark.asyncio
     async def test_call_tool_unknown_name_returns_error(self):
         """Calling a non-existent tool returns an error."""
         from mcp.shared.memory import create_connected_server_and_client_session
+
         from nl2sql_agent.mcp_server import mcp
 
         async with create_connected_server_and_client_session(mcp) as client:
@@ -105,6 +114,7 @@ class TestToolInvocation:
     async def test_call_tool_missing_question_returns_error(self):
         """Missing required 'question' arg returns error."""
         from mcp.shared.memory import create_connected_server_and_client_session
+
         from nl2sql_agent.mcp_server import mcp
 
         async with create_connected_server_and_client_session(mcp) as client:
@@ -129,6 +139,7 @@ class TestToolInvocation:
             mock_runner.session_service = mock_session_service
 
             from mcp.shared.memory import create_connected_server_and_client_session
+
             from nl2sql_agent.mcp_server import mcp
 
             async with create_connected_server_and_client_session(mcp) as client:
@@ -142,9 +153,7 @@ class TestToolInvocation:
     @pytest.mark.asyncio
     async def test_call_tool_returns_final_response_text(self):
         """Final response text is extracted correctly from ADK event."""
-        final_event = _make_event(
-            is_final=True, text="Average edge was 0.0234 bps."
-        )
+        final_event = _make_event(is_final=True, text="Average edge was 0.0234 bps.")
 
         async def mock_run_async(**kwargs):
             yield final_event
@@ -159,6 +168,7 @@ class TestToolInvocation:
             mock_runner.session_service = mock_session_service
 
             from mcp.shared.memory import create_connected_server_and_client_session
+
             from nl2sql_agent.mcp_server import mcp
 
             async with create_connected_server_and_client_session(mcp) as client:
@@ -173,7 +183,7 @@ class TestToolInvocation:
 
         async def mock_run_async(**kwargs):
             raise RuntimeError("BQ connection failed")
-            yield  # noqa: unreachable — makes this an async generator
+            yield  # unreachable — makes this an async generator
 
         mock_session = AsyncMock()
         mock_session.id = "s2"
@@ -185,6 +195,7 @@ class TestToolInvocation:
             mock_runner.session_service = mock_session_service
 
             from mcp.shared.memory import create_connected_server_and_client_session
+
             from nl2sql_agent.mcp_server import mcp
 
             async with create_connected_server_and_client_session(mcp) as client:
@@ -213,6 +224,7 @@ class TestToolInvocation:
             mock_runner.session_service = mock_session_service
 
             from mcp.shared.memory import create_connected_server_and_client_session
+
             from nl2sql_agent.mcp_server import mcp
 
             async with create_connected_server_and_client_session(mcp) as client:
@@ -225,6 +237,7 @@ class TestToolInvocation:
 # ---------------------------------------------------------------------------
 # Progress notifications
 # ---------------------------------------------------------------------------
+
 
 class TestProgressNotifications:
     @pytest.mark.asyncio
@@ -247,6 +260,7 @@ class TestProgressNotifications:
             mock_runner.session_service = mock_session_service
 
             from mcp.shared.memory import create_connected_server_and_client_session
+
             from nl2sql_agent.mcp_server import mcp
 
             async with create_connected_server_and_client_session(mcp) as client:
@@ -291,6 +305,7 @@ class TestProgressNotifications:
             mock_runner.session_service = mock_session_service
 
             from mcp.shared.memory import create_connected_server_and_client_session
+
             from nl2sql_agent.mcp_server import mcp
 
             async with create_connected_server_and_client_session(mcp) as client:
@@ -305,13 +320,16 @@ class TestProgressNotifications:
 # Module-level safety
 # ---------------------------------------------------------------------------
 
+
 class TestModuleSafety:
     def test_no_bare_print_in_module(self):
         """Module must not have bare print() calls (stdout is MCP JSON-RPC)."""
-        import nl2sql_agent.mcp_server as mod
         import ast
 
-        tree = ast.parse(open(mod.__file__).read())
+        import nl2sql_agent.mcp_server as mod
+
+        with open(mod.__file__) as _f:
+            tree = ast.parse(_f.read())
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
                 func = node.func
@@ -324,6 +342,7 @@ class TestModuleSafety:
 
         expected_tools = {
             "check_semantic_cache",
+            "resolve_exchange",
             "vector_search_columns",
             "vector_search_tables",
             "load_yaml_metadata",

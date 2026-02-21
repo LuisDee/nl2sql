@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import TypedDict
 
-
 # --- Shared ---
+
 
 class ErrorResult(TypedDict):
     """Common error return for all tools."""
@@ -19,6 +19,7 @@ class ErrorResult(TypedDict):
 
 
 # --- Semantic Cache ---
+
 
 class CacheHitResult(TypedDict):
     """Returned when a near-exact match is found in query_memory."""
@@ -40,6 +41,7 @@ class CacheMissResult(TypedDict):
 
 # --- Exchange Resolver ---
 
+
 class ExchangeResolvedResult(TypedDict):
     """Returned when exchange is resolved (alias or symbol match)."""
 
@@ -58,6 +60,7 @@ class ExchangeMultipleResult(TypedDict):
 
 
 # --- Vector Search ---
+
 
 class VectorSearchResult(TypedDict):
     """Returned by vector_search_tables."""
@@ -83,6 +86,7 @@ class FewShotResult(TypedDict):
 
 # --- Metadata ---
 
+
 class MetadataSuccessResult(TypedDict):
     """Returned by load_yaml_metadata on success."""
 
@@ -93,6 +97,7 @@ class MetadataSuccessResult(TypedDict):
 
 
 # --- SQL Validation ---
+
 
 class DryRunValidResult(TypedDict):
     """Returned when SQL passes dry-run validation."""
@@ -111,6 +116,7 @@ class DryRunInvalidResult(TypedDict):
 
 # --- SQL Execution ---
 
+
 class ExecuteSuccessResult(TypedDict, total=False):
     """Returned on successful SQL execution.
 
@@ -124,6 +130,7 @@ class ExecuteSuccessResult(TypedDict, total=False):
 
 
 # --- Learning Loop ---
+
 
 class SaveQueryResult(TypedDict):
     """Returned by save_validated_query."""

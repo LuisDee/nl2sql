@@ -38,7 +38,7 @@ def test_eval_cases_have_required_fields():
         data = json.load(f)
 
     for case in data:
-        assert "name" in case, f"Test case missing 'name'"
+        assert "name" in case, "Test case missing 'name'"
         assert "data" in case, f"Test case '{case.get('name')}' missing 'data'"
         for entry in case["data"]:
             assert "query" in entry, f"Entry missing 'query' in {case['name']}"
@@ -60,7 +60,9 @@ async def test_adk_eval_tool_trajectory():
     try:
         from google.adk.evaluation import AgentEvaluator
     except ImportError:
-        pytest.skip("google.adk.evaluation.AgentEvaluator not available in this ADK version")
+        pytest.skip(
+            "google.adk.evaluation.AgentEvaluator not available in this ADK version"
+        )
 
     await AgentEvaluator.evaluate(
         agent_module="nl2sql_agent",

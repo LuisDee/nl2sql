@@ -7,11 +7,9 @@ These tests verify the exact failure mode that caused the runtime error:
 The root cause was missing provider prefix (e.g. openai/) on model names.
 """
 
+import litellm
 import pytest
 import requests
-import os
-
-import litellm
 
 
 class TestLiteLLMProxy:
@@ -82,7 +80,7 @@ class TestLiteLLMProxy:
             model=real_settings.litellm_model,
             messages=[{"role": "user", "content": "Say hello in one word."}],
             api_key=real_settings.litellm_api_key,  # Explicit pass
-            base_url=litellm_base_url,              # Explicit pass
+            base_url=litellm_base_url,  # Explicit pass
             max_tokens=10,
         )
         msg = response.choices[0].message

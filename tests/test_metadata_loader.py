@@ -4,9 +4,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 from nl2sql_agent.tools.metadata_loader import (
-    load_yaml_metadata,
-    _resolve_yaml_path,
     _discover_table_yaml_map,
+    _resolve_yaml_path,
+    load_yaml_metadata,
 )
 
 
@@ -36,7 +36,6 @@ class TestResolveYamlPath:
     def test_case_insensitive_match(self):
         path = _resolve_yaml_path("TheOData")
         assert path == "data/theodata.yaml"
-
 
     def test_resolves_brazil_kpi_via_registry(self):
         """Exchange registry lookup: Brazil KPI dataset."""
@@ -89,8 +88,14 @@ class TestDiscoverTableYamlMap:
         # markettrade exists in both — map has one entry (data wins)
         assert "markettrade" in table_map
         # _resolve_yaml_path with dataset still works for both
-        assert _resolve_yaml_path("markettrade", "nl2sql_omx_kpi") == "kpi/markettrade.yaml"
-        assert _resolve_yaml_path("markettrade", "nl2sql_omx_data") == "data/markettrade.yaml"
+        assert (
+            _resolve_yaml_path("markettrade", "nl2sql_omx_kpi")
+            == "kpi/markettrade.yaml"
+        )
+        assert (
+            _resolve_yaml_path("markettrade", "nl2sql_omx_data")
+            == "data/markettrade.yaml"
+        )
 
 
 class TestLoadYamlMetadata:
@@ -103,7 +108,7 @@ class TestLoadYamlMetadata:
         """Even if mapping exists, the file might not."""
         with patch(
             "nl2sql_agent.tools.metadata_loader.CATALOG_DIR",
-            Path("/tmp/nonexistent_catalog"),
+            Path("/tmp/nonexistent_catalog"),  # noqa: S108
         ):
             result = load_yaml_metadata("markettrade", "nl2sql_omx_kpi")
             assert result["status"] == "error"

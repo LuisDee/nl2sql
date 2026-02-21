@@ -4,26 +4,24 @@ The root_agent variable is REQUIRED by ADK convention.
 ADK discovers it automatically when running `adk run nl2sql_agent`.
 """
 
-import os
-
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
 from google.genai.types import GenerateContentConfig
 
+from nl2sql_agent.callbacks import after_tool_log, before_tool_guard
 from nl2sql_agent.config import settings
-from nl2sql_agent.logging_config import setup_logging, get_logger
+from nl2sql_agent.logging_config import get_logger, setup_logging
 from nl2sql_agent.prompts import build_nl2sql_instruction
-from nl2sql_agent.callbacks import before_tool_guard, after_tool_log
 from nl2sql_agent.tools import (
-    init_bq_service,
     check_semantic_cache,
-    resolve_exchange,
-    vector_search_columns,
-    fetch_few_shot_examples,
-    load_yaml_metadata,
     dry_run_sql,
     execute_sql,
+    fetch_few_shot_examples,
+    init_bq_service,
+    load_yaml_metadata,
+    resolve_exchange,
     save_validated_query,
+    vector_search_columns,
 )
 
 # --- Initialise logging ---

@@ -32,8 +32,7 @@ def _static_instruction() -> str:
         default_exchange = registry.get("default_exchange", "omx")
         exchange_count = len(exchanges)
         exchange_list = ", ".join(
-            f"{name} ({', '.join(info['aliases'])})"
-            for name, info in exchanges.items()
+            f"{name} ({', '.join(info['aliases'])})" for name, info in exchanges.items()
         )
     except Exception:
         default_exchange = "omx"
@@ -151,7 +150,7 @@ def _build_dynamic_section(ctx: ReadonlyContext) -> str:
 
     parts = [
         f"Today's date is {today}. Use this as the default for trade_date filters when "
-        f"the user says \"today\". For \"yesterday\", use DATE_SUB('{today}', INTERVAL 1 DAY)."
+        f'the user says "today". For "yesterday", use DATE_SUB(\'{today}\', INTERVAL 1 DAY).'
     ]
 
     state = ctx.state if hasattr(ctx, "state") and ctx.state else {}
@@ -176,8 +175,8 @@ def _build_dynamic_section(ctx: ReadonlyContext) -> str:
             f"\n## FOLLOW-UP CONTEXT\n\n"
             f"The previous query in this session was:\n"
             f"```sql\n{last_sql_trimmed}\n```\n"
-            f"It returned {row_count} rows. If the user asks a follow-up question (e.g. \"break that\n"
-            f"down by symbol\", \"filter to WHITE portfolio\"), you can reuse the same table without\n"
+            f'It returned {row_count} rows. If the user asks a follow-up question (e.g. "break that\n'
+            f'down by symbol", "filter to WHITE portfolio"), you can reuse the same table without\n'
             f"re-running vector_search_columns. Modify the previous SQL directly."
         )
 

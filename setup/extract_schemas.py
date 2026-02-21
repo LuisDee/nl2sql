@@ -52,7 +52,9 @@ DATASETS = {
 OUTPUT_DIR = Path("schemas")
 
 
-def extract_schema(client: bigquery.Client, dataset: str, table_name: str) -> list[dict]:
+def extract_schema(
+    client: bigquery.Client, dataset: str, table_name: str
+) -> list[dict]:
     """Extract schema from a BigQuery table.
 
     Args:

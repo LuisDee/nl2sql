@@ -4,7 +4,6 @@ Verifies that tool return type annotations reference the TypedDicts
 defined in nl2sql_agent.types, not bare `dict`.
 """
 
-import inspect
 import typing
 
 from nl2sql_agent.types import (
@@ -14,9 +13,9 @@ from nl2sql_agent.types import (
     DryRunInvalidResult,
     DryRunValidResult,
     ErrorResult,
-    ExecuteSuccessResult,
     ExchangeMultipleResult,
     ExchangeResolvedResult,
+    ExecuteSuccessResult,
     FewShotResult,
     MetadataSuccessResult,
     SaveQueryResult,

@@ -35,12 +35,12 @@ class TestAgentStructure:
         assert "trading data" in desc
         assert "bigquery" in desc
 
-    def test_nl2sql_agent_has_seven_tools(self):
-        """nl2sql_agent must have 7 tools wired in (including semantic cache)."""
+    def test_nl2sql_agent_has_eight_tools(self):
+        """nl2sql_agent must have 8 tools wired in (including exchange resolver)."""
         from nl2sql_agent.agent import nl2sql_agent
 
         assert nl2sql_agent.tools is not None
-        assert len(nl2sql_agent.tools) == 7
+        assert len(nl2sql_agent.tools) == 8
 
     def test_root_agent_instruction_mentions_delegation(self):
         """Root agent instruction must tell it to delegate data questions."""
@@ -51,14 +51,14 @@ class TestAgentStructure:
 
     def test_agent_names_are_valid_python_identifiers(self):
         """All agent names must be valid Python identifiers (ADK requirement)."""
-        from nl2sql_agent.agent import root_agent, nl2sql_agent
+        from nl2sql_agent.agent import nl2sql_agent, root_agent
 
         assert root_agent.name.isidentifier()
         assert nl2sql_agent.name.isidentifier()
 
     def test_agent_names_are_not_reserved(self):
         """No agent can be named 'user' — reserved by ADK."""
-        from nl2sql_agent.agent import root_agent, nl2sql_agent
+        from nl2sql_agent.agent import nl2sql_agent, root_agent
 
         assert root_agent.name != "user"
         assert nl2sql_agent.name != "user"

@@ -29,8 +29,8 @@ def _tool_call_hash(tool_name: str, args: dict) -> str:
     try:
         key = json.dumps({"tool": tool_name, "args": args}, sort_keys=True, default=str)
     except (TypeError, ValueError):
-        key = f"{tool_name}:{str(args)}"
-    return hashlib.md5(key.encode()).hexdigest()[:12]
+        key = f"{tool_name}:{args!s}"
+    return hashlib.md5(key.encode(), usedforsecurity=False).hexdigest()[:12]
 
 
 def before_tool_guard(
@@ -58,17 +58,17 @@ def before_tool_guard(
             return {"status": "error", "error_message": reason}
 
     # Hard circuit breaker: block SQL tools after max retries
-    if tool_name in ("dry_run_sql", "execute_sql"):
-        if tool_context.state.get("max_retries_reached"):
-            logger.warning("circuit_breaker_blocked", tool=tool_name)
-            return {
-                "status": "error",
-                "error_message": (
-                    "Max SQL retry attempts reached. "
-                    "Explain the error to the user."
-                ),
-                "blocked_by": "circuit_breaker",
-            }
+    if tool_name in ("dry_run_sql", "execute_sql") and tool_context.state.get(
+        "max_retries_reached"
+    ):
+        logger.warning("circuit_breaker_blocked", tool=tool_name)
+        return {
+            "status": "error",
+            "error_message": (
+                "Max SQL retry attempts reached. Explain the error to the user."
+            ),
+            "blocked_by": "circuit_breaker",
+        }
 
     # Reset state on new question
     # (check_semantic_cache is always the first tool called per question)
@@ -159,9 +159,7 @@ def after_tool_log(
             )
             if attempts >= MAX_DRY_RUN_RETRIES:
                 tool_context.state["max_retries_reached"] = True
-                logger.error(
-                    "dry_run_max_retries_reached", attempts=attempts
-                )
+                logger.error("dry_run_max_retries_reached", attempts=attempts)
                 # Augment the response with escalation hint
                 return {
                     **(tool_response or {}),

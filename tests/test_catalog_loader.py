@@ -1,11 +1,11 @@
 """Unit tests for catalog_loader module (no BQ required)."""
 
 from nl2sql_agent.catalog_loader import (
-    validate_table_yaml,
-    validate_examples_yaml,
-    resolve_fqn,
     resolve_example_sql,
+    resolve_fqn,
     resolve_placeholders,
+    validate_examples_yaml,
+    validate_table_yaml,
 )
 
 
@@ -21,7 +21,9 @@ class TestResolvePlaceholders:
         assert result == "nl2sql_omx_kpi"
 
     def test_resolves_data_dataset(self):
-        result = resolve_placeholders("{data_dataset}", data_dataset="nl2sql_brazil_data")
+        result = resolve_placeholders(
+            "{data_dataset}", data_dataset="nl2sql_brazil_data"
+        )
         assert result == "nl2sql_brazil_data"
 
     def test_resolves_all_three(self):
@@ -114,10 +116,12 @@ class TestValidateTableYaml:
         """Invalid layer value should produce an error."""
         data = {
             "table": {
-                "name": "test", "dataset": "{kpi_dataset}",
+                "name": "test",
+                "dataset": "{kpi_dataset}",
                 "fqn": "{project}.{kpi_dataset}.test",
                 "layer": "gold",
-                "description": "x", "partition_field": "trade_date",
+                "description": "x",
+                "partition_field": "trade_date",
                 "columns": [{"name": "a", "type": "STRING", "description": "x"}],
             }
         }
@@ -128,9 +132,11 @@ class TestValidateTableYaml:
         """Invalid dataset value should produce an error."""
         data = {
             "table": {
-                "name": "test", "dataset": "dev_agent_test",
+                "name": "test",
+                "dataset": "dev_agent_test",
                 "fqn": "{project}.dev_agent_test.test",
-                "layer": "kpi", "description": "x",
+                "layer": "kpi",
+                "description": "x",
                 "partition_field": "trade_date",
                 "columns": [{"name": "a", "type": "STRING", "description": "x"}],
             }
@@ -142,9 +148,11 @@ class TestValidateTableYaml:
         """fqn without {project} placeholder should produce an error."""
         data = {
             "table": {
-                "name": "test", "dataset": "{kpi_dataset}",
+                "name": "test",
+                "dataset": "{kpi_dataset}",
                 "fqn": "hardcoded-project.{kpi_dataset}.test",
-                "layer": "kpi", "description": "x",
+                "layer": "kpi",
+                "description": "x",
                 "partition_field": "trade_date",
                 "columns": [{"name": "a", "type": "STRING", "description": "x"}],
             }
@@ -158,26 +166,30 @@ class TestValidateExamplesYaml:
 
     def test_valid_example(self):
         data = {
-            "examples": [{
-                "question": "What was the PnL?",
-                "sql": "SELECT * FROM `{project}.{kpi_dataset}.markettrade` WHERE trade_date = '2026-02-17'",
-                "tables_used": ["markettrade"],
-                "dataset": "{kpi_dataset}",
-                "complexity": "simple",
-            }]
+            "examples": [
+                {
+                    "question": "What was the PnL?",
+                    "sql": "SELECT * FROM `{project}.{kpi_dataset}.markettrade` WHERE trade_date = '2026-02-17'",
+                    "tables_used": ["markettrade"],
+                    "dataset": "{kpi_dataset}",
+                    "complexity": "simple",
+                }
+            ]
         }
         errors = validate_examples_yaml(data)
         assert errors == []
 
     def test_missing_project_placeholder_in_sql(self):
         data = {
-            "examples": [{
-                "question": "What?",
-                "sql": "SELECT * FROM markettrade WHERE trade_date = '2026-02-17'",
-                "tables_used": ["markettrade"],
-                "dataset": "{kpi_dataset}",
-                "complexity": "simple",
-            }]
+            "examples": [
+                {
+                    "question": "What?",
+                    "sql": "SELECT * FROM markettrade WHERE trade_date = '2026-02-17'",
+                    "tables_used": ["markettrade"],
+                    "dataset": "{kpi_dataset}",
+                    "complexity": "simple",
+                }
+            ]
         }
         errors = validate_examples_yaml(data)
         assert any("{project}" in e for e in errors)

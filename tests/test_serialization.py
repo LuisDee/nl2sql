@@ -1,7 +1,6 @@
 """Exhaustive tests for BigQuery JSON serialization sanitizer."""
 
 import json
-import math
 from datetime import date, datetime, time
 from decimal import Decimal
 

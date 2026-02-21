@@ -1,7 +1,5 @@
 """Tests for populate_embeddings.py — enriched embedding text generation."""
 
-import pytest
-
 from scripts.populate_embeddings import build_embedding_text
 
 

@@ -111,7 +111,7 @@ class TestRepetitionDetection:
         # 4 calls allowed
         for i in range(4):
             result = before_tool_guard(tool, args, ctx)
-            assert result is None, f"Blocked early on call {i+1}"
+            assert result is None, f"Blocked early on call {i + 1}"
 
         # 5th call blocked
         result = before_tool_guard(tool, args, ctx)

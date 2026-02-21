@@ -31,8 +31,8 @@ class TestSettings:
     def test_settings_missing_required_field_raises(self, monkeypatch):
         """Settings should raise ValidationError if required field is missing."""
         monkeypatch.delenv("LITELLM_API_KEY", raising=False)
-        from pydantic import ValidationError
         import pytest
+        from pydantic import ValidationError
 
         with pytest.raises(ValidationError):
             Settings(_env_file=None)

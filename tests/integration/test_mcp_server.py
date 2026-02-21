@@ -10,8 +10,6 @@ import json
 import subprocess
 import sys
 
-import pytest
-
 
 class TestMCPServerStdio:
     def test_mcp_server_stdio_list_tools(self):
@@ -43,22 +41,26 @@ class TestMCPServerStdio:
         }
 
         # Send all messages, newline-delimited
-        stdin_data = "\n".join([
-            json.dumps(init_request),
-            json.dumps(initialized_notification),
-            json.dumps(list_tools_request),
-            "",  # trailing newline
-        ])
+        stdin_data = "\n".join(
+            [
+                json.dumps(init_request),
+                json.dumps(initialized_notification),
+                json.dumps(list_tools_request),
+                "",  # trailing newline
+            ]
+        )
 
-        proc = subprocess.run(
+        proc = subprocess.run(  # noqa: S603
             [sys.executable, "-m", "nl2sql_agent.mcp_server"],
             input=stdin_data,
             capture_output=True,
             text=True,
             timeout=30,
-            cwd=str(subprocess.os.path.dirname(subprocess.os.path.dirname(
-                subprocess.os.path.dirname(__file__)
-            ))),
+            cwd=str(
+                subprocess.os.path.dirname(
+                    subprocess.os.path.dirname(subprocess.os.path.dirname(__file__))
+                )
+            ),
         )
 
         # Server should not crash

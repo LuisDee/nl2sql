@@ -1,8 +1,5 @@
 """Tests for YAML lru_cache in catalog_loader."""
 
-from pathlib import Path
-from unittest.mock import mock_open, patch
-
 from nl2sql_agent.catalog_loader import clear_yaml_cache, load_yaml
 
 

@@ -8,8 +8,8 @@ logging MUST go to stderr. This module redirects structlog output to
 stderr before importing the agent module.
 """
 
-import sys
 import logging
+import sys
 
 # --- Redirect ALL logging to stderr BEFORE any agent imports ---
 # structlog's PrintLoggerFactory prints to stdout by default.
@@ -33,17 +33,17 @@ structlog.configure(
     cache_logger_on_first_use=False,  # Allow reconfiguration
 )
 
-from mcp.server import FastMCP  # noqa: E402
-from mcp.server.fastmcp import Context  # noqa: E402
-
 from google.adk.runners import InMemoryRunner  # noqa: E402
 from google.genai.types import Content, Part  # noqa: E402
+from mcp.server import FastMCP  # noqa: E402
+from mcp.server.fastmcp import Context  # noqa: E402
 
 from nl2sql_agent.agent import root_agent  # noqa: E402
 
 # --- Progress message mapping ---
 TOOL_PROGRESS_MESSAGES = {
     "check_semantic_cache": "Checking query cache...",
+    "resolve_exchange": "Resolving exchange...",
     "vector_search_columns": "Searching tables and columns...",
     "vector_search_tables": "Searching for relevant tables...",
     "load_yaml_metadata": "Loading column metadata...",
@@ -105,7 +105,7 @@ async def ask_trading_data(question: str, ctx: Context) -> str:
                     tool_name, f"Running {tool_name}..."
                 )
                 await ctx.report_progress(
-                    progress=step_count, total=7, message=step_desc
+                    progress=step_count, total=8, message=step_desc
                 )
                 step_count += 1
 
@@ -113,7 +113,9 @@ async def ask_trading_data(question: str, ctx: Context) -> str:
             if event.is_final_response():
                 if event.content and event.content.parts:
                     final_text = "\n".join(
-                        p.text for p in event.content.parts if hasattr(p, "text") and p.text
+                        p.text
+                        for p in event.content.parts
+                        if hasattr(p, "text") and p.text
                     )
                 break
 

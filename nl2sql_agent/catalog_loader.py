@@ -22,7 +22,15 @@ logger = get_logger(__name__)
 CATALOG_DIR = Path(__file__).parent.parent / "catalog"
 EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
 
-REQUIRED_TABLE_KEYS = {"name", "dataset", "fqn", "layer", "description", "partition_field", "columns"}
+REQUIRED_TABLE_KEYS = {
+    "name",
+    "dataset",
+    "fqn",
+    "layer",
+    "description",
+    "partition_field",
+    "columns",
+}
 REQUIRED_COLUMN_KEYS = {"name", "type", "description"}
 REQUIRED_EXAMPLE_KEYS = {"question", "sql", "tables_used", "dataset", "complexity"}
 VALID_LAYERS = {"kpi", "data"}
@@ -150,10 +158,14 @@ def validate_table_yaml(data: dict[str, Any], filepath: str = "") -> list[str]:
         errors.append(f"{prefix}Missing table keys: {missing}")
 
     if table.get("layer") not in VALID_LAYERS:
-        errors.append(f"{prefix}Invalid layer: {table.get('layer')}. Must be one of {VALID_LAYERS}")
+        errors.append(
+            f"{prefix}Invalid layer: {table.get('layer')}. Must be one of {VALID_LAYERS}"
+        )
 
     if table.get("dataset") not in VALID_DATASETS:
-        errors.append(f"{prefix}Invalid dataset: {table.get('dataset')}. Must be one of {VALID_DATASETS}")
+        errors.append(
+            f"{prefix}Invalid dataset: {table.get('dataset')}. Must be one of {VALID_DATASETS}"
+        )
 
     fqn = table.get("fqn", "")
     if "{project}" not in fqn:
@@ -166,7 +178,9 @@ def validate_table_yaml(data: dict[str, Any], filepath: str = "") -> list[str]:
         for i, col in enumerate(columns):
             col_missing = REQUIRED_COLUMN_KEYS - set(col.keys())
             if col_missing:
-                errors.append(f"{prefix}Column {i} ({col.get('name', '?')}): missing keys {col_missing}")
+                errors.append(
+                    f"{prefix}Column {i} ({col.get('name', '?')}): missing keys {col_missing}"
+                )
 
     return errors
 
@@ -209,14 +223,18 @@ def validate_examples_yaml(data: dict[str, Any], filepath: str = "") -> list[str
             errors.append(f"{prefix}Example {i}: missing keys {missing}")
 
         if ex.get("complexity") not in VALID_COMPLEXITIES:
-            errors.append(f"{prefix}Example {i}: invalid complexity '{ex.get('complexity')}'")
+            errors.append(
+                f"{prefix}Example {i}: invalid complexity '{ex.get('complexity')}'"
+            )
 
         if ex.get("dataset") not in VALID_DATASETS:
             errors.append(f"{prefix}Example {i}: invalid dataset '{ex.get('dataset')}'")
 
         sql = ex.get("sql", "")
         if "{project}" not in sql:
-            errors.append(f"{prefix}Example {i}: SQL must use {{project}} placeholder for fully-qualified table names")
+            errors.append(
+                f"{prefix}Example {i}: SQL must use {{project}} placeholder for fully-qualified table names"
+            )
 
     return errors
 
@@ -239,6 +257,25 @@ def load_all_table_yamls() -> list[dict[str, Any]]:
             if "table" in data:
                 tables.append(data)
     return tables
+
+
+@functools.lru_cache(maxsize=1)
+def load_exchange_registry() -> dict[str, Any]:
+    """Load the exchange registry from catalog/_exchanges.yaml (cached).
+
+    Returns:
+        Parsed YAML dict with 'default_exchange' and 'exchanges' keys.
+
+    Raises:
+        FileNotFoundError: If _exchanges.yaml doesn't exist.
+    """
+    path = CATALOG_DIR / "_exchanges.yaml"
+    return load_yaml(path)
+
+
+def clear_exchange_cache() -> None:
+    """Clear the exchange registry LRU cache (for test isolation)."""
+    load_exchange_registry.cache_clear()
 
 
 def load_all_examples() -> list[dict[str, Any]]:

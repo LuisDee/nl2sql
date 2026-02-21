@@ -65,7 +65,6 @@ class BigQueryProtocol(Protocol):
         """
         ...
 
-
     def query_with_params(
         self, sql: str, params: list[dict[str, Any]] | None = None
     ) -> list[dict[str, Any]]:

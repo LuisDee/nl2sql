@@ -42,7 +42,7 @@ def execute_sql(sql_query: str) -> ExecuteSuccessResult | ErrorResult:
 
     # --- Add LIMIT if not present at outer query level ---
     max_rows = settings.bq_max_result_rows
-    has_outer_limit = bool(re.search(r'\bLIMIT\s+\d+\s*$', stripped, re.IGNORECASE))
+    has_outer_limit = bool(re.search(r"\bLIMIT\s+\d+\s*$", stripped, re.IGNORECASE))
     if not has_outer_limit:
         sql_query = f"{stripped}\nLIMIT {max_rows}"
         logger.info("execute_sql_limit_added", limit=max_rows)

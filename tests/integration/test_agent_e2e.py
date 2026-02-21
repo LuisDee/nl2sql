@@ -10,7 +10,7 @@ import pytest
 class TestAgentInitialisation:
     def test_agent_imports_without_error(self, real_settings):
         """Importing agent.py must not raise — catches import-time init errors."""
-        from nl2sql_agent.agent import root_agent, nl2sql_agent
+        from nl2sql_agent.agent import nl2sql_agent, root_agent
 
         assert root_agent.name == "mako_assistant"
         assert nl2sql_agent.name == "nl2sql_agent"
@@ -31,12 +31,14 @@ class TestAgentConversation:
         """A greeting should get a direct response without SQL tool calls."""
         try:
             import requests
+
             requests.get(f"{litellm_base_url}/health", timeout=5)
         except requests.ConnectionError:
             pytest.skip(f"LiteLLM proxy not reachable at {litellm_base_url}")
 
         from google.adk.runners import InMemoryRunner
         from google.adk.sessions import InMemorySessionService
+
         from nl2sql_agent.agent import root_agent
 
         runner = InMemoryRunner(
@@ -68,10 +70,7 @@ class TestAgentConversation:
         assert len(events) > 0
 
         # Should NOT have called any SQL tools for a greeting
-        tool_calls = [
-            e for e in events
-            if hasattr(e, "tool_calls") and e.tool_calls
-        ]
+        tool_calls = [e for e in events if hasattr(e, "tool_calls") and e.tool_calls]
         sql_tool_names = {"dry_run_sql", "execute_sql"}
         for tc_event in tool_calls:
             for tc in tc_event.tool_calls:

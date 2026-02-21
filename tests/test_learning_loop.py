@@ -99,5 +99,7 @@ class TestSaveValidatedQuery:
         # The insert SQL should contain SPLIT for converting comma-separated to ARRAY
         # last_query will be the embed SQL (second call), so check params from insert
         assert mock_bq.last_params is not None
-        tables_param = next(p for p in mock_bq.last_params if p["name"] == "tables_used")
+        tables_param = next(
+            p for p in mock_bq.last_params if p["name"] == "tables_used"
+        )
         assert tables_param["value"] == "markettrade,brokertrade"

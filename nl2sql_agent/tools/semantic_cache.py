@@ -41,7 +41,9 @@ LIMIT 1
 """
 
 
-def check_semantic_cache(question: str, exchange_datasets: str = "") -> CacheHitResult | CacheMissResult:
+def check_semantic_cache(
+    question: str, exchange_datasets: str = ""
+) -> CacheHitResult | CacheMissResult:
     """Check if this question was previously answered with high confidence.
 
     Searches query_memory for a near-exact match (cosine distance below
@@ -132,4 +134,4 @@ def check_semantic_cache(question: str, exchange_datasets: str = "") -> CacheHit
 
     except Exception as e:
         logger.error("semantic_cache_error", error=str(e))
-        return {"cache_hit": False, "reason": f"cache lookup error: {str(e)}"}
+        return {"cache_hit": False, "reason": f"cache lookup error: {e!s}"}

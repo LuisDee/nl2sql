@@ -7,10 +7,18 @@ first keyword, to catch patterns like WITH ... INSERT INTO.
 
 import re
 
-_DML_DDL_KEYWORDS = frozenset({
-    "INSERT", "UPDATE", "DELETE", "DROP", "ALTER",
-    "TRUNCATE", "MERGE", "CREATE",
-})
+_DML_DDL_KEYWORDS = frozenset(
+    {
+        "INSERT",
+        "UPDATE",
+        "DELETE",
+        "DROP",
+        "ALTER",
+        "TRUNCATE",
+        "MERGE",
+        "CREATE",
+    }
+)
 
 # Regex that matches any of the DML/DDL keywords as whole words
 _DML_PATTERN = re.compile(
@@ -37,12 +45,18 @@ def contains_dml(sql: str) -> tuple[bool, str]:
 
     # Check for multiple statements (semicolons)
     if ";" in stripped:
-        return True, "Multiple statements detected (semicolon). Only single SELECT queries allowed."
+        return (
+            True,
+            "Multiple statements detected (semicolon). Only single SELECT queries allowed.",
+        )
 
     # Scan full body for DML/DDL keywords
     match = _DML_PATTERN.search(stripped)
     if match:
         keyword = match.group(1).upper()
-        return True, f"Blocked: {keyword} queries are not allowed. Only SELECT/WITH queries are permitted."
+        return (
+            True,
+            f"Blocked: {keyword} queries are not allowed. Only SELECT/WITH queries are permitted.",
+        )
 
     return False, ""

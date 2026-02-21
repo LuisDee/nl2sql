@@ -1,24 +1,30 @@
 """Tests for combined vector search + internal caching."""
 
 from nl2sql_agent.tools._deps import clear_vector_cache, get_cached_vector_result
-from nl2sql_agent.tools.vector_search import fetch_few_shot_examples, vector_search_tables
+from nl2sql_agent.tools.vector_search import (
+    fetch_few_shot_examples,
+    vector_search_tables,
+)
 
 
 class TestCombinedVectorSearch:
     """vector_search_tables() runs a combined CTE and caches examples."""
 
     def test_combined_query_returns_schema_results(self, mock_bq):
-        mock_bq.set_query_response("schema_results", [
-            {
-                "search_type": "schema",
-                "source_type": "table",
-                "layer": "kpi",
-                "dataset_name": "nl2sql_omx_kpi",
-                "table_name": "markettrade",
-                "description": "KPI metrics for market trades",
-                "distance": 0.1234,
-            },
-        ])
+        mock_bq.set_query_response(
+            "schema_results",
+            [
+                {
+                    "search_type": "schema",
+                    "source_type": "table",
+                    "layer": "kpi",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "markettrade",
+                    "description": "KPI metrics for market trades",
+                    "distance": 0.1234,
+                },
+            ],
+        )
 
         result = vector_search_tables("what was the edge?")
 
@@ -27,26 +33,29 @@ class TestCombinedVectorSearch:
         assert result["results"][0]["table_name"] == "markettrade"
 
     def test_combined_query_caches_examples(self, mock_bq):
-        mock_bq.set_query_response("question_embedding", [
-            {
-                "search_type": "schema",
-                "source_type": "table",
-                "layer": "kpi",
-                "dataset_name": "nl2sql_omx_kpi",
-                "table_name": "markettrade",
-                "description": "KPI metrics",
-                "distance": 0.12,
-            },
-            {
-                "search_type": "example",
-                "source_type": "",
-                "layer": "",
-                "dataset_name": "nl2sql_omx_kpi",
-                "table_name": "what was edge yesterday?",
-                "description": "SELECT edge_bps FROM ...",
-                "distance": 0.05,
-            },
-        ])
+        mock_bq.set_query_response(
+            "question_embedding",
+            [
+                {
+                    "search_type": "schema",
+                    "source_type": "table",
+                    "layer": "kpi",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "markettrade",
+                    "description": "KPI metrics",
+                    "distance": 0.12,
+                },
+                {
+                    "search_type": "example",
+                    "source_type": "",
+                    "layer": "",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "what was edge yesterday?",
+                    "description": "SELECT edge_bps FROM ...",
+                    "distance": 0.05,
+                },
+            ],
+        )
 
         vector_search_tables("what was the edge?")
 
@@ -56,26 +65,29 @@ class TestCombinedVectorSearch:
         assert cached["examples"][0]["past_question"] == "what was edge yesterday?"
 
     def test_fetch_few_shot_uses_cache_no_extra_bq_call(self, mock_bq):
-        mock_bq.set_query_response("question_embedding", [
-            {
-                "search_type": "schema",
-                "source_type": "table",
-                "layer": "kpi",
-                "dataset_name": "nl2sql_omx_kpi",
-                "table_name": "markettrade",
-                "description": "KPI metrics",
-                "distance": 0.12,
-            },
-            {
-                "search_type": "example",
-                "source_type": "",
-                "layer": "",
-                "dataset_name": "nl2sql_omx_kpi",
-                "table_name": "what was edge yesterday?",
-                "description": "SELECT edge_bps FROM ...",
-                "distance": 0.05,
-            },
-        ])
+        mock_bq.set_query_response(
+            "question_embedding",
+            [
+                {
+                    "search_type": "schema",
+                    "source_type": "table",
+                    "layer": "kpi",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "markettrade",
+                    "description": "KPI metrics",
+                    "distance": 0.12,
+                },
+                {
+                    "search_type": "example",
+                    "source_type": "",
+                    "layer": "",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "what was edge yesterday?",
+                    "description": "SELECT edge_bps FROM ...",
+                    "distance": 0.05,
+                },
+            ],
+        )
 
         vector_search_tables("what was the edge?")
         calls_after_tables = mock_bq.query_call_count
@@ -88,17 +100,20 @@ class TestCombinedVectorSearch:
         assert mock_bq.query_call_count == calls_after_tables
 
     def test_different_question_triggers_fresh_bq_call(self, mock_bq):
-        mock_bq.set_query_response("question_embedding", [
-            {
-                "search_type": "schema",
-                "source_type": "table",
-                "layer": "kpi",
-                "dataset_name": "nl2sql_omx_kpi",
-                "table_name": "markettrade",
-                "description": "KPI metrics",
-                "distance": 0.12,
-            },
-        ])
+        mock_bq.set_query_response(
+            "question_embedding",
+            [
+                {
+                    "search_type": "schema",
+                    "source_type": "table",
+                    "layer": "kpi",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "markettrade",
+                    "description": "KPI metrics",
+                    "distance": 0.12,
+                },
+            ],
+        )
 
         vector_search_tables("what was the edge?")
         calls_after_tables = mock_bq.query_call_count
@@ -109,17 +124,20 @@ class TestCombinedVectorSearch:
         assert mock_bq.query_call_count == calls_after_tables + 1
 
     def test_cache_cleared_between_sessions(self, mock_bq):
-        mock_bq.set_query_response("question_embedding", [
-            {
-                "search_type": "example",
-                "source_type": "",
-                "layer": "",
-                "dataset_name": "nl2sql_omx_kpi",
-                "table_name": "cached question",
-                "description": "SELECT 1",
-                "distance": 0.01,
-            },
-        ])
+        mock_bq.set_query_response(
+            "question_embedding",
+            [
+                {
+                    "search_type": "example",
+                    "source_type": "",
+                    "layer": "",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "cached question",
+                    "description": "SELECT 1",
+                    "distance": 0.01,
+                },
+            ],
+        )
 
         vector_search_tables("test")
         assert get_cached_vector_result("test") is not None
@@ -173,6 +191,7 @@ class TestCombinedSearchSqlTemplate:
     def test_combined_sql_includes_tables_used(self):
         """example_results CTE must SELECT tables_used for routing."""
         from nl2sql_agent.tools.vector_search import _COMBINED_SEARCH_SQL
+
         assert "tables_used" in _COMBINED_SEARCH_SQL, (
             "_COMBINED_SEARCH_SQL drops tables_used — examples lose routing info"
         )
@@ -180,6 +199,7 @@ class TestCombinedSearchSqlTemplate:
     def test_combined_sql_includes_complexity(self):
         """example_results CTE must SELECT complexity."""
         from nl2sql_agent.tools.vector_search import _COMBINED_SEARCH_SQL
+
         assert "complexity" in _COMBINED_SEARCH_SQL, (
             "_COMBINED_SEARCH_SQL drops complexity — examples lose metadata"
         )
@@ -187,6 +207,7 @@ class TestCombinedSearchSqlTemplate:
     def test_combined_sql_includes_routing_signal(self):
         """example_results CTE must SELECT routing_signal."""
         from nl2sql_agent.tools.vector_search import _COMBINED_SEARCH_SQL
+
         assert "routing_signal" in _COMBINED_SEARCH_SQL, (
             "_COMBINED_SEARCH_SQL drops routing_signal — examples lose routing hints"
         )

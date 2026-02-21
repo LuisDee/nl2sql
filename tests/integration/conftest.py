@@ -51,6 +51,7 @@ def real_settings():
         os.environ[key] = val
 
     from nl2sql_agent.config import Settings
+
     s = Settings(_env_file=str(_REAL_ENV_FILE))
 
     # Restore original env (so unit tests aren't polluted)

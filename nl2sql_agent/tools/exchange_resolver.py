@@ -91,12 +91,14 @@ def _symbol_lookup(identifier: str) -> dict | None:
             continue
         info = registry["exchanges"][exchange]
         portfolios = [r["portfolio"] for r in rows if r["exchange"] == exchange]
-        matches.append({
-            "exchange": exchange,
-            "kpi_dataset": info["kpi_dataset"],
-            "data_dataset": info["data_dataset"],
-            "portfolios": portfolios,
-        })
+        matches.append(
+            {
+                "exchange": exchange,
+                "kpi_dataset": info["kpi_dataset"],
+                "data_dataset": info["data_dataset"],
+                "portfolios": portfolios,
+            }
+        )
     return {
         "status": "multiple",
         "message": (
@@ -107,7 +109,9 @@ def _symbol_lookup(identifier: str) -> dict | None:
     }
 
 
-def resolve_exchange(exchange_or_symbol: str) -> ExchangeResolvedResult | ExchangeMultipleResult:
+def resolve_exchange(
+    exchange_or_symbol: str,
+) -> ExchangeResolvedResult | ExchangeMultipleResult:
     """Resolve an exchange name, alias, or trading symbol to BQ datasets.
 
     Use this tool when the user's question mentions a specific exchange
@@ -145,7 +149,9 @@ def resolve_exchange(exchange_or_symbol: str) -> ExchangeResolvedResult | Exchan
     canonical = alias_map.get(identifier.lower())
     if canonical:
         result = _make_result(canonical)
-        logger.info("resolve_exchange_alias_hit", identifier=identifier, exchange=canonical)
+        logger.info(
+            "resolve_exchange_alias_hit", identifier=identifier, exchange=canonical
+        )
         return result
 
     # Tier 2: Symbol lookup via BQ
@@ -160,5 +166,7 @@ def resolve_exchange(exchange_or_symbol: str) -> ExchangeResolvedResult | Exchan
 
     # Tier 3: Default fallback
     result = _default_result()
-    logger.info("resolve_exchange_default", identifier=identifier, exchange=result["exchange"])
+    logger.info(
+        "resolve_exchange_default", identifier=identifier, exchange=result["exchange"]
+    )
     return result

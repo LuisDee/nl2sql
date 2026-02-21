@@ -1,7 +1,10 @@
 """Tests for vector search tools."""
 
 from nl2sql_agent.tools._deps import clear_vector_cache
-from nl2sql_agent.tools.vector_search import fetch_few_shot_examples, vector_search_tables
+from nl2sql_agent.tools.vector_search import (
+    fetch_few_shot_examples,
+    vector_search_tables,
+)
 
 # The combined query contains both "schema_embeddings" and "query_memory",
 # so we use "question_embedding" as the mock keyword to match the CTE name.
@@ -12,17 +15,20 @@ class TestVectorSearchTables:
         clear_vector_cache()
 
     def test_returns_results_on_success(self, mock_bq):
-        mock_bq.set_query_response("question_embedding", [
-            {
-                "search_type": "schema",
-                "source_type": "table",
-                "layer": "kpi",
-                "dataset_name": "nl2sql_omx_kpi",
-                "table_name": "markettrade",
-                "description": "KPI metrics for market trades",
-                "distance": 0.1234,
-            }
-        ])
+        mock_bq.set_query_response(
+            "question_embedding",
+            [
+                {
+                    "search_type": "schema",
+                    "source_type": "table",
+                    "layer": "kpi",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "markettrade",
+                    "description": "KPI metrics for market trades",
+                    "distance": 0.1234,
+                }
+            ],
+        )
 
         result = vector_search_tables("what was the edge on our trade?")
 
@@ -77,17 +83,20 @@ class TestFetchFewShotExamples:
 
     def test_returns_examples_on_success(self, mock_bq):
         """Cache miss path: independent query to query_memory."""
-        mock_bq.set_query_response("query_memory", [
-            {
-                "past_question": "what was edge yesterday?",
-                "sql_query": "SELECT edge_bps FROM ...",
-                "tables_used": "markettrade",
-                "past_dataset": "nl2sql_omx_kpi",
-                "complexity": "simple",
-                "routing_signal": "mentions edge",
-                "distance": 0.0567,
-            }
-        ])
+        mock_bq.set_query_response(
+            "query_memory",
+            [
+                {
+                    "past_question": "what was edge yesterday?",
+                    "sql_query": "SELECT edge_bps FROM ...",
+                    "tables_used": "markettrade",
+                    "past_dataset": "nl2sql_omx_kpi",
+                    "complexity": "simple",
+                    "routing_signal": "mentions edge",
+                    "distance": 0.0567,
+                }
+            ],
+        )
 
         result = fetch_few_shot_examples("what was the edge?")
 

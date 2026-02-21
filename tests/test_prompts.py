@@ -89,7 +89,9 @@ class TestBuildInstruction:
 
     def test_contains_retry_instruction(self):
         result = build_nl2sql_instruction(self._make_ctx())
-        assert "retry" in result.lower() or "3 times" in result or "3 failures" in result
+        assert (
+            "retry" in result.lower() or "3 times" in result or "3 failures" in result
+        )
 
     def test_contains_cache_step(self):
         result = build_nl2sql_instruction(self._make_ctx())
@@ -246,10 +248,8 @@ class TestPromptCaching:
 
     def test_full_prompt_combines_static_and_dynamic(self):
         """build_nl2sql_instruction output must contain both static and dynamic parts."""
-        from nl2sql_agent.prompts import _static_instruction
 
         result = build_nl2sql_instruction(self._make_ctx())
-        static = _static_instruction()
         # Static content should be embedded in the full prompt
         assert "ROUTING RULES" in result
         assert "SQL GENERATION RULES" in result

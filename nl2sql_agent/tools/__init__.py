@@ -5,25 +5,27 @@ Import and use init_bq_service() in agent.py to set up dependencies.
 """
 
 from nl2sql_agent.tools._deps import init_bq_service
+from nl2sql_agent.tools.exchange_resolver import resolve_exchange
+from nl2sql_agent.tools.learning_loop import save_validated_query
+from nl2sql_agent.tools.metadata_loader import load_yaml_metadata
+from nl2sql_agent.tools.semantic_cache import check_semantic_cache
+from nl2sql_agent.tools.sql_executor import execute_sql
+from nl2sql_agent.tools.sql_validator import dry_run_sql
 from nl2sql_agent.tools.vector_search import (
+    fetch_few_shot_examples,
     vector_search_columns,
     vector_search_tables,
-    fetch_few_shot_examples,
 )
-from nl2sql_agent.tools.metadata_loader import load_yaml_metadata
-from nl2sql_agent.tools.sql_validator import dry_run_sql
-from nl2sql_agent.tools.sql_executor import execute_sql
-from nl2sql_agent.tools.learning_loop import save_validated_query
-from nl2sql_agent.tools.semantic_cache import check_semantic_cache
 
 __all__ = [
-    "init_bq_service",
     "check_semantic_cache",
-    "vector_search_columns",
-    "vector_search_tables",
-    "fetch_few_shot_examples",
-    "load_yaml_metadata",
     "dry_run_sql",
     "execute_sql",
+    "fetch_few_shot_examples",
+    "init_bq_service",
+    "load_yaml_metadata",
+    "resolve_exchange",
     "save_validated_query",
+    "vector_search_columns",
+    "vector_search_tables",
 ]

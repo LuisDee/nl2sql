@@ -4,8 +4,6 @@ Verifies that the BigQuery client can connect, execute queries,
 and access the expected datasets and tables.
 """
 
-import pytest
-
 
 class TestBigQueryConnectivity:
     def test_bq_select_one(self, bq_client):
@@ -28,7 +26,9 @@ class TestBigQueryConnectivity:
 
     def test_bq_dry_run_invalid_sql(self, bq_client):
         """Dry run of invalid SQL must return valid=False with error."""
-        result = bq_client.dry_run_query("SELECT nonexistent_col FROM nonexistent_table")
+        result = bq_client.dry_run_query(
+            "SELECT nonexistent_col FROM nonexistent_table"
+        )
         assert result["valid"] is False
         assert result["error"] is not None
 

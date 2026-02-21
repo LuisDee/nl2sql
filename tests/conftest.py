@@ -107,11 +107,13 @@ def mock_bq():
     mock = MockBigQueryService()
 
     from nl2sql_agent.tools._deps import clear_vector_cache, init_bq_service
+
     init_bq_service(mock)
 
     yield mock
 
     # Reset to None after test and clear vector cache
     import nl2sql_agent.tools._deps as deps
+
     deps._bq_service = None
     clear_vector_cache()

@@ -10,19 +10,26 @@ import pytest
 
 from nl2sql_agent.config import settings
 from nl2sql_agent.tools._deps import init_bq_service
-from nl2sql_agent.tools.vector_search import vector_search_tables, fetch_few_shot_examples
 from nl2sql_agent.tools.metadata_loader import load_yaml_metadata
-from nl2sql_agent.tools.sql_validator import dry_run_sql
 from nl2sql_agent.tools.sql_executor import execute_sql
+from nl2sql_agent.tools.sql_validator import dry_run_sql
+from nl2sql_agent.tools.vector_search import (
+    fetch_few_shot_examples,
+    vector_search_tables,
+)
 
 
 @contextmanager
 def _patch_settings(real_settings):
     """Temporarily patch the settings singleton with real values."""
     attrs = [
-        "gcp_project", "kpi_dataset", "data_dataset",
-        "metadata_dataset", "embedding_model_ref",
-        "vertex_ai_connection", "vector_search_top_k",
+        "gcp_project",
+        "kpi_dataset",
+        "data_dataset",
+        "metadata_dataset",
+        "embedding_model_ref",
+        "vertex_ai_connection",
+        "vector_search_top_k",
     ]
     originals = {a: getattr(settings, a) for a in attrs}
     for a in attrs:
@@ -41,6 +48,7 @@ def wire_bq(bq_client, real_settings):
     with _patch_settings(real_settings):
         yield
     import nl2sql_agent.tools._deps as deps
+
     deps._bq_service = None
 
 
@@ -51,7 +59,9 @@ class TestVectorSearch:
         assert result["status"] == "success"
         assert len(result["results"]) > 0
         table_names = [r["table_name"] for r in result["results"]]
-        assert any("trade" in t for t in table_names), f"Expected a trade table, got: {table_names}"
+        assert any("trade" in t for t in table_names), (
+            f"Expected a trade table, got: {table_names}"
+        )
 
     def test_fetch_few_shot_examples_returns_results(self, wire_bq):
         """Few-shot retrieval must find at least one similar past query."""
@@ -76,7 +86,9 @@ class TestMetadataLoader:
         result = load_yaml_metadata("theodata", "nl2sql_omx_data")
         assert result["status"] == "success"
         assert "metadata" in result
-        assert "vol" in result["metadata"].lower() or "delta" in result["metadata"].lower()
+        assert (
+            "vol" in result["metadata"].lower() or "delta" in result["metadata"].lower()
+        )
 
     def test_load_yaml_metadata_unknown_table(self):
         """Unknown table must return error with known table list."""

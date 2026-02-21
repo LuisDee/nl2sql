@@ -14,7 +14,6 @@ Usage:
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 from typing import Any
 
 from eval.run_eval import load_gold_queries
@@ -135,7 +134,7 @@ def main():
             for t in q["expected_tables"]:
                 tables.add(t)
 
-        print(f"\nValidation PASSED")
+        print("\nValidation PASSED")
         print(f"  Queries: {len(queries)}")
         print(f"  Categories ({len(categories)}):")
         for cat, count in sorted(categories.items()):

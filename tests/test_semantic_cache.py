@@ -1,10 +1,6 @@
 """Tests for the semantic cache tool."""
 
-from unittest.mock import patch
-
-import pytest
-
-from nl2sql_agent.tools.semantic_cache import check_semantic_cache, _CACHE_SEARCH_SQL
+from nl2sql_agent.tools.semantic_cache import _CACHE_SEARCH_SQL, check_semantic_cache
 
 
 class TestSemanticCacheHit:
@@ -116,6 +112,7 @@ class TestSemanticCacheNoBqService:
     def test_no_bq_service_returns_miss(self):
         """If BQ service not initialized, should degrade gracefully."""
         import nl2sql_agent.tools._deps as deps
+
         original = deps._bq_service
         deps._bq_service = None
         try:

@@ -7,6 +7,7 @@ which causes the LLM to generate broken SQL.
 import re
 from pathlib import Path
 
+import pytest
 import yaml
 
 CATALOG_DIR = Path(__file__).parent.parent / "catalog"
@@ -33,18 +34,69 @@ def _extract_sql_identifiers(sql: str) -> set[str]:
     excluding SQL keywords, table aliases, and function names.
     """
     sql_keywords = {
-        "SELECT", "FROM", "WHERE", "AND", "OR", "NOT", "AS", "ON", "IN",
-        "IS", "NULL", "BETWEEN", "LIKE", "ORDER", "BY", "GROUP", "HAVING",
-        "LIMIT", "OFFSET", "UNION", "ALL", "DISTINCT", "JOIN", "LEFT",
-        "RIGHT", "INNER", "OUTER", "CROSS", "FULL", "WITH", "CASE", "WHEN",
-        "THEN", "ELSE", "END", "ASC", "DESC", "INSERT", "INTO", "VALUES",
-        "UPDATE", "SET", "DELETE", "CREATE", "TABLE", "IF", "EXISTS",
-        "TRUE", "FALSE", "CURRENT_DATE", "TIMESTAMP", "ROUND", "SUM",
-        "AVG", "COUNT", "MIN", "MAX", "ABS", "SPLIT",
+        "SELECT",
+        "FROM",
+        "WHERE",
+        "AND",
+        "OR",
+        "NOT",
+        "AS",
+        "ON",
+        "IN",
+        "IS",
+        "NULL",
+        "BETWEEN",
+        "LIKE",
+        "ORDER",
+        "BY",
+        "GROUP",
+        "HAVING",
+        "LIMIT",
+        "OFFSET",
+        "UNION",
+        "ALL",
+        "DISTINCT",
+        "JOIN",
+        "LEFT",
+        "RIGHT",
+        "INNER",
+        "OUTER",
+        "CROSS",
+        "FULL",
+        "WITH",
+        "CASE",
+        "WHEN",
+        "THEN",
+        "ELSE",
+        "END",
+        "ASC",
+        "DESC",
+        "INSERT",
+        "INTO",
+        "VALUES",
+        "UPDATE",
+        "SET",
+        "DELETE",
+        "CREATE",
+        "TABLE",
+        "IF",
+        "EXISTS",
+        "TRUE",
+        "FALSE",
+        "CURRENT_DATE",
+        "TIMESTAMP",
+        "ROUND",
+        "SUM",
+        "AVG",
+        "COUNT",
+        "MIN",
+        "MAX",
+        "ABS",
+        "SPLIT",
     }
     # Match identifiers: word characters after dot (table.column) or standalone
     # We specifically look for table_alias.column_name patterns
-    dot_refs = re.findall(r'\b\w+\.(\w+)\b', sql)
+    dot_refs = re.findall(r"\b\w+\.(\w+)\b", sql)
     return {col for col in dot_refs if col.upper() not in sql_keywords}
 
 
@@ -78,13 +130,15 @@ class TestExampleColumnNames:
                 continue
             # Check for bare `edge` usage (not instant_edge, edge_model_type)
             # Matches: AVG(edge), SUM(edge), edge AS, edge > etc.
-            if re.search(r'(?<!\w)edge(?!_)\b', sql) and "edge" not in catalog_cols:
+            if re.search(r"(?<!\w)edge(?!_)\b", sql) and "edge" not in catalog_cols:
                 errors.append(
                     f"Q: {ex['question'][:60]} | table={table} "
                     f"uses 'edge' but catalog only has 'instant_edge'"
                 )
 
-        assert not errors, "Wrong column names in kpi_examples.yaml:\n" + "\n".join(errors)
+        assert not errors, "Wrong column names in kpi_examples.yaml:\n" + "\n".join(
+            errors
+        )
 
     def test_kpi_examples_correct_slippage_column_names(self):
         """Slippage columns must use {metric}_{interval}_per_unit pattern."""
@@ -149,7 +203,7 @@ class TestExampleColumnNames:
             if "marketdepth" not in tables:
                 continue
             # Match putcall as a column name (not inside a string or comment)
-            if re.search(r'\bputcall\b', sql):
+            if re.search(r"\bputcall\b", sql):
                 errors.append(
                     f"Q: {ex['question'][:60]} | "
                     "uses 'putcall' but correct name is 'option_type_name'"
@@ -176,7 +230,7 @@ class TestExampleColumnNames:
             for ex in data.get("examples", []):
                 tables = set(ex.get("tables_used", []))
                 if "markettrade" in tables and tables & mako_tables:
-                    assert False, (
+                    pytest.fail(
                         f"Double-counting risk in {yaml_file}: "
                         f"Q: {ex['question'][:60]} | "
                         f"tables_used combines markettrade with {tables & mako_tables}. "

@@ -64,7 +64,6 @@ class LiveBigQueryClient:
                 "error": str(e),
             }
 
-
     def query_with_params(
         self, sql: str, params: list[dict[str, Any]] | None = None
     ) -> list[dict[str, Any]]:
@@ -89,12 +88,14 @@ class LiveBigQueryClient:
                 job_config=job_config,
                 timeout=settings.bq_query_timeout_seconds,
             )
-            rows = sanitize_rows([
-                dict(row)
-                for row in query_job.result(
-                    timeout=settings.bq_query_timeout_seconds
-                )
-            ])
+            rows = sanitize_rows(
+                [
+                    dict(row)
+                    for row in query_job.result(
+                        timeout=settings.bq_query_timeout_seconds
+                    )
+                ]
+            )
             logger.info("bq_query_with_params_complete", row_count=len(rows))
             return rows
         except Exception as e:

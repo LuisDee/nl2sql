@@ -48,7 +48,7 @@ Multiple wrong column names in few-shot examples poison the LLM's SQL generation
 
 **Test:** New `tests/test_example_column_validation.py` — parse all example YAML files, extract column names from SQL, validate each against the corresponding catalog YAML.
 
-### [ ] Task 1.4: Fix PnL double-counting routing rule
+### [x] Task 1.4: Fix PnL double-counting routing rule `fd985f5`
 
 The "total PnL across all trade types" example UNION ALLs markettrade with quotertrade/clicktrade/otoswing. But markettrade already includes all Mako trades (it's the superset). This double-counts PnL.
 

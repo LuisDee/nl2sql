@@ -185,6 +185,31 @@ class TestEvalRunner:
                 pass
 
 
+class TestOnlineEvalUsesRunner:
+    """Online eval must use InMemoryRunner, not nl2sql_agent.run()."""
+
+    def test_run_online_does_not_call_agent_run(self):
+        """The broken nl2sql_agent.run() pattern must not be in run_online."""
+        import inspect
+        from eval.run_eval import EvalRunner
+
+        source = inspect.getsource(EvalRunner.run_online)
+        assert ".run(input=" not in source, (
+            "run_online still calls nl2sql_agent.run() which doesn't exist on LlmAgent. "
+            "Must use InMemoryRunner instead."
+        )
+
+    def test_run_online_uses_inmemory_runner(self):
+        """run_online must use ADK's InMemoryRunner."""
+        import inspect
+        from eval.run_eval import EvalRunner
+
+        source = inspect.getsource(EvalRunner.run_online)
+        assert "InMemoryRunner" in source or "runner" in source.lower(), (
+            "run_online must use InMemoryRunner for programmatic agent execution"
+        )
+
+
 class TestExtractTables:
     def test_single_table(self):
         sql = "SELECT * FROM `project.dataset.table_name`"

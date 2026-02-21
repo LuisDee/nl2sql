@@ -305,41 +305,51 @@ class EvalRunner:
         return report
 
     def run_online(self) -> EvalReport:
-        """Online mode: run agent pipeline and compare results."""
-        from nl2sql_agent.agent import nl2sql_agent
-        from nl2sql_agent.tools import execute_sql as original_execute_sql
+        """Online mode: run agent pipeline via InMemoryRunner and compare results.
+
+        Uses ADK's InMemoryRunner for programmatic agent execution. Extracts
+        generated SQL from execute_sql tool call events in the session history.
+        """
+        import uuid
+
+        from google.adk.runners import InMemoryRunner
+        from google.genai import types as genai_types
+
+        from nl2sql_agent.agent import root_agent
         from nl2sql_agent.tools._deps import get_bq_service
 
         report = EvalReport()
         bq = get_bq_service()
-
-        # Hook into execute_sql to capture generated SQL
-        captured_sql: list[str] = []
-
-        def capture_execute_sql(sql_query: str) -> dict:
-            captured_sql.append(sql_query)
-            return original_execute_sql(sql_query)
-
-        # Patch the tool in the agent
-        original_tool_idx = -1
-        for i, tool in enumerate(nl2sql_agent.tools):
-            if hasattr(tool, "__name__") and tool.__name__ == "execute_sql":
-                original_tool_idx = i
-                nl2sql_agent.tools[i] = capture_execute_sql
-                break
-        
-        if original_tool_idx == -1:
-            print("WARNING: Could not find execute_sql tool in agent. SQL capture will fail.")
+        runner = InMemoryRunner(agent=root_agent, app_name="nl2sql_eval")
 
         print(f"Running online evaluation for {len(self.queries)} queries...")
 
         for q in self.queries:
             print(f"Query {q['id']}: {q['question']}")
-            captured_sql.clear()
-            
-            # Run Agent
+
+            user_id = "eval_user"
+            session_id = f"eval_{q['id']}_{uuid.uuid4().hex[:8]}"
+
+            # Run agent via InMemoryRunner
+            predicted_sql = None
             try:
-                nl2sql_agent.run(input=q["question"])
+                content = genai_types.Content(
+                    role="user",
+                    parts=[genai_types.Part(text=q["question"])],
+                )
+                for event in runner.run(
+                    user_id=user_id,
+                    session_id=session_id,
+                    new_message=content,
+                ):
+                    # Extract SQL from execute_sql tool call events
+                    if (
+                        hasattr(event, "tool_name")
+                        and event.tool_name == "execute_sql"
+                        and hasattr(event, "tool_input")
+                        and event.tool_input
+                    ):
+                        predicted_sql = event.tool_input.get("sql_query", "")
             except Exception as e:
                 print(f"  Agent failed: {e}")
                 report.results.append(EvalResult(
@@ -352,7 +362,7 @@ class EvalRunner:
                 continue
 
             # Check if SQL was generated
-            if not captured_sql:
+            if not predicted_sql:
                 print("  No SQL generated.")
                 report.results.append(EvalResult(
                     query_id=q["id"],
@@ -364,10 +374,8 @@ class EvalRunner:
                 ))
                 continue
 
-            # We use the LAST generated SQL if multiple were attempted
-            predicted_sql = captured_sql[-1]
             resolved_gold_sql = resolve_example_sql(q["gold_sql"], self.project)
-            
+
             # Execute Gold
             try:
                 gold_df = bq.execute_query(resolved_gold_sql)
@@ -416,10 +424,6 @@ class EvalRunner:
             )
             report.results.append(result)
             print(f"  Match: {execution_match}")
-
-        # Restore original tool
-        if original_tool_idx != -1:
-            nl2sql_agent.tools[original_tool_idx] = original_execute_sql
 
         return report
 

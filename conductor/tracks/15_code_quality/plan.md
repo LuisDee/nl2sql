@@ -183,7 +183,7 @@ The exchange list from the registry IS static (loaded once from YAML) and can be
 
 **Test:** Verify `build_nl2sql_instruction` returns consistent static sections across calls; verify dynamic section changes with context.
 
-### [ ] Task 3.2: Review and document column_search_top_k
+### [x] Task 3.2: Review and document column_search_top_k `402f7fe`
 
 **File:** `nl2sql_agent/config.py`
 

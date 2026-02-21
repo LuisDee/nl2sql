@@ -100,7 +100,7 @@ async def ask_trading_data(question: str, ctx: Context) -> str:
         ):
             # Emit progress for tool calls (function calls are in content.parts)
             for fc in event.get_function_calls():
-                tool_name = fc.name
+                tool_name = fc.name or "unknown"
                 step_desc = TOOL_PROGRESS_MESSAGES.get(
                     tool_name, f"Running {tool_name}..."
                 )

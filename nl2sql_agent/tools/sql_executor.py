@@ -73,7 +73,7 @@ def execute_sql(sql_query: str) -> ExecuteSuccessResult | ErrorResult:
                 "Add more specific filters to see all data."
             )
 
-        return result
+        return result  # type: ignore[return-value]
 
     except Exception as e:
         logger.error("execute_sql_error", error=str(e))

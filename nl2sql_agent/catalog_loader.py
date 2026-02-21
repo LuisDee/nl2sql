@@ -55,7 +55,7 @@ def load_yaml(path: Path) -> dict[str, Any]:
         yaml.YAMLError: If the YAML is malformed.
     """
     with open(path) as f:
-        return yaml.safe_load(f)
+        return yaml.safe_load(f)  # type: ignore[no-any-return]
 
 
 def clear_yaml_cache() -> None:

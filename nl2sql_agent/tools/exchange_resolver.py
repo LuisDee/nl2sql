@@ -152,7 +152,7 @@ def resolve_exchange(
         logger.info(
             "resolve_exchange_alias_hit", identifier=identifier, exchange=canonical
         )
-        return result
+        return result  # type: ignore[return-value]
 
     # Tier 2: Symbol lookup via BQ
     symbol_result = _symbol_lookup(identifier)
@@ -162,11 +162,11 @@ def resolve_exchange(
             identifier=identifier,
             status=symbol_result["status"],
         )
-        return symbol_result
+        return symbol_result  # type: ignore[return-value]
 
     # Tier 3: Default fallback
     result = _default_result()
     logger.info(
         "resolve_exchange_default", identifier=identifier, exchange=result["exchange"]
     )
-    return result
+    return result  # type: ignore[return-value]

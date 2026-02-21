@@ -128,4 +128,4 @@ class Settings(BaseSettings):
 
 
 # Singleton instance — import this everywhere
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]  # env vars / .env provide required fields

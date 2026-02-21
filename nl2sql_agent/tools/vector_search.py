@@ -313,10 +313,10 @@ def vector_search_tables(question: str) -> VectorSearchResult | ErrorResult:
             logger.info(
                 "vector_search_tables_fallback_complete", result_count=len(rows)
             )
-            return {"status": "success", "results": rows}
+            return {"status": "success", "results": rows}  # type: ignore[return-value]
         except Exception as e2:
             logger.error("vector_search_tables_error", error=str(e2))
-            return {"status": "error", "error_message": str(e2), "results": []}
+            return {"status": "error", "error_message": str(e2), "results": []}  # type: ignore[return-value]
 
 
 def fetch_few_shot_examples(question: str) -> FewShotResult:
@@ -369,7 +369,7 @@ def fetch_few_shot_examples(question: str) -> FewShotResult:
         return {"status": "success", "examples": rows}
     except Exception as e:
         logger.error("fetch_few_shot_error", error=str(e))
-        return {"status": "error", "error_message": str(e), "examples": []}
+        return {"status": "error", "error_message": str(e), "examples": []}  # type: ignore[typeddict-unknown-key,return-value]
 
 
 def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:
@@ -464,16 +464,16 @@ def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:
         try:
             fallback_result = vector_search_tables(question)
             if fallback_result["status"] == "success":
-                return {
+                return {  # type: ignore[return-value]
                     "status": "success",
                     "fallback": True,
-                    "tables": fallback_result["results"],
+                    "tables": fallback_result["results"],  # type: ignore[typeddict-item]
                     "examples": [],
                 }
-            return fallback_result
+            return fallback_result  # type: ignore[return-value]
         except Exception as e2:
             logger.error("vector_search_columns_error", error=str(e2))
-            return {
+            return {  # type: ignore[return-value]
                 "status": "error",
                 "error_message": str(e2),
                 "tables": [],

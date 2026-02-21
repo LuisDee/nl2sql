@@ -3,6 +3,13 @@
 This module holds the BigQuery service instance that all tools share.
 It is initialised once at agent startup via init_bq_service().
 
+THREAD SAFETY: This module uses mutable module-level globals
+(_bq_service, _vector_cache_*). It is NOT thread-safe.
+Current usage (single ADK session per process) is safe.
+If concurrent request handling is needed (e.g., async MCP server),
+these globals must be replaced with thread-local storage or
+a per-request context object.
+
 Usage (inside tool modules):
     from nl2sql_agent.tools._deps import get_bq_service
 """

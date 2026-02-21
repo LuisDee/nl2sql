@@ -160,7 +160,7 @@ def check_semantic_cache(question: str) -> CacheHitResult | CacheMissResult:
 
 ## Phase 3: Prompt Optimization & Developer Tooling
 
-### [ ] Task 3.1: Split prompt into static and dynamic sections
+### [x] Task 3.1: Split prompt into static and dynamic sections `ed6baec`
 
 **File:** `nl2sql_agent/prompts.py`
 

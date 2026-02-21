@@ -28,7 +28,7 @@ SET embedding = (
         STRUCT(TRUE AS flatten_json_output, 'RETRIEVAL_DOCUMENT' AS task_type)
     )
 )
-WHERE ARRAY_LENGTH(t.embedding) = 0
+WHERE t.embedding IS NULL OR ARRAY_LENGTH(t.embedding) = 0
 """
 
 

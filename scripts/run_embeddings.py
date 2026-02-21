@@ -8,6 +8,7 @@ Usage:
     python scripts/run_embeddings.py --step verify-model
     python scripts/run_embeddings.py --step create-tables
     python scripts/run_embeddings.py --step populate-schema
+    python scripts/run_embeddings.py --step populate-symbols
     python scripts/run_embeddings.py --step generate-embeddings
     python scripts/run_embeddings.py --step create-indexes
     python scripts/run_embeddings.py --step test-search
@@ -15,7 +16,9 @@ Usage:
 """
 
 import argparse
+import csv
 import sys
+from pathlib import Path
 
 from nl2sql_agent.config import Settings
 from nl2sql_agent.logging_config import setup_logging, get_logger
@@ -101,10 +104,62 @@ def create_embedding_tables(bq: BigQueryProtocol, s: Settings) -> None:
           embedding ARRAY<FLOAT64>
         );
         """,
+        f"""
+        CREATE TABLE IF NOT EXISTS `{fqn}.symbol_exchange_map` (
+          symbol STRING NOT NULL,
+          exchange STRING NOT NULL,
+          portfolio STRING NOT NULL
+        );
+        """,
     ]
     for sql in sqls:
         bq.execute_query(sql)
     logger.info("created_embedding_tables", fqn=fqn)
+
+
+def populate_symbols(bq: BigQueryProtocol, s: Settings) -> None:
+    """Step 3b: Populate symbol_exchange_map from CSV.
+
+    Idempotent: MERGE on (symbol, exchange, portfolio).
+    Batches rows to stay under BQ query size limits.
+    """
+    fqn = f"{s.gcp_project}.{s.metadata_dataset}"
+    csv_path = Path(__file__).parent.parent / "data" / "symbol_exchange_map.csv"
+
+    if not csv_path.exists():
+        logger.error("symbol_csv_not_found", path=str(csv_path))
+        return
+
+    with open(csv_path) as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    logger.info("symbol_csv_loaded", row_count=len(rows))
+
+    batch_size = 500
+    total_merged = 0
+
+    for i in range(0, len(rows), batch_size):
+        batch = rows[i : i + batch_size]
+        values = ",\n        ".join(
+            f"STRUCT('{r['symbol']}' AS symbol, '{r['exchange']}' AS exchange, '{r['portfolio']}' AS portfolio)"
+            for r in batch
+        )
+        sql = f"""
+        MERGE `{fqn}.symbol_exchange_map` AS target
+        USING (SELECT * FROM UNNEST([{values}])) AS source
+        ON target.symbol = source.symbol
+           AND target.exchange = source.exchange
+           AND target.portfolio = source.portfolio
+        WHEN NOT MATCHED THEN
+          INSERT (symbol, exchange, portfolio)
+          VALUES (source.symbol, source.exchange, source.portfolio);
+        """
+        bq.execute_query(sql)
+        total_merged += len(batch)
+        logger.info("symbol_batch_merged", batch=i // batch_size + 1, rows=len(batch))
+
+    logger.info("populated_symbols", total=total_merged)
 
 
 def populate_schema_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
@@ -114,25 +169,28 @@ def populate_schema_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
     """
     fqn = f"{s.gcp_project}.{s.metadata_dataset}"
 
+    kpi_ds = s.kpi_dataset
+    data_ds = s.data_dataset
+
     # KPI dataset rows
     kpi_sql = f"""
     MERGE `{fqn}.schema_embeddings` AS target
     USING (
       SELECT * FROM UNNEST([
         STRUCT(
-          'dataset' AS source_type, 'kpi' AS layer, 'nl2sql_omx_kpi' AS dataset_name,
+          'dataset' AS source_type, 'kpi' AS layer, '{kpi_ds}' AS dataset_name,
           CAST(NULL AS STRING) AS table_name,
-          'KPI Key Performance Indicators dataset for OMX options trading. Gold layer. Contains one table per trade type: markettrade (exchange trades, default), quotertrade (auto-quoter fills), brokertrade (broker trades with account field for broker comparison), clicktrade (manual click trades), otoswing (OTO swing trades). All share columns: edge (trading edge), instant_pnl (immediate PnL profit loss), instant_pnl_w_fees (PnL with fees), delta slippage at multiple intervals. For total PnL across all types use UNION ALL.' AS description
+          'KPI Key Performance Indicators dataset for options trading. Gold layer. Contains one table per trade type: markettrade (exchange trades, default), quotertrade (auto-quoter fills), brokertrade (broker trades with account field for broker comparison), clicktrade (manual click trades), otoswing (OTO swing trades). All share columns: edge (trading edge), instant_pnl (immediate PnL profit loss), instant_pnl_w_fees (PnL with fees), delta slippage at multiple intervals. For total PnL across all types use UNION ALL.' AS description
         ),
-        STRUCT('table', 'kpi', 'nl2sql_omx_kpi', 'markettrade',
-          'KPI metrics for market exchange trades on OMX options. One row per trade. Contains edge (difference between machine fair value and trade price), instant_pnl (immediate PnL, profit loss), instant_pnl_w_fees, delta_slippage at 1s/1m/5m/30m/1h/eod intervals, portfolio, symbol, term, trade_date. Default KPI table when trade type is not specified.'),
-        STRUCT('table', 'kpi', 'nl2sql_omx_kpi', 'quotertrade',
-          'KPI metrics for auto-quoter originated trade fills on OMX options. Same KPI columns as markettrade: edge, instant_pnl, delta slippage. Use for quoter performance, quoter edge, quoter PnL analysis.'),
-        STRUCT('table', 'kpi', 'nl2sql_omx_kpi', 'brokertrade',
+        STRUCT('table', 'kpi', '{kpi_ds}', 'markettrade',
+          'KPI metrics for market exchange trades. One row per trade. Contains edge (difference between machine fair value and trade price), instant_pnl (immediate PnL, profit loss), instant_pnl_w_fees, delta_slippage at 1s/1m/5m/30m/1h/eod intervals, portfolio, symbol, term, trade_date. Default KPI table when trade type is not specified.'),
+        STRUCT('table', 'kpi', '{kpi_ds}', 'quotertrade',
+          'KPI metrics for auto-quoter originated trade fills. Same KPI columns as markettrade: edge, instant_pnl, delta slippage. Use for quoter performance, quoter edge, quoter PnL analysis.'),
+        STRUCT('table', 'kpi', '{kpi_ds}', 'brokertrade',
           'KPI metrics for broker facilitated trades. Same KPI columns as markettrade plus account field. Use when comparing broker performance or when question mentions broker account names like BGC or MGN. NOTE: may be empty for some dates.'),
-        STRUCT('table', 'kpi', 'nl2sql_omx_kpi', 'clicktrade',
+        STRUCT('table', 'kpi', '{kpi_ds}', 'clicktrade',
           'KPI metrics for manually initiated click trades. Same KPI columns as markettrade. Use when question mentions click trades or manual trades.'),
-        STRUCT('table', 'kpi', 'nl2sql_omx_kpi', 'otoswing',
+        STRUCT('table', 'kpi', '{kpi_ds}', 'otoswing',
           'KPI metrics for OTO swing trades. Same KPI columns as markettrade. Use when question mentions OTO, swing, or otoswing trades.')
       ])
     ) AS source
@@ -153,23 +211,23 @@ def populate_schema_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
     USING (
       SELECT * FROM UNNEST([
         STRUCT(
-          'dataset' AS source_type, 'data' AS layer, 'nl2sql_omx_data' AS dataset_name,
+          'dataset' AS source_type, 'data' AS layer, '{data_ds}' AS dataset_name,
           CAST(NULL AS STRING) AS table_name,
-          'Raw OMX options trading and market data. Silver layer. Contains trade execution details, theoretical options pricing snapshots (theo delta vol vega), market data feeds, order book depth. Higher granularity than KPI but without computed performance metrics like edge or instant_pnl.' AS description
+          'Raw options trading and market data. Silver layer. Contains trade execution details, theoretical options pricing snapshots (theo delta vol vega), market data feeds, order book depth. Higher granularity than KPI but without computed performance metrics like edge or instant_pnl.' AS description
         ),
-        STRUCT('table', 'data', 'nl2sql_omx_data', 'theodata',
+        STRUCT('table', 'data', '{data_ds}', 'theodata',
           'Theoretical options pricing snapshots. Contains tv (theoretical fair price, fair value, theo, machine price), delta (delta greek, hedge ratio), vol (annualised implied volatility as decimal, also called IV, implied vol, sigma), vega, gamma, theta, strike, symbol, term, portfolio, trade_date. ONLY exists in data dataset. Use for any question about vol, IV, implied volatility, delta, greeks, fair value, or theoretical pricing.'),
-        STRUCT('table', 'data', 'nl2sql_omx_data', 'marketdata',
-          'Market data feed snapshots for OMX options. Top-of-book prices, volumes. Use for market price questions, exchange data, price feeds.'),
-        STRUCT('table', 'data', 'nl2sql_omx_data', 'marketdepth',
-          'Full order book depth for OMX options. Multiple price levels with bid/ask sizes at each level. Use for order book questions, depth analysis, bid-ask spread at different levels.'),
-        STRUCT('table', 'data', 'nl2sql_omx_data', 'swingdata',
+        STRUCT('table', 'data', '{data_ds}', 'marketdata',
+          'Market data feed snapshots. Top-of-book prices, volumes. Use for market price questions, exchange data, price feeds.'),
+        STRUCT('table', 'data', '{data_ds}', 'marketdepth',
+          'Full order book depth. Multiple price levels with bid/ask sizes at each level. Use for order book questions, depth analysis, bid-ask spread at different levels.'),
+        STRUCT('table', 'data', '{data_ds}', 'swingdata',
           'Raw OTO swing trade data. Use for swing-specific raw data questions.'),
-        STRUCT('table', 'data', 'nl2sql_omx_data', 'markettrade',
+        STRUCT('table', 'data', '{data_ds}', 'markettrade',
           'Raw market trade execution details. Silver layer -- exact timestamps, prices, sizes, fill information. NOT KPI enriched. Use when question asks about raw execution details, not performance metrics.'),
-        STRUCT('table', 'data', 'nl2sql_omx_data', 'quotertrade',
+        STRUCT('table', 'data', '{data_ds}', 'quotertrade',
           'Raw quoter trade execution details. Silver layer. Use for raw quoter execution data, not KPI performance metrics.'),
-        STRUCT('table', 'data', 'nl2sql_omx_data', 'clicktrade',
+        STRUCT('table', 'data', '{data_ds}', 'clicktrade',
           'Raw click trade execution details. Silver layer.')
       ])
     ) AS source
@@ -184,7 +242,7 @@ def populate_schema_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
     """
     bq.execute_query(data_sql)
 
-    # Routing descriptions
+    # Routing descriptions (exchange-agnostic — schema is identical across exchanges)
     routing_sql = f"""
     MERGE `{fqn}.schema_embeddings` AS target
     USING (
@@ -192,10 +250,10 @@ def populate_schema_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
         STRUCT(
           'routing' AS source_type, CAST(NULL AS STRING) AS layer,
           CAST(NULL AS STRING) AS dataset_name, CAST(NULL AS STRING) AS table_name,
-          'The nl2sql_omx_kpi dataset (gold layer) has KPI-enriched trade data with computed metrics: edge, instant_pnl, delta slippage. The nl2sql_omx_data dataset (silver layer) has raw trade and market data. Both contain tables with the same names (clicktrade, markettrade, quotertrade). Use kpi for performance edge PnL slippage questions. Use data for raw execution timestamps market data and theoretical pricing.' AS description
+          'The KPI dataset (gold layer) has KPI-enriched trade data with computed metrics: edge, instant_pnl, delta slippage. The data dataset (silver layer) has raw trade and market data. Both contain tables with the same names (clicktrade, markettrade, quotertrade). Use kpi for performance edge PnL slippage questions. Use data for raw execution timestamps market data and theoretical pricing.' AS description
         ),
         STRUCT('routing', NULL, NULL, NULL,
-          'Questions about theoretical pricing, implied volatility IV vol sigma, delta, vega, gamma, greeks, fair value, machine price, or theo should route to nl2sql_omx_data.theodata. This table only exists in the data dataset. It does not exist in kpi.'),
+          'Questions about theoretical pricing, implied volatility IV vol sigma, delta, vega, gamma, greeks, fair value, machine price, or theo should route to the data dataset theodata table. This table only exists in the data dataset. It does not exist in kpi.'),
         STRUCT('routing', NULL, NULL, NULL,
           'The kpi dataset has 5 tables one per trade origin: markettrade (exchange trades the default), quotertrade (auto-quoter fills), brokertrade (broker trades with account field), clicktrade (manual), otoswing (OTO swing). When trade type is unspecified use markettrade. When comparing brokers use brokertrade. For all trades use UNION ALL across all 5.')
       ])
@@ -224,7 +282,7 @@ def populate_schema_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
 def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
     """Step 5: Generate embeddings for all rows that don't have them yet.
 
-    Idempotent: WHERE ARRAY_LENGTH(embedding) = 0.
+    Idempotent: WHERE embedding IS NULL OR ARRAY_LENGTH(embedding) = 0.
     """
     fqn = f"{s.gcp_project}.{s.metadata_dataset}"
     model = s.embedding_model_ref
@@ -241,7 +299,7 @@ def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
             STRUCT(TRUE AS flatten_json_output, 'RETRIEVAL_DOCUMENT' AS task_type)
           )
         )
-        WHERE ARRAY_LENGTH(t.embedding) = 0;
+        WHERE t.embedding IS NULL OR ARRAY_LENGTH(t.embedding) = 0;
         """,
         # Column embeddings — uses enriched embedding_text when available
         f"""
@@ -254,7 +312,7 @@ def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
             STRUCT(TRUE AS flatten_json_output, 'RETRIEVAL_DOCUMENT' AS task_type)
           )
         )
-        WHERE ARRAY_LENGTH(t.embedding) = 0;
+        WHERE t.embedding IS NULL OR ARRAY_LENGTH(t.embedding) = 0;
         """,
         # Query memory
         f"""
@@ -267,7 +325,7 @@ def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
             STRUCT(TRUE AS flatten_json_output, 'RETRIEVAL_QUERY' AS task_type)
           )
         )
-        WHERE ARRAY_LENGTH(t.embedding) = 0;
+        WHERE t.embedding IS NULL OR ARRAY_LENGTH(t.embedding) = 0;
         """,
     ]
     for sql in sqls:
@@ -365,6 +423,7 @@ STEPS = {
     "verify-model": verify_embedding_model,
     "create-tables": create_embedding_tables,
     "populate-schema": populate_schema_embeddings,
+    "populate-symbols": populate_symbols,
     "generate-embeddings": generate_embeddings,
     "create-indexes": create_vector_indexes,
     "test-search": test_vector_search,
@@ -372,7 +431,8 @@ STEPS = {
 
 ALL_STEPS_ORDER = [
     "create-dataset", "verify-model", "create-tables",
-    "populate-schema", "generate-embeddings", "create-indexes", "test-search",
+    "populate-schema", "populate-symbols",
+    "generate-embeddings", "create-indexes", "test-search",
 ]
 
 

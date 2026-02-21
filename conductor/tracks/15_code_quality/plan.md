@@ -16,7 +16,7 @@ Tests:
 
 **Run:** `pytest tests/test_cache_exchange.py -v` — expect failures.
 
-### [ ] Task 1.2: Add exchange-aware validation to semantic cache (TDD green)
+### [x] Task 1.2: Add exchange-aware validation to semantic cache (TDD green) `711b3b8`
 
 **File:** `nl2sql_agent/tools/semantic_cache.py`
 

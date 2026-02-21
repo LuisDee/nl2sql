@@ -531,7 +531,7 @@ Plus directories: `.github/`, `catalog/`, `conductor/`, `data/`, `docs/`, `eval/
 
 This phase runs AFTER Track 15 (TypedDict contracts) is complete. With typed returns on all tools, full strict mypy becomes feasible.
 
-### [ ] Task 7.1: Tighten mypy to strict mode
+### [x] Task 7.1: Tighten mypy to strict mode `36baa52`
 
 **File:** `pyproject.toml`
 
@@ -548,7 +548,7 @@ Remove the permissive `disallow_untyped_defs = false` from Phase 1. With Track 1
 
 **Run:** `mypy nl2sql_agent/` — zero errors.
 
-### [ ] Task 7.2: Add Python 3.12 to CI matrix
+### [x] Task 7.2: Add Python 3.12 to CI matrix `36baa52`
 
 **File:** `.github/workflows/ci.yml`
 
@@ -580,7 +580,7 @@ inputs:
 
 **Test:** `act push` — both Python versions pass.
 
-### [ ] Task 7.3: Remove sample_data.tar.gz from tracking
+### [x] Task 7.3: Remove sample_data.tar.gz from tracking (already gitignored)
 
 The 116MB archive should not be in git. Options:
 - (a) Add to `.gitignore` and `git rm --cached sample_data.tar.gz`
@@ -593,7 +593,7 @@ echo "sample_data.tar.gz" >> .gitignore
 git rm --cached sample_data.tar.gz
 ```
 
-### [ ] Task 7.4: Document intentional YAML design choice
+### [x] Task 7.4: Document intentional YAML design choice `36baa52`
 
 **File:** `catalog/README.md` (or create if it doesn't exist)
 

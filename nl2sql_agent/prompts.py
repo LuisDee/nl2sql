@@ -3,8 +3,13 @@
 This module builds the comprehensive instruction for the NL2SQL sub-agent.
 The instruction is a callable that ADK invokes with ReadonlyContext,
 allowing dynamic injection of the current date and project ID.
+
+The prompt is split into a cached static section (tool descriptions, routing
+rules, SQL guidelines) and a dynamic section (date, follow-up context, retry
+status) that changes per turn.
 """
 
+import functools
 from datetime import date
 
 from google.adk.agents.readonly_context import ReadonlyContext
@@ -13,13 +18,9 @@ from nl2sql_agent.catalog_loader import load_exchange_registry
 from nl2sql_agent.config import settings
 
 
-def build_nl2sql_instruction(ctx: ReadonlyContext) -> str:
-    """Build the NL2SQL agent instruction with dynamic context.
-
-    ADK calls this at each turn. The ReadonlyContext provides access
-    to session state but not modification — safe for instruction generation.
-    """
-    today = date.today().isoformat()
+@functools.lru_cache(maxsize=1)
+def _static_instruction() -> str:
+    """Tool descriptions, routing rules, SQL guidelines — never change per-turn."""
     project = settings.gcp_project
     kpi = settings.kpi_dataset
     data = settings.data_dataset
@@ -39,46 +40,9 @@ def build_nl2sql_instruction(ctx: ReadonlyContext) -> str:
         exchange_count = 1
         exchange_list = "omx (omx, nordic, stockholm)"
 
-    # Build optional follow-up context from session state
-    follow_up_section = ""
-    state = ctx.state if hasattr(ctx, "state") and ctx.state else {}
-    last_sql = state.get("last_query_sql")
-    if last_sql:
-        summary = state.get("last_results_summary", {})
-        row_count = summary.get("row_count", "?")
-        last_sql_trimmed = last_sql[:500] + "..." if len(last_sql) > 500 else last_sql
-        follow_up_section = f"""
-
-## FOLLOW-UP CONTEXT
-
-The previous query in this session was:
-```sql
-{last_sql_trimmed}
-```
-It returned {row_count} rows. If the user asks a follow-up question (e.g. "break that
-down by symbol", "filter to WHITE portfolio"), you can reuse the same table without
-re-running vector_search_columns. Modify the previous SQL directly.
-"""
-
-    # Build retry-aware guidance
-    retry_attempts = state.get("dry_run_attempts", 0)
-    retry_section = ""
-    if retry_attempts > 0:
-        retry_section = f"""
-
-## RETRY STATUS
-
-dry_run_sql has failed {retry_attempts} time(s) in this session. You have
-{3 - retry_attempts} attempt(s) remaining before you must stop and explain
-the error to the user.
-"""
-
     return f"""You are a SQL expert for Mako Group, an options market-making firm.
 Your job is to answer natural language questions about trading data by generating
 and executing BigQuery Standard SQL queries.
-
-Today's date is {today}. Use this as the default for trade_date filters when
-the user says "today". For "yesterday", use DATE_SUB('{today}', INTERVAL 1 DAY).
 
 ## TOOL USAGE ORDER (follow this EVERY TIME)
 
@@ -93,7 +57,7 @@ the user says "today". For "yesterday", use DATE_SUB('{today}', INTERVAL 1 DAY).
 
 If dry_run_sql fails, read the error message carefully, fix the SQL, and retry.
 You may retry up to 3 times. After 3 failures, explain the error to the user.
-{retry_section}
+
 ## MULTI-EXCHANGE SUPPORT
 
 Mako trades on {exchange_count} exchanges. All exchanges have **identical table schemas** — only the BQ dataset name differs. The default exchange is **{default_exchange}** (used when no exchange is specified).
@@ -141,7 +105,7 @@ Raw execution details, timestamps, prices, sizes. No computed KPI metrics.
 ## SQL GENERATION RULES
 
 - **ALWAYS** use fully-qualified table names: `{project}.dataset.table`
-- **ALWAYS** filter on `trade_date` partition column. If no date specified, use '{today}'.
+- **ALWAYS** filter on `trade_date` partition column.
 - **ALWAYS** use `ROUND()` for decimal outputs (4 decimals for edge/vol/delta, 2 for PnL).
 - **ALWAYS** add `LIMIT` unless the user explicitly asks for all rows.
 - **ALWAYS** use BigQuery Standard SQL dialect.
@@ -164,7 +128,6 @@ Ask a clarifying question if:
 
 Do NOT ask for clarification if:
 - The routing rules clearly identify the table
-- The user says "today" (use {today})
 - The question is about aggregate data across all symbols
 
 ## RESPONSE FORMAT
@@ -179,5 +142,58 @@ After executing a query successfully:
 
 - You are a READ-ONLY agent. Never generate or execute data modification queries.
 - If a user asks you to modify, delete, or create data, politely refuse.
-- Stick to the datasets and tables listed above. Do not query other datasets.
-{follow_up_section}"""
+- Stick to the datasets and tables listed above. Do not query other datasets."""
+
+
+def _build_dynamic_section(ctx: ReadonlyContext) -> str:
+    """Build per-turn dynamic context from session state."""
+    today = date.today().isoformat()
+
+    parts = [
+        f"Today's date is {today}. Use this as the default for trade_date filters when "
+        f"the user says \"today\". For \"yesterday\", use DATE_SUB('{today}', INTERVAL 1 DAY)."
+    ]
+
+    state = ctx.state if hasattr(ctx, "state") and ctx.state else {}
+
+    # Retry status
+    retry_attempts = state.get("dry_run_attempts", 0)
+    if retry_attempts > 0:
+        parts.append(
+            f"\n## RETRY STATUS\n\n"
+            f"dry_run_sql has failed {retry_attempts} time(s) in this session. You have "
+            f"{3 - retry_attempts} attempt(s) remaining before you must stop and explain "
+            f"the error to the user."
+        )
+
+    # Follow-up context
+    last_sql = state.get("last_query_sql")
+    if last_sql:
+        summary = state.get("last_results_summary", {})
+        row_count = summary.get("row_count", "?")
+        last_sql_trimmed = last_sql[:500] + "..." if len(last_sql) > 500 else last_sql
+        parts.append(
+            f"\n## FOLLOW-UP CONTEXT\n\n"
+            f"The previous query in this session was:\n"
+            f"```sql\n{last_sql_trimmed}\n```\n"
+            f"It returned {row_count} rows. If the user asks a follow-up question (e.g. \"break that\n"
+            f"down by symbol\", \"filter to WHITE portfolio\"), you can reuse the same table without\n"
+            f"re-running vector_search_columns. Modify the previous SQL directly."
+        )
+
+    return "\n".join(parts)
+
+
+def build_nl2sql_instruction(ctx: ReadonlyContext) -> str:
+    """Build the NL2SQL agent instruction with dynamic context.
+
+    ADK calls this at each turn. The ReadonlyContext provides access
+    to session state but not modification — safe for instruction generation.
+
+    The static section (tool descriptions, routing rules, SQL guidelines) is
+    cached via lru_cache. Only the dynamic section (date, retry status,
+    follow-up context) is rebuilt each turn.
+    """
+    static = _static_instruction()
+    dynamic = _build_dynamic_section(ctx)
+    return f"{static}\n\n{dynamic}"

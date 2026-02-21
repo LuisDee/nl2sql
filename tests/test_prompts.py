@@ -189,6 +189,74 @@ class TestTradeTaxonomyInPrompt:
         assert "event_timestamp_ns" in result
 
 
+class TestPromptCaching:
+    """Tests for the static/dynamic prompt split and caching."""
+
+    def _make_ctx(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state or {}
+        return ctx
+
+    def test_static_instruction_is_cached(self):
+        """Static section must return the same object (identity) on repeated calls."""
+        from nl2sql_agent.prompts import _static_instruction
+
+        a = _static_instruction()
+        b = _static_instruction()
+        assert a is b, "Static instruction should be cached (same object identity)"
+
+    def test_static_instruction_contains_tool_order(self):
+        """Static section must include tool usage order."""
+        from nl2sql_agent.prompts import _static_instruction
+
+        static = _static_instruction()
+        assert "vector_search_columns" in static
+        assert "dry_run_sql" in static
+        assert "execute_sql" in static
+
+    def test_static_instruction_contains_routing_rules(self):
+        """Static section must include routing rules."""
+        from nl2sql_agent.prompts import _static_instruction
+
+        static = _static_instruction()
+        assert "ROUTING RULES" in static
+
+    def test_static_instruction_contains_sql_rules(self):
+        """Static section must include SQL generation rules."""
+        from nl2sql_agent.prompts import _static_instruction
+
+        static = _static_instruction()
+        assert "ROUND" in static
+        assert "trade_date" in static
+
+    def test_dynamic_section_contains_today(self):
+        """Dynamic section must include today's date."""
+        result = build_nl2sql_instruction(self._make_ctx())
+        today = date.today().isoformat()
+        assert today in result
+
+    def test_dynamic_section_includes_follow_up_when_present(self):
+        """Dynamic section must include follow-up context from state."""
+        state = {
+            "last_query_sql": "SELECT x FROM t",
+            "last_results_summary": {"row_count": 5},
+        }
+        result = build_nl2sql_instruction(self._make_ctx(state))
+        assert "FOLLOW-UP CONTEXT" in result
+
+    def test_full_prompt_combines_static_and_dynamic(self):
+        """build_nl2sql_instruction output must contain both static and dynamic parts."""
+        from nl2sql_agent.prompts import _static_instruction
+
+        result = build_nl2sql_instruction(self._make_ctx())
+        static = _static_instruction()
+        # Static content should be embedded in the full prompt
+        assert "ROUTING RULES" in result
+        assert "SQL GENERATION RULES" in result
+        # Dynamic content should also be present
+        assert date.today().isoformat() in result
+
+
 class TestExchangeAwareCache:
     def _make_ctx(self, state=None):
         ctx = MagicMock()

@@ -31,7 +31,7 @@ queries:
     gold_sql: |
       SELECT
         COUNT(*) AS fill_count,
-        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(AVG(instant_edge), 4) AS avg_edge,
         ROUND(SUM(instant_pnl), 2) AS total_pnl
       FROM `{project}.nl2sql_omx_kpi.quotertrade`
       WHERE trade_date = CURRENT_DATE()
@@ -48,7 +48,7 @@ queries:
       SELECT
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
-        ROUND(AVG(edge), 4) AS avg_edge
+        ROUND(AVG(instant_edge), 4) AS avg_edge
       FROM `{project}.nl2sql_omx_kpi.brokertrade`
       WHERE trade_date = CURRENT_DATE()
     complexity: "simple"
@@ -63,7 +63,7 @@ queries:
     gold_sql: |
       SELECT
         COUNT(*) AS trade_count,
-        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(AVG(instant_edge), 4) AS avg_edge,
         ROUND(SUM(instant_pnl), 2) AS total_pnl
       FROM `{project}.nl2sql_omx_kpi.clicktrade`
       WHERE trade_date = CURRENT_DATE()
@@ -81,7 +81,7 @@ queries:
         symbol,
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
-        ROUND(AVG(edge), 4) AS avg_edge
+        ROUND(AVG(instant_edge), 4) AS avg_edge
       FROM `{project}.nl2sql_omx_kpi.otoswing`
       WHERE trade_date = CURRENT_DATE()
       GROUP BY symbol
@@ -306,7 +306,7 @@ queries:
       SELECT
         symbol,
         COUNT(*) AS fill_count,
-        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(AVG(instant_edge), 4) AS avg_edge,
         ROUND(SUM(instant_pnl), 2) AS total_pnl
       FROM `{project}.nl2sql_omx_kpi.quotertrade`
       WHERE trade_date = CURRENT_DATE()
@@ -531,23 +531,23 @@ queries:
     expected_dataset: "nl2sql_omx_kpi"
     expected_routing_signal: "compare edge all types -> UNION ALL"
     gold_sql: |
-      SELECT 'markettrade' AS trade_type, ROUND(AVG(edge), 4) AS avg_edge, COUNT(*) AS count
+      SELECT 'markettrade' AS trade_type, ROUND(AVG(instant_edge), 4) AS avg_edge, COUNT(*) AS count
       FROM `{project}.nl2sql_omx_kpi.markettrade`
       WHERE trade_date = CURRENT_DATE()
       UNION ALL
-      SELECT 'quotertrade', ROUND(AVG(edge), 4), COUNT(*)
+      SELECT 'quotertrade', ROUND(AVG(instant_edge), 4), COUNT(*)
       FROM `{project}.nl2sql_omx_kpi.quotertrade`
       WHERE trade_date = CURRENT_DATE()
       UNION ALL
-      SELECT 'brokertrade', ROUND(AVG(edge), 4), COUNT(*)
+      SELECT 'brokertrade', ROUND(AVG(instant_edge), 4), COUNT(*)
       FROM `{project}.nl2sql_omx_kpi.brokertrade`
       WHERE trade_date = CURRENT_DATE()
       UNION ALL
-      SELECT 'clicktrade', ROUND(AVG(edge), 4), COUNT(*)
+      SELECT 'clicktrade', ROUND(AVG(instant_edge), 4), COUNT(*)
       FROM `{project}.nl2sql_omx_kpi.clicktrade`
       WHERE trade_date = CURRENT_DATE()
       UNION ALL
-      SELECT 'otoswing', ROUND(AVG(edge), 4), COUNT(*)
+      SELECT 'otoswing', ROUND(AVG(instant_edge), 4), COUNT(*)
       FROM `{project}.nl2sql_omx_kpi.otoswing`
       WHERE trade_date = CURRENT_DATE()
       ORDER BY avg_edge DESC
@@ -607,7 +607,7 @@ queries:
         symbol,
         COUNT(*) AS fill_count,
         ROUND(SUM(vol_slippage_10m), 2) AS total_vol_slip_10m,
-        ROUND(AVG(vol_slippage_per_unit_10m), 4) AS avg_vol_slip_unit_10m
+        ROUND(AVG(vol_slippage_10m_per_unit), 4) AS avg_vol_slip_unit_10m
       FROM `{project}.nl2sql_omx_kpi.quotertrade`
       WHERE trade_date = CURRENT_DATE()
       GROUP BY symbol
@@ -648,7 +648,7 @@ queries:
         symbol,
         COUNT(*) AS swing_count,
         ROUND(SUM(delta_slippage_1h), 2) AS delta_slip_fill,
-        ROUND(SUM(delta_slippage_fired_at_1h), 2) AS delta_slip_fired
+        ROUND(SUM(delta_slippage_1h_fired_at), 2) AS delta_slip_fired
       FROM `{project}.nl2sql_omx_kpi.otoswing`
       WHERE trade_date = CURRENT_DATE()
       GROUP BY symbol
@@ -671,7 +671,7 @@ queries:
         account,
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
-        ROUND(AVG(edge), 4) AS avg_edge
+        ROUND(AVG(instant_edge), 4) AS avg_edge
       FROM `{project}.nl2sql_omx_kpi.brokertrade`
       WHERE trade_date = CURRENT_DATE()
         AND account IN ('BGC', 'MGN')
@@ -712,7 +712,7 @@ queries:
         symbol,
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
-        ROUND(AVG(edge), 4) AS avg_edge
+        ROUND(AVG(instant_edge), 4) AS avg_edge
       FROM `{project}.nl2sql_omx_kpi.brokertrade`
       WHERE trade_date = CURRENT_DATE()
       GROUP BY account, symbol

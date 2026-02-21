@@ -302,11 +302,11 @@ examples:
       SELECT
         md.DataTimestamp,
         md.strike,
-        md.putcall,
-        md.bid_price_0, md.bid_size_0, md.bid_orders_0,
-        md.ask_price_0, md.ask_size_0, md.ask_orders_0,
-        md.bid_price_1, md.bid_size_1,
-        md.ask_price_1, md.ask_size_1
+        md.option_type_name,
+        md.bid_price_0, md.bid_volume_0, md.bid_orders_0,
+        md.ask_price_0, md.ask_volume_0, md.ask_orders_0,
+        md.bid_price_1, md.bid_volume_1,
+        md.ask_price_1, md.ask_volume_1
       FROM `{project}.{data_dataset}.marketdepth` md
       CROSS JOIN nearest_strike ns
       WHERE md.trade_date = '2026-02-17'
@@ -314,7 +314,7 @@ examples:
         AND md.term = 'Apr-2026'
         AND md.strike = ns.strike
         AND md.DataTimestamp >= TIMESTAMP('2026-02-17 16:20:00')
-      ORDER BY md.putcall, md.DataTimestamp DESC
+      ORDER BY md.option_type_name, md.DataTimestamp DESC
       LIMIT 20
     tables_used: [marketdepth, theodata]
     dataset: "{data_dataset}"
@@ -329,9 +329,9 @@ examples:
       SELECT
         DataTimestamp,
         strike,
-        putcall,
-        bid_price_0, bid_size_0,
-        ask_price_0, ask_size_0,
+        option_type_name,
+        bid_price_0, bid_volume_0,
+        ask_price_0, ask_volume_0,
         ROUND(ask_price_0 - bid_price_0, 4) AS spread
       FROM `{project}.{data_dataset}.marketdepth`
       WHERE trade_date = '2026-02-17'

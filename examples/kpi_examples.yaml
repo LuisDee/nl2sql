@@ -118,7 +118,7 @@ examples:
       SELECT
         COUNT(*) AS fill_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
-        ROUND(AVG(edge), 4) AS avg_edge
+        ROUND(AVG(instant_edge), 4) AS avg_edge
       FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
     tables_used: [quotertrade]
@@ -134,7 +134,7 @@ examples:
         portfolio,
         COUNT(*) AS fill_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
-        ROUND(AVG(edge), 4) AS avg_edge
+        ROUND(AVG(instant_edge), 4) AS avg_edge
       FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY portfolio
@@ -170,7 +170,7 @@ examples:
       SELECT
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
-        ROUND(AVG(edge), 4) AS avg_edge
+        ROUND(AVG(instant_edge), 4) AS avg_edge
       FROM `{project}.{kpi_dataset}.brokertrade`
       WHERE trade_date = '2026-02-17'
     tables_used: [brokertrade]
@@ -185,7 +185,7 @@ examples:
     sql: |
       SELECT
         COUNT(*) AS trade_count,
-        ROUND(AVG(edge), 4) AS avg_edge,
+        ROUND(AVG(instant_edge), 4) AS avg_edge,
         ROUND(SUM(instant_pnl), 2) AS total_pnl
       FROM `{project}.{kpi_dataset}.clicktrade`
       WHERE trade_date = '2026-02-17'
@@ -202,7 +202,7 @@ examples:
         symbol,
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
-        ROUND(AVG(edge), 4) AS avg_edge
+        ROUND(AVG(instant_edge), 4) AS avg_edge
       FROM `{project}.{kpi_dataset}.clicktrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
@@ -221,7 +221,7 @@ examples:
         symbol,
         COUNT(*) AS trade_count,
         ROUND(SUM(instant_pnl), 2) AS total_pnl,
-        ROUND(AVG(edge), 4) AS avg_edge
+        ROUND(AVG(instant_edge), 4) AS avg_edge
       FROM `{project}.{kpi_dataset}.otoswing`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
@@ -326,7 +326,7 @@ examples:
         symbol,
         COUNT(*) AS fill_count,
         ROUND(SUM(vol_slippage_10m), 2) AS total_vol_slip_10m,
-        ROUND(AVG(vol_slippage_per_unit_10m), 4) AS avg_vol_slip_unit_10m
+        ROUND(AVG(vol_slippage_10m_per_unit), 4) AS avg_vol_slip_unit_10m
       FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
@@ -423,7 +423,7 @@ examples:
         symbol,
         COUNT(*) AS swing_count,
         ROUND(SUM(delta_slippage_1h), 2) AS delta_slip_fill,
-        ROUND(SUM(delta_slippage_fired_at_1h), 2) AS delta_slip_fired
+        ROUND(SUM(delta_slippage_1h_fired_at), 2) AS delta_slip_fired
       FROM `{project}.{kpi_dataset}.otoswing`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol

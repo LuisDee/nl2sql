@@ -233,14 +233,25 @@ examples:
     validated: false
     validated_by: ""
 
-  # --- UNION ALL across all KPI tables ---
+  # --- Total PnL (all trades) uses markettrade only ---
   - question: "What was total PnL across all trade types?"
     sql: |
-      SELECT 'markettrade' AS trade_type, ROUND(SUM(instant_pnl), 2) AS total_pnl, COUNT(*) AS count
+      SELECT
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        COUNT(*) AS trade_count
       FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
-      UNION ALL
-      SELECT 'quotertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
+    tables_used: [markettrade]
+    dataset: "{kpi_dataset}"
+    complexity: simple
+    routing_signal: "total PnL all trades -> markettrade only (superset of all trade types, avoids double-counting)"
+    validated: false
+    validated_by: ""
+
+  # --- PnL breakdown by Mako trade type (UNION of Mako-only tables) ---
+  - question: "What was PnL breakdown by Mako trade type?"
+    sql: |
+      SELECT 'quotertrade' AS trade_type, ROUND(SUM(instant_pnl), 2) AS total_pnl, COUNT(*) AS count
       FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       UNION ALL
@@ -256,29 +267,29 @@ examples:
       FROM `{project}.{kpi_dataset}.otoswing`
       WHERE trade_date = '2026-02-17'
       ORDER BY total_pnl DESC
-    tables_used: [markettrade, quotertrade, brokertrade, clicktrade, otoswing]
+    tables_used: [quotertrade, brokertrade, clicktrade, otoswing]
     dataset: "{kpi_dataset}"
     complexity: complex
-    routing_signal: "all trades / total PnL -> UNION ALL across all KPI"
+    routing_signal: "PnL by Mako trade type -> UNION ALL of 4 Mako-only tables (NOT markettrade, which is the superset)"
     validated: false
     validated_by: ""
 
-  - question: "How many trades did we do by symbol across market and quoter?"
+  - question: "How many trades did we do by symbol across quoter and broker?"
     sql: |
-      SELECT symbol, 'markettrade' AS source, COUNT(*) AS trade_count, ROUND(SUM(instant_pnl), 2) AS total_pnl
-      FROM `{project}.{kpi_dataset}.markettrade`
-      WHERE trade_date = '2026-02-17'
-      GROUP BY symbol
-      UNION ALL
-      SELECT symbol, 'quotertrade', COUNT(*), ROUND(SUM(instant_pnl), 2)
+      SELECT symbol, 'quotertrade' AS source, COUNT(*) AS trade_count, ROUND(SUM(instant_pnl), 2) AS total_pnl
       FROM `{project}.{kpi_dataset}.quotertrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
+      UNION ALL
+      SELECT symbol, 'brokertrade', COUNT(*), ROUND(SUM(instant_pnl), 2)
+      FROM `{project}.{kpi_dataset}.brokertrade`
+      WHERE trade_date = '2026-02-17'
+      GROUP BY symbol
       ORDER BY total_pnl DESC
-    tables_used: [markettrade, quotertrade]
+    tables_used: [quotertrade, brokertrade]
     dataset: "{kpi_dataset}"
     complexity: complex
-    routing_signal: "cross-table symbol comparison -> UNION KPI tables"
+    routing_signal: "cross Mako trade type comparison -> UNION Mako-only tables (no markettrade overlap)"
     validated: false
     validated_by: ""
 

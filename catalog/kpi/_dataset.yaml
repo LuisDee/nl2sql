@@ -183,8 +183,12 @@ dataset:
       table: otoswing
 
     - patterns: ["all trades", "total PnL", "overall", "across all types", "every trade type"]
-      action: "UNION ALL across all 5 kpi tables"
-      notes: "Agent must query all tables and combine results"
+      table: markettrade
+      notes: "markettrade is the superset containing ALL participants' trades. Do NOT UNION ALL with Mako-specific tables (double-counts)."
+
+    - patterns: ["by trade type", "by Mako trade type", "quoter vs click vs broker", "compare trade types"]
+      action: "UNION ALL across quotertrade, brokertrade, clicktrade, otoswing (4 Mako-only tables)"
+      notes: "Excludes markettrade to avoid double-counting. These 4 are Mako-only subsets."
 
   disambiguation:
     kpi_vs_data_same_table_name: >

@@ -43,21 +43,11 @@ examples:
       FROM `{project}.{kpi_dataset}.markettrade`
       WHERE trade_date = '2026-02-17'
       GROUP BY symbol
-      UNION ALL
-      SELECT symbol, COUNT(*), ROUND(SUM(instant_pnl), 2)
-      FROM `{project}.{kpi_dataset}.quotertrade`
-      WHERE trade_date = '2026-02-17'
-      GROUP BY symbol
-      UNION ALL
-      SELECT symbol, COUNT(*), ROUND(SUM(instant_pnl), 2)
-      FROM `{project}.{kpi_dataset}.clicktrade`
-      WHERE trade_date = '2026-02-17'
-      GROUP BY symbol
       ORDER BY total_pnl DESC
-    tables_used: [markettrade, quotertrade, clicktrade]
+    tables_used: [markettrade]
     dataset: "{kpi_dataset}"
-    complexity: complex
-    routing_signal: "all types by symbol -> UNION across KPI tables"
+    complexity: medium
+    routing_signal: "all types by symbol -> markettrade (superset of all trade types, avoids double-counting)"
     validated: false
     validated_by: ""
 

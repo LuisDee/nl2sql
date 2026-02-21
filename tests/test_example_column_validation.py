@@ -156,3 +156,29 @@ class TestExampleColumnNames:
                 )
 
         assert not errors, "Wrong putcall column:\n" + "\n".join(errors)
+
+    def test_no_union_all_markettrade_with_mako_tables(self):
+        """UNION ALL must not combine markettrade with Mako-specific tables.
+
+        markettrade contains ALL trades (Mako + counterparties).
+        quotertrade/brokertrade/clicktrade/otoswing are Mako-only subsets.
+        Combining them double-counts Mako's PnL.
+        """
+        mako_tables = {"quotertrade", "brokertrade", "clicktrade", "otoswing"}
+
+        for yaml_file in ["kpi_examples.yaml", "routing_examples.yaml"]:
+            path = EXAMPLES_DIR / yaml_file
+            if not path.exists():
+                continue
+            with open(path) as f:
+                data = yaml.safe_load(f)
+
+            for ex in data.get("examples", []):
+                tables = set(ex.get("tables_used", []))
+                if "markettrade" in tables and tables & mako_tables:
+                    assert False, (
+                        f"Double-counting risk in {yaml_file}: "
+                        f"Q: {ex['question'][:60]} | "
+                        f"tables_used combines markettrade with {tables & mako_tables}. "
+                        "markettrade already contains Mako trades."
+                    )

@@ -447,32 +447,17 @@ queries:
   - id: "eval_025"
     question: "What was total PnL across all trade types?"
     category: "union_all"
-    expected_tables: ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"]
+    expected_tables: ["markettrade"]
     expected_dataset: "nl2sql_omx_kpi"
-    expected_routing_signal: "all trades / total PnL -> UNION ALL across all KPI"
+    expected_routing_signal: "total PnL all trades -> markettrade only (superset, avoids double-counting)"
     gold_sql: |
-      SELECT 'markettrade' AS trade_type, ROUND(SUM(instant_pnl), 2) AS total_pnl, COUNT(*) AS count
+      SELECT
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        COUNT(*) AS trade_count
       FROM `{project}.nl2sql_omx_kpi.markettrade`
       WHERE trade_date = CURRENT_DATE()
-      UNION ALL
-      SELECT 'quotertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
-      FROM `{project}.nl2sql_omx_kpi.quotertrade`
-      WHERE trade_date = CURRENT_DATE()
-      UNION ALL
-      SELECT 'brokertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
-      FROM `{project}.nl2sql_omx_kpi.brokertrade`
-      WHERE trade_date = CURRENT_DATE()
-      UNION ALL
-      SELECT 'clicktrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
-      FROM `{project}.nl2sql_omx_kpi.clicktrade`
-      WHERE trade_date = CURRENT_DATE()
-      UNION ALL
-      SELECT 'otoswing', ROUND(SUM(instant_pnl), 2), COUNT(*)
-      FROM `{project}.nl2sql_omx_kpi.otoswing`
-      WHERE trade_date = CURRENT_DATE()
-      ORDER BY total_pnl DESC
-    complexity: "complex"
-    tags: ["union_all", "all_kpi", "pnl"]
+    complexity: "simple"
+    tags: ["markettrade", "total_pnl", "no_double_count"]
 
   - id: "eval_026"
     question: "How many trades did we do across all types today?"

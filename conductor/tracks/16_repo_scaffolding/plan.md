@@ -467,7 +467,7 @@ Short, practical guide (~50 lines):
 
 ## Phase 6: Final Verification
 
-### [ ] Task 6.1: Run full local CI via act
+### [x] Task 6.1: Run full local CI via act
 
 **Command:** `make ci`
 
@@ -481,13 +481,13 @@ This runs `act push` which executes all three CI jobs (lint, type-check, test) i
 - Check if composite action syntax works in act (may need inline fallback)
 - Verify uv installation works in act container
 
-### [ ] Task 6.2: Run pre-commit on all files
+### [x] Task 6.2: Run pre-commit on all files
 
 **Command:** `make pre-commit`
 
 **Expected:** All hooks pass (trailing whitespace, EOF, YAML, TOML, ruff, gitleaks).
 
-### [ ] Task 6.3: Verify test suite
+### [x] Task 6.3: Verify test suite
 
 **Command:** `make test-cov`
 
@@ -496,7 +496,7 @@ This runs `act push` which executes all three CI jobs (lint, type-check, test) i
 - Coverage >= 80%
 - HTML report generated at `htmlcov/index.html`
 
-### [ ] Task 6.4: Verify clean git status
+### [x] Task 6.4: Verify clean git status
 
 ```bash
 git status          # No untracked junk files

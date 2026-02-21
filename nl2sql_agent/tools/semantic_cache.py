@@ -40,7 +40,7 @@ LIMIT 1
 """
 
 
-def check_semantic_cache(question: str) -> dict:
+def check_semantic_cache(question: str, exchange_datasets: str = "") -> dict:
     """Check if this question was previously answered with high confidence.
 
     Searches query_memory for a near-exact match (cosine distance below
@@ -52,6 +52,10 @@ def check_semantic_cache(question: str) -> dict:
 
     Args:
         question: The trader's natural language question.
+        exchange_datasets: Optional comma-separated dataset names from resolve_exchange.
+            If provided, cache hits with a different dataset are treated as misses.
+            This prevents cross-exchange cache pollution (e.g., returning OMX SQL
+            for a Brazil question).
 
     Returns:
         Dict with 'cache_hit' (bool). If True, includes 'cached_sql',
@@ -86,6 +90,20 @@ def check_semantic_cache(question: str) -> dict:
         threshold = settings.semantic_cache_threshold
 
         if distance <= threshold:
+            # Exchange-aware validation: reject cache hits from different exchanges
+            if exchange_datasets and best.get("cached_dataset"):
+                allowed = {d.strip() for d in exchange_datasets.split(",")}
+                if best["cached_dataset"] not in allowed:
+                    logger.info(
+                        "semantic_cache_exchange_mismatch",
+                        cached_dataset=best["cached_dataset"],
+                        allowed_datasets=list(allowed),
+                    )
+                    return {
+                        "cache_hit": False,
+                        "reason": "cached result is for a different exchange",
+                    }
+
             logger.info(
                 "semantic_cache_hit",
                 distance=distance,

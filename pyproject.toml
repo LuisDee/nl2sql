@@ -8,6 +8,7 @@ dependencies = [
     "google-cloud-bigquery>=3.25.0",
     "google-cloud-aiplatform>=1.60.0",
     "litellm>=1.40.0",
+    "numpy>=1.24.0",
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
     "pyyaml>=6.0",
@@ -22,6 +23,10 @@ dependencies = [
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.9.0",
+    "mypy>=1.10.0",
+    "pre-commit>=3.7.0",
 ]
 
 [build-system]
@@ -39,3 +44,75 @@ markers = [
 addopts = "-m 'not integration'"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+src = ["nl2sql_agent", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "UP",   # pyupgrade (modernize syntax)
+    "B",    # flake8-bugbear (common bugs)
+    "I",    # isort (import sorting)
+    "N",    # pep8-naming
+    "S",    # flake8-bandit (security)
+    "T20",  # flake8-print (no bare print)
+    "PT",   # flake8-pytest-style
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "E501",  # line length (formatter handles this)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]  # allow assert in tests
+"scripts/**/*.py" = ["T201"]  # allow print in scripts
+"eval/**/*.py" = ["T201"]  # allow print in eval runner
+"setup/**/*.py" = ["T201"]  # allow print in setup scripts
+
+[tool.ruff.lint.isort]
+known-first-party = ["nl2sql_agent"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+disallow_untyped_defs = false
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "google.adk.*",
+    "google.cloud.*",
+    "litellm.*",
+    "structlog.*",
+]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["nl2sql_agent"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.",
+]

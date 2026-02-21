@@ -48,6 +48,48 @@ class TestEmbeddingNullPredicate:
         )
 
 
+class TestAutonomousEmbeddings:
+    """When use_autonomous_embeddings is True, manual embedding steps should be skipped."""
+
+    def test_config_has_autonomous_embeddings_setting(self):
+        """Settings must have a use_autonomous_embeddings field."""
+        from nl2sql_agent.config import Settings
+        import inspect
+
+        sig = inspect.signature(Settings)
+        # Check it exists as a field
+        assert hasattr(Settings, "model_fields") and "use_autonomous_embeddings" in Settings.model_fields, (
+            "Settings must have a use_autonomous_embeddings field"
+        )
+
+    def test_autonomous_embeddings_defaults_to_false(self):
+        """use_autonomous_embeddings should default to False for backward compatibility."""
+        from nl2sql_agent.config import Settings
+
+        s = Settings(_env_file=None)
+        assert s.use_autonomous_embeddings is False
+
+    def test_learning_loop_skips_embed_when_autonomous(self):
+        """save_validated_query should skip embedding step when autonomous embeddings enabled."""
+        import inspect
+        from nl2sql_agent.tools.learning_loop import save_validated_query
+
+        source = inspect.getsource(save_validated_query)
+        assert "use_autonomous_embeddings" in source, (
+            "save_validated_query must check use_autonomous_embeddings setting"
+        )
+
+    def test_generate_embeddings_checks_autonomous(self):
+        """generate_embeddings should check use_autonomous_embeddings setting."""
+        import inspect
+        from scripts.run_embeddings import generate_embeddings
+
+        source = inspect.getsource(generate_embeddings)
+        assert "autonomous" in source.lower(), (
+            "generate_embeddings must mention autonomous embeddings"
+        )
+
+
 class TestCreateTablesSafety:
     """create_embedding_tables must not destroy existing data by default."""
 

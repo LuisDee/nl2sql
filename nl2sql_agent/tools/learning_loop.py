@@ -87,7 +87,24 @@ def save_validated_query(
         logger.error("save_validated_query_insert_error", error=str(e))
         return {"status": "error", "error_message": f"Failed to insert: {e}"}
 
+    tables_array = [t.strip() for t in tables_used.split(",")]
+
     # Step 2: Generate embedding for the new row
+    # Skip when autonomous embeddings are enabled (BQ generates them automatically)
+    if settings.use_autonomous_embeddings:
+        logger.info(
+            "save_validated_query_complete",
+            tables_used=tables_array,
+            embedding="autonomous",
+        )
+        return {
+            "status": "success",
+            "message": (
+                f"Saved validated query. Tables: {tables_array}. "
+                "Embedding will be generated automatically by BigQuery."
+            ),
+        }
+
     embed_sql = _EMBED_NEW_ROWS_SQL.format(
         metadata_dataset=fq_metadata,
         embedding_model=settings.embedding_model_ref,
@@ -95,7 +112,6 @@ def save_validated_query(
 
     try:
         bq.execute_query(embed_sql)
-        tables_array = [t.strip() for t in tables_used.split(",")]
         logger.info(
             "save_validated_query_complete",
             tables_used=tables_array,

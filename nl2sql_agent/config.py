@@ -107,6 +107,15 @@ class Settings(BaseSettings):
         ),
     )
 
+    # --- Autonomous Embeddings (Track 13) ---
+    use_autonomous_embeddings: bool = Field(
+        default=False,
+        description=(
+            "When True, BQ generates embeddings autonomously via GENERATED ALWAYS AS columns. "
+            "Manual embedding UPDATE steps in learning_loop and run_embeddings are skipped."
+        ),
+    )
+
     # --- Loop Detection (Track 09) ---
     max_consecutive_repeats: int = Field(
         default=3,

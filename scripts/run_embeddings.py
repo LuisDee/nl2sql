@@ -288,7 +288,13 @@ def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
     """Step 5: Generate embeddings for all rows that don't have them yet.
 
     Idempotent: WHERE embedding IS NULL OR ARRAY_LENGTH(embedding) = 0.
+
+    When use_autonomous_embeddings is enabled, BQ generates embeddings
+    automatically via GENERATED ALWAYS AS columns — this step is skipped.
     """
+    if s.use_autonomous_embeddings:
+        logger.info("skipping_manual_embeddings", reason="autonomous embeddings enabled")
+        return
     fqn = f"{s.gcp_project}.{s.metadata_dataset}"
     model = s.embedding_model_ref
 

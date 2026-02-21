@@ -158,7 +158,7 @@ def check_semantic_cache(question: str) -> CacheHitResult | CacheMissResult:
 
 ---
 
-## Phase 3: Prompt Optimization & Developer Tooling
+## Phase 3: Prompt Optimization & Developer Tooling [checkpoint: a2b53b8]
 
 ### [x] Task 3.1: Split prompt into static and dynamic sections `ed6baec`
 

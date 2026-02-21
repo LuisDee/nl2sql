@@ -1,5 +1,7 @@
 """Tests for configuration loading via pydantic-settings."""
 
+from pathlib import Path
+
 from nl2sql_agent.config import Settings
 
 
@@ -40,3 +42,33 @@ class TestSettings:
         monkeypatch.setenv("SOME_RANDOM_THING", "foobar")
         s = Settings()  # Should not raise
         assert s.gcp_project == "cloud-data-n-base-d4b3"
+
+
+class TestEnvExample:
+    """Verify .env.example exists and covers all Settings fields."""
+
+    ENV_EXAMPLE = Path(__file__).parent.parent / ".env.example"
+
+    def test_env_example_exists(self):
+        assert self.ENV_EXAMPLE.exists(), ".env.example must exist in project root"
+
+    def test_env_example_covers_required_fields(self):
+        """All required Settings fields must appear in .env.example."""
+        content = self.ENV_EXAMPLE.read_text()
+        # Required fields (no default in Settings)
+        for field in ["LITELLM_API_KEY", "LITELLM_API_BASE"]:
+            assert field in content, f"Required field {field} missing from .env.example"
+
+    def test_env_example_covers_key_optional_fields(self):
+        """Key optional fields should be documented in .env.example."""
+        content = self.ENV_EXAMPLE.read_text()
+        for field in [
+            "GCP_PROJECT",
+            "KPI_DATASET",
+            "DATA_DATASET",
+            "METADATA_DATASET",
+            "LITELLM_MODEL",
+            "BQ_MAX_RESULT_ROWS",
+            "SEMANTIC_CACHE_THRESHOLD",
+        ]:
+            assert field in content, f"Optional field {field} missing from .env.example"

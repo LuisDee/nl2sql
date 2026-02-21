@@ -97,3 +97,48 @@
 - **Complexity:** L
 - **Dependencies:** 09_production_hardening, 10_metadata_gaps
 - **Description:** Adds column-level vector search to replace table-description-only routing. Single BQ query searches 4,631 column embeddings, aggregates to tables, returns top columns per table. Fixes phantom `edge_bps` column. Based on RESQL/TailorSQL/bidirectional retrieval research (2025).
+
+---
+
+## [x] Track: Multi-Exchange Support
+- **ID:** 14_multi_exchange
+- **Wave:** 11
+- **Complexity:** M
+- **Dependencies:** 12_column_semantic_search
+- **Description:** Adds multi-exchange routing via alias/symbol lookup. Exchange registry YAML + resolve_exchange tool (3-tier: alias→symbol→default). Updates prompt with exchange-aware section. Parameterizes run_embeddings.py dataset names. Symbol-to-exchange BQ table from 4,806-row CSV. No changes to shared embeddings or vector search (research-backed: identical schemas = shared semantics).
+
+---
+
+## [x] Track: Autopsy Fixes
+- **ID:** 13_autopsy_fixes
+- **Wave:** 11
+- **Complexity:** L
+- **Dependencies:** 12_column_semantic_search
+- **Description:** Fixes 10 critical and 20 high-severity findings from the autopsy deep review. Phase 1: ARRAY_LENGTH(NULL) bug, circuit breaker reset, example column names, PnL routing, query timeout, LIMIT detection, vector search CTE, destructive DDL. Phase 2: shared SQL guard, YAML auto-discovery, Docker fixes, lazy BQ init. Phase 3: online eval fix, ADK eval expansion, autonomous embeddings.
+
+---
+
+## [ ] Track: Code Quality & Reliability
+- **ID:** 15_code_quality
+- **Wave:** 12
+- **Complexity:** M
+- **Dependencies:** 14_multi_exchange
+- **Description:** Addresses findings from the codebase review NOT covered by Track 13. Phase 1: exchange-aware semantic cache (prevents cross-exchange pollution). Phase 2: TypedDict return contracts for all 8 tools. Phase 3: prompt caching, config documentation, .env.example. Phase 4: dead code cleanup, thread safety docs, error handling consolidation.
+
+---
+
+## [ ] Track: Repo Scaffolding & Local CI
+- **ID:** 16_repo_scaffolding
+- **Wave:** 13
+- **Complexity:** M
+- **Dependencies:** 13_autopsy_fixes, 15_code_quality
+- **Description:** Adds all missing Python tooling infrastructure. Phase 1: ruff lint/format + mypy type-check config. Phase 2: pre-commit hooks (ruff, gitleaks, file checks). Phase 3: GitHub Actions CI workflow + local `act` runner in Docker. Phase 4: Makefile with standard targets. Phase 5: root cleanup, README upgrade, CONTRIBUTING.md, .editorconfig. Phase 6: full local CI verification via `act push`. Phase 7: strict mypy, multi-version CI (3.11+3.12), git-lfs cleanup, document catalog design choice.
+
+---
+
+## [ ] Track: Routing Consolidation & Pipeline Testing
+- **ID:** 17_routing_and_pipeline
+- **Wave:** 14
+- **Complexity:** M
+- **Dependencies:** 13_autopsy_fixes, 16_repo_scaffolding
+- **Description:** Eliminates routing rule duplication across 5 locations. Makes _routing.yaml and _dataset.yaml the single source of truth — prompts.py and run_embeddings.py read from YAML instead of hardcoding. Adds drift detection test (CI catches when sources diverge). Adds unit tests for the entire embedding pipeline (run_embeddings.py + populate_embeddings.py, currently zero tests).

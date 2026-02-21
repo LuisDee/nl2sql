@@ -16,7 +16,7 @@ The `WHERE ARRAY_LENGTH(t.embedding) = 0` predicate never matches newly inserted
 
 **Test:** New `tests/test_embedding_pipeline.py` — assert the SQL templates contain the `IS NULL` predicate. Integration: `run_embeddings.py --step generate-embeddings` actually processes NULL rows.
 
-### [ ] Task 1.2: Reset circuit breaker state on new question
+### [x] Task 1.2: Reset circuit breaker state on new question `766002a`
 
 When `check_semantic_cache` is called (marking a new question), only `tool_call_count` and `tool_call_history` are reset. The `dry_run_attempts` and `max_retries_reached` keys persist, permanently blocking the agent after 3 dry-run failures.
 

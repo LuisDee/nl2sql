@@ -431,4 +431,3 @@ python eval/run_eval.py --mode offline
 # Compares actual result sets (row counts, values).
 python eval/run_eval.py --mode online
 ```
-

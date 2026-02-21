@@ -56,7 +56,7 @@ class TestSanitizeValue:
         val = np.int64(42)
         result = sanitize_value(val)
         assert result == 42
-        assert isinstance(result, (int, np.integer))
+        assert isinstance(result, int | np.integer)
 
     def test_sanitize_numpy_float(self):
         val = np.float64(3.14)

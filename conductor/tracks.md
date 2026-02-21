@@ -127,7 +127,7 @@
 
 ---
 
-## [ ] Track: Repo Scaffolding & Local CI
+## [~] Track: Repo Scaffolding & Local CI
 - **ID:** 16_repo_scaffolding
 - **Wave:** 13
 - **Complexity:** M

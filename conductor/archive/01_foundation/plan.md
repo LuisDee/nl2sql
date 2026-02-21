@@ -804,9 +804,9 @@ class FakeEmbeddingClient:
 def test_something():
     client = FakeBigQueryClient()
     client.add_result("SELECT 1", pd.DataFrame({"x": [1]}))
-    
+
     my_function(client)  # calls client.execute_query("SELECT 1") internally
-    
+
     assert len(client.executed_queries) == 1
     assert "SELECT 1" in client.executed_queries[0]
 ```

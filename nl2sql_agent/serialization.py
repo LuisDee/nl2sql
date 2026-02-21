@@ -27,7 +27,7 @@ def sanitize_value(val: Any) -> Any:
     if val is None:
         return None
     # NaT/NA check FIRST — pd.NaT is a datetime instance so must be caught early
-    if not isinstance(val, (str, bytes)):
+    if not isinstance(val, str | bytes):
         try:
             if pd.isna(val):
                 return None

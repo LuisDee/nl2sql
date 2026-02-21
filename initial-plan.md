@@ -502,26 +502,26 @@ dataset:
   description: >
     KPI (Key Performance Indicators) for all options trade types.
     One table per trade origin, all sharing the same KPI column structure.
-    
+
   routing:
     - patterns: ["market trade", "exchange trade", "generic trades"]
       table: kpi_markettrade
       notes: "Default KPI table when trade type is unspecified"
-    
+
     - patterns: ["quoter trade", "quoter fill", "quoter PnL", "quoter edge"]
       table: kpi_quotertrade
       notes: "KPI metrics for auto-quoter originated fills. NOT raw quoter activity."
-    
+
     - patterns: ["broker trade", "voice trade", "BGC", "MGN", "account", "broker performance"]
       table: kpi_brokertrade
       notes: "Has account/broker fields. Use when comparing broker performance."
-    
+
     - patterns: ["click trade"]
       table: kpi_clicktrade
-    
+
     - patterns: ["OTO", "swing", "otoswing"]
       table: kpi_otoswing
-    
+
     - patterns: ["all trades", "total PnL", "overall", "across all"]
       action: "UNION ALL across all 5 kpi tables"
       notes: "Agent must query all tables and combine results"
@@ -932,10 +932,10 @@ bq = bigquery.Client()
 
 def vector_search_tables(question: str) -> str:
     """Find the most relevant tables for a natural language question.
-    
+
     Args:
         question: The trader's natural language question.
-    
+
     Returns:
         Top 5 matching tables with descriptions and relevance scores.
     """
@@ -960,10 +960,10 @@ def vector_search_tables(question: str) -> str:
 
 def fetch_few_shot_examples(question: str) -> str:
     """Find similar past validated queries to use as few-shot examples.
-    
+
     Args:
         question: The trader's natural language question.
-    
+
     Returns:
         Top 5 similar past questions with their validated SQL queries.
     """
@@ -1003,10 +1003,10 @@ CATALOG_DIR = Path(__file__).parent.parent.parent.parent / "catalog"
 
 def load_yaml_metadata(table_name: str) -> str:
     """Load the YAML metadata catalog for a specific table.
-    
+
     Args:
         table_name: The table to load metadata for (e.g., 'theodata', 'kpi_markettrade').
-    
+
     Returns:
         Full YAML metadata including column descriptions, synonyms, business rules.
     """
@@ -1020,18 +1020,18 @@ def load_yaml_metadata(table_name: str) -> str:
         "kpi_otoswing": "kpi/otoswing.yaml",
         "quoter_quotertrade": "quoter/quotertrade.yaml",
     }
-    
+
     path = table_to_path.get(table_name)
     if not path:
         return f"No metadata found for table '{table_name}'"
-    
+
     full_path = CATALOG_DIR / path
     if not full_path.exists():
         return f"YAML file not found: {full_path}"
-    
+
     with open(full_path) as f:
         content = yaml.safe_load(f)
-    
+
     # Also load KPI dataset metadata if it's a KPI table
     if table_name.startswith("kpi_"):
         dataset_path = CATALOG_DIR / "kpi" / "_dataset.yaml"
@@ -1039,7 +1039,7 @@ def load_yaml_metadata(table_name: str) -> str:
             with open(dataset_path) as f:
                 dataset_meta = yaml.safe_load(f)
             content["kpi_dataset_context"] = dataset_meta
-    
+
     return yaml.dump(content, default_flow_style=False)
 
 
@@ -1059,10 +1059,10 @@ bq = bigquery.Client()
 def dry_run_sql(sql_query: str) -> str:
     """Validate a SQL query using BigQuery dry run. Checks syntax and permissions
     without executing. Returns estimated bytes processed or error details.
-    
+
     Args:
         sql_query: The BigQuery SQL query to validate.
-    
+
     Returns:
         'VALID: estimated X MB processed' or 'ERROR: <error details>'
     """
@@ -1078,16 +1078,16 @@ def dry_run_sql(sql_query: str) -> str:
 def execute_sql(sql_query: str) -> str:
     """Execute a validated SQL query against BigQuery and return results.
     Read-only. Maximum 1000 rows returned.
-    
+
     Args:
         sql_query: The BigQuery SQL query to execute (must be SELECT).
-    
+
     Returns:
         Query results as a markdown table.
     """
     if not sql_query.strip().upper().startswith("SELECT"):
         return "ERROR: Only SELECT queries are allowed."
-    
+
     try:
         results = bq.query(sql_query).to_dataframe()
         if len(results) > 1000:
@@ -1115,17 +1115,17 @@ bq = bigquery.Client()
 def save_validated_query(question: str, sql_query: str, tables_used: str) -> str:
     """Save a validated question→SQL pair to the query memory for future retrieval.
     Call this when the trader confirms the query result was correct.
-    
+
     Args:
         question: The original natural language question.
         sql_query: The SQL that produced correct results.
         tables_used: Comma-separated list of tables used.
-    
+
     Returns:
         Confirmation message.
     """
     tables_array = [t.strip() for t in tables_used.split(",")]
-    
+
     query = """
     INSERT INTO metadata.query_memory (question, sql_query, tables_used, validated_by)
     VALUES (@question, @sql_query, @tables_used, 'trader')
@@ -1138,7 +1138,7 @@ def save_validated_query(question: str, sql_query: str, tables_used: str) -> str
         ]
     )
     bq.query(query, job_config=job_config).result()
-    
+
     # Generate embedding for the new question
     embed_query = """
     UPDATE metadata.query_memory
@@ -1150,7 +1150,7 @@ def save_validated_query(question: str, sql_query: str, tables_used: str) -> str
     WHERE embedding IS NULL
     """
     bq.query(embed_query).result()
-    
+
     return f"✓ Saved validated query. Tables: {tables_array}. This will improve future similar questions."
 
 

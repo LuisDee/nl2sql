@@ -12,12 +12,12 @@ from google.genai.types import GenerateContentConfig
 
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import setup_logging, get_logger
-from nl2sql_agent.clients import LiveBigQueryClient
 from nl2sql_agent.prompts import build_nl2sql_instruction
 from nl2sql_agent.callbacks import before_tool_guard, after_tool_log
 from nl2sql_agent.tools import (
     init_bq_service,
     check_semantic_cache,
+    resolve_exchange,
     vector_search_columns,
     fetch_few_shot_examples,
     load_yaml_metadata,
@@ -31,11 +31,31 @@ setup_logging()
 logger = get_logger(__name__)
 
 
-# --- Initialise tool dependencies ---
-bq_client = LiveBigQueryClient(
-    project=settings.gcp_project, location=settings.bq_location
-)
-init_bq_service(bq_client)
+# --- Lazy BQ client initialization ---
+# Deferred so importing this module doesn't require GCP credentials.
+# The client is created on first tool call via ADK's lifecycle.
+_bq_initialized = False
+
+
+def _ensure_bq_initialized():
+    """Create and register the BQ client if not already done."""
+    global _bq_initialized
+    if _bq_initialized:
+        return
+    from nl2sql_agent.clients import LiveBigQueryClient
+
+    bq_client = LiveBigQueryClient(
+        project=settings.gcp_project, location=settings.bq_location
+    )
+    init_bq_service(bq_client)
+    _bq_initialized = True
+
+
+def _lazy_before_tool_guard(tool, args, tool_context):
+    """Wrapper that ensures BQ is initialized before the first tool call."""
+    _ensure_bq_initialized()
+    return before_tool_guard(tool, args, tool_context)
+
 
 # --- Model instances ---
 default_model = LiteLlm(
@@ -58,6 +78,7 @@ nl2sql_agent = LlmAgent(
     generate_content_config=GenerateContentConfig(temperature=0.1),
     tools=[
         check_semantic_cache,
+        resolve_exchange,
         vector_search_columns,
         fetch_few_shot_examples,
         load_yaml_metadata,
@@ -65,7 +86,7 @@ nl2sql_agent = LlmAgent(
         execute_sql,
         save_validated_query,
     ],
-    before_tool_callback=before_tool_guard,
+    before_tool_callback=_lazy_before_tool_guard,
     after_tool_callback=after_tool_log,
 )
 

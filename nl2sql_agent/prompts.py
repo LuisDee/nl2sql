@@ -9,6 +9,7 @@ from datetime import date
 
 from google.adk.agents.readonly_context import ReadonlyContext
 
+from nl2sql_agent.catalog_loader import load_exchange_registry
 from nl2sql_agent.config import settings
 
 
@@ -22,6 +23,21 @@ def build_nl2sql_instruction(ctx: ReadonlyContext) -> str:
     project = settings.gcp_project
     kpi = settings.kpi_dataset
     data = settings.data_dataset
+
+    # Exchange registry for multi-exchange prompt section
+    try:
+        registry = load_exchange_registry()
+        exchanges = registry.get("exchanges", {})
+        default_exchange = registry.get("default_exchange", "omx")
+        exchange_count = len(exchanges)
+        exchange_list = ", ".join(
+            f"{name} ({', '.join(info['aliases'])})"
+            for name, info in exchanges.items()
+        )
+    except Exception:
+        default_exchange = "omx"
+        exchange_count = 1
+        exchange_list = "omx (omx, nordic, stockholm)"
 
     # Build optional follow-up context from session state
     follow_up_section = ""
@@ -66,20 +82,31 @@ the user says "today". For "yesterday", use DATE_SUB('{today}', INTERVAL 1 DAY).
 
 ## TOOL USAGE ORDER (follow this EVERY TIME)
 
-0. **check_semantic_cache** — Check if this exact question was answered before (skip to step 5 if cache hit)
+0. **(CONDITIONAL) resolve_exchange** — Call ONLY if the question mentions an exchange name, alias, or specific trading symbol. Examples: "bovespa"→call, "ASX trades"→call, "VALE3 PnL"→call. Do NOT call for generic questions like "edge today" with no exchange context.
+0.5. **check_semantic_cache** — Check if this exact question was answered before (skip to step 6 if cache hit). If resolve_exchange was called in step 0, pass the returned datasets as `exchange_datasets` parameter: `check_semantic_cache(question, exchange_datasets="<kpi_dataset>,<data_dataset>")`. This prevents returning cached SQL from the wrong exchange.
 1. **vector_search_columns** — Find relevant tables AND columns via semantic search. Returns top columns per table with names, types, descriptions, and synonyms.
 2. **(OPTIONAL) load_yaml_metadata** — Only if you need full schema, business rules, or preferred timestamps not covered by column search results
 3. **fetch_few_shot_examples** — Find similar past validated queries for reference
-4. **Write the SQL** using column descriptions + examples as context (see SQL Rules below)
+4. **Write the SQL** using column descriptions + examples as context (see SQL Rules below). If resolve_exchange was called, use the returned kpi_dataset and data_dataset in fully-qualified table names.
 5. **dry_run_sql** — Validate syntax and estimate cost
 6. **execute_sql** — Run the validated query and return results
 
 If dry_run_sql fails, read the error message carefully, fix the SQL, and retry.
 You may retry up to 3 times. After 3 failures, explain the error to the user.
 {retry_section}
+## MULTI-EXCHANGE SUPPORT
+
+Mako trades on {exchange_count} exchanges. All exchanges have **identical table schemas** — only the BQ dataset name differs. The default exchange is **{default_exchange}** (used when no exchange is specified).
+
+**Exchanges:** {exchange_list}
+
+When the user mentions an exchange or alias, call **resolve_exchange** with the name/alias/symbol. It returns the correct kpi_dataset and data_dataset. Then use those dataset names (not the defaults) in all SQL fully-qualified table names.
+
+If resolve_exchange returns status="multiple" (symbol on multiple exchanges), present the options to the user and ask which exchange they mean.
+
 ## DATASET AND TABLE REFERENCE
 
-There are two datasets:
+There are two datasets per exchange (shown below with default {default_exchange} datasets):
 
 ### `{project}.{kpi}` (Gold Layer — KPI Metrics)
 Performance metrics with computed columns: instant_edge (edge), instant_pnl,

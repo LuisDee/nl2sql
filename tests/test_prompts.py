@@ -54,6 +54,7 @@ class TestBuildInstruction:
 
     def test_contains_tool_usage_order(self):
         result = build_nl2sql_instruction(self._make_ctx())
+        assert "resolve_exchange" in result
         assert "vector_search_columns" in result
         assert "load_yaml_metadata" in result
         assert "fetch_few_shot_examples" in result
@@ -99,6 +100,23 @@ class TestBuildInstruction:
         cache_pos = result.find("check_semantic_cache")
         vector_pos = result.find("vector_search_columns")
         assert cache_pos < vector_pos
+
+    def test_resolve_exchange_before_vector_search(self):
+        result = build_nl2sql_instruction(self._make_ctx())
+        exchange_pos = result.find("resolve_exchange")
+        vector_pos = result.find("vector_search_columns")
+        assert exchange_pos < vector_pos
+
+    def test_contains_exchange_list(self):
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "MULTI-EXCHANGE SUPPORT" in result
+        assert "bovespa" in result
+        assert "10 exchanges" in result
+
+    def test_contains_default_exchange(self):
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "default exchange" in result.lower() or "default" in result.lower()
+        assert "omx" in result.lower()
 
 
 class TestFollowUpContext:
@@ -169,3 +187,15 @@ class TestTradeTaxonomyInPrompt:
         assert "DataTimestamp" in result
         assert "EventTimestamp" in result
         assert "event_timestamp_ns" in result
+
+
+class TestExchangeAwareCache:
+    def _make_ctx(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state or {}
+        return ctx
+
+    def test_prompt_mentions_exchange_datasets_param(self):
+        """Prompt must tell LLM to pass exchange_datasets to check_semantic_cache."""
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "exchange_datasets" in result

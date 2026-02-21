@@ -9,6 +9,7 @@ import re
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
 from nl2sql_agent.serialization import sanitize_rows
+from nl2sql_agent.sql_guard import contains_dml
 from nl2sql_agent.tools._deps import get_bq_service
 
 logger = get_logger(__name__)
@@ -33,16 +34,10 @@ def execute_sql(sql_query: str) -> dict:
     """
     # --- Read-only enforcement ---
     stripped = sql_query.strip()
-    first_keyword = stripped.split()[0].upper() if stripped else ""
-    if first_keyword not in ("SELECT", "WITH"):
-        logger.warning("execute_sql_rejected", first_keyword=first_keyword)
-        return {
-            "status": "error",
-            "error_message": (
-                f"Only SELECT queries are allowed. Got: {first_keyword}. "
-                "This tool is read-only and cannot modify data."
-            ),
-        }
+    is_blocked, reason = contains_dml(stripped)
+    if is_blocked:
+        logger.warning("execute_sql_rejected", reason=reason)
+        return {"status": "error", "error_message": reason}
 
     # --- Add LIMIT if not present at outer query level ---
     max_rows = settings.bq_max_result_rows

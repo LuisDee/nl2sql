@@ -17,6 +17,7 @@ from google.adk.tools.tool_context import ToolContext
 
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
+from nl2sql_agent.sql_guard import contains_dml
 
 logger = get_logger(__name__)
 
@@ -48,21 +49,13 @@ def before_tool_guard(
         args_preview={k: str(v)[:100] for k, v in args.items()},
     )
 
-    # Guard: reject SQL tool calls with obvious DML/DDL
+    # Guard: reject SQL tool calls with DML/DDL anywhere in the body
     if tool_name in ("dry_run_sql", "execute_sql"):
         sql = args.get("sql_query", "")
-        first_word = sql.strip().split()[0].upper() if sql.strip() else ""
-        if first_word not in ("SELECT", "WITH", ""):
-            logger.warning(
-                "callback_blocked_dml", tool=tool_name, first_word=first_word
-            )
-            return {
-                "status": "error",
-                "error_message": (
-                    f"Blocked: {first_word} queries are not allowed. "
-                    "Only SELECT/WITH queries are permitted."
-                ),
-            }
+        is_blocked, reason = contains_dml(sql)
+        if is_blocked:
+            logger.warning("callback_blocked_dml", tool=tool_name, reason=reason)
+            return {"status": "error", "error_message": reason}
 
     # Hard circuit breaker: block SQL tools after max retries
     if tool_name in ("dry_run_sql", "execute_sql"):

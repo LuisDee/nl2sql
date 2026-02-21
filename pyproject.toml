@@ -76,7 +76,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101"]  # allow assert in tests
-"scripts/**/*.py" = ["T201"]  # allow print in scripts
+"scripts/**/*.py" = ["T201", "E402"]  # allow print and sys.path manipulation in scripts
 "eval/**/*.py" = ["T201"]  # allow print in eval runner
 "setup/**/*.py" = ["T201"]  # allow print in setup scripts
 

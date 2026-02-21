@@ -229,7 +229,7 @@ LITELLM_API_BASE=http://localhost:4000
 
 ## Phase 4: Code Hygiene
 
-### [ ] Task 4.1: Remove dead get_table_schema method
+### [x] Task 4.1: Remove dead get_table_schema method `80b6991`
 
 `get_table_schema()` is defined in `BigQueryProtocol`, `LiveBigQueryClient`, `FakeBigQueryClient`, and `MockBigQueryService` but is never called by any tool.
 

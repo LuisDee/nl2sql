@@ -196,7 +196,7 @@ column_search_top_k: int = 30  # ~0.6% of 4,631 columns; reduces to ~3-5 tables 
 
 No default change needed — the value is defensible. The main improvement is documentation.
 
-### [ ] Task 3.3: Create .env.example template
+### [x] Task 3.3: Create .env.example template `7744be1`
 
 **Create:** `.env.example`
 

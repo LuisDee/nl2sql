@@ -118,7 +118,7 @@
 
 ---
 
-## [ ] Track: Code Quality & Reliability
+## [x] Track: Code Quality & Reliability
 - **ID:** 15_code_quality
 - **Wave:** 12
 - **Complexity:** M

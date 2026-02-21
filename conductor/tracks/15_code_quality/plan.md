@@ -71,7 +71,7 @@ Step 0: check_semantic_cache(question)
 
 ## Phase 2: TypedDict Return Contracts
 
-### [ ] Task 2.1: Define TypedDict types for all tool returns
+### [x] Task 2.1: Define TypedDict types for all tool returns `4d1f106`
 
 **Create:** `nl2sql_agent/types.py`
 

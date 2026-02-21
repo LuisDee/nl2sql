@@ -19,6 +19,11 @@ import argparse
 import csv
 from pathlib import Path
 
+from nl2sql_agent.catalog_loader import (
+    CATALOG_DIR,
+    load_routing_rules,
+    load_yaml,
+)
 from nl2sql_agent.clients import LiveBigQueryClient
 from nl2sql_agent.config import Settings
 from nl2sql_agent.logging_config import get_logger, setup_logging
@@ -172,121 +177,188 @@ def populate_symbols(bq: BigQueryProtocol, s: Settings) -> None:
     logger.info("populated_symbols", total=total_merged)
 
 
-def populate_schema_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
-    """Step 4: Populate schema_embeddings from catalog descriptions.
+def _build_table_descriptions(s: Settings) -> list[dict[str, str]]:
+    """Build table description rows from YAML catalog.
 
-    Idempotent: MERGE on (source_type, dataset_name, table_name).
+    Each row has: source_type, layer, dataset_name, table_name, description.
+    Reads from catalog/<layer>/_dataset.yaml for dataset-level descriptions
+    and catalog/<layer>/<table>.yaml for table-level descriptions.
+    """
+    descriptions: list[dict[str, str]] = []
+
+    for layer in ("kpi", "data"):
+        dataset_name = s.kpi_dataset if layer == "kpi" else s.data_dataset
+
+        # Dataset-level description
+        ds_path = CATALOG_DIR / layer / "_dataset.yaml"
+        if ds_path.exists():
+            ds_data = load_yaml(ds_path)
+            ds_desc = ds_data.get("dataset", {}).get("description", "")
+            descriptions.append(
+                {
+                    "source_type": "dataset",
+                    "layer": layer,
+                    "dataset_name": dataset_name,
+                    "table_name": "",
+                    "description": ds_desc.strip(),
+                }
+            )
+
+        # Table-level descriptions from individual YAML files
+        layer_dir = CATALOG_DIR / layer
+        for yaml_file in sorted(layer_dir.glob("*.yaml")):
+            if yaml_file.name.startswith("_"):
+                continue
+            content = load_yaml(yaml_file)
+            table = content.get("table", {})
+            descriptions.append(
+                {
+                    "source_type": "table",
+                    "layer": layer,
+                    "dataset_name": dataset_name,
+                    "table_name": table.get("name", yaml_file.stem),
+                    "description": table.get("description", "").strip(),
+                }
+            )
+
+    return descriptions
+
+
+def _build_routing_descriptions() -> list[str]:
+    """Build routing description texts from YAML catalog.
+
+    Reads cross-cutting routing descriptions from _routing.yaml.
+    Returns a list of description strings for embedding.
+    """
+    rules = load_routing_rules()
+    cc = rules.get("cross_cutting", {})
+
+    descriptions: list[str] = []
+
+    # KPI vs Data general guidance
+    kpi_vs_data = cc.get("kpi_vs_data_general", "")
+    if kpi_vs_data:
+        descriptions.append(kpi_vs_data.strip())
+
+    # Theodata routing
+    theodata = cc.get("theodata_routing", "")
+    if theodata:
+        descriptions.append(theodata.strip())
+
+    # KPI table selection
+    kpi_selection = cc.get("kpi_table_selection", "")
+    if kpi_selection:
+        descriptions.append(kpi_selection.strip())
+
+    return descriptions
+
+
+def _escape_bq_string(text: str) -> str:
+    """Escape single quotes and collapse whitespace for BQ SQL strings."""
+    return " ".join(text.replace("'", "\\'").split())
+
+
+def populate_schema_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
+    """Step 4: Populate schema_embeddings from YAML catalog descriptions.
+
+    Reads table descriptions from YAML catalog files and routing descriptions
+    from _routing.yaml. Idempotent: MERGE on (source_type, dataset_name, table_name).
     """
     fqn = f"{s.gcp_project}.{s.metadata_dataset}"
 
-    kpi_ds = s.kpi_dataset
-    data_ds = s.data_dataset
+    # Build descriptions from YAML catalog
+    table_descs = _build_table_descriptions(s)
 
-    # KPI dataset rows
-    kpi_sql = f"""
-    MERGE `{fqn}.schema_embeddings` AS target
-    USING (
-      SELECT * FROM UNNEST([
-        STRUCT(
-          'dataset' AS source_type, 'kpi' AS layer, '{kpi_ds}' AS dataset_name,
-          CAST(NULL AS STRING) AS table_name,
-          'KPI Key Performance Indicators dataset for options trading. Gold layer. Contains one table per trade type: markettrade (exchange trades, default), quotertrade (auto-quoter fills), brokertrade (broker trades with account field for broker comparison), clicktrade (manual click trades), otoswing (OTO swing trades). All share columns: edge (trading edge), instant_pnl (immediate PnL profit loss), instant_pnl_w_fees (PnL with fees), delta slippage at multiple intervals. For total PnL across all types use UNION ALL.' AS description
-        ),
-        STRUCT('table', 'kpi', '{kpi_ds}', 'markettrade',
-          'KPI metrics for market exchange trades. One row per trade. Contains edge (difference between machine fair value and trade price), instant_pnl (immediate PnL, profit loss), instant_pnl_w_fees, delta_slippage at 1s/1m/5m/30m/1h/eod intervals, portfolio, symbol, term, trade_date. Default KPI table when trade type is not specified.'),
-        STRUCT('table', 'kpi', '{kpi_ds}', 'quotertrade',
-          'KPI metrics for auto-quoter originated trade fills. Same KPI columns as markettrade: edge, instant_pnl, delta slippage. Use for quoter performance, quoter edge, quoter PnL analysis.'),
-        STRUCT('table', 'kpi', '{kpi_ds}', 'brokertrade',
-          'KPI metrics for broker facilitated trades. Same KPI columns as markettrade plus account field. Use when comparing broker performance or when question mentions broker account names like BGC or MGN. NOTE: may be empty for some dates.'),
-        STRUCT('table', 'kpi', '{kpi_ds}', 'clicktrade',
-          'KPI metrics for manually initiated click trades. Same KPI columns as markettrade. Use when question mentions click trades or manual trades.'),
-        STRUCT('table', 'kpi', '{kpi_ds}', 'otoswing',
-          'KPI metrics for OTO swing trades. Same KPI columns as markettrade. Use when question mentions OTO, swing, or otoswing trades.')
-      ])
-    ) AS source
-    ON target.source_type = source.source_type
-       AND COALESCE(target.dataset_name, '') = COALESCE(source.dataset_name, '')
-       AND COALESCE(target.table_name, '') = COALESCE(source.table_name, '')
-    WHEN MATCHED THEN
-      UPDATE SET description = source.description, embedding = NULL, updated_at = CURRENT_TIMESTAMP()
-    WHEN NOT MATCHED THEN
-      INSERT (source_type, layer, dataset_name, table_name, description)
-      VALUES (source.source_type, source.layer, source.dataset_name, source.table_name, source.description);
-    """
-    bq.execute_query(kpi_sql)
+    # Process datasets: kpi and data
+    for layer in ("kpi", "data"):
+        layer_rows = [d for d in table_descs if d["layer"] == layer]
+        if not layer_rows:
+            continue
 
-    # DATA dataset rows
-    data_sql = f"""
-    MERGE `{fqn}.schema_embeddings` AS target
-    USING (
-      SELECT * FROM UNNEST([
-        STRUCT(
-          'dataset' AS source_type, 'data' AS layer, '{data_ds}' AS dataset_name,
-          CAST(NULL AS STRING) AS table_name,
-          'Raw options trading and market data. Silver layer. Contains trade execution details, theoretical options pricing snapshots (theo delta vol vega), market data feeds, order book depth. Higher granularity than KPI but without computed performance metrics like edge or instant_pnl.' AS description
-        ),
-        STRUCT('table', 'data', '{data_ds}', 'theodata',
-          'Theoretical options pricing snapshots. Contains tv (theoretical fair price, fair value, theo, machine price), delta (delta greek, hedge ratio), vol (annualised implied volatility as decimal, also called IV, implied vol, sigma), vega, gamma, theta, strike, symbol, term, portfolio, trade_date. ONLY exists in data dataset. Use for any question about vol, IV, implied volatility, delta, greeks, fair value, or theoretical pricing.'),
-        STRUCT('table', 'data', '{data_ds}', 'marketdata',
-          'Market data feed snapshots. Top-of-book prices, volumes. Use for market price questions, exchange data, price feeds.'),
-        STRUCT('table', 'data', '{data_ds}', 'marketdepth',
-          'Full order book depth. Multiple price levels with bid/ask sizes at each level. Use for order book questions, depth analysis, bid-ask spread at different levels.'),
-        STRUCT('table', 'data', '{data_ds}', 'swingdata',
-          'Raw OTO swing trade data. Use for swing-specific raw data questions.'),
-        STRUCT('table', 'data', '{data_ds}', 'markettrade',
-          'Raw market trade execution details. Silver layer -- exact timestamps, prices, sizes, fill information. NOT KPI enriched. Use when question asks about raw execution details, not performance metrics.'),
-        STRUCT('table', 'data', '{data_ds}', 'quotertrade',
-          'Raw quoter trade execution details. Silver layer. Use for raw quoter execution data, not KPI performance metrics.'),
-        STRUCT('table', 'data', '{data_ds}', 'clicktrade',
-          'Raw click trade execution details. Silver layer.')
-      ])
-    ) AS source
-    ON target.source_type = source.source_type
-       AND COALESCE(target.dataset_name, '') = COALESCE(source.dataset_name, '')
-       AND COALESCE(target.table_name, '') = COALESCE(source.table_name, '')
-    WHEN MATCHED THEN
-      UPDATE SET description = source.description, embedding = NULL, updated_at = CURRENT_TIMESTAMP()
-    WHEN NOT MATCHED THEN
-      INSERT (source_type, layer, dataset_name, table_name, description)
-      VALUES (source.source_type, source.layer, source.dataset_name, source.table_name, source.description);
-    """
-    bq.execute_query(data_sql)
+        struct_parts = []
+        for row in layer_rows:
+            desc = _escape_bq_string(row["description"])
+            table_name = row["table_name"]
+            table_val = f"'{table_name}'" if table_name else "CAST(NULL AS STRING)"
 
-    # Routing descriptions (exchange-agnostic — schema is identical across exchanges)
-    routing_sql = f"""
-    MERGE `{fqn}.schema_embeddings` AS target
-    USING (
-      SELECT * FROM UNNEST([
-        STRUCT(
-          'routing' AS source_type, CAST(NULL AS STRING) AS layer,
-          CAST(NULL AS STRING) AS dataset_name, CAST(NULL AS STRING) AS table_name,
-          'The KPI dataset (gold layer) has KPI-enriched trade data with computed metrics: edge, instant_pnl, delta slippage. The data dataset (silver layer) has raw trade and market data. Both contain tables with the same names (clicktrade, markettrade, quotertrade). Use kpi for performance edge PnL slippage questions. Use data for raw execution timestamps market data and theoretical pricing.' AS description
-        ),
-        STRUCT('routing', NULL, NULL, NULL,
-          'Questions about theoretical pricing, implied volatility IV vol sigma, delta, vega, gamma, greeks, fair value, machine price, or theo should route to the data dataset theodata table. This table only exists in the data dataset. It does not exist in kpi.'),
-        STRUCT('routing', NULL, NULL, NULL,
-          'The kpi dataset has 5 tables one per trade origin: markettrade (exchange trades the default), quotertrade (auto-quoter fills), brokertrade (broker trades with account field), clicktrade (manual), otoswing (OTO swing). When trade type is unspecified use markettrade. When comparing brokers use brokertrade. For all trades use UNION ALL across all 5.')
-      ])
-    ) AS source
-    ON FALSE
-    WHEN NOT MATCHED THEN
-      INSERT (source_type, layer, dataset_name, table_name, description)
-      VALUES (source.source_type, source.layer, source.dataset_name, source.table_name, source.description);
-    """
-    bq.execute_query(routing_sql)
+            if row["source_type"] == "dataset":
+                struct_parts.append(
+                    f"STRUCT("
+                    f"'dataset' AS source_type, '{layer}' AS layer, "
+                    f"'{row['dataset_name']}' AS dataset_name, "
+                    f"CAST(NULL AS STRING) AS table_name, "
+                    f"'{desc}' AS description)"
+                )
+            else:
+                struct_parts.append(
+                    f"STRUCT("
+                    f"'table', '{layer}', "
+                    f"'{row['dataset_name']}', {table_val}, "
+                    f"'{desc}')"
+                )
 
-    # Clean up duplicate routing rows from previous runs
-    cleanup_sql = f"""
-    DELETE FROM `{fqn}.schema_embeddings`
-    WHERE source_type = 'routing'
-      AND id NOT IN (
-        SELECT MAX(id) FROM `{fqn}.schema_embeddings`
+        structs = ",\n        ".join(struct_parts)
+        merge_sql = f"""
+        MERGE `{fqn}.schema_embeddings` AS target
+        USING (
+          SELECT * FROM UNNEST([
+            {structs}
+          ])
+        ) AS source
+        ON target.source_type = source.source_type
+           AND COALESCE(target.dataset_name, '') = COALESCE(source.dataset_name, '')
+           AND COALESCE(target.table_name, '') = COALESCE(source.table_name, '')
+        WHEN MATCHED THEN
+          UPDATE SET description = source.description, embedding = NULL, updated_at = CURRENT_TIMESTAMP()
+        WHEN NOT MATCHED THEN
+          INSERT (source_type, layer, dataset_name, table_name, description)
+          VALUES (source.source_type, source.layer, source.dataset_name, source.table_name, source.description);
+        """
+        bq.execute_query(merge_sql)
+        logger.info("populated_schema_embeddings", layer=layer, rows=len(layer_rows))
+
+    # Routing descriptions from _routing.yaml
+    routing_descs = _build_routing_descriptions()
+    if routing_descs:
+        routing_structs = []
+        for desc in routing_descs:
+            escaped = _escape_bq_string(desc)
+            routing_structs.append(
+                f"STRUCT("
+                f"'routing' AS source_type, CAST(NULL AS STRING) AS layer, "
+                f"CAST(NULL AS STRING) AS dataset_name, "
+                f"CAST(NULL AS STRING) AS table_name, "
+                f"'{escaped}' AS description)"
+            )
+
+        structs = ",\n        ".join(routing_structs)
+        routing_sql = f"""
+        MERGE `{fqn}.schema_embeddings` AS target
+        USING (
+          SELECT * FROM UNNEST([
+            {structs}
+          ])
+        ) AS source
+        ON FALSE
+        WHEN NOT MATCHED THEN
+          INSERT (source_type, layer, dataset_name, table_name, description)
+          VALUES (source.source_type, source.layer, source.dataset_name, source.table_name, source.description);
+        """
+        bq.execute_query(routing_sql)
+
+        # Clean up duplicate routing rows from previous runs
+        cleanup_sql = f"""
+        DELETE FROM `{fqn}.schema_embeddings`
         WHERE source_type = 'routing'
-        GROUP BY description
-      );
-    """
-    bq.execute_query(cleanup_sql)
-    logger.info("populated_schema_embeddings")
+          AND id NOT IN (
+            SELECT MAX(id) FROM `{fqn}.schema_embeddings`
+            WHERE source_type = 'routing'
+            GROUP BY description
+          );
+        """
+        bq.execute_query(cleanup_sql)
+
+    logger.info("populated_schema_embeddings_complete")
 
 
 def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:

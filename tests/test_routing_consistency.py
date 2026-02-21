@@ -4,6 +4,7 @@ Verifies that:
 1. load_routing_rules() returns structured data from all YAML sources
 2. All routing sources (YAML, prompts, embeddings) stay in sync
 3. Adding a table to YAML propagates to the generated prompt
+4. Embedding descriptions are driven by YAML (no hardcoded drift)
 """
 
 from nl2sql_agent.catalog_loader import (
@@ -11,6 +12,7 @@ from nl2sql_agent.catalog_loader import (
     load_routing_rules,
     load_yaml,
 )
+from nl2sql_agent.config import settings
 
 
 class TestLoadRoutingRules:
@@ -145,4 +147,79 @@ class TestRoutingDrift:
                 continue  # Known: brokertrade.yaml doesn't exist in data/
             assert table in data_yamls, (
                 f"Data routing references '{table}' but no catalog/data/{table}.yaml exists"
+            )
+
+
+class TestEmbeddingDrift:
+    """Drift detection: embedding descriptions must come from YAML."""
+
+    def test_build_table_descriptions_covers_all_kpi_tables(self) -> None:
+        """Every KPI table YAML must appear in embedding descriptions."""
+        from scripts.run_embeddings import _build_table_descriptions
+
+        descs = _build_table_descriptions(settings)
+        kpi_tables = {
+            d["table_name"]
+            for d in descs
+            if d["layer"] == "kpi" and d["source_type"] == "table"
+        }
+        kpi_yamls = {
+            f.stem
+            for f in (CATALOG_DIR / "kpi").glob("*.yaml")
+            if not f.name.startswith("_")
+        }
+        assert kpi_yamls == kpi_tables, (
+            f"Mismatch between KPI YAMLs and embedding descriptions: "
+            f"missing={kpi_yamls - kpi_tables}, extra={kpi_tables - kpi_yamls}"
+        )
+
+    def test_build_table_descriptions_covers_all_data_tables(self) -> None:
+        """Every data table YAML must appear in embedding descriptions."""
+        from scripts.run_embeddings import _build_table_descriptions
+
+        descs = _build_table_descriptions(settings)
+        data_tables = {
+            d["table_name"]
+            for d in descs
+            if d["layer"] == "data" and d["source_type"] == "table"
+        }
+        data_yamls = {
+            f.stem
+            for f in (CATALOG_DIR / "data").glob("*.yaml")
+            if not f.name.startswith("_")
+        }
+        assert data_yamls == data_tables, (
+            f"Mismatch between data YAMLs and embedding descriptions: "
+            f"missing={data_yamls - data_tables}, extra={data_tables - data_yamls}"
+        )
+
+    def test_build_table_descriptions_includes_dataset_level(self) -> None:
+        """Each layer must have a dataset-level description row."""
+        from scripts.run_embeddings import _build_table_descriptions
+
+        descs = _build_table_descriptions(settings)
+        dataset_rows = [d for d in descs if d["source_type"] == "dataset"]
+        layers = {d["layer"] for d in dataset_rows}
+        assert "kpi" in layers, "Missing KPI dataset-level description"
+        assert "data" in layers, "Missing data dataset-level description"
+
+    def test_build_routing_descriptions_non_empty(self) -> None:
+        """Routing descriptions from _routing.yaml must be non-empty."""
+        from scripts.run_embeddings import _build_routing_descriptions
+
+        descs = _build_routing_descriptions()
+        assert len(descs) >= 3, (
+            f"Expected at least 3 routing descriptions, got {len(descs)}"
+        )
+        for desc in descs:
+            assert len(desc) > 50, f"Routing description too short: {desc[:50]}..."
+
+    def test_table_descriptions_have_content(self) -> None:
+        """Every table description must be non-empty."""
+        from scripts.run_embeddings import _build_table_descriptions
+
+        descs = _build_table_descriptions(settings)
+        for d in descs:
+            assert d["description"], (
+                f"Empty description for {d['layer']}/{d['table_name'] or 'dataset'}"
             )

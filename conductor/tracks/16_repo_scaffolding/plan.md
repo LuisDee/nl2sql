@@ -80,7 +80,7 @@ ruff format .             # Format all Python files
 
 **Commit:** `style: ruff lint and format pass on entire codebase`
 
-### [ ] Task 1.3: Add mypy configuration to pyproject.toml
+### [x] Task 1.3: Add mypy configuration to pyproject.toml `2e8f0fd`
 
 **File:** `pyproject.toml`
 
@@ -109,11 +109,11 @@ module = [
 ignore_missing_imports = true
 ```
 
-### [ ] Task 1.4: Create py.typed marker
+### [x] Task 1.4: Create py.typed marker `a469a91`
 
 **Create:** `nl2sql_agent/py.typed` (empty file — PEP 561 marker)
 
-### [ ] Task 1.5: Run mypy and fix blocking errors
+### [x] Task 1.5: Run mypy and fix blocking errors `a469a91`
 
 **Command:** `mypy nl2sql_agent/`
 

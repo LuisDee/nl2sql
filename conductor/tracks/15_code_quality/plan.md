@@ -130,7 +130,7 @@ class SaveQueryResult(TypedDict):
 
 **Note:** Some tools have multiple return shapes (success vs error). Use `Union` types or a base `ErrorResult` TypedDict.
 
-### [ ] Task 2.2: Write type contract tests (TDD red)
+### [x] Task 2.2: Write type contract tests (TDD red) `25d5360`
 
 **Create:** `tests/test_types.py`
 
@@ -141,7 +141,7 @@ Tests:
 
 **Run:** `pytest tests/test_types.py -v` — expect failures.
 
-### [ ] Task 2.3: Annotate all tools with TypedDict returns (TDD green)
+### [x] Task 2.3: Annotate all tools with TypedDict returns (TDD green) `25d5360`
 
 **Files:** All 8 tool files in `nl2sql_agent/tools/`
 

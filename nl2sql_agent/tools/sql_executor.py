@@ -11,11 +11,12 @@ from nl2sql_agent.logging_config import get_logger
 from nl2sql_agent.serialization import sanitize_rows
 from nl2sql_agent.sql_guard import contains_dml
 from nl2sql_agent.tools._deps import get_bq_service
+from nl2sql_agent.types import ErrorResult, ExecuteSuccessResult
 
 logger = get_logger(__name__)
 
 
-def execute_sql(sql_query: str) -> dict:
+def execute_sql(sql_query: str) -> ExecuteSuccessResult | ErrorResult:
     """Execute a validated BigQuery SQL query and return the results.
 
     Use this tool ONLY after dry_run_sql confirms the query is valid.

@@ -12,6 +12,7 @@ import yaml
 from nl2sql_agent.catalog_loader import load_yaml, CATALOG_DIR
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
+from nl2sql_agent.types import ErrorResult, MetadataSuccessResult
 
 logger = get_logger(__name__)
 
@@ -106,7 +107,7 @@ def _resolve_yaml_path(table_name: str, dataset_name: str = "") -> str | None:
     return None
 
 
-def load_yaml_metadata(table_name: str, dataset_name: str) -> dict:
+def load_yaml_metadata(table_name: str, dataset_name: str) -> MetadataSuccessResult | ErrorResult:
     """Load the YAML metadata catalog for a specific BigQuery table.
 
     Use this tool AFTER vector_search_columns to get detailed column

@@ -8,6 +8,7 @@ so the pair is available for future few-shot retrieval.
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
 from nl2sql_agent.tools._deps import get_bq_service
+from nl2sql_agent.types import ErrorResult, SaveQueryResult
 
 logger = get_logger(__name__)
 
@@ -39,7 +40,7 @@ def save_validated_query(
     dataset: str,
     complexity: str,
     routing_signal: str,
-) -> dict:
+) -> SaveQueryResult | ErrorResult:
     """Save a validated question→SQL pair to query memory for future retrieval.
 
     Call this tool when the trader confirms the query result was correct.

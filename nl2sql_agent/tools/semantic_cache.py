@@ -11,6 +11,7 @@ Uses the same VECTOR_SEARCH pattern as vector_search.py.
 from nl2sql_agent.config import settings
 from nl2sql_agent.logging_config import get_logger
 from nl2sql_agent.tools._deps import get_bq_service
+from nl2sql_agent.types import CacheHitResult, CacheMissResult
 
 logger = get_logger(__name__)
 
@@ -40,7 +41,7 @@ LIMIT 1
 """
 
 
-def check_semantic_cache(question: str, exchange_datasets: str = "") -> dict:
+def check_semantic_cache(question: str, exchange_datasets: str = "") -> CacheHitResult | CacheMissResult:
     """Check if this question was previously answered with high confidence.
 
     Searches query_memory for a near-exact match (cosine distance below

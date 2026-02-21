@@ -6,11 +6,12 @@ query cost — all without executing the query.
 
 from nl2sql_agent.logging_config import get_logger
 from nl2sql_agent.tools._deps import get_bq_service
+from nl2sql_agent.types import DryRunInvalidResult, DryRunValidResult
 
 logger = get_logger(__name__)
 
 
-def dry_run_sql(sql_query: str) -> dict:
+def dry_run_sql(sql_query: str) -> DryRunValidResult | DryRunInvalidResult:
     """Validate a BigQuery SQL query without executing it.
 
     Use this tool AFTER generating SQL to check for syntax errors,

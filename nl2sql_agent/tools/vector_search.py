@@ -20,6 +20,7 @@ from nl2sql_agent.tools._deps import (
     get_bq_service,
     get_cached_vector_result,
 )
+from nl2sql_agent.types import ColumnSearchResult, ErrorResult, FewShotResult, VectorSearchResult
 
 logger = get_logger(__name__)
 
@@ -235,7 +236,7 @@ def _split_combined_rows(rows: list[dict]) -> tuple[list[dict], list[dict]]:
     return schema_rows, example_rows
 
 
-def vector_search_tables(question: str) -> dict:
+def vector_search_tables(question: str) -> VectorSearchResult | ErrorResult:
     """Find the most relevant BigQuery tables for a natural language question.
 
     Use this tool FIRST for every data question. It searches table and dataset
@@ -307,7 +308,7 @@ def vector_search_tables(question: str) -> dict:
             return {"status": "error", "error_message": str(e2), "results": []}
 
 
-def fetch_few_shot_examples(question: str) -> dict:
+def fetch_few_shot_examples(question: str) -> FewShotResult:
     """Find similar past validated SQL queries to use as few-shot examples.
 
     Use this tool AFTER vector_search_tables to find proven question->SQL
@@ -360,7 +361,7 @@ def fetch_few_shot_examples(question: str) -> dict:
         return {"status": "error", "error_message": str(e), "examples": []}
 
 
-def vector_search_columns(question: str) -> dict:
+def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:
     """Find relevant tables and columns for a natural language question.
 
     Searches column-level embeddings to find the most relevant columns,

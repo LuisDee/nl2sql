@@ -227,7 +227,7 @@ LITELLM_API_BASE=http://localhost:4000
 
 ---
 
-## Phase 4: Code Hygiene
+## Phase 4: Code Hygiene [checkpoint: 6b79647]
 
 ### [x] Task 4.1: Remove dead get_table_schema method `80b6991`
 

@@ -49,6 +49,9 @@ schema_results AS (
         base.dataset_name,
         base.table_name,
         base.description,
+        CAST(NULL AS STRING) AS tables_used,
+        CAST(NULL AS STRING) AS complexity,
+        CAST(NULL AS STRING) AS routing_signal,
         ROUND(distance, 4) AS distance
     FROM VECTOR_SEARCH(
         (SELECT * FROM `{metadata_dataset}.schema_embeddings`),
@@ -66,6 +69,9 @@ example_results AS (
         base.dataset AS dataset_name,
         base.question AS table_name,
         base.sql_query AS description,
+        base.tables_used,
+        base.complexity,
+        base.routing_signal,
         ROUND(distance, 4) AS distance
     FROM VECTOR_SEARCH(
         (SELECT * FROM `{metadata_dataset}.query_memory`),

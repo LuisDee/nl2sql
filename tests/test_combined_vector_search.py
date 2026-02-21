@@ -167,6 +167,31 @@ class TestCombinedVectorSearch:
         assert embedding_count == 1, f"Expected 1 embedding call, got {embedding_count}"
 
 
+class TestCombinedSearchSqlTemplate:
+    """The combined SQL template must include example metadata columns."""
+
+    def test_combined_sql_includes_tables_used(self):
+        """example_results CTE must SELECT tables_used for routing."""
+        from nl2sql_agent.tools.vector_search import _COMBINED_SEARCH_SQL
+        assert "tables_used" in _COMBINED_SEARCH_SQL, (
+            "_COMBINED_SEARCH_SQL drops tables_used — examples lose routing info"
+        )
+
+    def test_combined_sql_includes_complexity(self):
+        """example_results CTE must SELECT complexity."""
+        from nl2sql_agent.tools.vector_search import _COMBINED_SEARCH_SQL
+        assert "complexity" in _COMBINED_SEARCH_SQL, (
+            "_COMBINED_SEARCH_SQL drops complexity — examples lose metadata"
+        )
+
+    def test_combined_sql_includes_routing_signal(self):
+        """example_results CTE must SELECT routing_signal."""
+        from nl2sql_agent.tools.vector_search import _COMBINED_SEARCH_SQL
+        assert "routing_signal" in _COMBINED_SEARCH_SQL, (
+            "_COMBINED_SEARCH_SQL drops routing_signal — examples lose routing hints"
+        )
+
+
 class TestVectorCacheIsolation:
     """Cache is properly isolated per test via conftest mock_bq fixture."""
 

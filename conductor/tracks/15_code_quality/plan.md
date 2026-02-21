@@ -262,7 +262,7 @@ a per-request context object.
 
 No code change — documentation only. This prevents future contributors from accidentally introducing concurrency without addressing the globals.
 
-### [ ] Task 4.3: Consolidate error handling patterns
+### [x] Task 4.3: Consolidate error handling patterns (SKIPPED)
 
 **Files:** All tool files in `nl2sql_agent/tools/`
 

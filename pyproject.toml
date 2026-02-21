@@ -36,7 +36,7 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["nl2sql_agent"]
+include = ["nl2sql_agent", "catalog"]
 namespaces = false
 
 [tool.pytest.ini_options]
@@ -81,7 +81,7 @@ ignore = [
 "setup/**/*.py" = ["T201"]  # allow print in setup scripts
 
 [tool.ruff.lint.isort]
-known-first-party = ["nl2sql_agent"]
+known-first-party = ["nl2sql_agent", "catalog"]
 
 [tool.ruff.format]
 quote-style = "double"

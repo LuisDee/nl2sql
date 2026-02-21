@@ -7,16 +7,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies first (Docker layer caching)
+# Copy dependency spec first (Docker layer caching)
 COPY pyproject.toml .
-RUN pip install --no-cache-dir -e .
+
+# Install dependencies (non-editable, no source needed)
+RUN pip install --no-cache-dir .
 
 # Copy application code
 COPY . .
 
-# Install the package in editable mode (now with all source files)
-RUN pip install --no-cache-dir -e ".[dev]"
+# Re-install with source available (picks up the package properly)
+RUN pip install --no-cache-dir .
 
-# Default command: run the agent in terminal mode
-# adk run expects to be in the PARENT of the agent package directory
-CMD ["adk", "run", "nl2sql_agent"]
+# Create non-root user
+RUN useradd -m agent
+USER agent
+
+# Default command: run the agent web UI
+CMD ["adk", "web", "--host", "0.0.0.0", "--port", "8001", "."]

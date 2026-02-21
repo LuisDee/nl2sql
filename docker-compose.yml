@@ -3,7 +3,7 @@ services:
     build: .
     volumes:
       - .:/app                    # Mount source code for live development
-      - ~/.config/gcloud:/root/.config/gcloud:ro  # Google Cloud ADC credentials
+      - ~/.config/gcloud:/home/agent/.config/gcloud:ro  # Google Cloud ADC credentials
     env_file:
       - nl2sql_agent/.env         # Load environment variables
     stdin_open: true              # Required for interactive adk run

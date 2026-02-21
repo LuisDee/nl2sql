@@ -278,6 +278,51 @@ def clear_exchange_cache() -> None:
     load_exchange_registry.cache_clear()
 
 
+@functools.lru_cache(maxsize=1)
+def load_routing_rules() -> dict[str, Any]:
+    """Load routing rules from all YAML sources (cached).
+
+    Combines:
+    - catalog/_routing.yaml (cross-cutting routing descriptions)
+    - catalog/kpi/_dataset.yaml routing section (KPI pattern→table)
+    - catalog/data/_dataset.yaml routing section (data pattern→table)
+
+    Returns:
+        Dict with 'cross_cutting', 'kpi_routing', 'data_routing' keys.
+    """
+    # Cross-cutting routing descriptions
+    routing_path = CATALOG_DIR / "_routing.yaml"
+    cross_cutting: dict[str, Any] = {}
+    if routing_path.exists():
+        routing_data = load_yaml(routing_path)
+        cross_cutting = routing_data.get("routing_descriptions", {})
+
+    # KPI routing rules
+    kpi_ds_path = CATALOG_DIR / "kpi" / "_dataset.yaml"
+    kpi_routing: list[dict[str, Any]] = []
+    if kpi_ds_path.exists():
+        kpi_data = load_yaml(kpi_ds_path)
+        kpi_routing = kpi_data.get("dataset", {}).get("routing", [])
+
+    # Data routing rules
+    data_ds_path = CATALOG_DIR / "data" / "_dataset.yaml"
+    data_routing: list[dict[str, Any]] = []
+    if data_ds_path.exists():
+        data_data = load_yaml(data_ds_path)
+        data_routing = data_data.get("dataset", {}).get("routing", [])
+
+    return {
+        "cross_cutting": cross_cutting,
+        "kpi_routing": kpi_routing,
+        "data_routing": data_routing,
+    }
+
+
+def clear_routing_cache() -> None:
+    """Clear the routing rules LRU cache (for test isolation)."""
+    load_routing_rules.cache_clear()
+
+
 def load_all_examples() -> list[dict[str, Any]]:
     """Load all example YAML files from examples/.
 

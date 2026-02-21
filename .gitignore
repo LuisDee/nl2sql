@@ -39,6 +39,23 @@ Thumbs.db
 # pytest
 .pytest_cache/
 
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# mypy
+.mypy_cache/
+
+# ADK metadata (root level)
+.adk/
+
+# Empty/generated directories
+embeddings/
+
+# Benchmarks
+.benchmarks/
+
 # Git worktrees
 .worktrees/
 .autopsy/

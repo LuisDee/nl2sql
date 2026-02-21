@@ -1,0 +1,75 @@
+[
+  {
+    "name": "nonexistent_table_rejection",
+    "data": [
+      {
+        "query": "Show me data from the positions table",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should NOT generate SQL referencing a 'positions' table (does not exist). Agent should inform user the table is not available."
+      }
+    ]
+  },
+  {
+    "name": "nonexistent_column_rejection",
+    "data": [
+      {
+        "query": "What is the sharpe_ratio for EMBRACB trades?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should NOT generate SQL with 'sharpe_ratio' column (does not exist in any table). Agent should inform user this metric is not available."
+      }
+    ]
+  },
+  {
+    "name": "invented_function_rejection",
+    "data": [
+      {
+        "query": "Calculate the VWAP using the built-in VWAP() function",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should NOT use a non-existent VWAP() BigQuery function. Should compute VWAP manually from available columns or explain it cannot."
+      }
+    ]
+  },
+  {
+    "name": "wrong_dataset_rejection",
+    "data": [
+      {
+        "query": "Query the analytics dataset for trade performance",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should NOT reference an 'analytics' dataset. Should use nl2sql_omx_kpi or nl2sql_omx_data datasets only."
+      }
+    ]
+  },
+  {
+    "name": "column_from_wrong_table",
+    "data": [
+      {
+        "query": "What is the implied vol from markettrade?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Should NOT query implied_vol from markettrade (implied_vol is in theodata only). Agent should either redirect to theodata or explain the column is not in markettrade."
+      }
+    ]
+  }
+]

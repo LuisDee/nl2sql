@@ -1,0 +1,114 @@
+[
+  {
+    "name": "refinement_add_filter",
+    "data": [
+      {
+        "query": "What was the edge today?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "First turn: basic edge query on markettrade"
+      },
+      {
+        "query": "Filter that to just EMBRACB",
+        "expected_tool_use": [
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Second turn: should add WHERE symbol = 'EMBRACB' to previous query without re-running full pipeline"
+      }
+    ]
+  },
+  {
+    "name": "refinement_change_timeframe",
+    "data": [
+      {
+        "query": "Show me total PnL today",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "First turn: PnL for today on markettrade"
+      },
+      {
+        "query": "What about last week?",
+        "expected_tool_use": [
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Second turn: should change date filter to last week, keeping the same PnL aggregation"
+      }
+    ]
+  },
+  {
+    "name": "follow_up_different_table",
+    "data": [
+      {
+        "query": "What was the quoter edge?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "First turn: edge on kpi.quotertrade"
+      },
+      {
+        "query": "Now show me the click trade edge",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Second turn: should route to kpi.clicktrade (different table), requiring full pipeline re-run"
+      }
+    ]
+  },
+  {
+    "name": "refinement_add_groupby",
+    "data": [
+      {
+        "query": "What was the total edge today?",
+        "expected_tool_use": [
+          {"tool_name": "check_semantic_cache"},
+          {"tool_name": "vector_search_tables"},
+          {"tool_name": "load_yaml_metadata"},
+          {"tool_name": "fetch_few_shot_examples"},
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "First turn: aggregate edge on markettrade"
+      },
+      {
+        "query": "Break that down by symbol",
+        "expected_tool_use": [
+          {"tool_name": "dry_run_sql"},
+          {"tool_name": "execute_sql"}
+        ],
+        "expected_intermediate_agent_responses": [],
+        "reference": "Second turn: should add GROUP BY symbol to the previous query"
+      }
+    ]
+  }
+]

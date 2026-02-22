@@ -154,7 +154,7 @@
 
 ---
 
-## [ ] Track: Embedding Strategy & Glossary Collection
+## [x] Track: Embedding Strategy & Glossary Collection
 - **ID:** 19_embedding_enrichment
 - **Wave:** 16
 - **Complexity:** L

@@ -48,8 +48,8 @@
 - [x] Verify tests pass (CI validation covers full glossary)
 
 ### Task 2.3: Phase 2 checkpoint
-- [ ] Run full test suite
-- [ ] Manual verification: review glossary entries for accuracy and completeness
+- [x] Run full test suite
+- [x] Manual verification: review glossary entries for accuracy and completeness
 
 ---
 

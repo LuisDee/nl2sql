@@ -23,9 +23,9 @@
 ## Phase 2: Business Glossary YAML + Pydantic Validation
 
 ### Task 2.1: Create GlossaryEntrySchema Pydantic model
-- [ ] Write tests for `GlossaryEntrySchema` validation (required fields: name, definition, synonyms, related_columns; optional: category, sql_pattern)
-- [ ] Add `GlossaryEntrySchema` and `GlossarySchema` to `catalog/schema.py` (include `synonyms: list[str]` field for embedding text)
-- [ ] Verify tests pass
+- [x] Write tests for `GlossaryEntrySchema` validation (required fields: name, definition, synonyms, related_columns; optional: category, sql_pattern)
+- [x] Add `GlossaryEntrySchema` and `GlossarySchema` to `catalog/schema.py` (include `synonyms: list[str]` field for embedding text)
+- [x] Verify tests pass
 
 ### Task 2.2a: Create catalog/glossary.yaml — high-priority concepts (10-15 entries)
 - [ ] Create `catalog/glossary.yaml` with first batch of high-priority concepts that traders actively ask about:

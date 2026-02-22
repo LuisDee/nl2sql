@@ -6,7 +6,13 @@ ColumnSchema, TableSchema, and DatasetSchema models before implementation.
 
 import pytest
 
-from catalog.schema import ColumnSchema, DatasetSchema, TableSchema
+from catalog.schema import (
+    ColumnSchema,
+    DatasetSchema,
+    GlossaryEntrySchema,
+    GlossarySchema,
+    TableSchema,
+)
 
 
 class TestColumnSchema:
@@ -299,3 +305,103 @@ class TestDatasetSchema:
         """Dataset without required field raises ValidationError."""
         with pytest.raises(ValueError, match="Field required"):
             DatasetSchema(name="test")
+
+
+class TestGlossaryEntrySchema:
+    """GlossaryEntrySchema validates a single glossary concept."""
+
+    def test_valid_entry(self):
+        entry = GlossaryEntrySchema(
+            name="total PnL",
+            definition="Sum of instant_pnl across all trades.",
+            synonyms=["total profit", "aggregate pnl"],
+            related_columns=["markettrade.instant_pnl", "brokertrade.instant_pnl"],
+        )
+        assert entry.name == "total PnL"
+
+    def test_entry_with_all_optional_fields(self):
+        entry = GlossaryEntrySchema(
+            name="total PnL",
+            definition="Sum of instant_pnl across all trades.",
+            synonyms=["total profit"],
+            related_columns=["markettrade.instant_pnl"],
+            category="performance",
+            sql_pattern="SUM(instant_pnl)",
+        )
+        assert entry.category == "performance"
+        assert entry.sql_pattern == "SUM(instant_pnl)"
+
+    def test_missing_name_fails(self):
+        with pytest.raises(ValueError, match="Field required"):
+            GlossaryEntrySchema(
+                definition="Some definition.",
+                synonyms=["a"],
+                related_columns=["x.y"],
+            )
+
+    def test_missing_definition_fails(self):
+        with pytest.raises(ValueError, match="Field required"):
+            GlossaryEntrySchema(
+                name="test",
+                synonyms=["a"],
+                related_columns=["x.y"],
+            )
+
+    def test_missing_synonyms_fails(self):
+        with pytest.raises(ValueError, match="Field required"):
+            GlossaryEntrySchema(
+                name="test",
+                definition="def",
+                related_columns=["x.y"],
+            )
+
+    def test_missing_related_columns_fails(self):
+        with pytest.raises(ValueError, match="Field required"):
+            GlossaryEntrySchema(
+                name="test",
+                definition="def",
+                synonyms=["a"],
+            )
+
+    def test_empty_synonyms_valid(self):
+        """Empty synonyms list is valid (some concepts may not have aliases)."""
+        entry = GlossaryEntrySchema(
+            name="test",
+            definition="def",
+            synonyms=[],
+            related_columns=["x.y"],
+        )
+        assert entry.synonyms == []
+
+    def test_related_columns_capped(self):
+        """related_columns capped at 10 entries for glossary."""
+        with pytest.raises(ValueError, match="related_columns.*max is 10"):
+            GlossaryEntrySchema(
+                name="test",
+                definition="def",
+                synonyms=["a"],
+                related_columns=[f"t.col{i}" for i in range(11)],
+            )
+
+
+class TestGlossarySchema:
+    """GlossarySchema validates the full glossary.yaml structure."""
+
+    def test_valid_glossary(self):
+        g = GlossarySchema(
+            entries=[
+                {
+                    "name": "total PnL",
+                    "definition": "Sum of instant_pnl.",
+                    "synonyms": ["aggregate pnl"],
+                    "related_columns": ["markettrade.instant_pnl"],
+                }
+            ]
+        )
+        assert len(g.entries) == 1
+        assert g.entries[0].name == "total PnL"
+
+    def test_empty_entries_fails(self):
+        """Glossary must have at least one entry."""
+        with pytest.raises(ValueError, match="at least 1"):
+            GlossarySchema(entries=[])

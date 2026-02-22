@@ -139,3 +139,52 @@ class DatasetSchema(BaseModel):
     shared_columns: dict[str, Any] | None = None
     enum_reference: dict[str, Any] | None = None
     interval_expansion: dict[str, Any] | None = None
+
+
+# -- Glossary schema -----------------------------------------------------------
+
+
+class GlossaryEntrySchema(BaseModel):
+    """Validates a single glossary concept in glossary.yaml.
+
+    Required fields: name, definition, synonyms, related_columns.
+    Optional fields: category, sql_pattern.
+    """
+
+    # Required
+    name: str
+    definition: str
+    synonyms: list[str]
+    related_columns: list[str]
+
+    # Optional
+    category: str | None = None
+    sql_pattern: str | None = None
+
+    @field_validator("related_columns")
+    @classmethod
+    def _cap_related_columns(cls, v: list[str]) -> list[str]:
+        if len(v) > 10:
+            msg = f"related_columns has {len(v)} items, max is 10"
+            raise ValueError(msg)
+        return v
+
+
+class GlossarySchema(BaseModel):
+    """Validates the full glossary.yaml structure.
+
+    Must contain at least one entry.
+    """
+
+    entries: list[GlossaryEntrySchema]
+
+    @field_validator("entries")
+    @classmethod
+    def _at_least_one_entry(
+        cls,
+        v: list[GlossaryEntrySchema],
+    ) -> list[GlossaryEntrySchema]:
+        if len(v) < 1:
+            msg = "entries must contain at least 1 item"
+            raise ValueError(msg)
+        return v

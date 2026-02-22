@@ -38,14 +38,14 @@
 - [x] Verify tests pass
 
 ### Task 2.2b: Expand glossary.yaml — remaining concepts (10-15 entries)
-- [ ] Add second batch of concepts:
+- [x] Add second batch of concepts:
   - ATM strike logic: where delta ~ 0.5, moneyness concepts
   - Delta/vol/greeks: delta hedging, implied vol vs realised vol, gamma exposure
   - Exchange-specific concepts: exchange codes (ICE, Eurex, NSE, OMX, KRX), exchange-specific session times
   - Interval expansion: the 9 standard intervals (1s, 5s, 10s, 30s, 1m, 5m, open, close, settle)
   - Combo structures: spreads, strangles, straddles, how aggregation differs at combo vs leg level
   - Named filters as concepts: calls_only, today_only, mako_trades_only
-- [ ] Verify tests pass (CI validation covers full glossary)
+- [x] Verify tests pass (CI validation covers full glossary)
 
 ### Task 2.3: Phase 2 checkpoint
 - [ ] Run full test suite

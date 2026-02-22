@@ -232,3 +232,203 @@ glossary:
         - markettrade.instant_edge
         - markettrade.instant_pnl
       category: disambiguation
+
+    # --- Greeks and pricing ---
+
+    - name: delta
+      definition: >-
+        Option delta: directional exposure to the underlying asset. Stored in the
+        delta column. Values range from 0 to 1 for calls, -1 to 0 for puts.
+        ATM options have delta ~ 0.5. Delta is captured at trade time and
+        re-snapshotted at each interval (delta_1s, delta_5m, etc.). Used in
+        slippage decomposition and hedging analysis.
+      synonyms:
+        - directional exposure
+        - hedge ratio
+        - option delta
+      related_columns:
+        - markettrade.delta
+        - markettrade.delta_1s
+        - markettrade.delta_5m
+      category: greeks
+
+    - name: implied volatility
+      definition: >-
+        Implied volatility (IV) at trade time, stored in the vol column.
+        Represents the market's expectation of future price movement embedded in
+        the option price. Different from realized/historical volatility.
+        Vol changes drive vol_slippage at each interval.
+      synonyms:
+        - implied vol
+        - IV
+        - volatility
+        - vol
+      related_columns:
+        - markettrade.vol
+        - markettrade.vol_slippage_1s
+      category: greeks
+
+    - name: ATM strike
+      definition: >-
+        At-the-money strike: the strike price closest to the current underlying
+        price, where delta is approximately 0.5 for calls or -0.5 for puts.
+        Filter with ABS(delta) BETWEEN 0.45 AND 0.55 for near-ATM trades.
+        The strike column holds the strike price; compare with the underlying
+        price via the symbol column.
+      synonyms:
+        - at the money
+        - ATM
+        - near the money
+      related_columns:
+        - markettrade.strike
+        - markettrade.delta
+        - markettrade.symbol
+      category: greeks
+      sql_pattern: "ABS(delta) BETWEEN 0.45 AND 0.55"
+
+    # --- Exchange concepts ---
+
+    - name: exchange
+      definition: >-
+        The exchange where the trade was executed. Stored in the exchange column
+        (STRING). Common values include ICE, Eurex, NSE, OMX, KRX, CME, CBOE.
+        Each exchange has different session times, tick sizes, and contract
+        specifications. Filter by exchange to analyze venue-specific performance.
+      synonyms:
+        - venue
+        - exchange code
+        - trading venue
+      related_columns:
+        - markettrade.exchange
+      category: dimension
+
+    # --- Named filter patterns ---
+
+    - name: calls only
+      definition: >-
+        Filter for call options only. Use WHERE option_type_name = 'CALL' or
+        option_type = 'C'. The option_type_name column is human-readable.
+      synonyms:
+        - call options
+        - calls
+        - call filter
+      related_columns:
+        - markettrade.option_type_name
+        - markettrade.option_type
+      category: query_pattern
+      sql_pattern: "option_type_name = 'CALL'"
+
+    - name: puts only
+      definition: >-
+        Filter for put options only. Use WHERE option_type_name = 'PUT' or
+        option_type = 'P'. The option_type_name column is human-readable.
+      synonyms:
+        - put options
+        - puts
+        - put filter
+      related_columns:
+        - markettrade.option_type_name
+        - markettrade.option_type
+      category: query_pattern
+      sql_pattern: "option_type_name = 'PUT'"
+
+    - name: today only
+      definition: >-
+        Filter for today's trades only. Use WHERE trade_date = CURRENT_DATE().
+        This is the default when the user says "today" or doesn't specify a date.
+      synonyms:
+        - today's trades
+        - current day
+        - intraday
+      related_columns:
+        - markettrade.trade_date
+      category: query_pattern
+      sql_pattern: "trade_date = CURRENT_DATE()"
+
+    - name: buy side
+      definition: >-
+        Filter for buy trades. The buysell column stores numeric codes:
+        BUY = 66, SELL = 83. Use WHERE buysell = 66 for buys or
+        buysell_name = 'BUY'. The buysell_name column is the human-readable form.
+      synonyms:
+        - buys
+        - long
+        - buy trades
+        - bought
+      related_columns:
+        - markettrade.buysell
+        - markettrade.buysell_name
+      category: query_pattern
+      sql_pattern: "buysell = 66"
+
+    - name: sell side
+      definition: >-
+        Filter for sell trades. The buysell column stores numeric codes:
+        BUY = 66, SELL = 83. Use WHERE buysell = 83 for sells or
+        buysell_name = 'SELL'. The buysell_name column is the human-readable form.
+      synonyms:
+        - sells
+        - short
+        - sell trades
+        - sold
+      related_columns:
+        - markettrade.buysell
+        - markettrade.buysell_name
+      category: query_pattern
+      sql_pattern: "buysell = 83"
+
+    # --- OTO swing specific ---
+
+    - name: OTO swing
+      definition: >-
+        OTO (One-Touch-Out) swing trades are automated takeout trades that fire
+        when market conditions cross edge thresholds. Stored in the otoswing
+        table. Key unique columns: min_edge (minimum required edge threshold),
+        swing_edge (edge captured), takeout_category and takeout_type (trigger
+        classification). Use the otoswing table, not markettrade, to analyze
+        swing-specific metrics.
+      synonyms:
+        - swing
+        - takeout
+        - OTO
+        - sweep
+        - automated trade
+      related_columns:
+        - otoswing.swing_edge
+        - otoswing.min_edge
+        - otoswing.takeout_category
+        - otoswing.takeout_type
+      category: trade_structure
+
+    # --- Portfolio and algo ---
+
+    - name: portfolio
+      definition: >-
+        Trading portfolio or desk identifier. Stored in the portfolio column
+        (STRING). Common values: MON, WHITE, RED, BROADWAY, FIXEDINCOME_US,
+        US_D1_OPT, AMM_OIL, FIPROP_US, EURODOLLARS, STOCKS_EUR, INDEXPROP,
+        EUPOWER. Use to segment performance by trading desk.
+      synonyms:
+        - book
+        - desk
+        - trading book
+        - portfolio name
+      related_columns:
+        - markettrade.portfolio
+      category: dimension
+
+    - name: algorithm
+      definition: >-
+        Trading algorithm or strategy name. Stored in the algo column (STRING).
+        Common values: OST_MQ (auto-quoter), OST_X (Korea market maker),
+        ZB_TAK (taker strategy). Use to segment performance by execution
+        strategy.
+      synonyms:
+        - algo
+        - strategy
+        - algo name
+        - trading strategy
+        - execution algo
+      related_columns:
+        - markettrade.algo
+      category: dimension

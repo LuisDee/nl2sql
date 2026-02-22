@@ -19,6 +19,9 @@ nl2sql_agent/.adk/
 # Git bundles
 *.bundle
 
+# Source repos (cloned from bundles for metadata extraction)
+repos/
+
 # Sample data (large, not for version control)
 sample_data/
 sample_data.tar.gz

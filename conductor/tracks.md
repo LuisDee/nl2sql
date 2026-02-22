@@ -185,6 +185,33 @@
 - **ID:** 22_metadata_population
 - **Wave:** 17
 - **Complexity:** L
-- **Dependencies:** 18_yaml_schema_enrichment
+- **Dependencies:** 24_metadata_extraction
 - **Prerequisites:** C++ trading repo access, KPI pipeline repo access
 - **Description:** Populates enrichment fields (category, typical_aggregation, filterable, example_values, comprehensive, formula, related_columns) across all 4,631 columns. Builds heuristic enrichment script + BQ data profiling pipeline. Verifies ALL existing metadata (descriptions, synonyms, formulas, business_rules) against source code. Tiered approach: human-curated for high-impact columns, heuristic for bulk, LLM-assisted for remainder.
+
+---
+
+## [ ] Track: Source Repo Discovery & Profiling Framework
+- **ID:** 23_source_repo_discovery
+- **Wave:** 16
+- **Complexity:** L
+- **Dependencies:** 19_embedding_enrichment
+- **Description:** Builds infrastructure for LLM agents to explore and document 4 source repos (CPP/protos, data-library/Go consumer, data-loader/bronze→silver, KPI/gold computation). Generates repo cards, structural indexes (proto fields, transformation mappings, KPI computations), cross-repo routing guide, and end-to-end field lineage. Uses deterministic extraction (tree-sitter, protoc, grep) for structure, LLM only for semantic enrichment. All outputs committed to `metadata/` directory.
+
+---
+
+## [ ] Track: Metadata Extraction from Source Repos
+- **ID:** 24_metadata_extraction
+- **Wave:** 17
+- **Complexity:** L
+- **Dependencies:** 23_source_repo_discovery
+- **Description:** Uses structural indexes from Track 23 to populate YAML catalog with source-grounded metadata. Extracts formulas from KPI repo, assigns categories from proto/transformation context, maps cross-layer column relationships, verifies existing descriptions against source code, fills gaps with LLM-generated descriptions validated against structural indexes. Target >95% existence ratio.
+
+---
+
+## [ ] Track: Metadata Validation & Drift Detection
+- **ID:** 25_metadata_validation
+- **Wave:** 18
+- **Complexity:** M
+- **Dependencies:** 24_metadata_extraction
+- **Description:** Permanent validation infrastructure: YAML-vs-BQ schema comparison, YAML-vs-source-repo formula verification, example SQL column validation, routing/prompt column checks, developer-facing schema diff script. Runs in CI to catch future metadata drift and hallucination.

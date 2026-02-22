@@ -1,0 +1,1243 @@
+# KPI Computation Formulas Index
+# Auto-generated from KPI repo SQL calculation files
+# Source: repos/kpi/models/staging/kpi/components/calculations/
+#
+# Notes:
+# - contract_size is streamed in the proto payload (not computed by KPI)
+# - All formulas use Jinja templating; {interval} marks per-interval expansion
+# - NSE/NIFTY exchanges use (forward) instead of (under - roll) in adjusted_tv
+# - vol_path_estimate is an intermediate value used in vol_slippage calculation
+
+# ---------------------------------------------------------------------------
+# Time Intervals
+# ---------------------------------------------------------------------------
+# Intraday intervals are always included. Multi-day (EOD) intervals are
+# appended when include_eod=true. Multi-day intervals vary by country:
+#   - NSE/NIFTY: none (EOD only, no multi-day)
+#   - ICE + ARB children (eurex, ice, canada, euronext): eod, 1D, 5D, 10D, 20D, 50D, 80D
+#   - All others: eod, 1D, 5D
+
+time_intervals:
+  intraday:
+    - name: trade
+      nanoseconds: 0
+      eod_only: false
+      display_order: 1
+      note: "T+0 (at trade time); only included when include_trade=true in get_slippages"
+
+    - name: 1s
+      nanoseconds: 1000000000
+      eod_only: false
+      display_order: 2
+
+    - name: 5s
+      nanoseconds: 5000000000
+      eod_only: false
+      display_order: 3
+
+    - name: 10s
+      nanoseconds: 10000000000
+      eod_only: false
+      display_order: 4
+
+    - name: 30s
+      nanoseconds: 30000000000
+      eod_only: false
+      display_order: 5
+
+    - name: 1m
+      nanoseconds: 60000000000
+      eod_only: false
+      display_order: 6
+
+    - name: 5m
+      nanoseconds: 300000000000
+      eod_only: false
+      display_order: 7
+
+    - name: 10m
+      nanoseconds: 600000000000
+      eod_only: true
+      display_order: 8
+      note: "Only available for EOD post-trade snap data type"
+
+    - name: 30m
+      nanoseconds: 1800000000000
+      eod_only: false
+      display_order: 9
+
+    - name: 1h
+      nanoseconds: 3600000000000
+      eod_only: false
+      display_order: 10
+
+  multiday:
+    - name: eod
+      days: 0
+      note: "End of day snapshot"
+
+    - name: 1D
+      days: 1
+
+    - name: 5D
+      days: 5
+
+    - name: 10D
+      days: 10
+      note: "ICE and ARB children only"
+
+    - name: 20D
+      days: 20
+      note: "ICE and ARB children only"
+
+    - name: 50D
+      days: 50
+      note: "ICE and ARB children only"
+
+    - name: 80D
+      days: 80
+      note: "ICE and ARB children only"
+
+  country_rules:
+    nse_nifty: "Intraday only; no multi-day slippages"
+    ice_and_arb_children: "eod + 1D, 5D, 10D, 20D, 50D, 80D"
+    default: "eod + 1D, 5D"
+
+# ---------------------------------------------------------------------------
+# Shared Intermediate Calculations
+# ---------------------------------------------------------------------------
+# These appear across multiple trade types with slight variations.
+
+shared_formulas:
+  adjusted_tv:
+    standard: "tv_{interval} + delta_{interval} * (calculated_base_val_{interval} - (under_{interval} - roll_{interval})) + 0.5 * gamma_{interval} * POW((calculated_base_val_{interval} - (under_{interval} - roll_{interval})), 2)"
+    nse_nifty: "tv_{interval} + delta_{interval} * (calculated_base_val_{interval} - forward_{interval}) + 0.5 * gamma_{interval} * POW((calculated_base_val_{interval} - forward_{interval}), 2)"
+    description: "Taylor-expanded TV at each interval, accounting for delta and gamma effects of underlying price movement"
+
+  vol_path_estimate:
+    markettrade: "((calculated_base_val_{interval} - mid_base_val) * ((delta_{interval} - raw_delta_mid_bv_{interval}) + (delta - raw_delta_mid_bv)) / 2)"
+    clicktrade: "((calculated_base_val_{interval} - mid_base_val) * ((delta_{interval} - raw_delta_{interval}) + (delta - raw_delta)) / 2)"
+    brokertrade: "((calculated_base_val_{interval} - mid_base_val) * ((delta_{interval} - raw_delta_{interval}) + (delta - raw_delta)) / 2)"
+    quotertrade: "((calculated_base_val_{interval} - mid_base_val) * ((delta_{interval} - raw_delta_mid_bv_{interval}) + (delta - raw_delta_mid_bv)) / 2)"
+    otoswing: "((calculated_base_val_{interval} - swing_mid_base_val) * ((delta_{interval} - raw_delta_mid_bv_{interval}) + (delta - raw_delta_mid_bv)) / 2)"
+    description: "Path-dependent volatility correction term subtracted from raw vol slippage"
+
+# ---------------------------------------------------------------------------
+# Trade Types
+# ---------------------------------------------------------------------------
+trade_types:
+
+  # =========================================================================
+  # MARKETTRADE
+  # =========================================================================
+  - name: markettrade
+    calculation_file: markettrade/kpi_markettrade_calculations.sql
+    source: markettrade data-layer table (from MarketTrade proto)
+    input_ref: kpi_markettrade_trade_side
+
+    intermediate_calculations:
+      - name: mid_base_val
+        formula: "(raw_bv_bid + raw_bv_ask) / 2"
+        input_columns: [raw_bv_bid, raw_bv_ask]
+        description: "Mid-market base value from bid/ask average"
+
+      - name: delta
+        formula: "ref_delta + (((raw_bv_bid + raw_bv_ask) / 2) - ref_base_price) * ref_gamma"
+        input_columns: [ref_delta, raw_bv_bid, raw_bv_ask, ref_base_price, ref_gamma]
+        description: "Gamma-adjusted delta using mid base value"
+
+      - name: raw_delta_mid_bv
+        standard: "raw_delta_mid_bv + (((raw_bv_bid + raw_bv_ask) / 2) - (under - roll)) * raw_gamma"
+        nse_nifty: "raw_delta_mid_bv + (((raw_bv_bid + raw_bv_ask) / 2) - forward) * raw_gamma"
+        input_columns: [raw_delta_mid_bv, raw_bv_bid, raw_bv_ask, under, roll, forward, raw_gamma]
+        description: "Gamma-adjusted raw delta at mid base value"
+
+      - name: base_adjustment
+        formula: "layered_base_adjustment + odr_adjustment"
+        input_columns: [layered_base_adjustment, odr_adjustment]
+        description: "Total base adjustment combining layered and ODR components"
+
+      - name: stock_roll
+        formula: "forward - under"
+        input_columns: [forward, under]
+        description: "Stock roll value"
+
+      - name: reference_roll
+        formula: "CASE WHEN parent_is_combo = TRUE THEN ((forward - under) + roll) ELSE ((forward - under) + ref_roll) END"
+        input_columns: [forward, under, roll, ref_roll, parent_is_combo]
+        description: "Reference roll; uses roll for combos, ref_roll otherwise"
+
+    metrics:
+      - name: buy_sell_multiplier
+        formula: "CASE WHEN trade_aggressor_side IN ('BUY', '66') THEN -1 WHEN trade_aggressor_side IN ('SELL', '83') THEN 1 ELSE 0 END"
+        input_columns: [trade_aggressor_side]
+        description: "Sign convention for markettrade: -1 for BUY (Mako is buying = market is selling to us), +1 for SELL"
+
+      - name: adjusted_tv_{interval}
+        formula: "See shared_formulas.adjusted_tv"
+        per_interval: true
+        input_columns: ["tv_{interval}", "delta_{interval}", "calculated_base_val_{interval}", "under_{interval}", "roll_{interval}", "gamma_{interval}"]
+        description: "Taylor-expanded TV at each interval"
+
+      - name: instant_edge
+        formula: "CASE WHEN trade_aggressor_side = 'BUY' THEN (trade_price - tv) WHEN trade_aggressor_side = 'SELL' THEN (tv - trade_price) ELSE 0 END"
+        input_columns: [trade_price, tv, trade_aggressor_side]
+        description: "At-trade edge: difference between trade price and theoretical value"
+
+      - name: instant_pnl
+        formula: "CASE WHEN trade_aggressor_side = 'BUY' THEN (trade_price - tv) * trade_size * contract_size WHEN trade_aggressor_side = 'SELL' THEN (tv - trade_price) * trade_size * contract_size ELSE 0 END"
+        input_columns: [trade_price, tv, trade_aggressor_side, trade_size, contract_size]
+        description: "At-trade P&L in currency"
+
+      - name: instant_pnl_w_fees
+        formula: "CASE WHEN trade_aggressor_side = 'BUY' THEN ((trade_price - tv) - fees) * trade_size * contract_size WHEN trade_aggressor_side = 'SELL' THEN ((tv - trade_price) - fees) * trade_size * contract_size ELSE 0 END"
+        input_columns: [trade_price, tv, trade_aggressor_side, trade_size, contract_size, fees]
+        description: "At-trade P&L after fees"
+
+      - name: tv_offset_slippage_{interval}_per_unit
+        formula: "(tv_offset_{interval} - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["tv_offset_{interval}", tv_offset, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "TV offset slippage per unit (NSE/NIFTY only)"
+        nse_nifty_only: true
+
+      - name: tv_offset_slippage_{interval}
+        formula: "(tv_offset_{interval} - tv_offset) * trade_size * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["tv_offset_{interval}", tv_offset, trade_size, contract_size, buy_sell_multiplier]
+        description: "TV offset slippage (NSE/NIFTY only)"
+        nse_nifty_only: true
+
+      - name: tv_change_{interval}
+        formula: "(adjusted_tv_{interval} - tv)"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", tv]
+        description: "Total TV change at each interval"
+
+      - name: tv_change_buysell_{interval}
+        formula: "(adjusted_tv_{interval} - tv) * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", tv, buy_sell_multiplier]
+        description: "TV change signed by buy/sell direction"
+
+      - name: delta_slippage_{interval}_per_unit
+        formula: "((calculated_base_val_{interval} - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["calculated_base_val_{interval}", mid_base_val, delta, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "P&L from underlying price movement per unit at each interval"
+
+      - name: delta_slippage_{interval}
+        formula: "((calculated_base_val_{interval} - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["calculated_base_val_{interval}", mid_base_val, delta, trade_size, contract_size, buy_sell_multiplier]
+        description: "P&L from underlying price movement at each interval"
+
+      - name: roll_slippage_{interval}_per_unit
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "P&L from roll changes per unit at each interval"
+
+      - name: roll_slippage_{interval}
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, trade_size, contract_size, buy_sell_multiplier]
+        description: "P&L from roll changes at each interval"
+
+      - name: vol_slippage_{interval}_per_unit
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", leg_ratio, contract_size, buy_sell_multiplier]
+        description: "P&L from volatility changes per unit at each interval (path-corrected)"
+
+      - name: vol_slippage_{interval}
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * trade_size * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", trade_size, contract_size, buy_sell_multiplier]
+        description: "P&L from volatility changes at each interval (path-corrected)"
+
+      - name: other_slippage_{interval}_per_unit
+        formula: "(tv_change_buysell_{interval} * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_{interval}_per_unit + roll_slippage_{interval}_per_unit)"
+        per_interval: true
+        input_columns: ["tv_change_buysell_{interval}", leg_ratio, contract_size, "delta_slippage_{interval}_per_unit", "roll_slippage_{interval}_per_unit"]
+        description: "Residual slippage per unit: total TV change minus delta and roll components"
+
+      - name: other_slippage_{interval}
+        formula: "(tv_change_buysell_{interval} * contract_size * trade_size) - (delta_slippage_{interval} + roll_slippage_{interval})"
+        per_interval: true
+        input_columns: ["tv_change_buysell_{interval}", contract_size, trade_size, "delta_slippage_{interval}", "roll_slippage_{interval}"]
+        description: "Residual slippage: total TV change minus delta and roll components"
+
+  # =========================================================================
+  # QUOTERTRADE
+  # =========================================================================
+  - name: quotertrade
+    calculation_file: quotertrade/kpi_quotertrade_calculations.sql
+    source: quotertrade data-layer table (from QuoterTrade proto)
+    input_ref: kpi_quotertrade_combo_adjustments
+    notes:
+      - "Uses side-dependent TV selection (tv_bid for BUY, tv_ask for SELL)"
+      - "Combo children use tv_theo"
+      - "Instant edge uses NHR adjustment: (tv - nhr_adjustment_bid)"
+      - "Has two gamma adjustments: first for mid_tv, second for slippage delta"
+      - "Slippages measured from mid_tv (not raw tv)"
+      - "Final trade_side converted from BUYSELL_BUY/SELL to BUY/SELL"
+
+    intermediate_calculations:
+      - name: mid_base_val
+        formula: "(raw_bv_bid + raw_bv_ask) / 2"
+        input_columns: [raw_bv_bid, raw_bv_ask]
+        description: "Mid-market base value"
+
+      - name: delta
+        formula: "ref_delta + (delta_adjusted_base_price - ref_base_price) * ref_gamma"
+        input_columns: [ref_delta, delta_adjusted_base_price, ref_base_price, ref_gamma]
+        description: "First gamma-adjusted delta (for mid_tv calculation)"
+        note: "A second gamma adjustment is applied later for slippage delta: delta + (mid_base_val - delta_adjusted_base_price) * ref_gamma"
+
+      - name: raw_delta_mid_bv
+        standard: "raw_delta_mid_bv + (((raw_bv_bid + raw_bv_ask) / 2) - (under - roll)) * raw_gamma"
+        nse_nifty: "raw_delta_mid_bv + (((raw_bv_bid + raw_bv_ask) / 2) - forward) * raw_gamma"
+        input_columns: [raw_delta_mid_bv, raw_bv_bid, raw_bv_ask, under, roll, forward, raw_gamma]
+        description: "Gamma-adjusted raw delta at mid base value"
+
+      - name: base_adjustment
+        formula: "layered_base_adjustment + odr_adjustment"
+        input_columns: [layered_base_adjustment, odr_adjustment]
+        description: "Total base adjustment"
+
+      - name: stock_roll
+        formula: "forward - under"
+        input_columns: [forward, under]
+        description: "Stock roll value"
+
+      - name: reference_roll
+        formula: "CASE WHEN parent_is_combo = TRUE THEN ((forward - under) + roll) ELSE ((forward - under) + ref_roll) END"
+        input_columns: [forward, under, roll, ref_roll, parent_is_combo]
+        description: "Reference roll"
+
+      - name: tv
+        formula: >
+          CASE
+            WHEN parent_is_combo = TRUE AND is_parent = FALSE THEN tv_theo
+            WHEN trade_side NOT IN ('BUYSELL_BUY', '66') THEN tv_ask
+            WHEN trade_side IN ('BUYSELL_SELL', '83') AND parent_is_combo = false THEN tv_ask
+            WHEN trade_side IN ('BUYSELL_BUY', '66') AND parent_is_combo = false THEN tv_bid
+            WHEN trade_side IN ('BUYSELL_SELL', '83') AND parent_is_combo = TRUE AND is_parent = TRUE THEN tv_ask
+            WHEN trade_side IN ('BUYSELL_BUY', '66') AND parent_is_combo = TRUE AND is_parent = TRUE THEN tv_bid
+            ELSE tv_ask
+          END
+        input_columns: [tv_theo, tv_bid, tv_ask, trade_side, parent_is_combo, is_parent]
+        description: "TV selection: tv_bid for BUY, tv_ask for SELL; combo children use tv_theo"
+
+      - name: second_delta_adjustment
+        formula: "delta + (mid_base_val - delta_adjusted_base_price) * ref_gamma"
+        input_columns: [delta, mid_base_val, delta_adjusted_base_price, ref_gamma]
+        description: "Second gamma adjustment applied to delta before slippage calculations"
+
+    metrics:
+      - name: buy_sell_multiplier
+        formula: "CASE WHEN trade_side IN ('BUYSELL_BUY', '66') THEN 1 WHEN trade_side NOT IN ('BUYSELL_BUY', '66') THEN -1 END"
+        input_columns: [trade_side]
+        description: "Sign convention for quotertrade: +1 for BUY, -1 for SELL"
+
+      - name: mid_tv
+        formula: "tv + delta * (mid_base_val - delta_adjusted_base_price) + 0.5 * ref_gamma * POW((mid_base_val - delta_adjusted_base_price), 2)"
+        input_columns: [tv, delta, mid_base_val, delta_adjusted_base_price, ref_gamma]
+        description: "Mid theoretical value with gamma adjustment; used as baseline for slippages"
+
+      - name: adjusted_tv_{interval}
+        formula: "See shared_formulas.adjusted_tv"
+        per_interval: true
+        input_columns: ["tv_{interval}", "delta_{interval}", "calculated_base_val_{interval}", "under_{interval}", "roll_{interval}", "gamma_{interval}"]
+        description: "Taylor-expanded TV at each interval"
+
+      - name: instant_edge
+        formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((tv - nhr_adjustment_bid) - trade_price) WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (tv - nhr_adjustment_bid)) ELSE 0 END"
+        input_columns: [tv, nhr_adjustment_bid, trade_price, trade_side]
+        description: "At-trade edge with NHR adjustment"
+
+      - name: instant_pnl
+        formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((tv - nhr_adjustment_bid) - trade_price) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (tv - nhr_adjustment_bid)) * trade_size * contract_size ELSE 0 END"
+        input_columns: [tv, nhr_adjustment_bid, trade_price, trade_side, trade_size, contract_size]
+        description: "At-trade P&L with NHR adjustment"
+
+      - name: instant_pnl_w_fees
+        formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN (((tv - nhr_adjustment_bid) - trade_price) - fees) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN ((trade_price - (tv - nhr_adjustment_bid)) - fees) * trade_size * contract_size ELSE 0 END"
+        input_columns: [tv, nhr_adjustment_bid, trade_price, trade_side, trade_size, contract_size, fees]
+        description: "At-trade P&L after fees with NHR adjustment"
+
+      - name: instant_edge_mid_tv
+        formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((mid_tv - nhr_adjustment_bid) - trade_price) WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (mid_tv - nhr_adjustment_bid)) ELSE 0 END"
+        input_columns: [mid_tv, nhr_adjustment_bid, trade_price, trade_side]
+        description: "At-trade edge using mid TV with NHR adjustment"
+
+      - name: instant_pnl_mid_tv
+        formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((mid_tv - nhr_adjustment_bid) - trade_price) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (mid_tv - nhr_adjustment_bid)) * trade_size * contract_size ELSE 0 END"
+        input_columns: [mid_tv, nhr_adjustment_bid, trade_price, trade_side, trade_size, contract_size]
+        description: "At-trade P&L using mid TV with NHR adjustment"
+
+      - name: instant_pnl_w_fees_mid_tv
+        formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN (((mid_tv - nhr_adjustment_bid) - trade_price) - fees) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN ((trade_price - (mid_tv - nhr_adjustment_bid)) - fees) * trade_size * contract_size ELSE 0 END"
+        input_columns: [mid_tv, nhr_adjustment_bid, trade_price, trade_side, trade_size, contract_size, fees]
+        description: "At-trade P&L after fees using mid TV with NHR adjustment"
+
+      - name: mark_to_mid_pnl_per_unit
+        formula: "(tv - mid_tv) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * -1"
+        input_columns: [tv, mid_tv, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "Mark-to-mid P&L per unit: cost of quoting away from mid"
+
+      - name: mark_to_mid_pnl
+        formula: "(tv - mid_tv) * trade_size * contract_size * buy_sell_multiplier * -1"
+        input_columns: [tv, mid_tv, trade_size, contract_size, buy_sell_multiplier]
+        description: "Mark-to-mid P&L: total cost of quoting away from mid"
+
+      - name: tv_change_{interval}
+        formula: "(adjusted_tv_{interval} - mid_tv)"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", mid_tv]
+        description: "Total TV change at each interval (measured from mid_tv)"
+
+      - name: tv_change_buysell_{interval}
+        formula: "(adjusted_tv_{interval} - mid_tv) * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", mid_tv, buy_sell_multiplier]
+        description: "TV change signed by buy/sell direction (measured from mid_tv)"
+
+      - name: delta_slippage_{interval}_per_unit
+        formula: "((calculated_base_val_{interval} - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["calculated_base_val_{interval}", mid_base_val, delta, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "P&L from underlying price movement per unit"
+
+      - name: delta_slippage_{interval}
+        formula: "((calculated_base_val_{interval} - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["calculated_base_val_{interval}", mid_base_val, delta, trade_size, contract_size, buy_sell_multiplier]
+        description: "P&L from underlying price movement"
+
+      - name: roll_slippage_{interval}_per_unit
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "P&L from roll changes per unit"
+
+      - name: roll_slippage_{interval}
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, trade_size, contract_size, buy_sell_multiplier]
+        description: "P&L from roll changes"
+
+      - name: vol_slippage_{interval}_per_unit
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", leg_ratio, contract_size, buy_sell_multiplier]
+        description: "P&L from volatility changes per unit (path-corrected)"
+
+      - name: vol_slippage_{interval}
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * trade_size * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", trade_size, contract_size, buy_sell_multiplier]
+        description: "P&L from volatility changes (path-corrected)"
+
+      - name: other_slippage_{interval}_per_unit
+        formula: "(tv_change_buysell_{interval} * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_{interval}_per_unit + roll_slippage_{interval}_per_unit)"
+        per_interval: true
+        input_columns: ["tv_change_buysell_{interval}", leg_ratio, contract_size, "delta_slippage_{interval}_per_unit", "roll_slippage_{interval}_per_unit"]
+        description: "Residual slippage per unit"
+
+      - name: other_slippage_{interval}
+        formula: "(tv_change_buysell_{interval} * contract_size * trade_size) - (delta_slippage_{interval} + roll_slippage_{interval})"
+        per_interval: true
+        input_columns: ["tv_change_buysell_{interval}", contract_size, trade_size, "delta_slippage_{interval}", "roll_slippage_{interval}"]
+        description: "Residual slippage"
+
+  # =========================================================================
+  # OTOSWING
+  # =========================================================================
+  - name: otoswing
+    calculation_file: otoswing/kpi_otoswing_calculations.sql
+    source: otoswingdata data-layer table (from OTOSwing proto)
+    input_ref: kpi_otoswing_combo_adjustments
+    notes:
+      - "Uses routed_buy_sell (not trade_aggressor_side) for direction"
+      - "Has both regular (trade_volume) and fired_at (routed_size_capped) variants for most metrics"
+      - "Uses swing_mid_base_val and swing_mid_tv (not mid_base_val/mid_tv)"
+      - "Two gamma adjustments: first for swing_mid_tv, second for slippage delta"
+      - "Slippages measured from swing_mid_tv"
+      - "TV selection: combo parent->oto_tv, combo child->tv_theo, else->oto_tv"
+      - "Final routed_buy_sell converted from BUYSELL_BUY/SELL to BUY/SELL"
+
+    intermediate_calculations:
+      - name: swing_mid_base_val
+        formula: "(raw_bv_bid + raw_bv_ask) / 2"
+        input_columns: [raw_bv_bid, raw_bv_ask]
+        description: "Mid-market base value (named swing_mid_base_val in otoswing)"
+
+      - name: delta
+        formula: "ref_delta + (delta_adjusted_base_price - ref_base_price) * ref_gamma"
+        input_columns: [ref_delta, delta_adjusted_base_price, ref_base_price, ref_gamma]
+        description: "First gamma-adjusted delta (for swing_mid_tv)"
+        note: "Second gamma adjustment for slippages: delta + (swing_mid_base_val - delta_adjusted_base_price) * ref_gamma"
+
+      - name: raw_delta_mid_bv
+        standard: "raw_delta_mid_bv + (((raw_bv_bid + raw_bv_ask) / 2) - (under - roll)) * raw_gamma"
+        nse_nifty: "raw_delta_mid_bv + (((raw_bv_bid + raw_bv_ask) / 2) - forward) * raw_gamma"
+        input_columns: [raw_delta_mid_bv, raw_bv_bid, raw_bv_ask, under, roll, forward, raw_gamma]
+        description: "Gamma-adjusted raw delta at mid base value"
+
+      - name: base_adjustment
+        formula: "layered_base_adjustment + odr_adjustment"
+        input_columns: [layered_base_adjustment, odr_adjustment]
+        description: "Total base adjustment"
+
+      - name: stock_roll
+        formula: "forward - under"
+        input_columns: [forward, under]
+        description: "Stock roll value"
+
+      - name: reference_roll
+        formula: "CASE WHEN parent_is_combo = TRUE THEN ((forward - under) + roll) ELSE ((forward - under) + ref_roll) END"
+        input_columns: [forward, under, roll, ref_roll, parent_is_combo]
+        description: "Reference roll"
+
+      - name: tv
+        formula: >
+          CASE
+            WHEN parent_is_combo = TRUE AND is_parent = TRUE THEN oto_tv
+            WHEN parent_is_combo = TRUE AND is_parent = FALSE THEN tv_theo
+            ELSE oto_tv
+          END
+        input_columns: [oto_tv, tv_theo, parent_is_combo, is_parent]
+        description: "TV selection: combo parent/non-combo use oto_tv, combo children use tv_theo"
+
+      - name: second_delta_adjustment
+        formula: "delta + (swing_mid_base_val - delta_adjusted_base_price) * ref_gamma"
+        input_columns: [delta, swing_mid_base_val, delta_adjusted_base_price, ref_gamma]
+        description: "Second gamma adjustment for slippage delta"
+
+    metrics:
+      - name: buy_sell_multiplier
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN 1 ELSE -1 END"
+        input_columns: [routed_buy_sell]
+        description: "Sign convention for otoswing: +1 for BUY, -1 for SELL"
+
+      - name: swing_mid_tv
+        formula: "tv + delta * (swing_mid_base_val - delta_adjusted_base_price) + 0.5 * ref_gamma * POW((swing_mid_base_val - delta_adjusted_base_price), 2)"
+        input_columns: [tv, delta, swing_mid_base_val, delta_adjusted_base_price, ref_gamma]
+        description: "Mid theoretical value with gamma adjustment (OTO swing variant)"
+
+      - name: adjusted_tv_{interval}
+        formula: "See shared_formulas.adjusted_tv"
+        per_interval: true
+        input_columns: ["tv_{interval}", "delta_{interval}", "calculated_base_val_{interval}", "under_{interval}", "roll_{interval}", "gamma_{interval}"]
+        description: "Taylor-expanded TV at each interval"
+
+      - name: instant_edge
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (CASE WHEN trade_volume > 0 THEN ((tv - nhr_adjustment_bid) - avg_trade_price) ELSE 0 END) ELSE (CASE WHEN trade_volume > 0 THEN (avg_trade_price - (tv - nhr_adjustment_bid)) ELSE 0 END) END"
+        input_columns: [routed_buy_sell, tv, nhr_adjustment_bid, avg_trade_price, trade_volume]
+        description: "At-trade edge using avg_trade_price (regular variant, zero if no volume)"
+
+      - name: instant_edge_fired_at
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((tv - nhr_adjustment_bid) - routed_price) ELSE (routed_price - (tv - nhr_adjustment_bid)) END"
+        input_columns: [routed_buy_sell, tv, nhr_adjustment_bid, routed_price]
+        description: "At-trade edge using routed_price (fired-at variant)"
+
+      - name: instant_pnl
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((tv - nhr_adjustment_bid) - avg_trade_price) * trade_volume * contract_size ELSE (avg_trade_price - (tv - nhr_adjustment_bid)) * trade_volume * contract_size END"
+        input_columns: [routed_buy_sell, tv, nhr_adjustment_bid, avg_trade_price, trade_volume, contract_size]
+        description: "At-trade P&L using avg_trade_price and trade_volume"
+
+      - name: instant_pnl_fired_at
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((tv - nhr_adjustment_bid) - routed_price) * routed_size_capped * contract_size ELSE (routed_price - (tv - nhr_adjustment_bid)) * routed_size_capped * contract_size END"
+        input_columns: [routed_buy_sell, tv, nhr_adjustment_bid, routed_price, routed_size_capped, contract_size]
+        description: "At-trade P&L using routed_price and routed_size_capped (fired-at variant)"
+
+      - name: instant_pnl_w_fees
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (((tv - nhr_adjustment_bid) - avg_trade_price) - fees) * trade_volume * contract_size ELSE ((avg_trade_price - (tv - nhr_adjustment_bid)) - fees) * trade_volume * contract_size END"
+        input_columns: [routed_buy_sell, tv, nhr_adjustment_bid, avg_trade_price, trade_volume, contract_size, fees]
+        description: "At-trade P&L after fees (regular variant)"
+
+      - name: instant_pnl_fired_at_w_fees
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (((tv - nhr_adjustment_bid) - routed_price) - fees) * routed_size_capped * contract_size ELSE ((routed_price - (tv - nhr_adjustment_bid)) - fees) * routed_size_capped * contract_size END"
+        input_columns: [routed_buy_sell, tv, nhr_adjustment_bid, routed_price, routed_size_capped, contract_size, fees]
+        description: "At-trade P&L after fees (fired-at variant)"
+
+      - name: instant_edge_mid_tv
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (CASE WHEN trade_volume > 0 THEN ((swing_mid_tv - nhr_adjustment_bid) - avg_trade_price) ELSE 0 END) ELSE (CASE WHEN trade_volume > 0 THEN (avg_trade_price - (swing_mid_tv - nhr_adjustment_bid)) ELSE 0 END) END"
+        input_columns: [routed_buy_sell, swing_mid_tv, nhr_adjustment_bid, avg_trade_price, trade_volume]
+        description: "At-trade edge using swing_mid_tv (regular variant)"
+
+      - name: instant_edge_fired_at_mid_tv
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((swing_mid_tv - nhr_adjustment_bid) - routed_price) ELSE (routed_price - (swing_mid_tv - nhr_adjustment_bid)) END"
+        input_columns: [routed_buy_sell, swing_mid_tv, nhr_adjustment_bid, routed_price]
+        description: "At-trade edge using swing_mid_tv and routed_price (fired-at variant)"
+
+      - name: instant_pnl_mid_tv
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((swing_mid_tv - nhr_adjustment_bid) - avg_trade_price) * trade_volume * contract_size ELSE (avg_trade_price - (swing_mid_tv - nhr_adjustment_bid)) * trade_volume * contract_size END"
+        input_columns: [routed_buy_sell, swing_mid_tv, nhr_adjustment_bid, avg_trade_price, trade_volume, contract_size]
+        description: "At-trade P&L using swing_mid_tv (regular variant)"
+
+      - name: instant_pnl_fired_at_mid_tv
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((swing_mid_tv - nhr_adjustment_bid) - routed_price) * routed_size_capped * contract_size ELSE (routed_price - (swing_mid_tv - nhr_adjustment_bid)) * routed_size_capped * contract_size END"
+        input_columns: [routed_buy_sell, swing_mid_tv, nhr_adjustment_bid, routed_price, routed_size_capped, contract_size]
+        description: "At-trade P&L using swing_mid_tv (fired-at variant)"
+
+      - name: instant_pnl_w_fees_mid_tv
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (((swing_mid_tv - nhr_adjustment_bid) - avg_trade_price) - fees) * trade_volume * contract_size ELSE ((avg_trade_price - (swing_mid_tv - nhr_adjustment_bid)) - fees) * trade_volume * contract_size END"
+        input_columns: [routed_buy_sell, swing_mid_tv, nhr_adjustment_bid, avg_trade_price, trade_volume, contract_size, fees]
+        description: "At-trade P&L after fees using swing_mid_tv (regular variant)"
+
+      - name: instant_pnl_fired_at_w_fees_mid_tv
+        formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (((swing_mid_tv - nhr_adjustment_bid) - routed_price) - fees) * routed_size_capped * contract_size ELSE ((routed_price - (swing_mid_tv - nhr_adjustment_bid)) - fees) * routed_size_capped * contract_size END"
+        input_columns: [routed_buy_sell, swing_mid_tv, nhr_adjustment_bid, routed_price, routed_size_capped, contract_size, fees]
+        description: "At-trade P&L after fees using swing_mid_tv (fired-at variant)"
+
+      - name: mark_to_mid_pnl_per_unit
+        formula: "(tv - swing_mid_tv) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * -1"
+        input_columns: [tv, swing_mid_tv, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "Mark-to-mid P&L per unit"
+
+      - name: mark_to_mid_pnl
+        formula: "(tv - swing_mid_tv) * trade_volume * contract_size * buy_sell_multiplier * -1"
+        input_columns: [tv, swing_mid_tv, trade_volume, contract_size, buy_sell_multiplier]
+        description: "Mark-to-mid P&L (regular variant)"
+
+      - name: mark_to_mid_pnl_fired_at
+        formula: "(tv - swing_mid_tv) * routed_size_capped * contract_size * buy_sell_multiplier * -1"
+        input_columns: [tv, swing_mid_tv, routed_size_capped, contract_size, buy_sell_multiplier]
+        description: "Mark-to-mid P&L (fired-at variant)"
+
+      - name: tv_offset_slippage_{interval}_per_unit
+        formula: "(tv_offset_{interval} - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["tv_offset_{interval}", tv_offset, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "TV offset slippage per unit (NSE/NIFTY only)"
+        nse_nifty_only: true
+
+      - name: tv_offset_slippage_{interval}
+        formula: "(tv_offset_{interval} - tv_offset) * trade_volume * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["tv_offset_{interval}", tv_offset, trade_volume, contract_size, buy_sell_multiplier]
+        description: "TV offset slippage (NSE/NIFTY only)"
+        nse_nifty_only: true
+
+      - name: tv_change_{interval}
+        formula: "(adjusted_tv_{interval} - swing_mid_tv)"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", swing_mid_tv]
+        description: "Total TV change measured from swing_mid_tv"
+
+      - name: tv_change_buysell_{interval}
+        formula: "(adjusted_tv_{interval} - swing_mid_tv) * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", swing_mid_tv, buy_sell_multiplier]
+        description: "TV change signed by buy/sell direction"
+
+      - name: delta_slippage_{interval}_per_unit
+        formula: "((calculated_base_val_{interval} - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["calculated_base_val_{interval}", swing_mid_base_val, delta, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "Delta slippage per unit"
+
+      - name: delta_slippage_{interval}
+        formula: "((calculated_base_val_{interval} - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["calculated_base_val_{interval}", swing_mid_base_val, delta, trade_volume, contract_size, buy_sell_multiplier]
+        description: "Delta slippage (regular variant)"
+
+      - name: delta_slippage_{interval}_fired_at
+        formula: "((calculated_base_val_{interval} - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["calculated_base_val_{interval}", swing_mid_base_val, delta, routed_size_capped, contract_size, buy_sell_multiplier]
+        description: "Delta slippage (fired-at variant)"
+
+      - name: roll_slippage_{interval}_per_unit
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "Roll slippage per unit"
+
+      - name: roll_slippage_{interval}
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, trade_volume, contract_size, buy_sell_multiplier]
+        description: "Roll slippage (regular variant)"
+
+      - name: roll_slippage_{interval}_fired_at
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, routed_size_capped, contract_size, buy_sell_multiplier]
+        description: "Roll slippage (fired-at variant)"
+
+      - name: vol_slippage_{interval}_per_unit
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", leg_ratio, contract_size, buy_sell_multiplier]
+        description: "Vol slippage per unit (path-corrected)"
+
+      - name: vol_slippage_{interval}
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * trade_volume * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", trade_volume, contract_size, buy_sell_multiplier]
+        description: "Vol slippage (regular variant, path-corrected)"
+
+      - name: vol_slippage_{interval}_fired_at
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * routed_size_capped * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", routed_size_capped, contract_size, buy_sell_multiplier]
+        description: "Vol slippage (fired-at variant, path-corrected)"
+
+      - name: other_slippage_{interval}_per_unit
+        formula: "(tv_change_buysell_{interval} * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_{interval}_per_unit + roll_slippage_{interval}_per_unit)"
+        per_interval: true
+        input_columns: ["tv_change_buysell_{interval}", leg_ratio, contract_size, "delta_slippage_{interval}_per_unit", "roll_slippage_{interval}_per_unit"]
+        description: "Residual slippage per unit"
+
+      - name: other_slippage_{interval}
+        formula: "(tv_change_buysell_{interval} * contract_size * trade_volume) - (delta_slippage_{interval} + roll_slippage_{interval})"
+        per_interval: true
+        input_columns: ["tv_change_buysell_{interval}", contract_size, trade_volume, "delta_slippage_{interval}", "roll_slippage_{interval}"]
+        description: "Residual slippage (regular variant)"
+
+      - name: other_slippage_{interval}_fired_at
+        formula: "(tv_change_buysell_{interval} * contract_size * routed_size_capped) - (delta_slippage_{interval}_fired_at + roll_slippage_{interval}_fired_at)"
+        per_interval: true
+        input_columns: ["tv_change_buysell_{interval}", contract_size, routed_size_capped, "delta_slippage_{interval}_fired_at", "roll_slippage_{interval}_fired_at"]
+        description: "Residual slippage (fired-at variant)"
+
+  # =========================================================================
+  # CLICKTRADE
+  # =========================================================================
+  - name: clicktrade
+    calculation_file: clicktrade/kpi_clicktrade_calculations.sql
+    source: "tradedata (filtered subset of PosData/PositionEvent proto)"
+    input_ref: kpi_clicktrade_combo_adjustments
+    filters:
+      algorithm:
+        - VTM_TAKEOUT
+        - CLICK_ORDER
+        - CLICK_TAKEOUT
+        - BOOKSCREEN
+        - VTM_ORDER
+        - VTM_DIME
+        - COMBO_TAKEOUT
+        - COMBO_ORDER
+        - COMBO
+      position_type_exclude: [80, 69, 65, 68, 79]
+      inst_type_name: [OPTION, COMBO]
+    notes:
+      - "Uses tv_theo as tv (not tv_bid/tv_ask)"
+      - "Uses ref_base_val as mid_base_val (not bid/ask average)"
+      - "Uses delta_theo as delta (no initial gamma adjustment)"
+      - "trade_aggressor_side derived from price vs tv comparison"
+      - "trade_side derived from size sign (positive=BUY, negative=SELL)"
+      - "Delta gamma adjustment: delta + (mid_base_val + reference_roll - forward) * ref_gamma"
+      - "fees hardcoded to 0"
+      - "vol_path_estimate uses raw_delta (not raw_delta_mid_bv)"
+
+    intermediate_calculations:
+      - name: tv
+        formula: "tv_theo"
+        input_columns: [tv_theo]
+        description: "Uses tv_theo directly"
+
+      - name: mid_base_val
+        formula: "ref_base_val"
+        input_columns: [ref_base_val]
+        description: "Uses ref_base_val directly (not bid/ask average)"
+
+      - name: delta
+        formula: "delta_theo"
+        input_columns: [delta_theo]
+        description: "Uses delta_theo directly (no initial gamma adjustment)"
+        note: "Gamma adjustment applied later: delta + (mid_base_val + reference_roll - forward) * ref_gamma"
+
+      - name: base_adjustment
+        formula: "0"
+        description: "Always zero for clicktrade"
+
+      - name: stock_roll
+        formula: "forward - under"
+        input_columns: [forward, under]
+        description: "Stock roll value"
+
+      - name: reference_roll
+        formula: "(forward - under) + roll"
+        input_columns: [forward, under, roll]
+        description: "Reference roll (always uses roll, no combo distinction)"
+
+      - name: fees
+        formula: "0"
+        description: "Always zero for clicktrade"
+
+      - name: trade_aggressor_side
+        formula: "CASE WHEN price > tv THEN 'BUY' WHEN price < tv THEN 'SELL' ELSE 'NULL' END"
+        input_columns: [price, tv]
+        description: "Derived from price vs TV comparison"
+
+      - name: trade_side
+        formula: "CASE WHEN size > 0 THEN 'BUY' WHEN size < 0 THEN 'SELL' ELSE 'NULL' END"
+        input_columns: [size]
+        description: "Derived from size sign"
+
+      - name: size_adjustment
+        formula: "CASE WHEN parent_is_combo = true AND is_parent = true AND trade_side = 'BUY' THEN CAST(total_traded_size AS INT64) WHEN parent_is_combo = true AND is_parent = true AND trade_side = 'SELL' THEN CAST(total_traded_size * -1 AS INT64) ELSE CAST(size AS INT64) END"
+        input_columns: [parent_is_combo, is_parent, trade_side, total_traded_size, size]
+        description: "Size adjustment for combo parents"
+
+      - name: delta_gamma_adjustment
+        formula: "delta + (mid_base_val + reference_roll - forward) * ref_gamma"
+        input_columns: [delta, mid_base_val, reference_roll, forward, ref_gamma]
+        description: "Gamma adjustment for delta before slippage calculations"
+
+    metrics:
+      - name: buy_sell_multiplier
+        formula: "CASE WHEN trade_side IN ('BUY', '66') THEN 1 WHEN trade_side IN ('SELL', '83') THEN -1 ELSE 0 END"
+        input_columns: [trade_side]
+        description: "Sign convention for clicktrade: +1 for BUY, -1 for SELL"
+
+      - name: adjusted_tv_{interval}
+        formula: "See shared_formulas.adjusted_tv"
+        per_interval: true
+        input_columns: ["tv_{interval}", "delta_{interval}", "calculated_base_val_{interval}", "under_{interval}", "roll_{interval}", "gamma_{interval}"]
+        description: "Taylor-expanded TV at each interval"
+
+      - name: instant_edge
+        formula: "CASE WHEN trade_side = 'BUY' THEN (tv - price) WHEN trade_side = 'SELL' THEN (price - tv) ELSE 0 END"
+        input_columns: [trade_side, tv, price]
+        description: "At-trade edge (note: reversed sign vs markettrade -- Mako's edge)"
+
+      - name: instant_pnl
+        formula: "CASE WHEN trade_side = 'BUY' THEN (tv - price) * ABS(size) * contract_size WHEN trade_side = 'SELL' THEN (price - tv) * ABS(size) * contract_size ELSE 0 END"
+        input_columns: [trade_side, tv, price, size, contract_size]
+        description: "At-trade P&L (uses ABS(size))"
+
+      - name: instant_pnl_w_fees
+        formula: "CASE WHEN trade_side = 'BUY' THEN ((tv - price) - fees) * ABS(size) * contract_size WHEN trade_side = 'SELL' THEN ((price - tv) - fees) * ABS(size) * contract_size ELSE 0 END"
+        input_columns: [trade_side, tv, price, size, contract_size, fees]
+        description: "At-trade P&L after fees (fees is always 0)"
+
+      - name: tv_change_{interval}
+        formula: "(adjusted_tv_{interval} - tv)"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", tv]
+        description: "Total TV change at each interval"
+
+      - name: tv_change_buysell_{interval}
+        formula: "(adjusted_tv_{interval} - tv) * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", tv, buy_sell_multiplier]
+        description: "TV change signed by buy/sell direction"
+
+      - name: delta_slippage_{interval}_per_unit
+        formula: "((calculated_base_val_{interval} - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["calculated_base_val_{interval}", mid_base_val, delta, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "Delta slippage per unit"
+
+      - name: delta_slippage_{interval}
+        formula: "((calculated_base_val_{interval} - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["calculated_base_val_{interval}", mid_base_val, delta, size, contract_size, buy_sell_multiplier]
+        description: "Delta slippage (uses ABS(size))"
+
+      - name: roll_slippage_{interval}_per_unit
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, leg_ratio, contract_size, buy_sell_multiplier]
+        description: "Roll slippage per unit"
+
+      - name: roll_slippage_{interval}
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, size, contract_size, buy_sell_multiplier]
+        description: "Roll slippage (uses ABS(size))"
+
+      - name: vol_slippage_{interval}_per_unit
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", leg_ratio, contract_size, buy_sell_multiplier]
+        description: "Vol slippage per unit (path-corrected)"
+
+      - name: vol_slippage_{interval}
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * ABS(size) * contract_size * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", size, contract_size, buy_sell_multiplier]
+        description: "Vol slippage (uses ABS(size), path-corrected)"
+
+      - name: other_slippage_{interval}_per_unit
+        formula: "(tv_change_buysell_{interval} * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_{interval}_per_unit + roll_slippage_{interval}_per_unit)"
+        per_interval: true
+        input_columns: ["tv_change_buysell_{interval}", leg_ratio, contract_size, "delta_slippage_{interval}_per_unit", "roll_slippage_{interval}_per_unit"]
+        description: "Residual slippage per unit"
+
+      - name: other_slippage_{interval}
+        formula: "(tv_change_buysell_{interval} * contract_size * ABS(size)) - (delta_slippage_{interval} + roll_slippage_{interval})"
+        per_interval: true
+        input_columns: ["tv_change_buysell_{interval}", contract_size, size, "delta_slippage_{interval}", "roll_slippage_{interval}"]
+        description: "Residual slippage (uses ABS(size))"
+
+  # =========================================================================
+  # BROKERTRADE
+  # =========================================================================
+  - name: brokertrade
+    calculation_file: brokertrade/kpi_brokertrade_calculations.sql
+    source: "brokertrade data-layer table (from csa_offfloor / BrokerTrade proto)"
+    input_ref: kpi_brokertrade_trade_side
+    notes:
+      - "Uses trade_tv (original raw TV) for instant_edge/pnl, NOT gamma-adjusted tv"
+      - "Has market_mako_multiplier: -1 for market trades, +1 for Mako trades"
+      - "All slippage formulas include market_mako_multiplier"
+      - "9 different fee methods for instant_pnl_w_fees"
+      - "Has is_ref_trade flag; delta_slippage is zero for ref trades"
+      - "Has ref_buy_sell_multiplier and ref components for other_slippage"
+      - "TV is gamma-adjusted using either adjusted_trade_ref_price (ref trades) or mid_base_val + adjusted_roll (non-ref)"
+      - "Delta for ref trades: backcalculated from size ratios for ref components"
+      - "trade_side from size sign; combo parents use leg_ratio_at_zero_index * size_at_zero_index"
+      - "tv_change uses trade_tv (not tv) to respect manual edits in Broker Trade Editor"
+      - "Has tv_change and other_slippage split into option_component and ref_component"
+      - "Uses ABS(size) for volume in slippage formulas"
+
+    intermediate_calculations:
+      - name: size
+        formula: "CASE WHEN is_parent = true AND trade_side = 'BUY' THEN CAST(total_traded_size AS INT64) WHEN is_parent = true AND trade_side = 'SELL' THEN CAST(total_traded_size * -1 AS INT64) ELSE CAST(size AS INT64) END"
+        input_columns: [is_parent, trade_side, total_traded_size, size]
+        description: "Size adjustment for combo parents"
+
+      - name: tv
+        formula: "CASE WHEN is_ref_trade THEN tv + delta * (adjusted_trade_ref_price - forward) + 0.5 * gamma * POW((adjusted_trade_ref_price - forward), 2) ELSE tv + delta * (mid_base_val + adjusted_roll - forward) + 0.5 * gamma * POW((mid_base_val + adjusted_roll - forward), 2) END"
+        input_columns: [tv, delta, adjusted_trade_ref_price, forward, gamma, mid_base_val, adjusted_roll, is_ref_trade]
+        description: "Gamma-adjusted TV (different formulas for ref vs non-ref trades)"
+
+      - name: mid_base_val
+        standard: "(ul_bid_price_0 + ul_ask_price_0) / 2"
+        special_handling: "under (when use_under_for_mid_base_val is set)"
+        input_columns: [ul_bid_price_0, ul_ask_price_0, under]
+        description: "Mid-market base value from underlying bid/ask or under price"
+
+      - name: delta
+        formula: "CASE WHEN is_ref_component = 1 THEN SAFE_DIVIDE(size * contract_size, ABS(SAFE_DIVIDE(size_at_zero_index * contract_size_at_zero_index, leg_ratio_at_zero_index))) * -1 ELSE delta_theo END"
+        input_columns: [is_ref_component, size, contract_size, size_at_zero_index, contract_size_at_zero_index, leg_ratio_at_zero_index, delta_theo]
+        description: "Delta: back-calculated for ref components, delta_theo otherwise"
+
+      - name: delta_adjustment
+        formula: "CASE WHEN is_ref_trade AND is_ref_component = 0 THEN delta + (adjusted_trade_ref_price - forward) * gamma WHEN is_ref_trade AND is_ref_component = 1 THEN delta ELSE delta + (mid_base_val + adjusted_roll - forward) * gamma END"
+        input_columns: [delta, adjusted_trade_ref_price, forward, gamma, mid_base_val, adjusted_roll, is_ref_trade, is_ref_component]
+        description: "Gamma-adjusted delta for slippage calculations"
+
+      - name: base_adjustment
+        formula: "0"
+        description: "Always zero for brokertrade"
+
+      - name: stock_roll
+        formula: "forward - under"
+        input_columns: [forward, under]
+        description: "Stock roll value"
+
+      - name: reference_roll
+        formula: "(forward - under) + roll"
+        input_columns: [forward, under, roll]
+        description: "Reference roll (always uses roll directly)"
+
+      - name: fees
+        formula: "0"
+        description: "Always zero (fees handled separately in instant_pnl_w_fees via fee methods)"
+
+      - name: trade_side
+        formula: "CASE WHEN parent_is_combo = true AND is_parent = true AND leg_ratio_at_zero_index * size_at_zero_index > 0 THEN 'BUY' WHEN parent_is_combo = true AND is_parent = true AND leg_ratio_at_zero_index * size_at_zero_index < 0 THEN 'SELL' WHEN size > 0 THEN 'BUY' WHEN size < 0 THEN 'SELL' ELSE 'NULL' END"
+        input_columns: [parent_is_combo, is_parent, leg_ratio_at_zero_index, size_at_zero_index, size]
+        description: "Trade side: combo parents use leg_ratio * size at index 0, others use size sign"
+
+      - name: adjusted_trade_ref_price
+        formula: "trade_ref_price + adjusted_roll"
+        input_columns: [trade_ref_price, adjusted_roll]
+        description: "Adjusted trade reference price"
+
+      - name: brokerage_rate
+        formula: >
+          CASE
+            WHEN brokerage_rate IS NULL THEN 0
+            WHEN LENGTH(counterparty) = 4 AND RIGHT(counterparty, 1) = 'F' THEN 0
+            WHEN LENGTH(counterparty) = 4 AND RIGHT(counterparty, 1) = 'H' THEN brokerage_rate / 2
+            WHEN LENGTH(counterparty) = 4 AND RIGHT(counterparty, 1) = 'Q' THEN brokerage_rate / 4
+            ELSE brokerage_rate
+          END
+        input_columns: [brokerage_rate, counterparty]
+        description: "Adjusted brokerage rate based on counterparty suffix (F=free, H=half, Q=quarter)"
+
+    metrics:
+      - name: buy_sell_multiplier
+        formula: "CASE WHEN trade_side IN ('BUY', '66') THEN 1 WHEN trade_side IN ('SELL', '83') THEN -1 ELSE 0 END"
+        input_columns: [trade_side]
+        description: "Sign convention for brokertrade: +1 for BUY, -1 for SELL"
+
+      - name: market_mako_multiplier
+        formula: "CASE WHEN market_or_mako_trade = 'market' THEN -1 ELSE 1 END"
+        input_columns: [market_or_mako_trade]
+        description: "Market/Mako multiplier: -1 for market trades (Mako is on the other side), +1 for Mako trades"
+
+      - name: ref_buy_sell_multiplier
+        formula: "CASE WHEN ref_trade_side IN ('BUY', '66') THEN 1 WHEN ref_trade_side IN ('SELL', '83') THEN -1 ELSE 0 END"
+        input_columns: [ref_trade_side]
+        description: "Buy/sell multiplier for reference trade side"
+
+      - name: adjusted_tv_{interval}
+        formula: "See shared_formulas.adjusted_tv"
+        per_interval: true
+        input_columns: ["tv_{interval}", "delta_{interval}", "calculated_base_val_{interval}", "under_{interval}", "roll_{interval}", "gamma_{interval}"]
+        description: "Taylor-expanded TV at each interval"
+
+      - name: instant_edge
+        formula: "CASE WHEN trade_side = 'BUY' THEN (trade_tv - price) * market_mako_multiplier WHEN trade_side = 'SELL' THEN (price - trade_tv) * market_mako_multiplier ELSE 0 END"
+        input_columns: [trade_side, trade_tv, price, market_mako_multiplier]
+        description: "At-trade edge using trade_tv (original raw TV, not gamma-adjusted)"
+
+      - name: instant_pnl
+        formula: "CASE WHEN trade_side = 'BUY' THEN (trade_tv - price) * ABS(size) * contract_size * market_mako_multiplier WHEN trade_side = 'SELL' THEN (price - trade_tv) * ABS(size) * contract_size * market_mako_multiplier ELSE 0 END"
+        input_columns: [trade_side, trade_tv, price, size, contract_size, market_mako_multiplier]
+        description: "At-trade P&L using trade_tv"
+
+      - name: instant_pnl_w_fees
+        formula: "See fee_methods below"
+        input_columns: [trade_side, trade_tv, price, size, contract_size, market_mako_multiplier, fees, fee_method, brokerage_rate, mid_base_val, total_leg_lots]
+        description: "At-trade P&L with fee deduction; formula depends on fee_method"
+        fee_methods:
+          - name: "Per Lot"
+            formula: "((trade_tv - price - fees) * contract_size * ABS(size) * market_mako_multiplier) - (brokerage_rate * total_leg_lots)"
+            description: "Fixed fee per lot traded"
+
+          - name: "bp of Underlying Price Per Lot"
+            formula: "((trade_tv - price - fees) * contract_size * ABS(size) * market_mako_multiplier) - (brokerage_rate * mid_base_val * 0.0001 * total_leg_lots)"
+            description: "Fee in basis points of underlying price per lot"
+
+          - name: "Per Trade"
+            formula: "((trade_tv - price - fees) * ABS(size) * contract_size * market_mako_multiplier) - brokerage_rate"
+            description: "Fixed fee per trade"
+
+          - name: "bp of Premium"
+            formula: "((trade_tv - price - fees) * ABS(size) * contract_size * market_mako_multiplier) - (brokerage_rate * price * 0.0001)"
+            description: "Fee in basis points of trade premium"
+
+          - name: "Pct of Premium"
+            formula: "((trade_tv - price - fees) * ABS(size) * contract_size * market_mako_multiplier) - (brokerage_rate * price * 0.01)"
+            description: "Fee as percentage of trade premium"
+
+          - name: "Per 1000 Lot x CSize"
+            formula: "((trade_tv - price - fees) * contract_size * ABS(size) * market_mako_multiplier) - (brokerage_rate * total_leg_lots / 1000)"
+            description: "Fee per 1000 lots times contract size"
+
+          - name: "No Fee"
+            formula: "(trade_tv - price) * ABS(size) * contract_size * market_mako_multiplier"
+            description: "Default (no fee deduction); also applies to NULL or unrecognized fee methods"
+
+          - name: "NULL"
+            formula: "(trade_tv - price) * ABS(size) * contract_size * market_mako_multiplier"
+            description: "Same as No Fee"
+
+          - name: "unrecognized"
+            formula: "(trade_tv - price) * ABS(size) * contract_size * market_mako_multiplier"
+            description: "Fallback: same as No Fee"
+        note: "Formulas shown for BUY side; SELL side reverses (price - trade_tv). For combo headers, total_leg_lots is the sum of ABS(total_traded_size) across legs, not ABS(size)."
+
+      - name: tv_change_{interval}
+        formula: "(adjusted_tv_{interval} - trade_tv)"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", trade_tv]
+        description: "Total TV change (uses trade_tv for Broker Trade Editor manual edits)"
+
+      - name: tv_change_buysell_{interval}
+        formula: "(adjusted_tv_{interval} - trade_tv) * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", trade_tv, buy_sell_multiplier]
+        description: "TV change signed by buy/sell direction"
+
+      - name: tv_change_{interval}_option_component
+        formula: "(adjusted_tv_{interval} - trade_tv)"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", trade_tv]
+        description: "TV change option component (same as tv_change, split for decomposition)"
+
+      - name: tv_change_buysell_{interval}_option_component
+        formula: "(adjusted_tv_{interval} - trade_tv) * buy_sell_multiplier"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", trade_tv, buy_sell_multiplier]
+        description: "TV change option component signed by buy/sell"
+
+      - name: tv_change_{interval}_ref_component
+        formula: "CASE WHEN is_ref_trade THEN (calculated_base_val_{interval} - trade_ref_price) ELSE 0 END"
+        per_interval: true
+        input_columns: [is_ref_trade, "calculated_base_val_{interval}", trade_ref_price]
+        description: "TV change reference component (only for ref trades)"
+
+      - name: tv_change_buysell_{interval}_ref_component
+        formula: "CASE WHEN is_ref_trade THEN (calculated_base_val_{interval} - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END"
+        per_interval: true
+        input_columns: [is_ref_trade, "calculated_base_val_{interval}", trade_ref_price, ref_buy_sell_multiplier]
+        description: "TV change reference component signed by ref buy/sell"
+
+      - name: delta_slippage_{interval}_per_unit
+        formula: "CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_{interval} - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END"
+        per_interval: true
+        input_columns: [is_ref_trade, "calculated_base_val_{interval}", mid_base_val, delta, leg_ratio, contract_size, buy_sell_multiplier, market_mako_multiplier]
+        description: "Delta slippage per unit (zero for ref trades)"
+
+      - name: delta_slippage_{interval}
+        formula: "CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_{interval} - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END"
+        per_interval: true
+        input_columns: [is_ref_trade, "calculated_base_val_{interval}", mid_base_val, delta, size, contract_size, buy_sell_multiplier, market_mako_multiplier]
+        description: "Delta slippage (zero for ref trades)"
+
+      - name: roll_slippage_{interval}_per_unit
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, leg_ratio, contract_size, buy_sell_multiplier, market_mako_multiplier]
+        description: "Roll slippage per unit"
+
+      - name: roll_slippage_{interval}
+        formula: "((reference_roll_{interval} - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier"
+        per_interval: true
+        input_columns: ["reference_roll_{interval}", reference_roll, delta, size, contract_size, buy_sell_multiplier, market_mako_multiplier]
+        description: "Roll slippage"
+
+      - name: vol_slippage_{interval}_per_unit
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", leg_ratio, contract_size, buy_sell_multiplier, market_mako_multiplier]
+        description: "Vol slippage per unit (path-corrected)"
+
+      - name: vol_slippage_{interval}
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier"
+        per_interval: true
+        input_columns: ["vol_{interval}", vol, "vega_{interval}", vega, "vol_path_estimate_{interval}", size, contract_size, buy_sell_multiplier, market_mako_multiplier]
+        description: "Vol slippage (path-corrected)"
+
+      - name: tv_offset_slippage_{interval}_per_unit
+        formula: "(tv_offset_{interval} - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier"
+        per_interval: true
+        input_columns: ["tv_offset_{interval}", tv_offset, leg_ratio, contract_size, buy_sell_multiplier, market_mako_multiplier]
+        description: "TV offset slippage per unit (brokertrade-specific; always computed, not NSE-only)"
+
+      - name: tv_offset_slippage_{interval}
+        formula: "(tv_offset_{interval} - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier"
+        per_interval: true
+        input_columns: ["tv_offset_{interval}", tv_offset, size, contract_size, buy_sell_multiplier, market_mako_multiplier]
+        description: "TV offset slippage (brokertrade-specific; always computed)"
+
+      - name: other_slippage_{interval}_per_unit
+        formula: "((adjusted_tv_{interval} - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_{interval}_per_unit + roll_slippage_{interval}_per_unit)"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", trade_tv, buy_sell_multiplier, leg_ratio, contract_size, market_mako_multiplier, "delta_slippage_{interval}_per_unit", "roll_slippage_{interval}_per_unit"]
+        description: "Residual slippage per unit"
+
+      - name: other_slippage_{interval}
+        formula: "((adjusted_tv_{interval} - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_{interval} + roll_slippage_{interval})"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", trade_tv, buy_sell_multiplier, contract_size, size, market_mako_multiplier, "delta_slippage_{interval}", "roll_slippage_{interval}"]
+        description: "Residual slippage"
+
+      - name: other_slippage_{interval}_per_unit_option_component
+        formula: "((adjusted_tv_{interval} - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_{interval}_per_unit + roll_slippage_{interval}_per_unit)"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", trade_tv, buy_sell_multiplier, leg_ratio, contract_size, market_mako_multiplier, "delta_slippage_{interval}_per_unit", "roll_slippage_{interval}_per_unit"]
+        description: "Other slippage per unit option component (same as other_slippage per unit)"
+
+      - name: other_slippage_{interval}_option_component
+        formula: "((adjusted_tv_{interval} - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_{interval} + roll_slippage_{interval})"
+        per_interval: true
+        input_columns: ["adjusted_tv_{interval}", trade_tv, buy_sell_multiplier, contract_size, size, market_mako_multiplier, "delta_slippage_{interval}", "roll_slippage_{interval}"]
+        description: "Other slippage option component (same as other_slippage)"
+
+      - name: other_slippage_{interval}_per_unit_ref_component
+        formula: "CASE WHEN is_ref_trade THEN (calculated_base_val_{interval} - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_{interval}_per_unit + roll_slippage_{interval}_per_unit) ELSE 0 END"
+        per_interval: true
+        input_columns: [is_ref_trade, "calculated_base_val_{interval}", trade_ref_price, ref_buy_sell_multiplier, leg_ratio, ref_contract_size, market_mako_multiplier, "delta_slippage_{interval}_per_unit", "roll_slippage_{interval}_per_unit"]
+        description: "Other slippage per unit reference component (only for ref trades)"
+
+      - name: other_slippage_{interval}_ref_component
+        formula: "CASE WHEN is_ref_trade THEN (calculated_base_val_{interval} - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_{interval} + roll_slippage_{interval}) ELSE 0 END"
+        per_interval: true
+        input_columns: [is_ref_trade, "calculated_base_val_{interval}", trade_ref_price, ref_buy_sell_multiplier, ref_contract_size, ref_size, market_mako_multiplier, "delta_slippage_{interval}", "roll_slippage_{interval}"]
+        description: "Other slippage reference component (only for ref trades)"
+
+# ---------------------------------------------------------------------------
+# Cross-Trade-Type Comparison Summary
+# ---------------------------------------------------------------------------
+comparison_notes:
+  buy_sell_multiplier:
+    markettrade: "-1 for BUY, +1 for SELL (reversed: Mako perspective on aggressor)"
+    quotertrade: "+1 for BUY, -1 for SELL"
+    otoswing: "+1 for BUY, -1 for SELL"
+    clicktrade: "+1 for BUY, -1 for SELL"
+    brokertrade: "+1 for BUY, -1 for SELL"
+    note: "Markettrade is the only type with reversed sign convention"
+
+  instant_edge_formula:
+    markettrade: "(trade_price - tv) for BUY, (tv - trade_price) for SELL"
+    quotertrade: "((tv - nhr_adjustment_bid) - trade_price) for BUY, (trade_price - (tv - nhr_adjustment_bid)) for SELL"
+    otoswing: "((tv - nhr_adjustment_bid) - avg_trade_price) for BUY, (avg_trade_price - (tv - nhr_adjustment_bid)) for SELL"
+    clicktrade: "(tv - price) for BUY, (price - tv) for SELL"
+    brokertrade: "(trade_tv - price) * market_mako_multiplier for BUY, (price - trade_tv) * market_mako_multiplier for SELL"
+
+  slippage_baseline:
+    markettrade: "tv (raw)"
+    quotertrade: "mid_tv"
+    otoswing: "swing_mid_tv"
+    clicktrade: "tv (raw)"
+    brokertrade: "trade_tv (raw from trade time)"
+
+  size_column:
+    markettrade: "trade_size"
+    quotertrade: "trade_size"
+    otoswing: "trade_volume (regular), routed_size_capped (fired_at)"
+    clicktrade: "ABS(size)"
+    brokertrade: "ABS(size)"
+
+  has_fired_at_variants:
+    markettrade: false
+    quotertrade: false
+    otoswing: true
+    clicktrade: false
+    brokertrade: false
+
+  has_mid_tv:
+    markettrade: false
+    quotertrade: true
+    otoswing: true
+    clicktrade: false
+    brokertrade: false
+
+  has_mark_to_mid_pnl:
+    markettrade: false
+    quotertrade: true
+    otoswing: true
+    clicktrade: false
+    brokertrade: false
+
+  has_market_mako_multiplier:
+    markettrade: false
+    quotertrade: false
+    otoswing: false
+    clicktrade: false
+    brokertrade: true
+
+  has_nhr_adjustment:
+    markettrade: false
+    quotertrade: true
+    otoswing: true
+    clicktrade: false
+    brokertrade: false
+
+  has_tv_offset_slippage:
+    markettrade: "NSE/NIFTY only"
+    quotertrade: false
+    otoswing: "NSE/NIFTY only"
+    clicktrade: false
+    brokertrade: "Always (all exchanges)"
+
+  has_ref_components:
+    markettrade: false
+    quotertrade: false
+    otoswing: false
+    clicktrade: false
+    brokertrade: true

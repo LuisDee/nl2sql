@@ -32,25 +32,25 @@
 ## Phase 2: Structural Indexing (Deterministic Extraction)
 
 ### Task 2.1: Extract proto field definitions
-- [ ] Write validation tests for `metadata/proto_fields.yaml` schema (messages have name, file, fields; fields have name, type, number)
-- [ ] Parse all `.proto` files in `repos/cpp/source/pb/` — extract message names, field names, types, field numbers, comments
-- [ ] Output to `metadata/proto_fields.yaml`
-- [ ] Map proto message names to BQ table names (convention-based + manual review)
+- [x] Write validation tests for `metadata/proto_fields.yaml` schema (messages have name, file, fields; fields have name, type, number)
+- [x] Parse all `.proto` files in `repos/cpp/source/pb/` — extract message names, field names, types, field numbers, comments
+- [x] Output to `metadata/proto_fields.yaml`
+- [x] Map proto message names to BQ table names (convention-based + manual review)
 
 ### Task 2.2: Extract data-loader transformations
-- [ ] Write validation tests for `metadata/data_loader_transforms.yaml` schema
-- [ ] Identify and parse transformation SQL/Python in `repos/data-loader/`
-- [ ] For each target table: document source columns, renames, type casts, derived columns
-- [ ] Output to `metadata/data_loader_transforms.yaml`
+- [x] Write validation tests for `metadata/data_loader_transforms.yaml` schema
+- [x] Identify and parse transformation SQL/Python in `repos/data-loader/`
+- [x] For each target table: document source columns, renames, type casts, derived columns
+- [x] Output to `metadata/data_loader_transforms.yaml`
 
 ### Task 2.3: Extract KPI computations
-- [ ] Write validation tests for `metadata/kpi_computations.yaml` schema
-- [ ] Identify and parse KPI computation SQL/Python in `repos/kpi/`
-- [ ] For each KPI column: document formula/SQL expression, input columns, aggregation type
-- [ ] Output to `metadata/kpi_computations.yaml`
+- [x] Write validation tests for `metadata/kpi_computations.yaml` schema
+- [x] Identify and parse KPI computation SQL/Python in `repos/kpi/`
+- [x] For each KPI column: document formula/SQL expression, input columns, aggregation type
+- [x] Output to `metadata/kpi_computations.yaml`
 
 ### Task 2.4: Phase 2 checkpoint
-- [ ] All 3 structural index files exist and pass validation tests
+- [x] All 3 structural index files exist and pass validation tests
 - [ ] Human verification: spot-check 5 proto fields, 5 transformations, 5 KPI formulas against source code
 
 ---

@@ -1,0 +1,3381 @@
+# Proto Field Index for NL2SQL Agent
+# Generated from: repos/cpp/source/pb/
+# Purpose: Reference index mapping protobuf message definitions to BigQuery tables
+# All field numbers, types, and inline comments are captured verbatim from proto sources.
+
+messages:
+
+  # ---------------------------------------------------------------------------
+  # data/MarketTrade.proto
+  # ---------------------------------------------------------------------------
+  - name: MarketTrade
+    file: data/MarketTrade.proto
+    fields:
+      - name: props
+        type: VtCommon
+        number: 1
+        comment: "See VtCommon.proto"
+      - name: tradePrice
+        type: double
+        number: 2
+        comment: "trade price"
+      - name: tradeSize
+        type: uint32
+        number: 3
+        comment: "trade quantity (number of lots)"
+      - name: tradeAggressorSide
+        type: pb.BuySell
+        number: 4
+        comment: "Estimate of direction of trade calculated by comparing TV to trade price"
+      - name: edge
+        type: double
+        number: 5
+        comment: "Edge seen in the trade by the VT, compared to tv at time of trade"
+      - name: isMakoTrade
+        type: uint32
+        number: 6
+        comment: "Indicates if the trade reported by the exchange is a Mako trade"
+      - name: counterpartyId
+        type: string
+        number: 7
+        comment: "Exchange-assigned Id number to market trade indicating counterparty"
+      - name: exchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 8
+        comment: "Exchange-provided timestamp of time of trade"
+      - name: isActiveInstrument
+        type: bool
+        number: 9
+        comment: "Indicates whether this instrument is tradable by the algorithm logging this data"
+      - name: firstFillSequenceNumber
+        type: int64
+        number: 10
+        comment: "The sequence number of the first recorded fill of this trade"
+      - name: lastFillSequenceNumber
+        type: int64
+        number: 11
+        comment: "The sequence number of the last recorded fill of this trade"
+      - name: containsImpliedFills
+        type: bool
+        number: 12
+        comment: "If any of the fills stem from an implied order fill"
+      - name: tradeDate
+        type: pb.Date
+        number: 13
+        comment: "The trade date"
+        optional: true
+      - name: exchAggressorSide
+        type: pb.BuySell
+        number: 14
+        comment: "Direction of trade as determined by the price interface"
+
+  # ---------------------------------------------------------------------------
+  # data/QuoterTrade.proto
+  # ---------------------------------------------------------------------------
+  - name: QuoterTrade
+    file: data/QuoterTrade.proto
+    fields:
+      - name: props
+        type: VtCommon
+        number: 1
+        comment: "See VtCommon.proto"
+      - name: isDeleting
+        type: bool
+        number: 2
+        comment: "Whether there is a fast-delete in-flight for this instrument and side at time of trade"
+      - name: tradePrice
+        type: double
+        number: 3
+        comment: "Trade price"
+      - name: tradeSize
+        type: uint32
+        number: 4
+        comment: "Trade quantity (number of lots)"
+      - name: residualSize
+        type: uint32
+        number: 5
+        comment: "Number of lots of this quote resting after this trade"
+      - name: tradeSide
+        type: pb.BuySell
+        number: 6
+        comment: "Side of the book that traded"
+      - name: totalLevelSize
+        type: uint32
+        number: 7
+        comment: "Total number of lots resting on this price level after this trade, including ours"
+      - name: lastUpdateTv
+        type: double
+        number: 8
+        comment: "Deprecated - see lastUpdateTvBid"
+      - name: lastUpdateBvBid
+        type: double
+        number: 9
+        comment: "The bid baseval when we last updated quotes for this instrument"
+      - name: lastUpdateBvAsk
+        type: double
+        number: 10
+        comment: "The ask baseval when we last updated quotes for this instrument"
+      - name: lastUpdateEdgeBid
+        type: double
+        number: 11
+        comment: "The bid min edge when we last updated quotes for this instrument"
+      - name: lastUpdateEdgeAsk
+        type: double
+        number: 12
+        comment: "The ask min edge when we last updated quotes for this instrument"
+      - name: lastUpdateTimestamp
+        type: google.protobuf.Timestamp
+        number: 13
+        comment: "The event timestamp when quotes for this instrument were last updated"
+      - name: tvBid
+        type: double
+        number: 14
+        comment: "Ref theo offset by internal deflection, adjusted to latest underlying price (bid)"
+      - name: tvAsk
+        type: double
+        number: 15
+        comment: "Ref theo offset by internal deflection, adjusted to latest underlying price (ask)"
+      - name: lastUpdateTvBid
+        type: double
+        number: 16
+        comment: "The bid tv at the last time this quote was updated"
+      - name: lastUpdateTvAsk
+        type: double
+        number: 17
+        comment: "The ask tv at the last time this quote was updated"
+      # field 18 is reserved
+      - name: tradeDate
+        type: pb.Date
+        number: 19
+        comment: "The trade date of this data"
+        optional: true
+      - name: makoOrderId
+        type: uint64
+        number: 20
+        comment: "The Mako front-office id (OrderId in bookServer)"
+      - name: isUpdating
+        type: bool
+        number: 21
+        comment: "Whether there is an update or non-fast delete inflight at the time of trade"
+      - name: lastTradePrice
+        type: double
+        number: 22
+        comment: ""
+      - name: marketVolumeBid
+        type: int32
+        number: 23
+        comment: ""
+      - name: marketVolumeAsk
+        type: int32
+        number: 24
+        comment: ""
+      - name: ourVolumeBid
+        type: int32
+        number: 25
+        comment: ""
+      - name: ourVolumeAsk
+        type: int32
+        number: 26
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # data/OffFloorData.proto
+  # ---------------------------------------------------------------------------
+  - name: OffFloorKey
+    file: data/OffFloorData.proto
+    fields:
+      - name: tradeDate
+        type: pb.Date
+        number: 1
+        comment: ""
+      - name: broker
+        type: string
+        number: 2
+        comment: ""
+      - name: source
+        type: string
+        number: 3
+        comment: ""
+      - name: instrumentHash
+        type: string
+        number: 4
+        comment: ""
+      - name: contractName
+        type: string
+        number: 5
+        comment: ""
+
+  - name: FillInfo
+    file: data/OffFloorData.proto
+    fields:
+      - name: marketSize
+        type: int32
+        number: 1
+        comment: ""
+      - name: marketPrice
+        type: double
+        number: 2
+        comment: ""
+      - name: makoSize
+        type: int32
+        number: 3
+        comment: ""
+      - name: makoPrice
+        type: double
+        number: 4
+        comment: ""
+      - name: refPrice
+        type: double
+        number: 5
+        comment: ""
+        optional: true
+      - name: tte
+        type: double
+        number: 6
+        comment: ""
+      - name: theos
+        type: OraTheoreticals
+        number: 7
+        comment: ""
+
+  - name: TradeLegFill
+    file: data/OffFloorData.proto
+    fields:
+      - name: instrumentHash
+        type: string
+        number: 1
+        comment: ""
+      - name: detail
+        type: FillInfo
+        number: 2
+        comment: ""
+      - name: contractName
+        type: string
+        number: 3
+        comment: ""
+
+  - name: BrokerTrade
+    file: data/OffFloorData.proto
+    fields:
+      - name: key
+        type: OffFloorKey
+        number: 1
+        comment: "to be deprecated soon"
+      - name: user
+        type: string
+        number: 2
+        comment: ""
+      - name: counterparty
+        type: string
+        number: 3
+        comment: ""
+      - name: portfolio
+        type: string
+        number: 4
+        comment: ""
+      - name: tradeTimeStamp
+        type: google.protobuf.Timestamp
+        number: 5
+        comment: ""
+      - name: lastEditTimeStamp
+        type: google.protobuf.Timestamp
+        number: 6
+        comment: ""
+      - name: detail
+        type: FillInfo
+        number: 7
+        comment: ""
+      # field 8 is reserved
+      - name: legFill
+        type: TradeLegFill
+        number: 9
+        comment: ""
+        repeated: true
+      - name: uuid
+        type: string
+        number: 10
+        comment: ""
+      - name: revision
+        type: uint32
+        number: 11
+        comment: ""
+      - name: entryTimeStamp
+        type: google.protobuf.Timestamp
+        number: 12
+        comment: ""
+      - name: dataSource
+        type: DataSource
+        number: 13
+        comment: ""
+      - name: streamSource
+        type: StreamSource
+        number: 14
+        comment: ""
+      # field 15 is reserved (account)
+      - name: note
+        type: string
+        number: 16
+        comment: ""
+      - name: aggressor
+        type: string
+        number: 17
+        comment: ""
+      # field 18 is reserved (inventory)
+      - name: tradeDate
+        type: pb.Date
+        number: 19
+        comment: "Moving OffFloorKey date into BrokerTrade"
+      - name: broker
+        type: string
+        number: 20
+        comment: ""
+      - name: source
+        type: string
+        number: 21
+        comment: ""
+      - name: instrumentHash
+        type: string
+        number: 22
+        comment: ""
+      - name: contractName
+        type: string
+        number: 23
+        comment: ""
+      - name: makoInventory
+        type: string
+        number: 24
+        comment: ""
+      - name: makoAccount
+        type: string
+        number: 25
+        comment: ""
+      - name: marketInventory
+        type: string
+        number: 26
+        comment: ""
+      - name: marketAccount
+        type: string
+        number: 27
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # data/SwingData.proto
+  # ---------------------------------------------------------------------------
+  - name: SwingData
+    file: data/SwingData.proto
+    fields:
+      - name: props
+        type: VtCommon
+        number: 1
+        comment: "See VtCommon.proto"
+      - name: takeoutCategory
+        type: string
+        number: 2
+        comment: "Reason for takeout: UnderMove|OptionTick|TheoChange|Invalid"
+      - name: baseOrderEventType
+        type: string
+        number: 3
+        comment: "Type of book change if takeout is due to underlying's book change"
+      - name: baseOrderEventSide
+        type: pb.BuySell
+        number: 4
+        comment: "Side of orderbook that changed if takeout triggered by base change"
+      - name: takeoutType
+        type: string
+        number: 5
+        comment: "Finer-grained takeout reason: UnderMove|BaseInsert|BaseUpdate|BaseDelete|BaseTrade|OptionTick|OptionTickMopup|PriceTraded|TheoChange|Invalid"
+      - name: eventType
+        type: string
+        number: 6
+        comment: "VT Event that triggered the swing"
+      - name: fanoutIdentifier
+        type: uint64
+        number: 7
+        comment: "Ordinal of the swing if using fan-out logic"
+      - name: fanoutCount
+        type: int32
+        number: 8
+        comment: "Number of identical orders sent in this swing"
+      - name: opportunityIndex
+        type: int32
+        number: 9
+        comment: "Ordinal of the swing if multiple orders routed in one swing"
+      - name: numOpportunities
+        type: int32
+        number: 10
+        comment: "Number of orders routed in this swing"
+      - name: swingProperties
+        type: uint32
+        number: 11
+        comment: "Bit mask of properties about the order"
+      - name: marketPrice
+        type: double
+        number: 12
+        comment: "Top-of-book market price on opposite side at time of swing"
+      - name: marketSize
+        type: int32
+        number: 13
+        comment: "Top-of-book market volume on opposite side at time of swing"
+      - name: routedPrice
+        type: double
+        number: 14
+        comment: "Trade price sent in our order message to exchange"
+      - name: routedSize
+        type: double
+        number: 15
+        comment: "Trade size sent in our order message to exchange"
+      - name: routedBuySell
+        type: pb.BuySell
+        number: 16
+        comment: "Direction of our trade order. 0=buy, 1=sell"
+      - name: avgTradePrice
+        type: double
+        number: 17
+        comment: "Average price of constituent fills"
+      - name: swingEdge
+        type: double
+        number: 18
+        comment: "Edge that we swung for"
+      - name: tradeVolume
+        type: int32
+        number: 19
+        comment: "Trade volume filled. 0 if swung and missed"
+      - name: makoOrderId
+        type: uint64
+        number: 20
+        comment: "Mako-assigned order id"
+      - name: exchOrderId
+        type: string
+        number: 21
+        comment: "Exchange-assigned ID of our order"
+      - name: exchTransId
+        type: string
+        number: 22
+        comment: "Exchange-assigned id of the transaction"
+      - name: latencyStatsPRCX
+        type: uint64
+        number: 23
+        comment: "Time spent awaiting software decode of price packet"
+      - name: latencyStatsPRCS
+        type: uint64
+        number: 24
+        comment: "Time spent in price feed decoder"
+      - name: latencyStatsVTIO
+        type: uint64
+        number: 25
+        comment: "Time spent by the VT to initiate the swing"
+      - name: latencyStatsBKIO
+        type: uint64
+        number: 26
+        comment: "Time in DMA layer"
+      - name: latencyStatsQMIO
+        type: uint64
+        number: 27
+        comment: "Time throttled within QM"
+      - name: latencyStatsITIO
+        type: uint64
+        number: 28
+        comment: "Time taken by order interface to form message and send order"
+      - name: latencyStatsITEX
+        type: uint64
+        number: 29
+        comment: "Meaning differs between exchanges"
+      - name: exchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 30
+        comment: "Exchange-provided timestamp of swing"
+      # field 31 is reserved
+      - name: fanoutIndex
+        type: int32
+        number: 32
+        comment: "Fanout index, starts with 1"
+        optional: true
+      - name: tradeDate
+        type: pb.Date
+        number: 33
+        comment: "Trade date"
+        optional: true
+      - name: minEdge
+        type: double
+        number: 34
+        comment: "Minimum edge required to route an order"
+        optional: true
+      - name: rawMinEdge
+        type: double
+        number: 35
+        comment: ""
+        optional: true
+      - name: isNegativeEdgeAllowed
+        type: bool
+        number: 36
+        comment: "Whether VT is allowed to execute trades with negative edge"
+        optional: true
+      - name: latencyStatsBVIO
+        type: uint64
+        number: 37
+        comment: "Time spent calculating BV"
+      - name: baseSize
+        type: double
+        number: 38
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # data/OroSwingData.proto
+  # ---------------------------------------------------------------------------
+  - name: OroSwingData
+    file: data/OroSwingData.proto
+    fields:
+      - name: props
+        type: VtCommon
+        number: 1
+        comment: "See VtCommon.proto"
+      - name: eventType
+        type: string
+        number: 2
+        comment: "VT Event that triggered the swing"
+      - name: exchOrderId
+        type: string
+        number: 3
+        comment: "Exchange-assigned ID of our order"
+      - name: exchTransId
+        type: string
+        number: 4
+        comment: "Exchange-assigned id of the transaction"
+      - name: userId
+        type: uint64
+        number: 5
+        comment: "Algo-internal id"
+      - name: makoOrderId
+        type: uint64
+        number: 6
+        comment: "Mako-assigned order id"
+      - name: latencyStatsPRCX
+        type: uint64
+        number: 7
+        comment: "Time spent awaiting software decode of price packet"
+      - name: latencyStatsPRCS
+        type: uint64
+        number: 8
+        comment: "Time spent in price feed decoder"
+      - name: latencyStatsVTIO
+        type: uint64
+        number: 9
+        comment: "Time spent by the VT to initiate the swing"
+      - name: latencyStatsBKIO
+        type: uint64
+        number: 10
+        comment: "Time in DMA layer"
+      - name: latencyStatsQMIO
+        type: uint64
+        number: 11
+        comment: "Time throttled within QM"
+      - name: latencyStatsITIO
+        type: uint64
+        number: 12
+        comment: "Time taken by order interface to form message and send order"
+      - name: latencyStatsITEX
+        type: uint64
+        number: 13
+        comment: "Meaning differs between exchanges"
+      - name: swingEdge
+        type: double
+        number: 14
+        comment: "Edge that we swung for"
+      - name: routedPrice
+        type: double
+        number: 15
+        comment: "Trade price sent in our order message to exchange"
+      - name: marketPrice
+        type: double
+        number: 16
+        comment: "The market price the ORO instance is seeing"
+      - name: avgTradePrice
+        type: double
+        number: 17
+        comment: "Average price of constituent fills"
+      - name: routedSize
+        type: double
+        number: 18
+        comment: "Trade size sent in our order message to exchange"
+      - name: marketSize
+        type: int32
+        number: 19
+        comment: "The market size the ORO instance is seeing (can be adjusted)"
+      - name: tradeVolume
+        type: int32
+        number: 20
+        comment: "Trade volume filled. 0 if swung and missed"
+      - name: routedBuySell
+        type: pb.BuySell
+        number: 21
+        comment: "Direction of our trade order"
+      # field 22 is missing in proto (numbering jumps 21->23)
+      - name: tradeDate
+        type: pb.Date
+        number: 23
+        comment: "Trade date"
+        optional: true
+      # field 24 is reserved
+      - name: orderType
+        type: pb.OrderType
+        number: 25
+        comment: "The order type of the swing, ie IOC or GFD"
+        optional: true
+      - name: TriggerSource
+        type: pb.TriggerSource
+        number: 26
+        comment: "Trigger source: FPGA, SoftwareViaFpga, SoftwareTestDma, SoftwareInline, Unknown"
+        optional: true
+
+  # ---------------------------------------------------------------------------
+  # data/OboMarketData.proto  (MarketEvent message)
+  # ---------------------------------------------------------------------------
+  - name: MarketEvent
+    file: data/OboMarketData.proto
+    fields:
+      - name: instrumentHash
+        type: string
+        number: 1
+        comment: ""
+      - name: exchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 2
+        comment: "Timestamp reported by the exchange for when they sent the update"
+      - name: makoIngressTimestamp
+        type: google.protobuf.Timestamp
+        number: 3
+        comment: "Timestamp injected by the switch when the data packet arrives into Mako network"
+      - name: hardwareNicRxTimestamp
+        type: google.protobuf.Timestamp
+        number: 4
+        comment: "Timestamp reported by the network card when it arrives at the host"
+      - name: softwareRxTimestamp
+        type: google.protobuf.Timestamp
+        number: 5
+        comment: "Software timestamp - time just before message decode"
+      - name: sequenceNumber
+        type: uint64
+        number: 6
+        comment: ""
+        optional: true
+      - name: eventType
+        type: EventType
+        number: 7
+        comment: ""
+        optional: true
+      - name: side
+        type: BidAsk
+        number: 8
+        comment: ""
+        optional: true
+      - name: price
+        type: double
+        number: 9
+        comment: ""
+        optional: true
+      - name: quantity
+        type: int32
+        number: 10
+        comment: ""
+        optional: true
+      - name: orderId
+        type: uint64
+        number: 11
+        comment: ""
+        optional: true
+      - name: orderPosition
+        type: uint64
+        number: 12
+        comment: "The position of the order in the order book"
+        optional: true
+      - name: symbol
+        type: string
+        number: 13
+        comment: ""
+        optional: true
+      - name: keyframe
+        type: bool
+        number: 14
+        comment: "If true, message is part of a keyframe/snapshot of current order book state"
+      - name: marketState
+        type: MarketState
+        number: 15
+        comment: ""
+        optional: true
+      - name: instrumentType
+        type: InstType
+        number: 16
+        comment: ""
+        optional: true
+      - name: dataTimestamp
+        type: google.protobuf.Timestamp
+        number: 17
+        comment: "Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp)"
+        optional: true
+      - name: dataOrderIdentifier
+        type: uint64
+        number: 18
+        comment: "Sequence number relative to current exchange message for deterministic ordering"
+        optional: true
+      - name: tradeDate
+        type: pb.Date
+        number: 19
+        comment: ""
+        optional: true
+      - name: fillQuantity
+        type: uint32
+        number: 20
+        comment: "On TradeSummary events only"
+        optional: true
+      - name: hiddenQuantity
+        type: uint32
+        number: 21
+        comment: "On TradeSummary events only"
+        optional: true
+      - name: cancelQuantity
+        type: uint32
+        number: 22
+        comment: "On TradeSummary events only"
+        optional: true
+      - name: makoSequenceNumber
+        type: uint64
+        number: 23
+        comment: "Instrument-level absolute sequence number"
+        optional: true
+      - name: dataSource
+        type: DataSource
+        number: 24
+        comment: ""
+      - name: streamSource
+        type: StreamSource
+        number: 25
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # data/MarketDataExtended.proto
+  # ---------------------------------------------------------------------------
+  - name: MarketDataExtended
+    file: data/MarketDataExtended.proto
+    fields:
+      - name: tradeDate
+        type: pb.Date
+        number: 1
+        comment: ""
+      - name: symbol
+        type: string
+        number: 2
+        comment: ""
+      - name: instrumentHash
+        type: string
+        number: 3
+        comment: ""
+      - name: exchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 4
+        comment: "Timestamp reported by the exchange for matching engine time"
+      - name: makoIngressTimestamp
+        type: google.protobuf.Timestamp
+        number: 5
+        comment: "Timestamp injected by the switch when data packet arrives into Mako network"
+      - name: hardwareNicRxTimestamp
+        type: google.protobuf.Timestamp
+        number: 6
+        comment: "Timestamp reported by the network card when it arrives at the host"
+      - name: softwareRxTimestamp
+        type: google.protobuf.Timestamp
+        number: 7
+        comment: "Software timestamp - will be empty unless streamed live"
+      - name: sequenceNumber
+        type: uint64
+        number: 8
+        comment: ""
+      - name: marketTradeId
+        type: string
+        number: 9
+        comment: "Exchange-assigned identifier to link trade with private order feed"
+        optional: true
+      - name: price
+        type: double
+        number: 10
+        comment: ""
+        optional: true
+      - name: size
+        type: double
+        number: 11
+        comment: ""
+        optional: true
+      - name: side
+        type: pb.BuySell
+        number: 12
+        comment: ""
+        optional: true
+      - name: buyerId
+        type: string
+        number: 13
+        comment: "Exchange-assigned identifier for the buyer"
+        optional: true
+      - name: sellerId
+        type: string
+        number: 14
+        comment: "Exchange-assigned identifier for the seller"
+        optional: true
+      - name: tradeExchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 15
+        comment: "Timestamps of the actual trade message"
+        optional: true
+      - name: tradeIngressTimestamp
+        type: google.protobuf.Timestamp
+        number: 16
+        comment: ""
+        optional: true
+      - name: dataSource
+        type: DataSource
+        number: 17
+        comment: ""
+      - name: streamSource
+        type: StreamSource
+        number: 18
+        comment: ""
+      - name: eventType
+        type: EventType
+        number: 19
+        comment: ""
+      - name: enteringFirmId
+        type: string
+        number: 20
+        comment: "Exchange-assigned identifier for the participant inserting the order"
+        optional: true
+      - name: orderId
+        type: string
+        number: 21
+        comment: ""
+        optional: true
+      - name: aggressorExchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 22
+        comment: "Exchange-reported time aggressor got to exchange for a trade"
+      - name: sentExchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 23
+        comment: "Exchange-reported sending time of the market data packet"
+
+  # ---------------------------------------------------------------------------
+  # data/MarketDepth.proto
+  # ---------------------------------------------------------------------------
+  - name: MarketLevel
+    file: data/MarketDepth.proto
+    fields:
+      - name: price
+        type: double
+        number: 1
+        comment: ""
+      - name: volume
+        type: int32
+        number: 2
+        comment: ""
+      - name: orders
+        type: int32
+        number: 3
+        comment: ""
+
+  - name: MarketDepth
+    file: data/MarketDepth.proto
+    fields:
+      - name: instrumentHash
+        type: string
+        number: 1
+        comment: ""
+      - name: symbol
+        type: string
+        number: 2
+        comment: ""
+      - name: exchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 3
+        comment: ""
+      - name: makoIngressTimestamp
+        type: google.protobuf.Timestamp
+        number: 4
+        comment: ""
+      - name: hardwareNicRxTimestamp
+        type: google.protobuf.Timestamp
+        number: 5
+        comment: ""
+      - name: softwareRxTimestamp
+        type: google.protobuf.Timestamp
+        number: 6
+        comment: ""
+      - name: sequenceNumber
+        type: uint64
+        number: 7
+        comment: ""
+      - name: bids
+        type: MarketLevel
+        number: 8
+        comment: ""
+        repeated: true
+      - name: asks
+        type: MarketLevel
+        number: 9
+        comment: ""
+        repeated: true
+      - name: keyframe
+        type: bool
+        number: 10
+        comment: ""
+      - name: dataTimestamp
+        type: google.protobuf.Timestamp
+        number: 11
+        comment: ""
+        optional: true
+      - name: dataOrderIdentifier
+        type: uint64
+        number: 12
+        comment: ""
+        optional: true
+      - name: tradeDate
+        type: pb.Date
+        number: 13
+        comment: ""
+        optional: true
+      - name: dataSource
+        type: DataSource
+        number: 14
+        comment: ""
+      - name: streamSource
+        type: StreamSource
+        number: 15
+        comment: ""
+      - name: marketState
+        type: MarketState
+        number: 16
+        comment: ""
+      - name: impliedBid
+        type: MarketLevel
+        number: 17
+        comment: ""
+      - name: impliedAsk
+        type: MarketLevel
+        number: 18
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # data/theoData.proto
+  # ---------------------------------------------------------------------------
+  - name: TheoData
+    file: data/theoData.proto
+    fields:
+      - name: portfolio
+        type: string
+        number: 1
+        comment: ""
+      - name: symbol
+        type: string
+        number: 2
+        comment: ""
+      - name: curveId
+        type: uint64
+        number: 3
+        comment: ""
+      - name: carryId
+        type: uint64
+        number: 4
+        comment: ""
+      - name: streamId
+        type: uint64
+        number: 5
+        comment: ""
+      - name: instrumentHash
+        type: string
+        number: 6
+        comment: ""
+      - name: tv
+        type: double
+        number: 7
+        comment: ""
+      - name: delta
+        type: double
+        number: 8
+        comment: ""
+      - name: gamma
+        type: double
+        number: 9
+        comment: ""
+      - name: vega
+        type: double
+        number: 10
+        comment: ""
+      - name: theta
+        type: double
+        number: 11
+        comment: ""
+      - name: rho
+        type: double
+        number: 12
+        comment: ""
+      - name: tte
+        type: double
+        number: 13
+        comment: ""
+      - name: rawDelta
+        type: double
+        number: 14
+        comment: ""
+      - name: rawGamma
+        type: double
+        number: 15
+        comment: ""
+      - name: vol
+        type: double
+        number: 16
+        comment: ""
+      - name: normStrike
+        type: double
+        number: 17
+        comment: ""
+      - name: under
+        type: double
+        number: 18
+        comment: ""
+      - name: roll
+        type: double
+        number: 19
+        comment: ""
+      - name: tvOffset
+        type: double
+        number: 20
+        comment: ""
+      - name: whenTimestamp
+        type: google.protobuf.Timestamp
+        number: 21
+        comment: "theoreticals::when (resolution of seconds)"
+      - name: sourceEventTimestamp
+        type: google.protobuf.Timestamp
+        number: 22
+        comment: "Should not be used to discern between theo updates; use theoEventTxTimestamp instead"
+      - name: pmGreeks
+        type: PmModelGreeks
+        number: 23
+        comment: ""
+      - name: theoEventTxTimestamp
+        type: google.protobuf.Timestamp
+        number: 24
+        comment: ""
+      - name: forward
+        type: double
+        number: 25
+        comment: ""
+        optional: true
+      - name: shortRate
+        type: double
+        number: 26
+        comment: ""
+        optional: true
+      - name: tradeDate
+        type: pb.Date
+        number: 27
+        comment: ""
+        optional: true
+      - name: dataSource
+        type: DataSource
+        number: 28
+        comment: ""
+      - name: streamSource
+        type: StreamSource
+        number: 29
+        comment: ""
+      - name: theoComputeTimestampStart
+        type: google.protobuf.Timestamp
+        number: 30
+        comment: ""
+      - name: theoComputeTimestampStop
+        type: google.protobuf.Timestamp
+        number: 31
+        comment: ""
+      - name: theoComputeType
+        type: TheoComputeType
+        number: 32
+        comment: ""
+      - name: offsetId
+        type: uint64
+        number: 33
+        comment: ""
+      - name: greeks
+        type: CustomGreek
+        number: 34
+        comment: ""
+        repeated: true
+
+  # ---------------------------------------------------------------------------
+  # data/PosData.proto  (PositionEvent message)
+  # ---------------------------------------------------------------------------
+  - name: PositionEvent
+    file: data/PosData.proto
+    fields:
+      - name: instrumentHash
+        type: string
+        number: 1
+        comment: ""
+      - name: symbol
+        type: string
+        number: 2
+        comment: ""
+      - name: makoId
+        type: string
+        number: 3
+        comment: ""
+      - name: traderId
+        type: string
+        number: 4
+        comment: ""
+      - name: portfolio
+        type: string
+        number: 5
+        comment: ""
+      - name: algorithm
+        type: string
+        number: 6
+        comment: ""
+      - name: routedExchange
+        type: ExchCode
+        number: 7
+        comment: ""
+      - name: executableExchange
+        type: ExchCode
+        number: 8
+        comment: ""
+      - name: channel
+        type: string
+        number: 9
+        comment: ""
+      - name: transactionProperties
+        type: int32
+        number: 10
+        comment: "A mask of TransactionProperty"
+      - name: tagBook
+        type: int32
+        number: 11
+        comment: "A mask of TransactionTag"
+      - name: tagExchange
+        type: int32
+        number: 12
+        comment: "A mask of TransactionTagExchange"
+      - name: tagUser
+        type: int32
+        number: 13
+        comment: "A mask of TransactionTagUser"
+      - name: revision
+        type: int32
+        number: 14
+        comment: ""
+      - name: inventory
+        type: string
+        number: 15
+        comment: ""
+      - name: account
+        type: string
+        number: 16
+        comment: ""
+      - name: fillId
+        type: uint64
+        number: 17
+        comment: ""
+      - name: userId
+        type: uint64
+        number: 18
+        comment: ""
+      - name: userOrderId
+        type: uint64
+        number: 19
+        comment: ""
+      - name: transactionId
+        type: uint64
+        number: 20
+        comment: ""
+      - name: orderId
+        type: uint64
+        number: 21
+        comment: ""
+      - name: exchangeTransactionId
+        type: string
+        number: 22
+        comment: ""
+      - name: exchangeOrderId
+        type: string
+        number: 23
+        comment: ""
+      - name: transactionTimestamp
+        type: google.protobuf.Timestamp
+        number: 24
+        comment: ""
+      - name: exchangeDate
+        type: pb.Date
+        number: 25
+        comment: ""
+      - name: exchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 26
+        comment: ""
+      - name: exchangeInfo
+        type: string
+        number: 27
+        comment: ""
+      - name: exchangeInfoBits
+        type: int32
+        number: 28
+        comment: "A mask of TransactionExchangeInfo"
+      - name: exchangeQualifier
+        type: string
+        number: 29
+        comment: ""
+      - name: statistics
+        type: string
+        number: 30
+        comment: ""
+      - name: positionType
+        type: PositionType
+        number: 31
+        comment: ""
+      - name: positionId
+        type: uint32
+        number: 32
+        comment: ""
+      - name: size
+        type: int32
+        number: 33
+        comment: ""
+      - name: currency
+        type: CurrencyCode
+        number: 34
+        comment: ""
+      - name: tv
+        type: double
+        number: 35
+        comment: ""
+      - name: ectv
+        type: double
+        number: 36
+        comment: ""
+      - name: settlement
+        type: double
+        number: 37
+        comment: ""
+      - name: settlementDate
+        type: pb.Date
+        number: 38
+        comment: ""
+      - name: valueCurrency
+        type: CurrencyCode
+        number: 39
+        comment: ""
+      - name: cashValue
+        type: double
+        number: 40
+        comment: ""
+      - name: mgmtTimestamp
+        type: google.protobuf.Timestamp
+        number: 41
+        comment: ""
+      - name: maxTradeId
+        type: uint32
+        number: 42
+        comment: ""
+      - name: aggPosTimestamp
+        type: google.protobuf.Timestamp
+        number: 43
+        comment: ""
+      - name: aggPosDate
+        type: pb.Date
+        number: 44
+        comment: ""
+      - name: price
+        type: double
+        number: 45
+        comment: ""
+        optional: true
+      - name: deflectionScale
+        type: double
+        number: 46
+        comment: ""
+        optional: true
+      - name: curveId
+        type: int64
+        number: 47
+        comment: ""
+        optional: true
+      - name: carryId
+        type: int64
+        number: 48
+        comment: ""
+        optional: true
+      - name: revisionTimestamp
+        type: google.protobuf.Timestamp
+        number: 49
+        comment: ""
+        optional: true
+      - name: tradeId
+        type: uint32
+        number: 50
+        comment: ""
+        optional: true
+      - name: companyPosition
+        type: int32
+        number: 51
+        comment: ""
+        optional: true
+      - name: tradedSize
+        type: int32
+        number: 52
+        comment: ""
+        optional: true
+      - name: tradeDate
+        type: pb.Date
+        number: 53
+        comment: ""
+        optional: true
+      - name: valueDate
+        type: pb.Date
+        number: 54
+        comment: ""
+        optional: true
+      - name: counterparty
+        type: string
+        number: 55
+        comment: ""
+        optional: true
+      - name: text
+        type: string
+        number: 56
+        comment: ""
+        optional: true
+      - name: revisor
+        type: string
+        number: 57
+        comment: ""
+        optional: true
+      - name: dataSource
+        type: DataSource
+        number: 58
+        comment: ""
+      - name: streamSource
+        type: StreamSource
+        number: 59
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # data/VtCommon.proto  (shared embedded fields)
+  # ---------------------------------------------------------------------------
+  - name: VtCommon
+    file: data/VtCommon.proto
+    fields:
+      - name: portfolio
+        type: string
+        number: 1
+        comment: "Name of the Mako portfolio to which the algo belongs"
+      - name: algo
+        type: string
+        number: 2
+        comment: "Name of the originating algo"
+      - name: symbol
+        type: string
+        number: 3
+        comment: "Mako symbol identifier"
+      - name: refCurveId
+        type: uint64
+        number: 4
+        comment: "ID of the vol curve for this symbol"
+      - name: refCarryId
+        type: uint64
+        number: 5
+        comment: "ID from rates infra"
+      - name: refTv
+        type: double
+        number: 6
+        comment: "Theoretical value of instrument on last curve ID update"
+      - name: refDelta
+        type: double
+        number: 7
+        comment: "Delta of instrument on last vol curve update"
+      - name: refGamma
+        type: double
+        number: 8
+        comment: "Gamma of instrument on last vol curve update"
+      - name: refBasePrice
+        type: double
+        number: 9
+        comment: "Unadjusted raw baseval on last vol curve update"
+      - name: refRoll
+        type: double
+        number: 10
+        comment: "Roll value on last curve update"
+      - name: rawBvBid
+        type: double
+        number: 11
+        comment: "Unadjusted base val bid price at time of swing"
+      - name: rawBvBidSize
+        type: int32
+        number: 12
+        comment: "Target size of raw base val bid price"
+      - name: rawBvAsk
+        type: double
+        number: 13
+        comment: "Unadjusted base val ask price at time of swing"
+      - name: rawBvAskSize
+        type: int32
+        number: 14
+        comment: "Target size of raw base val ask price"
+      - name: layeredBaseBid
+        type: double
+        number: 15
+        comment: "Transformation of base val bid incorporating open delta position"
+      - name: layeredBaseBidSize
+        type: int32
+        number: 16
+        comment: "Max number of deltas willing to take on at layered base bid"
+      - name: layeredBaseAsk
+        type: double
+        number: 17
+        comment: "Transformation of base val ask"
+      - name: layeredBaseAskSize
+        type: int32
+        number: 18
+        comment: "Max number of deltas willing to take on at layered base ask"
+      - name: layeredBaseAdjustment
+        type: double
+        number: 19
+        comment: "Adjustment to relevant raw baseval side"
+      - name: odrAdjustment
+        type: double
+        number: 20
+        comment: "Adjustment to raw base val due to open delta retreat"
+      - name: inflightDeflectionTvAdjustmentBid
+        type: double
+        number: 21
+        comment: "Estimated TV adjustment while waiting for fill confirmation (bid)"
+      - name: inflightDeflectionTvAdjustmentAsk
+        type: double
+        number: 22
+        comment: "Estimated TV adjustment while waiting for fill confirmation (ask)"
+      - name: internalTvAdjustmentBid
+        type: double
+        number: 23
+        comment: "Internal adjustment/deflection made by VT after hearing about a fill (bid)"
+      - name: internalTvAdjustmentAsk
+        type: double
+        number: 24
+        comment: "Internal adjustment/deflection made by VT after hearing about a fill (ask)"
+      - name: nhrAdjustmentBid
+        type: double
+        number: 25
+        comment: "Estimated adjustment to bid edge based on current position in local strikes"
+      - name: nhrAdjustmentAsk
+        type: double
+        number: 26
+        comment: "Estimated adjustment to ask edge based on current position in local strikes"
+      - name: baseEdgeBid
+        type: double
+        number: 27
+        comment: "Net edge of bid side (model edge + fees + NHR)"
+      - name: baseEdgeAsk
+        type: double
+        number: 28
+        comment: "Net edge of ask side"
+      - name: fees
+        type: double
+        number: 29
+        comment: "Per-lot fees"
+      - name: roll
+        type: double
+        number: 30
+        comment: "Roll value at time of swing/trade"
+      - name: bvSide
+        type: pb.BuySell
+        number: 31
+        comment: "Which side bid/ask of the baseVal the VT is swinging off"
+      - name: deltaAdjustedBasePrice
+        type: double
+        number: 32
+        comment: "Raw baseval plus odr/layered base adjustments"
+      - name: tv
+        type: double
+        number: 33
+        comment: "Theoretical value the VT saw at time of swing/market trade"
+      - name: bvUpdateSequenceNumber
+        type: int64
+        number: 34
+        comment: "Price tick of base val instrument that triggered most recent baseval change"
+      - name: optionSequenceNumber
+        type: int64
+        number: 35
+        comment: "Last received price tick for this option"
+      - name: instrumentHash
+        type: string
+        number: 36
+        comment: "SHA256 of Mako instrument"
+      - name: bvUpdateInstrumentHash
+        type: string
+        number: 37
+        comment: "SHA256 of base val instrument that triggered last baseval change"
+      - name: hardwareNicRxTimestamp
+        type: google.protobuf.Timestamp
+        number: 38
+        comment: "Hardware timestamp of moment price packet hit the network card"
+      - name: eventTimestamp
+        type: google.protobuf.Timestamp
+        number: 39
+        comment: "Moment VT decided to trade (Swing) or processed event (MarketTrade)"
+      - name: underlyingSequenceNumber
+        type: int64
+        number: 40
+        comment: "Sequence number of the hedge instrument"
+      - name: underlyingInstrumentHash
+        type: string
+        number: 41
+        comment: "Hash of the hedge instrument"
+      - name: IsBvInvalid
+        type: bool
+        number: 42
+        comment: "Shows if the base valuation is invalid"
+        optional: true
+      - name: exchangeTimestamp
+        type: google.protobuf.Timestamp
+        number: 43
+        comment: "Exchange-provided nano-second timestamp of the event"
+      - name: underlyingExeExch
+        type: ExchCode
+        number: 44
+        comment: "Exchange where the underlying trades"
+      - name: isSpark
+        type: bool
+        number: 45
+        comment: "Denotes if VT is using a sparkOrder interface"
+      - name: refInstCurveId
+        type: uint64
+        number: 46
+        comment: "Curve Id of last theo update received by algo for this instrument"
+      - name: refInstCarryId
+        type: uint64
+        number: 47
+        comment: "Carry Id of last theo update received by algo for this instrument"
+      - name: dataSource
+        type: DataSource
+        number: 48
+        comment: "Will replace data source of individual vt files on switchover"
+      - name: streamSource
+        type: StreamSource
+        number: 49
+        comment: ""
+      - name: isRefTheoInvalid
+        type: bool
+        number: 50
+        comment: "If the reference theos were valid at the time of the event"
+      - name: edgeModelType
+        type: EdgeModelType
+        number: 51
+        comment: ""
+      - name: lbEnabled
+        type: bool
+        number: 52
+        comment: ""
+      - name: bid_price_0
+        type: double
+        number: 53
+        comment: "Bid-side unadjusted top-of-book price"
+      - name: bid_volume_0
+        type: int32
+        number: 54
+        comment: "Bid-side unadjusted top-of-book volume"
+      - name: ask_price_0
+        type: double
+        number: 55
+        comment: "Ask-side unadjusted top-of-book price"
+      - name: ask_volume_0
+        type: int32
+        number: 56
+        comment: "Ask-side unadjusted top-of-book volume"
+      - name: refTheoEvent
+        type: StreamEvent
+        number: 57
+        comment: "mako::stream::Event that produced the reference theos"
+        optional: true
+
+  # ---------------------------------------------------------------------------
+  # data/TradableInstrument.proto
+  # ---------------------------------------------------------------------------
+  - name: Instrument
+    file: data/TradableInstrument.proto
+    fields:
+      - name: index
+        type: Index
+        number: 1
+        comment: ""
+        oneof: instrument
+      - name: stock
+        type: Stock
+        number: 2
+        comment: ""
+        oneof: instrument
+      - name: future
+        type: Future
+        number: 3
+        comment: ""
+        oneof: instrument
+      - name: option
+        type: Option
+        number: 4
+        comment: ""
+        oneof: instrument
+      - name: bond
+        type: Bond
+        number: 5
+        comment: ""
+        oneof: instrument
+      - name: rate
+        type: Rate
+        number: 6
+        comment: ""
+        oneof: instrument
+      - name: commodity
+        type: Commodity
+        number: 7
+        comment: ""
+        oneof: instrument
+      - name: cash
+        type: Cash
+        number: 8
+        comment: ""
+        oneof: instrument
+      - name: underlyingHash
+        type: string
+        number: 9
+        comment: "SHA-256"
+
+  - name: TradableInstrument
+    file: data/TradableInstrument.proto
+    fields:
+      - name: instrumentHash
+        type: string
+        number: 1
+        comment: "SHA-256"
+      - name: legCount
+        type: int32
+        number: 2
+        comment: "Number of legs"
+      - name: ObsSettleType
+        type: SettlementType
+        number: 3
+        comment: "Obsolete: enum appears as a char in composition"
+      - name: inst
+        type: Instrument
+        number: 4
+        comment: ""
+        oneof: instrument
+      - name: combo
+        type: Combo
+        number: 5
+        comment: ""
+        oneof: instrument
+      - name: composition
+        type: string
+        number: 6
+        comment: "String from which SHA-256 is produced"
+      - name: feedCode
+        type: string
+        number: 7
+        comment: "String from formatFeedcodeInst()"
+      - name: exchangeNative
+        type: string
+        number: 8
+        comment: "Nomenclature used by exchange"
+      - name: symbol
+        type: string
+        number: 9
+        comment: ""
+      - name: isin
+        type: string
+        number: 10
+        comment: ""
+      - name: sedol
+        type: string
+        number: 11
+        comment: ""
+      - name: cusip
+        type: string
+        number: 12
+        comment: ""
+      - name: bloomberg
+        type: string
+        number: 13
+        comment: ""
+      - name: reuters
+        type: string
+        number: 14
+        comment: ""
+      - name: tradeDate
+        type: pb.Date
+        number: 15
+        comment: ""
+
+  - name: Combo
+    file: data/TradableInstrument.proto
+    fields:
+      - name: ObsComboType
+        type: int32
+        number: 1
+        comment: "Obsolete: replaced with ComboType enum"
+      - name: listed
+        type: Listed
+        number: 2
+        comment: "Enum appears as a char in composition"
+      - name: posExch
+        type: int32
+        number: 3
+        comment: "Enum appears as an int in composition"
+      - name: currency
+        type: int32
+        number: 4
+        comment: "Enum appears as an int in composition"
+      - name: contractSize
+        type: double
+        number: 5
+        comment: ""
+      - name: legs
+        type: TradableLeg
+        number: 6
+        comment: ""
+        repeated: true
+      - name: comboType
+        type: ComboType
+        number: 7
+        comment: ""
+      - name: calcType
+        type: ComboCalcType
+        number: 8
+        comment: ""
+      - name: settle
+        type: SettlementType
+        number: 9
+        comment: "Enum appears as an int in composition"
+
+  - name: PricingInput
+    file: data/TradableInstrument.proto
+    fields:
+      - name: type
+        type: PricingInputType
+        number: 1
+        comment: ""
+      - name: value
+        type: double
+        number: 2
+        comment: ""
+
+  - name: TradableLeg
+    file: data/TradableInstrument.proto
+    fields:
+      - name: ratio
+        type: double
+        number: 1
+        comment: ""
+      - name: inst
+        type: Instrument
+        number: 2
+        comment: ""
+      - name: instrumentHash
+        type: string
+        number: 3
+        comment: "SHA-256"
+      - name: pricingCount
+        type: int32
+        number: 4
+        comment: ""
+      - name: pricing
+        type: PricingInput
+        number: 5
+        comment: ""
+        repeated: true
+
+  - name: Index
+    file: data/TradableInstrument.proto
+    fields:
+      - name: type
+        type: InstType
+        number: 1
+        comment: "Enum appears as a char in composition"
+      - name: listed
+        type: Listed
+        number: 2
+        comment: "Enum appears as a char in composition"
+      - name: posExch
+        type: int32
+        number: 3
+        comment: "Enum appears as an int in composition"
+      - name: currency
+        type: int32
+        number: 4
+        comment: "Enum appears as an int in composition"
+      - name: revision
+        type: int32
+        number: 5
+        comment: ""
+      - name: contractSize
+        type: double
+        number: 6
+        comment: ""
+      - name: settle
+        type: SettlementType
+        number: 7
+        comment: "Enum appears as an int in composition"
+      - name: symbol
+        type: string
+        number: 10
+        comment: ""
+
+  - name: Stock
+    file: data/TradableInstrument.proto
+    fields:
+      - name: type
+        type: InstType
+        number: 1
+        comment: "Enum appears as a char in composition"
+      - name: listed
+        type: Listed
+        number: 2
+        comment: "Enum appears as a char in composition"
+      - name: posExch
+        type: int32
+        number: 3
+        comment: "Enum appears as an int in composition"
+      - name: currency
+        type: int32
+        number: 4
+        comment: "Enum appears as an int in composition"
+      - name: revision
+        type: int32
+        number: 5
+        comment: ""
+      - name: contractSize
+        type: double
+        number: 6
+        comment: ""
+      - name: settle
+        type: SettlementType
+        number: 7
+        comment: "Enum appears as an int in composition"
+      - name: symbol
+        type: string
+        number: 10
+        comment: ""
+      - name: stockType
+        type: StockType
+        number: 11
+        comment: "Enum appears as a char in composition"
+
+  - name: Future
+    file: data/TradableInstrument.proto
+    fields:
+      - name: type
+        type: InstType
+        number: 1
+        comment: "Enum appears as a char in composition"
+      - name: listed
+        type: Listed
+        number: 2
+        comment: "Enum appears as a char in composition"
+      - name: posExch
+        type: int32
+        number: 3
+        comment: "Enum appears as an int in composition"
+      - name: currency
+        type: int32
+        number: 4
+        comment: "Enum appears as an int in composition"
+      - name: revision
+        type: int32
+        number: 5
+        comment: ""
+      - name: contractSize
+        type: double
+        number: 6
+        comment: ""
+      - name: settle
+        type: SettlementType
+        number: 7
+        comment: "Enum appears as an int in composition"
+      - name: symbol
+        type: string
+        number: 10
+        comment: ""
+      - name: term
+        type: pb.Term
+        number: 11
+        comment: ""
+      - name: underlying
+        type: Instrument
+        number: 12
+        comment: ""
+
+  - name: Option
+    file: data/TradableInstrument.proto
+    fields:
+      - name: type
+        type: InstType
+        number: 1
+        comment: "Enum appears as a char in composition"
+      - name: listed
+        type: Listed
+        number: 2
+        comment: "Enum appears as a char in composition"
+      - name: posExch
+        type: int32
+        number: 3
+        comment: "Enum appears as an int in composition"
+      - name: currency
+        type: int32
+        number: 4
+        comment: "Enum appears as an int in composition"
+      - name: revision
+        type: int32
+        number: 5
+        comment: ""
+      - name: contractSize
+        type: double
+        number: 6
+        comment: ""
+      - name: settle
+        type: SettlementType
+        number: 7
+        comment: "Enum appears as an int in composition"
+      - name: symbol
+        type: string
+        number: 10
+        comment: ""
+      - name: term
+        type: pb.Term
+        number: 11
+        comment: ""
+      - name: strike
+        type: double
+        number: 12
+        comment: ""
+      - name: optType
+        type: OptionType
+        number: 13
+        comment: "Enum appears as a char in composition"
+      - name: exerType
+        type: ExerciseType
+        number: 14
+        comment: "Enum appears as a char in composition"
+      - name: underlying
+        type: Instrument
+        number: 15
+        comment: ""
+      - name: traits
+        type: OptionTraits
+        number: 16
+        comment: ""
+
+  - name: Bond
+    file: data/TradableInstrument.proto
+    fields:
+      - name: type
+        type: InstType
+        number: 1
+        comment: "Enum appears as a char in composition"
+      - name: listed
+        type: Listed
+        number: 2
+        comment: "Enum appears as a char in composition"
+      - name: posExch
+        type: int32
+        number: 3
+        comment: "Enum appears as an int in composition"
+      - name: currency
+        type: int32
+        number: 4
+        comment: "Enum appears as an int in composition"
+      - name: revision
+        type: int32
+        number: 5
+        comment: ""
+      - name: contractSize
+        type: double
+        number: 6
+        comment: ""
+      - name: settle
+        type: SettlementType
+        number: 7
+        comment: "Enum appears as an int in composition"
+      - name: symbol
+        type: string
+        number: 10
+        comment: ""
+      - name: term
+        type: pb.Term
+        number: 11
+        comment: ""
+      - name: issueDate
+        type: pb.Date
+        number: 12
+        comment: ""
+      - name: bondType
+        type: BondType
+        number: 13
+        comment: "Enum appears as a char in composition"
+      - name: dayCountType
+        type: DayCountType
+        number: 14
+        comment: "Enum appears as a char in composition"
+      - name: couponType
+        type: CouponType
+        number: 15
+        comment: "Enum appears as a char in composition"
+      - name: couponFreqType
+        type: int32
+        number: 16
+        comment: "Enum appears as an int in composition"
+      - name: coupon
+        type: double
+        number: 17
+        comment: ""
+
+  - name: Rate
+    file: data/TradableInstrument.proto
+    fields:
+      - name: type
+        type: InstType
+        number: 1
+        comment: "Enum appears as a char in composition"
+      - name: listed
+        type: Listed
+        number: 2
+        comment: "Enum appears as a char in composition"
+      - name: posExch
+        type: int32
+        number: 3
+        comment: "Enum appears as an int in composition"
+      - name: currency
+        type: int32
+        number: 4
+        comment: "Enum appears as an int in composition"
+      - name: revision
+        type: int32
+        number: 5
+        comment: ""
+      - name: contractSize
+        type: double
+        number: 6
+        comment: ""
+      - name: settle
+        type: SettlementType
+        number: 7
+        comment: "Enum appears as an int in composition"
+      - name: symbol
+        type: string
+        number: 10
+        comment: ""
+      - name: payType
+        type: PaymentDateType
+        number: 11
+        comment: "Enum appears as a char in composition"
+
+  - name: Commodity
+    file: data/TradableInstrument.proto
+    fields:
+      - name: type
+        type: InstType
+        number: 1
+        comment: "Enum appears as a char in composition"
+      - name: listed
+        type: Listed
+        number: 2
+        comment: "Enum appears as a char in composition"
+      - name: posExch
+        type: int32
+        number: 3
+        comment: "Enum appears as an int in composition"
+      - name: currency
+        type: int32
+        number: 4
+        comment: "Enum appears as an int in composition"
+      - name: revision
+        type: int32
+        number: 5
+        comment: ""
+      - name: contractSize
+        type: double
+        number: 6
+        comment: ""
+      - name: settle
+        type: SettlementType
+        number: 7
+        comment: "Enum appears as an int in composition"
+      - name: commType
+        type: int32
+        number: 10
+        comment: "Enum appears as an int in composition"
+
+  - name: Cash
+    file: data/TradableInstrument.proto
+    fields:
+      - name: type
+        type: InstType
+        number: 1
+        comment: "Enum appears as a char in composition"
+      - name: listed
+        type: Listed
+        number: 2
+        comment: "Enum appears as a char in composition"
+      - name: posExch
+        type: int32
+        number: 3
+        comment: "Enum appears as an int in composition"
+      - name: currency
+        type: int32
+        number: 4
+        comment: "Enum appears as an int in composition"
+      - name: revision
+        type: int32
+        number: 5
+        comment: ""
+      - name: contractSize
+        type: double
+        number: 6
+        comment: ""
+      - name: settle
+        type: SettlementType
+        number: 7
+        comment: "Enum appears as an int in composition"
+      - name: symbol
+        type: string
+        number: 10
+        comment: ""
+      - name: cashType
+        type: CashType
+        number: 11
+        comment: "Enum appears as a char in composition"
+      - name: posCurrency
+        type: int32
+        number: 12
+        comment: "Enum appears as an int in composition"
+
+  # ---------------------------------------------------------------------------
+  # data/StreamSource.proto
+  # ---------------------------------------------------------------------------
+  - name: StreamSource
+    file: data/StreamSource.proto
+    fields:
+      - name: streamId
+        type: uint64
+        number: 1
+        comment: ""
+      - name: eventId
+        type: uint64
+        number: 2
+        comment: ""
+      - name: messageId
+        type: uint64
+        number: 3
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # data/DataSource.proto
+  # ---------------------------------------------------------------------------
+  - name: DataSource
+    file: data/DataSource.proto
+    fields:
+      - name: pid
+        type: int32
+        number: 1
+        comment: ""
+      - name: hostname
+        type: string
+        number: 2
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # common/CommonTypes.proto  (enums only - key enums referenced by messages)
+  # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # common/Theoreticals.proto
+  # ---------------------------------------------------------------------------
+  - name: Theoreticals
+    file: common/Theoreticals.proto
+    fields:
+      - name: tv
+        type: double
+        number: 1
+        comment: ""
+      - name: delta
+        type: double
+        number: 2
+        comment: ""
+      - name: gamma
+        type: double
+        number: 3
+        comment: ""
+      - name: vega
+        type: double
+        number: 4
+        comment: ""
+      - name: under
+        type: double
+        number: 5
+        comment: ""
+      - name: roll
+        type: double
+        number: 6
+        comment: ""
+      - name: vol
+        type: double
+        number: 7
+        comment: ""
+      - name: whenTimestamp
+        type: google.protobuf.Timestamp
+        number: 8
+        comment: ""
+      - name: curveId
+        type: uint64
+        number: 9
+        comment: ""
+      - name: carryId
+        type: uint64
+        number: 10
+        comment: ""
+      - name: currency
+        type: CurrencyCode
+        number: 11
+        comment: ""
+      - name: theta
+        type: double
+        number: 12
+        comment: ""
+      - name: rho
+        type: double
+        number: 13
+        comment: ""
+      - name: rawGamma
+        type: double
+        number: 14
+        comment: ""
+      - name: rawDelta
+        type: double
+        number: 15
+        comment: ""
+      - name: lvol
+        type: double
+        number: 16
+        comment: ""
+      - name: norms
+        type: double
+        number: 17
+        comment: ""
+      # field 18 is reserved
+      - name: tvOffset
+        type: double
+        number: 19
+        comment: ""
+      - name: tte
+        type: double
+        number: 20
+        comment: ""
+      - name: forward
+        type: double
+        number: 21
+        comment: ""
+      - name: shortRate
+        type: double
+        number: 22
+        comment: ""
+      - name: pmModelGreeks
+        type: PmModelGreeks
+        number: 23
+        comment: ""
+        optional: true
+      - name: customGreeks
+        type: CustomGreek
+        number: 24
+        comment: ""
+        repeated: true
+
+  - name: OraTheoreticals
+    file: common/Theoreticals.proto
+    fields:
+      - name: tv
+        type: double
+        number: 1
+        comment: ""
+      - name: delta
+        type: double
+        number: 2
+        comment: ""
+      - name: gamma
+        type: double
+        number: 3
+        comment: ""
+      - name: vega
+        type: double
+        number: 4
+        comment: ""
+      - name: under
+        type: double
+        number: 5
+        comment: ""
+      - name: roll
+        type: double
+        number: 6
+        comment: ""
+      - name: vol
+        type: double
+        number: 7
+        comment: ""
+      - name: whenTimestamp
+        type: google.protobuf.Timestamp
+        number: 8
+        comment: ""
+      - name: curveId
+        type: uint64
+        number: 9
+        comment: ""
+      - name: carryId
+        type: uint64
+        number: 10
+        comment: ""
+
+  - name: TheoRate
+    file: common/Theoreticals.proto
+    fields:
+      - name: cash
+        type: double
+        number: 1
+        comment: ""
+      - name: cashFull
+        type: double
+        number: 2
+        comment: ""
+      - name: cashYield
+        type: double
+        number: 3
+        comment: ""
+      - name: roll
+        type: double
+        number: 4
+        comment: ""
+      - name: rollFull
+        type: double
+        number: 5
+        comment: ""
+      # field 6 is reserved (rollIcf)
+      - name: standardShort
+        type: double
+        number: 7
+        comment: ""
+      - name: premium
+        type: double
+        number: 8
+        comment: ""
+      - name: clearerShort
+        type: double
+        number: 9
+        comment: ""
+      - name: adjustment
+        type: double
+        number: 10
+        comment: ""
+      - name: days
+        type: int64
+        number: 11
+        comment: ""
+      - name: years
+        type: double
+        number: 12
+        comment: ""
+      - name: daysInYear
+        type: double
+        number: 13
+        comment: ""
+      - name: usable
+        type: bool
+        number: 14
+        comment: ""
+
+  - name: TheoRoll
+    file: common/Theoreticals.proto
+    fields:
+      - name: mode
+        type: string
+        number: 1
+        comment: ""
+      - name: roll
+        type: double
+        number: 2
+        comment: ""
+      - name: rollTheo
+        type: double
+        number: 3
+        comment: ""
+      - name: rollAdj
+        type: double
+        number: 4
+        comment: ""
+      - name: usable
+        type: bool
+        number: 5
+        comment: ""
+      - name: atmRoll
+        type: double
+        number: 6
+        comment: ""
+
+  - name: TheoDeflect
+    file: common/Theoreticals.proto
+    fields:
+      - name: mask
+        type: int64
+        number: 1
+        comment: ""
+      - name: calVol
+        type: double
+        number: 2
+        comment: ""
+      - name: calSkew
+        type: double
+        number: 3
+        comment: ""
+      - name: calCallSkew
+        type: double
+        number: 4
+        comment: ""
+      - name: calPutK
+        type: double
+        number: 5
+        comment: ""
+      - name: calCallK
+        type: double
+        number: 6
+        comment: ""
+      - name: fwdVol
+        type: double
+        number: 7
+        comment: ""
+      - name: pivotNvega
+        type: double
+        number: 8
+        comment: ""
+      - name: bsVega
+        type: double
+        number: 9
+        comment: ""
+      - name: volGreek
+        type: double
+        number: 10
+        comment: ""
+      - name: skewGreek
+        type: double
+        number: 11
+        comment: ""
+      - name: callSkewGreek
+        type: double
+        number: 12
+        comment: ""
+      - name: putKGreek
+        type: double
+        number: 13
+        comment: ""
+      - name: callKGreek
+        type: double
+        number: 14
+        comment: ""
+      - name: carryGreek
+        type: double
+        number: 15
+        comment: ""
+      - name: usable
+        type: bool
+        number: 16
+        comment: ""
+
+  - name: TheoConfidence
+    file: common/Theoreticals.proto
+    fields:
+      - name: min
+        type: int64
+        number: 1
+        comment: ""
+      - name: vol
+        type: int64
+        number: 2
+        comment: ""
+      - name: roll
+        type: int64
+        number: 3
+        comment: ""
+      - name: div
+        type: int64
+        number: 4
+        comment: ""
+      - name: rate
+        type: int64
+        number: 5
+        comment: ""
+      - name: deflect
+        type: int64
+        number: 6
+        comment: ""
+
+  - name: TheoVolParam
+    file: common/Theoreticals.proto
+    fields:
+      - name: name
+        type: string
+        number: 1
+        comment: ""
+      - name: value
+        type: double
+        number: 2
+        comment: ""
+
+  - name: TheoVol
+    file: common/Theoreticals.proto
+    fields:
+      - name: days
+        type: int64
+        number: 1
+        comment: ""
+      - name: years
+        type: double
+        number: 2
+        comment: ""
+      - name: daysInYear
+        type: double
+        number: 3
+        comment: ""
+      - name: calcTime
+        type: int64
+        number: 4
+        comment: ""
+      - name: expTime
+        type: int64
+        number: 5
+        comment: ""
+      - name: modelType
+        type: IvModelType
+        number: 6
+        comment: ""
+      - name: xAxisType
+        type: IvModelXAxis
+        number: 7
+        comment: ""
+      - name: putWingType
+        type: IvWingType
+        number: 8
+        comment: ""
+      - name: callWingType
+        type: IvWingType
+        number: 9
+        comment: ""
+      - name: params
+        type: TheoVolParam
+        number: 10
+        comment: ""
+        repeated: true
+      - name: deflect
+        type: TheoDeflect
+        number: 11
+        comment: ""
+        optional: true
+      - name: usable
+        type: bool
+        number: 12
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # common/StreamEvent.proto
+  # ---------------------------------------------------------------------------
+  - name: StreamEvent
+    file: common/StreamEvent.proto
+    fields:
+      - name: streamId
+        type: uint64
+        number: 1
+        comment: ""
+      - name: eventId
+        type: uint64
+        number: 2
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # common/CustomGreek.proto
+  # ---------------------------------------------------------------------------
+  - name: CustomGreek
+    file: common/CustomGreek.proto
+    fields:
+      - name: code
+        type: GreekCode
+        number: 1
+        comment: ""
+      - name: value
+        type: double
+        number: 2
+        comment: ""
+
+  - name: PmModelGreeks
+    file: common/CustomGreek.proto
+    fields:
+      - name: greekAtm
+        type: double
+        number: 1
+        comment: ""
+      - name: greekSkew
+        type: double
+        number: 2
+        comment: ""
+      - name: greekCallSkew
+        type: double
+        number: 3
+        comment: ""
+      - name: greekPutK
+        type: double
+        number: 4
+        comment: ""
+      - name: greekCallK
+        type: double
+        number: 5
+        comment: ""
+      - name: greekPutA
+        type: double
+        number: 6
+        comment: ""
+      - name: greekCallA
+        type: double
+        number: 7
+        comment: ""
+      - name: greekPutB
+        type: double
+        number: 8
+        comment: ""
+      - name: greekCallB
+        type: double
+        number: 9
+        comment: ""
+      - name: greekDatm
+        type: double
+        number: 10
+        comment: ""
+      - name: paramAtm
+        type: double
+        number: 11
+        comment: ""
+      - name: paramSkew
+        type: double
+        number: 12
+        comment: ""
+      - name: paramCallSkew
+        type: double
+        number: 13
+        comment: ""
+      - name: paramPutK
+        type: double
+        number: 14
+        comment: ""
+      - name: paramCallK
+        type: double
+        number: 15
+        comment: ""
+      - name: paramSvol
+        type: double
+        number: 16
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # common/Term.proto
+  # ---------------------------------------------------------------------------
+  - name: Term
+    file: common/Term.proto
+    fields:
+      # field 1 is reserved
+      - name: zone
+        type: string
+        number: 2
+        comment: ""
+      - name: name
+        type: string
+        number: 3
+        comment: ""
+      - name: datetime
+        type: pb.DateTime
+        number: 4
+        comment: ""
+      - name: timestamp
+        type: google.protobuf.Timestamp
+        number: 5
+        comment: ""
+
+  # ---------------------------------------------------------------------------
+  # common/date.proto
+  # ---------------------------------------------------------------------------
+  - name: Date
+    file: common/date.proto
+    fields:
+      - name: year
+        type: int32
+        number: 1
+        comment: "Year of the date. Must be from 1 to 9999, or 0 for no year."
+      - name: month
+        type: int32
+        number: 2
+        comment: "Month of a year. Must be from 1 to 12."
+      - name: day
+        type: int32
+        number: 3
+        comment: "Day of a month. Must be from 1 to 31."
+
+  # ---------------------------------------------------------------------------
+  # common/datetime.proto
+  # ---------------------------------------------------------------------------
+  - name: DateTime
+    file: common/datetime.proto
+    fields:
+      - name: year
+        type: int32
+        number: 1
+        comment: ""
+      - name: month
+        type: int32
+        number: 2
+        comment: ""
+      - name: day
+        type: int32
+        number: 3
+        comment: ""
+      - name: hours
+        type: int32
+        number: 4
+        comment: ""
+      - name: minutes
+        type: int32
+        number: 5
+        comment: ""
+      - name: seconds
+        type: int32
+        number: 6
+        comment: ""
+      - name: nanos
+        type: int32
+        number: 7
+        comment: ""
+      - name: utc_offset
+        type: google.protobuf.Duration
+        number: 8
+        comment: "UTC offset in seconds"
+        oneof: time_offset
+      - name: time_zone
+        type: TimeZone
+        number: 9
+        comment: "IANA time zone"
+        oneof: time_offset
+
+  - name: TimeZone
+    file: common/datetime.proto
+    fields:
+      - name: id
+        type: string
+        number: 1
+        comment: "IANA Time Zone Database time zone, e.g. America/New_York"
+      - name: version
+        type: string
+        number: 2
+        comment: "IANA Time Zone Database version number"
+
+# =============================================================================
+# Enums from common/CommonTypes.proto (referenced by messages)
+# =============================================================================
+enums:
+
+  - name: InstType
+    file: common/CommonTypes.proto
+    values:
+      - name: INST_TYPE_UNDEFINED
+        number: 0
+      - name: NULL_INSTRUMENT
+        number: 88
+      - name: WILD_INSTRUMENT
+        number: 42
+      - name: PRICE_INSTRUMENT
+        number: 112
+      - name: INDEX
+        number: 73
+      - name: STOCK
+        number: 83
+      - name: FUTURE
+        number: 70
+      - name: FORWARD
+        number: 102
+      - name: OPTION
+        number: 79
+      - name: BOND
+        number: 66
+      - name: RATE
+        number: 82
+      - name: COMMODITY
+        number: 67
+      - name: YIELD
+        number: 89
+      - name: SWAP
+        number: 80
+      - name: VARSWAP
+        number: 86
+      - name: RIGHTS
+        number: 84
+      - name: CASH
+        number: 99
+      - name: WARRANT
+        number: 87
+      - name: SWAPTION
+        number: 78
+
+  - name: OptionType
+    file: common/CommonTypes.proto
+    values:
+      - name: OPTION_TYPE_UNDEF
+        number: 0
+      - name: OPTION_TYPE_CALL
+        number: 67
+      - name: OPTION_TYPE_PUT
+        number: 80
+      - name: OPTION_TYPE_NULL
+        number: 88
+
+  - name: BuySell
+    file: common/CommonTypes.proto
+    values:
+      - name: BUYSELL_UNKNOWN
+        number: 0
+      - name: BUYSELL_NULL_BUYSELL
+        number: 88
+      - name: BUYSELL_BUY
+        number: 66
+      - name: BUYSELL_SELL
+        number: 83
+
+  - name: BidAsk
+    file: common/CommonTypes.proto
+    values:
+      - name: BIDASK_BID
+        number: 0
+      - name: BIDASK_ASK
+        number: 1
+      - name: BIDASK_INVALID
+        number: 2
+
+  - name: BidAskBoth
+    file: common/CommonTypes.proto
+    values:
+      - name: BIDASKBOTH_BID
+        number: 0
+      - name: BIDASKBOTH_ASK
+        number: 1
+      - name: BIDASKBOTH_BOTH
+        number: 2
+      - name: BIDASKBOTH_INVALID
+        number: 3
+
+  - name: CurrencyCode
+    file: common/CommonTypes.proto
+    comment: "216 values (CURRENCY_CODE_NULL=0 through CURRENCY_CODE_215=215). Key values: USD=2, EUR=4, GBP=12, AUD=17, JPY=20, KRW=21, ZAR=23, HKD=18, INR=19, CHF=7, SGD=31, BRL=24, CNY=25, BTC=207, ETH=208"
+    values_summary: "216 enum values from CURRENCY_CODE_NULL(0) to CURRENCY_CODE_215(215). See common/CommonTypes.proto for full list."
+
+  - name: ExchCode
+    file: common/CommonTypes.proto
+    comment: "273 values. Key exchanges: EUREX=8, CME=5, CBOE=3, NYSE=16, NASDAQ=15, ASX=28, SGX=56, JPX=118, HKFE=37, KSE=22, ICE=69, LIFFE=10"
+    values_summary: "273 enum values from EXCH_CODE_NULL(0) to EXCH_CODE_272(272). See common/CommonTypes.proto for full list."
+
+  - name: MarketState
+    file: common/CommonTypes.proto
+    values:
+      - name: MARKET_STATE_UNDEFINED
+        number: 0
+      - name: MARKET_STATE_INVALID
+        number: 1
+      - name: MARKET_STATE_OPEN
+        number: 20
+      - name: MARKET_STATE_FAST
+        number: 21
+      - name: MARKET_STATE_AUCTION
+        number: 22
+      - name: MARKET_STATE_BLIND
+        number: 23
+      - name: MARKET_STATE_CLOSED
+        number: 24
+      - name: MARKET_STATE_HALTED
+        number: 25
+      - name: MARKET_STATE_SUSPENDED
+        number: 26
+
+  - name: EventType
+    file: common/CommonTypes.proto
+    values:
+      - name: ORDER_EVENT_TYPE_UNDEFINED
+        number: 0
+      - name: ORDER_EVENT_TYPE_INSERT
+        number: 1
+      - name: ORDER_EVENT_TYPE_DELETE
+        number: 2
+      - name: ORDER_EVENT_TYPE_FULL_EXECUTION
+        number: 3
+      - name: ORDER_EVENT_TYPE_PART_EXECUTION
+        number: 4
+      - name: ORDER_EVENT_TYPE_REDUCE
+        number: 5
+      - name: ORDER_EVENT_TYPE_INCREASE
+        number: 6
+      - name: ORDER_EVENT_TYPE_DELETE_REPLACE
+        number: 7
+      - name: ORDER_EVENT_TYPE_TRADE_SUMMARY
+        number: 8
+      - name: ORDER_EVENT_TYPE_TRADE_PREDICTION
+        number: 9
+      - name: ORDER_EVENT_TYPE_CANARY_FULL_EXEC
+        number: 10
+      - name: ORDER_EVENT_TYPE_CANARY_PARTIAL_EXEC
+        number: 11
+      - name: ORDER_EVENT_TYPE_INSERT_PRICE_LEVEL
+        number: 12
+      - name: ORDER_EVENT_TYPE_REDUCE_PRICE_LEVEL
+        number: 13
+      - name: ORDER_EVENT_TYPE_MODIFY_PRICE_LEVEL
+        number: 14
+      - name: ORDER_EVENT_TYPE_DELETE_PRICE_LEVEL
+        number: 15
+      - name: ORDER_EVENT_TYPE_TRADE_PRICE_LEVEL
+        number: 16
+      - name: ORDER_EVENT_TYPE_CLEAR_ORDER_BOOK
+        number: 17
+      - name: PRICE_EVENT_TYPE_UNDEFINED
+        number: 192
+      - name: PRICE_EVENT_TYPE_LAST_SUMMARY
+        number: 193
+      - name: PRICE_EVENT_TYPE_INDICATIVE
+        number: 195
+      - name: PRICE_EVENT_TYPE_CROSS_REQUEST
+        number: 196
+      - name: PRICE_EVENT_TYPE_BLOCK
+        number: 197
+      - name: PRICE_EVENT_TYPE_RFQ
+        number: 198
+      - name: PRICE_EVENT_TYPE_BEST_BID
+        number: 199
+      - name: PRICE_EVENT_TYPE_BEST_ASK
+        number: 200
+      - name: PRICE_EVENT_TYPE_CUMULATIVE_VOLUME
+        number: 201
+      - name: PRICE_EVENT_TYPE_OPEN
+        number: 202
+      - name: PRICE_EVENT_TYPE_CLOSE
+        number: 203
+      - name: PRICE_EVENT_TYPE_HI
+        number: 204
+      - name: PRICE_EVENT_TYPE_LO
+        number: 205
+      - name: PRICE_EVENT_TYPE_OPEN_INTEREST
+        number: 206
+      - name: PRICE_EVENT_TYPE_MARKET_STATE
+        number: 207
+      - name: PRICE_EVENT_TYPE_SETTLEMENT
+        number: 208
+      - name: PRICE_EVENT_TYPE_IMPLIED_BID
+        number: 209
+      - name: PRICE_EVENT_TYPE_IMPLIED_ASK
+        number: 210
+      - name: PRICE_EVENT_TYPE_IMPLIED_LAST
+        number: 211
+      - name: PRICE_EVENT_TYPE_CROSS_TRADE
+        number: 212
+
+  - name: OrderType
+    file: common/CommonTypes.proto
+    values:
+      - name: NULL_FOR_PROTO
+        number: 0
+      - name: NULL_ORDER
+        number: 65
+      - name: ORDER_MKT
+        number: 66
+      - name: ORDER_GTC
+        number: 67
+      - name: ORDER_LIM
+        number: 68
+      - name: ORDER_DAY
+        number: 69
+      - name: ORDER_IOC
+        number: 70
+      - name: ORDER_FOK
+        number: 71
+      - name: ORDER_ICEBERG
+        number: 72
+      - name: ORDER_STOP
+        number: 73
+      - name: ORDER_RFQ
+        number: 74
+      - name: ORDER_PIMP
+        number: 75
+      - name: ORDER_PIMP_RESP
+        number: 76
+      - name: ORDER_BLOCK
+        number: 77
+      - name: ORDER_BLOCK_RESP
+        number: 78
+      - name: ORDER_CROSS
+        number: 79
+      - name: ORDER_CROSS_RESP
+        number: 80
+      - name: ORDER_MPO
+        number: 81
+      - name: ORDER_NN_CROSS
+        number: 82
+      - name: ORDER_VWAP
+        number: 83
+      - name: ORDER_SONAR
+        number: 84
+      - name: ORDER_SONAR_DARK
+        number: 85
+      - name: ORDER_SMALL_CAP
+        number: 86
+      - name: ORDER_IS
+        number: 87
+      - name: ORDER_AXIS
+        number: 88
+      - name: ORDER_MOC
+        number: 89
+      - name: ORDER_CLS_AUC_LIM
+        number: 90
+      - name: ORDER_CLS_AUC_MKT
+        number: 91
+      - name: QUOTE_ONE_SIDE
+        number: 92
+      - name: QUOTE_TWO_SIDES
+        number: 93
+
+  - name: EdgeModelType
+    file: common/CommonTypes.proto
+    values:
+      - name: EDGE_MODEL_NULL
+        number: 0
+      - name: EDGE_MODEL_MANUAL
+        number: 1
+      - name: EDGE_MODEL_PM
+        number: 2
+      - name: EDGE_MODEL_DUAL_SKEW_PM
+        number: 3
+      - name: EDGE_MODEL_FX
+        number: 4
+      - name: EDGE_MODEL_GRA
+        number: 5
+      - name: EDGE_MODEL_PS
+        number: 6
+      - name: EDGE_MODEL_PM_MR
+        number: 7
+      - name: EDGE_MODEL_DUAL_SKEW_PM_MR
+        number: 8
+
+  - name: StreamType
+    file: common/CommonTypes.proto
+    comment: "85 values. Key types for NL2SQL: OTO_SWING=30, RTO_SWING=35, VT_Q_TRADE=36, OTO_MARKET_TRADE=57, VT_Q_MARKET_TRADE=58, ORO_SWING=68, CSA_OFFFLOOR=78"
+    values_summary: "85 enum values. See common/CommonTypes.proto for full list."
+
+  - name: PositionType
+    file: common/TransactionTypes.proto
+    values:
+      - name: POSITION_TYPE_INVALID
+        number: 0
+      - name: POSITION_TYPE_NULL
+        number: 88
+      - name: POSITION_TYPE_POSITION
+        number: 80
+      - name: POSITION_TYPE_POSITION_ADJUSTMENT
+        number: 106
+      - name: POSITION_TYPE_TRADE
+        number: 84
+      - name: POSITION_TYPE_TRADE_LIQUIDITY
+        number: 108
+      - name: POSITION_TYPE_TRADE_MANUAL
+        number: 77
+      - name: POSITION_TYPE_TRADE_DELIVERY
+        number: 68
+      - name: POSITION_TYPE_TRADE_ADJUSTMENT
+        number: 74
+      - name: POSITION_TYPE_TRADE_TRANSFER_IN
+        number: 73
+      - name: POSITION_TYPE_TRADE_TRANSFER_OUT
+        number: 79
+      - name: POSITION_TYPE_TRADE_EXERCISE
+        number: 69
+      - name: POSITION_TYPE_TRADE_ASSIGNMENT
+        number: 65
+      - name: POSITION_TYPE_TRADE_SPLIT
+        number: 83
+      - name: POSITION_TYPE_IN_TRADE_NO_FEES
+        number: 105
+      - name: POSITION_TYPE_OUT_TRADE_NO_FEES
+        number: 111
+      - name: POSITION_TYPE_GIVE_UP
+        number: 71
+      - name: POSITION_TYPE_TAKE_UP
+        number: 85
+      - name: POSITION_TYPE_CANCELLATION
+        number: 99
+      - name: POSITION_TYPE_BUSTED
+        number: 98
+      - name: POSITION_TYPE_CORPORATE_ACTION
+        number: 97
+      - name: POSITION_TYPE_INTERNAL_ECN
+        number: 116
+      - name: POSITION_TYPE_LIMIT_ORDER
+        number: 76
+      - name: POSITION_TYPE_FLOOR_TRADE
+        number: 70
+      - name: POSITION_TYPE_MON_EXPIRED_OUT
+        number: 101
+      - name: POSITION_TYPE_BLOCK_TRADE
+        number: 66
+      - name: POSITION_TYPE_SHOW
+        number: 72
+      - name: POSITION_TYPE_SHOW_ADJUSTMENT
+        number: 87
+      - name: POSITION_TYPE_ETF_CREATION
+        number: 67
+      - name: POSITION_TYPE_ETF_REDEMPTION
+        number: 82
+      - name: POSITION_TYPE_DEPOSIT_TRANSFER
+        number: 100
+
+  - name: TransactionProperty
+    file: common/TransactionTypes.proto
+    comment: "Bitmask enum. See common/TransactionTypes.proto for full values."
+    values_summary: "Bitmask values from 0x00000000 to 0x40000000. Key flags: CONFIRMED, VT, SWEEP, ASSIGNMENT, EXERCISE."
+
+  - name: TransactionTag
+    file: common/TransactionTypes.proto
+    comment: "Bitmask enum for book tags. See common/TransactionTypes.proto for full values."
+    values_summary: "Bitmask values. Key flags: FABRICATED, NATIVE, CONFIRMED, FILLED, DELETED."
+
+  - name: TransactionTagExchange
+    file: common/TransactionTypes.proto
+    comment: "Bitmask enum for exchange tags. See common/TransactionTypes.proto for full values."
+    values_summary: "Bitmask values for exchange-level transaction tagging."
+
+  - name: TransactionTagUser
+    file: common/TransactionTypes.proto
+    comment: "Bitmask enum for user-level tags. See common/TransactionTypes.proto for full values."
+    values_summary: "Bitmask values. Key flags: TV_CHANGE, FAST_DELETE, UNDER_MOVE, HEDGE."
+
+  - name: TransactionExchangeInfo
+    file: common/TransactionTypes.proto
+    comment: "Exchange info codes. See common/TransactionTypes.proto for full values."
+    values_summary: "Values from 0 to 1000025. Includes TURN_OFF range (1-1000000) and specific error codes."
+
+  - name: TheoComputeType
+    file: data/theoData.proto
+    values:
+      - name: ESTIMATE
+        number: 0
+      - name: INSTRUMENT_COMPUTE
+        number: 1
+      - name: STRIKE_COMPUTE
+        number: 2
+      - name: TERM_COMPUTE
+        number: 3
+
+  - name: TriggerSource
+    file: data/OroSwingData.proto
+    values:
+      - name: NULL_SOURCE
+        number: 0
+      - name: FPGA
+        number: 70
+        comment: "F"
+      - name: SoftwareViaFpga
+        number: 83
+        comment: "S"
+      - name: SoftwareTestDma
+        number: 84
+        comment: "T"
+      - name: SoftwareInline
+        number: 73
+        comment: "I"
+      - name: Unknown
+        number: 88
+        comment: "X"
+
+  - name: GreekCode
+    file: common/CustomGreek.proto
+    comment: "128 values for custom greeks. Key codes: SABR_ALPHA=1, DELTA=19, VEGA=20, VOLGA=22, VANNA=23, CHARM=78"
+    values_summary: "128 enum values from GREEK_CODE_NONE(0) to GREEK_CODE_COUNT(127). See common/CustomGreek.proto for full list."
+
+  # Enums from TradableInstrument.proto
+  - name: Listed
+    file: data/TradableInstrument.proto
+    values:
+      - name: NULL_LISTED
+        number: 0
+      - name: LISTED
+        number: 89
+      - name: UN_LISTED
+        number: 78
+
+  - name: ComboType
+    file: data/TradableInstrument.proto
+    comment: "98 values for combo instrument types"
+    values_summary: "98 enum values from NULL_COMBO(0) to WILD_COMBO(2147483647). Common types: STRADDLE=5, STRANGLE=6, BUTTERFLY=8, CONDOR=9, IRON_CONDOR=35, CALENDAR_SPREAD=11."
+
+  - name: ComboCalcType
+    file: data/TradableInstrument.proto
+    values:
+      - name: CALC_TYPE_NONE
+        number: 0
+      - name: CALC_TYPE_CSS_SUM
+        number: 1
+      - name: CALC_TYPE_CSS_AVG
+        number: 2
+      - name: CALC_TYPE_CSS_AVG_REL_CLOSE
+        number: 3
+      - name: CALC_TYPE_ARITHMETIC_SUM
+        number: 4
+      - name: CALC_TYPE_NON_RATIO_SUM
+        number: 5
+
+  - name: SettlementType
+    file: data/TradableInstrument.proto
+    values:
+      - name: UNDEF_SETTLE
+        number: 0
+      - name: PHYSICAL_SETTLE
+        number: 80
+      - name: CASH_SETTLE
+        number: 67
+      - name: NULL_SETTLE
+        number: 88
+
+  - name: ExerciseType
+    file: data/TradableInstrument.proto
+    values:
+      - name: UNDEF_EXERCISE
+        number: 0
+      - name: EUROPEAN
+        number: 69
+      - name: AMERICAN
+        number: 65
+      - name: NULL_EXERCISE
+        number: 88
+
+  - name: OptionTraits
+    file: data/TradableInstrument.proto
+    values:
+      - name: DEFAULT_OPTION
+        number: 0
+      - name: LEPO_OPTION
+        number: 1
+      - name: PREMIUM_LEPO_OPTION
+        number: 2
+
+  - name: StockType
+    file: data/TradableInstrument.proto
+    values:
+      - name: STOCK_UNDEF
+        number: 0
+      - name: STOCK_CFD
+        number: 68
+      - name: STOCK_LOAN
+        number: 76
+      - name: STOCK_ETF
+        number: 69
+      - name: NULL_STOCK
+        number: 88
+
+  - name: PricingInputType
+    file: data/TradableInstrument.proto
+    values:
+      - name: NULL_PRICING_INPUT
+        number: 0
+      - name: UNDERLYING_PRICING_INPUT
+        number: 1
+      - name: VOLATILITY_PRICING_INPUT
+        number: 2
+      - name: BASIS_PRICE_PRICING_INPUT
+        number: 3
+
+# =============================================================================
+# Proto message -> BigQuery table mapping
+# =============================================================================
+proto_to_bq:
+
+  markettrade:
+    message: MarketTrade
+    file: data/MarketTrade.proto
+    includes_vtcommon: true
+    includes_instrument: true
+    notes: "VtCommon embedded as 'props' field (number 1). Instrument data joined via instrumentHash."
+
+  quotertrade:
+    message: QuoterTrade
+    file: data/QuoterTrade.proto
+    includes_vtcommon: true
+    includes_instrument: true
+    notes: "VtCommon embedded as 'props' field (number 1). Instrument data joined via instrumentHash."
+
+  brokertrade:
+    message: BrokerTrade
+    file: data/OffFloorData.proto
+    includes_vtcommon: false
+    includes_instrument: false
+    notes: "From csa_offfloor Kafka topic. Has nested FillInfo and TradeLegFill. No VtCommon -- uses OraTheoreticals via FillInfo.theos. OffFloorKey being deprecated in favor of top-level fields."
+
+  swingdata:
+    message: SwingData
+    file: data/SwingData.proto
+    includes_vtcommon: true
+    includes_instrument: true
+    notes: "VtCommon embedded as 'props' field (number 1). OTO swing data from option-tick takeouts and under-move takeouts."
+
+  oroswingdata:
+    message: OroSwingData
+    file: data/OroSwingData.proto
+    includes_vtcommon: true
+    includes_instrument: true
+    notes: "VtCommon embedded as 'props' field (number 1). Also source for otoswing KPI table. Includes TriggerSource enum for FPGA vs software path."
+
+  marketdata:
+    message: MarketEvent
+    file: data/OboMarketData.proto
+    includes_vtcommon: false
+    includes_instrument: true
+    notes: "NOT MarketDataExtended. Raw order-book events from exchange. Instrument data via instrumentHash. Multiple event types (insert, delete, execution, trade summary, etc.)."
+
+  marketdataext:
+    message: MarketDataExtended
+    file: data/MarketDataExtended.proto
+    includes_vtcommon: false
+    includes_instrument: true
+    notes: "Extended market data with buyer/seller IDs, trade IDs, and aggressor timestamps. Instrument data via instrumentHash."
+
+  marketdepth:
+    message: MarketDepth
+    file: data/MarketDepth.proto
+    includes_vtcommon: false
+    includes_instrument: true
+    notes: "Order book depth snapshots with repeated MarketLevel for bids/asks plus implied levels. Instrument data via instrumentHash."
+
+  theodata:
+    message: TheoData
+    file: data/theoData.proto
+    includes_vtcommon: false
+    includes_instrument: true
+    notes: "Theoretical values (greeks, vol, under) from theoServer. Has PmModelGreeks and repeated CustomGreek. Instrument data via instrumentHash."
+
+  tradedata:
+    message: PositionEvent
+    file: data/PosData.proto
+    includes_vtcommon: false
+    includes_instrument: false
+    notes: "clicktrade KPI = filtered subset (algorithm + position_type + inst_type filters). Combines position and trade transaction fields. Uses TransactionProperty/Tag/TagExchange/TagUser bitmask fields."

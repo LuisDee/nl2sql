@@ -1,0 +1,2659 @@
+# Data Loader Column Transformation Mappings
+# Generated from: repos/data-loader/duckdb_data_loader/models/staging/raw/
+# Mart layer:     repos/data-loader/duckdb_data_loader/models/marts/raw_daily/
+#
+# Transformation types:
+#   direct        - column passes through unchanged (same name, no cast)
+#   rename        - camelCase to snake_case rename (or other rename)
+#   cast          - explicit type cast (CAST(... AS ...))
+#   derive        - computed/constructed (MAKE_DATE, COALESCE, CASE, etc.)
+#   unnest        - extracted from nested struct (props.X, key.X, detail.X, etc.)
+#   array_expand  - expanded from array element (asks[1].price, bids[2].volume, etc.)
+#
+# Mart-layer notes:
+#   - All marts EXCLUDE: kafka_message_timestamp, record_written_timestamp,
+#     partition_timestamp_local, partition_number
+#   - Most marts JOIN to int_raw__instruments_agg to add enrichment columns:
+#     mako_symbol, currency, inst_type_name, term, strike, option_type,
+#     option_type_name, expiry_timestamp
+#   - Symbol is overridden at mart layer:
+#     COALESCE(NULLIF(data_deduped.symbol, ''), instruments.mako_symbol, 'MISSING_SYMBOL')
+
+tables:
+  # ---------------------------------------------------------------------------
+  # markettrade
+  # ---------------------------------------------------------------------------
+  - name: markettrade
+    staging_file: stg_raw__markettrade.sql
+    mart_file: markettrade.sql
+    source: parquet_data_dynamic/markettrade
+    dedup_keys: [datasource_pid, datasource_hostname, streamsource_stream_id, streamsource_event_id, streamsource_message_id]
+    mart_notes: |
+      Dedup via int_raw__markettrade_dedup intermediate model.
+      For NSE/NIFTY exchanges: additional aggregation - SUM(trade_size) grouped by
+      (exchange_timestamp_ns, instrument_hash, trade_price, trade_aggressor_side, algo),
+      keeping first row by event_timestamp_ns.
+      Instrument enrichment via LEFT JOIN to int_raw__instruments_agg.
+    columns_excluded_at_mart: [kafka_message_timestamp, record_written_timestamp, partition_timestamp_local, partition_number]
+    enrichment_columns_from_instruments: [mako_symbol, currency, inst_type_name, term, strike, option_type, option_type_name, expiry_timestamp]
+    columns:
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: direct
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: symbol
+        source_field: props.symbol
+        transformation: unnest
+      - name: portfolio
+        source_field: props.portfolio
+        transformation: unnest
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+        notes: only included when is_intraday == false
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: instrument_hash
+        source_field: props.instrumentHash
+        transformation: unnest
+      - name: algo
+        source_field: props.algo
+        transformation: unnest
+      - name: ref_curve_id
+        source_field: props.refCurveId
+        transformation: unnest
+      - name: ref_carry_id
+        source_field: props.refCarryId
+        transformation: unnest
+      - name: ref_tv
+        source_field: props.refTv
+        transformation: unnest
+      - name: ref_delta
+        source_field: props.refDelta
+        transformation: unnest
+      - name: ref_gamma
+        source_field: props.refGamma
+        transformation: unnest
+      - name: ref_base_price
+        source_field: props.refBasePrice
+        transformation: unnest
+      - name: ref_roll
+        source_field: props.refRoll
+        transformation: unnest
+      - name: raw_bv_bid
+        source_field: props.rawBvBid
+        transformation: unnest
+      - name: raw_bv_bid_size
+        source_field: props.rawBvBidSize
+        transformation: unnest
+      - name: raw_bv_ask
+        source_field: props.rawBvAsk
+        transformation: unnest
+      - name: raw_bv_ask_size
+        source_field: props.rawBvAskSize
+        transformation: unnest
+      - name: layered_base_bid
+        source_field: props.layeredBaseBid
+        transformation: unnest
+      - name: layered_base_bid_size
+        source_field: props.layeredBaseBidSize
+        transformation: unnest
+      - name: layered_base_ask
+        source_field: props.layeredBaseAsk
+        transformation: unnest
+      - name: layered_base_ask_size
+        source_field: props.layeredBaseAskSize
+        transformation: unnest
+      - name: layered_base_adjustment
+        source_field: props.layeredBaseAdjustment
+        transformation: unnest
+      - name: odr_adjustment
+        source_field: props.odrAdjustment
+        transformation: unnest
+      - name: inflight_deflection_tv_adjustment_bid
+        source_field: props.inflightDeflectionTvAdjustmentBid
+        transformation: unnest
+      - name: inflight_deflection_tv_adjustment_ask
+        source_field: props.inflightDeflectionTvAdjustmentAsk
+        transformation: unnest
+      - name: internal_tv_adjustment_bid
+        source_field: props.internalTvAdjustmentBid
+        transformation: unnest
+      - name: internal_tv_adjustment_ask
+        source_field: props.internalTvAdjustmentAsk
+        transformation: unnest
+      - name: nhr_adjustment_bid
+        source_field: props.nhrAdjustmentBid
+        transformation: unnest
+      - name: nhr_adjustment_ask
+        source_field: props.nhrAdjustmentAsk
+        transformation: unnest
+      - name: base_edge_bid
+        source_field: props.baseEdgeBid
+        transformation: unnest
+      - name: base_edge_ask
+        source_field: props.baseEdgeAsk
+        transformation: unnest
+      - name: fees
+        source_field: props.fees
+        transformation: unnest
+      - name: roll
+        source_field: props.roll
+        transformation: unnest
+      - name: bv_side
+        source_field: props.bvSide_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: delta_adjusted_base_price
+        source_field: props.deltaAdjustedBasePrice
+        transformation: unnest
+      - name: tv
+        source_field: props.tv
+        transformation: unnest
+      - name: base_sequence_number
+        source_field: "NULL"
+        transformation: cast
+        type: INTEGER
+        notes: hardcoded NULL placeholder (TODO)
+      - name: option_sequence_number
+        source_field: props.optionSequenceNumber
+        transformation: unnest
+      - name: base_instrument_hash
+        source_field: "NULL"
+        transformation: cast
+        type: VARCHAR
+        notes: hardcoded NULL placeholder (TODO)
+      - name: hardware_nic_rx_timestamp
+        source_field: props.hardwareNicRxTimestamp
+        transformation: unnest
+      - name: hardware_nic_rx_timestamp_ns
+        source_field: props.hardwareNicRxTimestamp_ns
+        transformation: unnest
+      - name: event_timestamp
+        source_field: props.eventTimestamp
+        transformation: unnest
+      - name: event_timestamp_ns
+        source_field: props.eventTimestamp_ns
+        transformation: unnest
+      - name: trade_price
+        source_field: tradePrice
+        transformation: rename
+      - name: trade_size
+        source_field: tradeSize
+        transformation: rename
+      - name: trade_aggressor_side
+        source_field: tradeAggressorSide_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: edge
+        source_field: edge
+        transformation: direct
+      - name: is_mako_trade
+        source_field: isMakoTrade
+        transformation: rename
+      - name: counterparty_id
+        source_field: counterpartyId
+        transformation: rename
+      - name: exchange_timestamp
+        source_field: exchangeTimestamp
+        transformation: rename
+      - name: exchange_timestamp_ns
+        source_field: exchangeTimestamp_ns
+        transformation: rename
+      - name: is_active_instrument
+        source_field: isActiveInstrument
+        transformation: rename
+      - name: bv_update_sequence_number
+        source_field: props.bvUpdateSequenceNumber
+        transformation: unnest
+      - name: bv_update_instrument_hash
+        source_field: props.bvUpdateInstrumentHash
+        transformation: unnest
+      - name: underlying_sequence_number
+        source_field: props.underlyingSequenceNumber
+        transformation: unnest
+      - name: underlying_instrument_hash
+        source_field: props.underlyingInstrumentHash
+        transformation: unnest
+      - name: first_fill_sequence_number
+        source_field: firstFillSequenceNumber
+        transformation: rename
+      - name: last_fill_sequence_number
+        source_field: lastFillSequenceNumber
+        transformation: rename
+      - name: contains_implied_fills
+        source_field: containsImpliedFills
+        transformation: rename
+      - name: is_bv_invalid
+        source_field: props.IsBvInvalid
+        transformation: unnest
+      - name: underlying_exe_exch
+        source_field: props.underlyingExeExch
+        transformation: unnest
+      - name: underlying_exe_exch_name
+        source_field: props.underlyingExeExch_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: is_spark
+        source_field: props.isSpark
+        transformation: unnest
+      - name: ref_inst_curve_id
+        source_field: props.refInstCurveId
+        transformation: unnest
+      - name: ref_inst_carry_id
+        source_field: props.refInstCarryId
+        transformation: unnest
+      - name: is_ref_theo_invalid
+        source_field: props.isRefTheoInvalid
+        transformation: unnest
+      - name: lb_enabled
+        source_field: props.lbEnabled
+        transformation: unnest
+      - name: edge_model_type
+        source_field: props.edgeModelType
+        transformation: unnest
+      - name: edge_model_type_name
+        source_field: props.edgeModelType_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: streamsource_stream_id
+        source_field: props.streamSource.streamId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: streamsource_event_id
+        source_field: props.streamSource.eventId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: streamsource_message_id
+        source_field: props.streamSource.messageId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: datasource_pid
+        source_field: props.dataSource.pid
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: datasource_hostname
+        source_field: props.dataSource.hostname
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: bid_price_0
+        source_field: props.bid_price_0
+        transformation: unnest
+      - name: ask_price_0
+        source_field: props.ask_price_0
+        transformation: unnest
+      - name: ask_volume_0
+        source_field: props.ask_volume_0
+        transformation: unnest
+      - name: bid_volume_0
+        source_field: props.bid_volume_0
+        transformation: unnest
+      - name: ref_theoevent_stream_id
+        source_field: props.refTheoEvent.streamId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: ref_theoevent_event_id
+        source_field: props.refTheoEvent.eventId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: exch_aggressor_side
+        source_field: exchAggressorSide_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+
+  # ---------------------------------------------------------------------------
+  # quotertrade
+  # ---------------------------------------------------------------------------
+  - name: quotertrade
+    staging_file: stg_raw__quotertrade.sql
+    mart_file: quotertrade.sql
+    source: parquet_data_dynamic/quotertrade
+    dedup_keys: [datasource_pid, datasource_hostname, streamsource_stream_id, streamsource_event_id, streamsource_message_id]
+    mart_notes: |
+      Dedup directly in mart via QUALIFY ROW_NUMBER().
+      Instrument enrichment via LEFT JOIN to int_raw__instruments_agg.
+    columns_excluded_at_mart: [kafka_message_timestamp, record_written_timestamp, partition_timestamp_local, partition_number]
+    enrichment_columns_from_instruments: [mako_symbol, currency, inst_type_name, term, strike, option_type, option_type_name, expiry_timestamp]
+    columns:
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: direct
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: symbol
+        source_field: props.symbol
+        transformation: unnest
+      - name: portfolio
+        source_field: props.portfolio
+        transformation: unnest
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+        notes: only included when is_intraday == false
+      - name: pid
+        source_field: "NULL"
+        transformation: cast
+        type: INTEGER
+        notes: hardcoded NULL; only included when is_intraday == false
+      - name: hostname
+        source_field: "NULL"
+        transformation: cast
+        type: VARCHAR
+        notes: hardcoded NULL; only included when is_intraday == false
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: instrument_hash
+        source_field: props.instrumentHash
+        transformation: unnest
+      - name: algo
+        source_field: props.algo
+        transformation: unnest
+      - name: ref_curve_id
+        source_field: props.refCurveId
+        transformation: unnest
+      - name: ref_carry_id
+        source_field: props.refCarryId
+        transformation: unnest
+      - name: ref_tv
+        source_field: props.refTv
+        transformation: unnest
+      - name: ref_delta
+        source_field: props.refDelta
+        transformation: unnest
+      - name: ref_gamma
+        source_field: props.refGamma
+        transformation: unnest
+      - name: ref_base_price
+        source_field: props.refBasePrice
+        transformation: unnest
+      - name: ref_roll
+        source_field: props.refRoll
+        transformation: unnest
+      - name: raw_bv_bid
+        source_field: props.rawBvBid
+        transformation: unnest
+      - name: raw_bv_bid_size
+        source_field: props.rawBvBidSize
+        transformation: unnest
+      - name: raw_bv_ask
+        source_field: props.rawBvAsk
+        transformation: unnest
+      - name: raw_bv_ask_size
+        source_field: props.rawBvAskSize
+        transformation: unnest
+      - name: layered_base_bid
+        source_field: props.layeredBaseBid
+        transformation: unnest
+      - name: layered_base_bid_size
+        source_field: props.layeredBaseBidSize
+        transformation: unnest
+      - name: layered_base_ask
+        source_field: props.layeredBaseAsk
+        transformation: unnest
+      - name: layered_base_ask_size
+        source_field: props.layeredBaseAskSize
+        transformation: unnest
+      - name: layered_base_adjustment
+        source_field: props.layeredBaseAdjustment
+        transformation: unnest
+      - name: odr_adjustment
+        source_field: props.odrAdjustment
+        transformation: unnest
+      - name: inflight_deflection_tv_adjustment_bid
+        source_field: props.inflightDeflectionTvAdjustmentBid
+        transformation: unnest
+      - name: inflight_deflection_tv_adjustment_ask
+        source_field: props.inflightDeflectionTvAdjustmentAsk
+        transformation: unnest
+      - name: internal_tv_adjustment_bid
+        source_field: props.internalTvAdjustmentBid
+        transformation: unnest
+      - name: internal_tv_adjustment_ask
+        source_field: props.internalTvAdjustmentAsk
+        transformation: unnest
+      - name: nhr_adjustment_bid
+        source_field: props.nhrAdjustmentBid
+        transformation: unnest
+      - name: nhr_adjustment_ask
+        source_field: props.nhrAdjustmentAsk
+        transformation: unnest
+      - name: base_edge_bid
+        source_field: props.baseEdgeBid
+        transformation: unnest
+      - name: base_edge_ask
+        source_field: props.baseEdgeAsk
+        transformation: unnest
+      - name: fees
+        source_field: props.fees
+        transformation: unnest
+      - name: roll
+        source_field: props.roll
+        transformation: unnest
+      - name: bv_side
+        source_field: props.bvSide_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: delta_adjusted_base_price
+        source_field: props.deltaAdjustedBasePrice
+        transformation: unnest
+      - name: tv
+        source_field: props.tv
+        transformation: unnest
+      - name: base_sequence_number
+        source_field: props.bvUpdateSequenceNumber
+        transformation: unnest
+        notes: aliased as base_sequence_number (different from markettrade which uses NULL)
+      - name: base_instrument_hash
+        source_field: props.bvUpdateInstrumentHash
+        transformation: unnest
+        notes: aliased as base_instrument_hash (different from markettrade which uses NULL)
+      - name: option_sequence_number
+        source_field: props.optionSequenceNumber
+        transformation: unnest
+      - name: hardware_nic_rx_timestamp
+        source_field: props.hardwareNicRxTimestamp
+        transformation: unnest
+      - name: hardware_nic_rx_timestamp_ns
+        source_field: props.hardwareNicRxTimestamp_ns
+        transformation: unnest
+      - name: event_timestamp
+        source_field: props.eventTimestamp
+        transformation: unnest
+      - name: event_timestamp_ns
+        source_field: props.eventTimestamp_ns
+        transformation: unnest
+      - name: is_deleting
+        source_field: isDeleting
+        transformation: rename
+      - name: trade_price
+        source_field: tradePrice
+        transformation: rename
+      - name: trade_size
+        source_field: tradeSize
+        transformation: rename
+      - name: residual_size
+        source_field: residualSize
+        transformation: rename
+      - name: trade_side
+        source_field: tradeSide_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: total_level_size
+        source_field: totalLevelSize
+        transformation: rename
+      - name: last_update_tv
+        source_field: lastUpdateTv
+        transformation: rename
+      - name: last_update_bv_bid
+        source_field: lastUpdateBvBid
+        transformation: rename
+      - name: last_update_bv_ask
+        source_field: lastUpdateBvAsk
+        transformation: rename
+      - name: last_update_edge_bid
+        source_field: lastUpdateEdgeBid
+        transformation: rename
+      - name: last_update_edge_ask
+        source_field: lastUpdateEdgeAsk
+        transformation: rename
+      - name: last_update_timestamp
+        source_field: lastUpdateTimestamp
+        transformation: rename
+      - name: last_update_timestamp_ns
+        source_field: lastUpdateTimestamp_ns
+        transformation: rename
+      - name: tv_bid
+        source_field: tvBid
+        transformation: rename
+      - name: tv_ask
+        source_field: tvAsk
+        transformation: rename
+      - name: last_update_tv_bid
+        source_field: lastUpdateTvBid
+        transformation: rename
+      - name: last_update_tv_ask
+        source_field: lastUpdateTvAsk
+        transformation: rename
+      - name: bv_update_sequence_number
+        source_field: props.bvUpdateSequenceNumber
+        transformation: unnest
+      - name: bv_update_instrument_hash
+        source_field: props.bvUpdateInstrumentHash
+        transformation: unnest
+      - name: underlying_sequence_number
+        source_field: props.underlyingSequenceNumber
+        transformation: unnest
+      - name: underlying_instrument_hash
+        source_field: props.underlyingInstrumentHash
+        transformation: unnest
+      - name: mako_order_id
+        source_field: makoOrderId
+        transformation: rename
+      - name: is_bv_invalid
+        source_field: props.IsBvInvalid
+        transformation: unnest
+      - name: exchange_timestamp
+        source_field: props.exchangeTimestamp
+        transformation: unnest
+        notes: from props (unlike markettrade which uses top-level exchangeTimestamp)
+      - name: exchange_timestamp_ns
+        source_field: props.exchangeTimestamp_ns
+        transformation: unnest
+      - name: is_updating
+        source_field: isUpdating
+        transformation: rename
+      - name: underlying_exe_exch
+        source_field: props.underlyingExeExch
+        transformation: unnest
+      - name: underlying_exe_exch_name
+        source_field: props.underlyingExeExch_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: is_spark
+        source_field: props.isSpark
+        transformation: unnest
+      - name: ref_inst_curve_id
+        source_field: props.refInstCurveId
+        transformation: unnest
+      - name: ref_inst_carry_id
+        source_field: props.refInstCarryId
+        transformation: unnest
+      - name: is_ref_theo_invalid
+        source_field: props.isRefTheoInvalid
+        transformation: unnest
+      - name: lb_enabled
+        source_field: props.lbEnabled
+        transformation: unnest
+      - name: edge_model_type
+        source_field: props.edgeModelType
+        transformation: unnest
+      - name: edge_model_type_name
+        source_field: props.edgeModelType_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: streamsource_stream_id
+        source_field: props.streamSource.streamId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: streamsource_event_id
+        source_field: props.streamSource.eventId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: streamsource_message_id
+        source_field: props.streamSource.messageId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: datasource_pid
+        source_field: props.dataSource.pid
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: datasource_hostname
+        source_field: props.dataSource.hostname
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: bid_price_0
+        source_field: props.bid_price_0
+        transformation: unnest
+      - name: ask_price_0
+        source_field: props.ask_price_0
+        transformation: unnest
+      - name: ask_volume_0
+        source_field: props.ask_volume_0
+        transformation: unnest
+      - name: bid_volume_0
+        source_field: props.bid_volume_0
+        transformation: unnest
+      - name: ref_theoevent_stream_id
+        source_field: props.refTheoEvent.streamId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: ref_theoevent_event_id
+        source_field: props.refTheoEvent.eventId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: our_volume_bid
+        source_field: ourVolumeBid
+        transformation: rename
+      - name: market_volume_bid
+        source_field: marketVolumeBid
+        transformation: rename
+      - name: market_volume_ask
+        source_field: marketVolumeAsk
+        transformation: rename
+      - name: last_trade_price
+        source_field: lastTradePrice
+        transformation: rename
+      - name: our_volume_ask
+        source_field: ourVolumeAsk
+        transformation: rename
+
+  # ---------------------------------------------------------------------------
+  # brokertrade
+  # ---------------------------------------------------------------------------
+  - name: brokertrade
+    staging_file: stg_raw__brokertrade.sql
+    mart_file: brokertrade.sql
+    source: parquet_data_dynamic/brokertrade
+    dedup_keys: [uuid]
+    dedup_order: revision DESC
+    mart_notes: |
+      Complex multi-stage intermediate pipeline:
+      1. int_raw__brokertrade_latest_entry: dedup by uuid (latest revision)
+      2. int_raw__brokertrade_tag_combos: tag combo instruments
+      3. int_raw__brokertrade_build_combo_legs: unnest legFill array into individual legs
+      4. int_raw__brokertrade_build_market_mako_trades: split into market/mako sides
+      5. int_raw__brokertrade_instruments_combos/non_combos: join instrument metadata
+      6. int_raw__brokertrade_combined_trades_with_instruments: union combos + non-combos
+      7. int_raw__brokertrade_transformed_trades: add calculated fields (combo_type_name,
+         counterparty_alt, market_or_mako_trade, count_calendar, is_parent, is_ref_component, term logic)
+      8. int_raw__brokertrade_trade_with_params: add exchange-specific parameters
+      9. int_raw__brokertrade_trade_with_portfolio_brokerage: add brokerage info
+      10. int_raw__brokertrade_process_instruments_col: handle parent_feed_code, currency,
+          contract_size, no_legs, inst_type_name, underlying_instrument_hash, term, expiry, total_traded_size
+      11. brokertrade.sql (mart): add ref_term, ref_inst_type_name
+      No standard instrument enrichment JOIN (handled in intermediate pipeline instead).
+    columns_excluded_at_mart: []
+    enrichment_columns_from_instruments: []
+    columns:
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: derive
+        notes: "COALESCE(record_written_timestamp, CURRENT_TIMESTAMP)"
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: uuid
+        source_field: uuid
+        transformation: direct
+      - name: revision
+        source_field: revision
+        transformation: direct
+      - name: portfolio
+        source_field: portfolio
+        transformation: direct
+      - name: user
+        source_field: user
+        transformation: direct
+      - name: inventory
+        source_field: "NULL"
+        transformation: cast
+        type: VARCHAR
+        notes: hardcoded NULL placeholder
+      - name: account
+        source_field: "NULL"
+        transformation: cast
+        type: VARCHAR
+        notes: hardcoded NULL placeholder
+      - name: note
+        source_field: note
+        transformation: direct
+      - name: mako_inventory
+        source_field: makoInventory
+        transformation: rename
+      - name: mako_account
+        source_field: makoAccount
+        transformation: rename
+      - name: market_inventory
+        source_field: marketInventory
+        transformation: rename
+      - name: market_account
+        source_field: marketAccount
+        transformation: rename
+      - name: instrument_hash
+        source_field: key.instrumentHash
+        transformation: unnest
+      - name: parent_instrument_hash
+        source_field: key.instrumentHash
+        transformation: unnest
+        notes: same source as instrument_hash, aliased differently
+      - name: contract_name
+        source_field: key.contractName
+        transformation: unnest
+      - name: source
+        source_field: key.source
+        transformation: unnest
+      - name: broker
+        source_field: key.broker
+        transformation: unnest
+      - name: month
+        source_field: key.tradeDate.month
+        transformation: unnest
+        notes: nested three levels deep
+      - name: day
+        source_field: key.tradeDate.day
+        transformation: unnest
+        notes: nested three levels deep
+      - name: year
+        source_field: key.tradeDate.year
+        transformation: unnest
+        notes: nested three levels deep
+      - name: entry_timestamp_ns
+        source_field: entryTimeStamp_ns
+        transformation: rename
+      - name: entry_timestamp
+        source_field: entryTimeStamp
+        transformation: rename
+      - name: last_edit_timestamp_ns
+        source_field: lastEditTimeStamp_ns
+        transformation: rename
+      - name: last_edit_timestamp
+        source_field: lastEditTimeStamp
+        transformation: rename
+      - name: trade_timestamp_ns
+        source_field: tradeTimeStamp_ns
+        transformation: rename
+      - name: trade_timestamp
+        source_field: tradeTimeStamp
+        transformation: rename
+      - name: counterparty
+        source_field: counterparty
+        transformation: direct
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+      - name: tte
+        source_field: detail.tte
+        transformation: unnest
+      - name: ref_price
+        source_field: detail.refPrice
+        transformation: unnest
+      - name: market_price
+        source_field: detail.marketPrice
+        transformation: unnest
+      - name: market_size
+        source_field: detail.marketSize
+        transformation: unnest
+      - name: mako_price
+        source_field: detail.makoPrice
+        transformation: unnest
+      - name: mako_size
+        source_field: detail.makoSize
+        transformation: unnest
+      - name: carry_id
+        source_field: detail.theos.carryId
+        transformation: unnest
+        notes: nested three levels deep
+      - name: curve_id
+        source_field: detail.theos.curveId
+        transformation: unnest
+        notes: nested three levels deep
+      - name: vol
+        source_field: detail.theos.vol
+        transformation: unnest
+        notes: nested three levels deep
+      - name: when_timestamp
+        source_field: detail.theos.whenTimestamp
+        transformation: unnest
+        notes: nested three levels deep
+      - name: vega
+        source_field: detail.theos.vega
+        transformation: unnest
+        notes: nested three levels deep
+      - name: tv
+        source_field: detail.theos.tv
+        transformation: unnest
+        notes: nested three levels deep
+      - name: under
+        source_field: detail.theos.under
+        transformation: unnest
+        notes: nested three levels deep
+      - name: gamma
+        source_field: detail.theos.gamma
+        transformation: unnest
+        notes: nested three levels deep
+      - name: delta
+        source_field: detail.theos.delta
+        transformation: unnest
+        notes: nested three levels deep
+      - name: roll
+        source_field: detail.theos.roll
+        transformation: unnest
+        notes: nested three levels deep
+      - name: datasource_pid
+        source_field: dataSource.pid
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: datasource_hostname
+        source_field: dataSource.hostname
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_stream_id
+        source_field: streamSource.streamId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_event_id
+        source_field: streamSource.eventId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_message_id
+        source_field: streamSource.messageId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: legFill
+        source_field: legFill
+        transformation: direct
+        notes: kept as raw struct array; unnested in intermediate pipeline into individual leg rows
+
+  # ---------------------------------------------------------------------------
+  # swingdata
+  # ---------------------------------------------------------------------------
+  - name: swingdata
+    staging_file: stg_raw__swingdata.sql
+    mart_file: swingdata.sql
+    source: parquet_data_dynamic/swingdata
+    dedup_keys: [datasource_pid, datasource_hostname, streamsource_stream_id, streamsource_event_id, streamsource_message_id]
+    mart_notes: |
+      Dedup directly in mart via QUALIFY ROW_NUMBER().
+      Instrument enrichment via LEFT JOIN to int_raw__instruments_agg.
+    columns_excluded_at_mart: [kafka_message_timestamp, record_written_timestamp, partition_timestamp_local, partition_number]
+    enrichment_columns_from_instruments: [mako_symbol, currency, inst_type_name, term, strike, option_type, option_type_name, expiry_timestamp]
+    columns:
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: direct
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: symbol
+        source_field: props.symbol
+        transformation: unnest
+      - name: portfolio
+        source_field: props.portfolio
+        transformation: unnest
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+        notes: only included when is_intraday == false
+      - name: pid
+        source_field: "NULL"
+        transformation: cast
+        type: INTEGER
+        notes: hardcoded NULL; only included when is_intraday == false
+      - name: hostname
+        source_field: "NULL"
+        transformation: cast
+        type: VARCHAR
+        notes: hardcoded NULL; only included when is_intraday == false
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: instrument_hash
+        source_field: props.instrumentHash
+        transformation: unnest
+      - name: algo
+        source_field: props.algo
+        transformation: unnest
+      - name: ref_curve_id
+        source_field: props.refCurveId
+        transformation: unnest
+      - name: ref_carry_id
+        source_field: props.refCarryId
+        transformation: unnest
+      - name: ref_tv
+        source_field: props.refTv
+        transformation: unnest
+      - name: ref_delta
+        source_field: props.refDelta
+        transformation: unnest
+      - name: ref_gamma
+        source_field: props.refGamma
+        transformation: unnest
+      - name: ref_base_price
+        source_field: props.refBasePrice
+        transformation: unnest
+      - name: ref_roll
+        source_field: props.refRoll
+        transformation: unnest
+      - name: raw_bv_bid
+        source_field: props.rawBvBid
+        transformation: unnest
+      - name: raw_bv_bid_size
+        source_field: props.rawBvBidSize
+        transformation: unnest
+      - name: raw_bv_ask
+        source_field: props.rawBvAsk
+        transformation: unnest
+      - name: raw_bv_ask_size
+        source_field: props.rawBvAskSize
+        transformation: unnest
+      - name: layered_base_bid
+        source_field: props.layeredBaseBid
+        transformation: unnest
+      - name: layered_base_bid_size
+        source_field: props.layeredBaseBidSize
+        transformation: unnest
+      - name: layered_base_ask
+        source_field: props.layeredBaseAsk
+        transformation: unnest
+      - name: layered_base_ask_size
+        source_field: props.layeredBaseAskSize
+        transformation: unnest
+      - name: layered_base_adjustment
+        source_field: props.layeredBaseAdjustment
+        transformation: unnest
+      - name: odr_adjustment
+        source_field: props.odrAdjustment
+        transformation: unnest
+      - name: inflight_deflection_tv_adjustment_bid
+        source_field: props.inflightDeflectionTvAdjustmentBid
+        transformation: unnest
+      - name: inflight_deflection_tv_adjustment_ask
+        source_field: props.inflightDeflectionTvAdjustmentAsk
+        transformation: unnest
+      - name: internal_tv_adjustment_bid
+        source_field: props.internalTvAdjustmentBid
+        transformation: unnest
+      - name: internal_tv_adjustment_ask
+        source_field: props.internalTvAdjustmentAsk
+        transformation: unnest
+      - name: nhr_adjustment_bid
+        source_field: props.nhrAdjustmentBid
+        transformation: unnest
+      - name: nhr_adjustment_ask
+        source_field: props.nhrAdjustmentAsk
+        transformation: unnest
+      - name: base_edge_bid
+        source_field: props.baseEdgeBid
+        transformation: unnest
+      - name: base_edge_ask
+        source_field: props.baseEdgeAsk
+        transformation: unnest
+      - name: fees
+        source_field: props.fees
+        transformation: unnest
+      - name: roll
+        source_field: props.roll
+        transformation: unnest
+      - name: bv_side
+        source_field: props.bvSide_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: delta_adjusted_base_price
+        source_field: props.deltaAdjustedBasePrice
+        transformation: unnest
+      - name: tv
+        source_field: props.tv
+        transformation: unnest
+      - name: base_sequence_number
+        source_field: "NULL"
+        transformation: cast
+        type: INTEGER
+        notes: hardcoded NULL placeholder
+      - name: option_sequence_number
+        source_field: props.optionSequenceNumber
+        transformation: unnest
+      - name: base_instrument_hash
+        source_field: "NULL"
+        transformation: cast
+        type: VARCHAR
+        notes: hardcoded NULL placeholder (TODO)
+      - name: hardware_nic_rx_timestamp
+        source_field: props.hardwareNicRxTimestamp
+        transformation: unnest
+      - name: hardware_nic_rx_timestamp_ns
+        source_field: props.hardwareNicRxTimestamp_ns
+        transformation: unnest
+      - name: event_timestamp
+        source_field: props.eventTimestamp
+        transformation: unnest
+      - name: event_timestamp_ns
+        source_field: props.eventTimestamp_ns
+        transformation: unnest
+      - name: takeout_category
+        source_field: takeoutCategory
+        transformation: rename
+      - name: base_order_event_type
+        source_field: baseOrderEventType
+        transformation: rename
+      - name: base_order_event_side
+        source_field: baseOrderEventSide_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: takeout_type
+        source_field: takeoutType
+        transformation: rename
+      - name: event_type
+        source_field: eventType
+        transformation: rename
+      - name: fanout_identifier
+        source_field: fanoutIdentifier
+        transformation: rename
+      - name: fanout_count
+        source_field: fanoutCount
+        transformation: rename
+      - name: opportunity_index
+        source_field: opportunityIndex
+        transformation: rename
+      - name: num_opportunities
+        source_field: numOpportunities
+        transformation: rename
+      - name: swing_properties
+        source_field: swingProperties
+        transformation: rename
+      - name: market_price
+        source_field: marketPrice
+        transformation: rename
+      - name: market_size
+        source_field: marketSize
+        transformation: rename
+      - name: routed_price
+        source_field: routedPrice
+        transformation: rename
+      - name: routed_size
+        source_field: routedSize
+        transformation: rename
+      - name: routed_buy_sell
+        source_field: routedBuySell_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: avg_trade_price
+        source_field: avgTradePrice
+        transformation: rename
+      - name: swing_edge
+        source_field: swingEdge
+        transformation: rename
+      - name: trade_volume
+        source_field: tradeVolume
+        transformation: rename
+      - name: mako_order_id
+        source_field: makoOrderId
+        transformation: rename
+      - name: exch_order_id
+        source_field: exchOrderId
+        transformation: rename
+      - name: exch_trans_id
+        source_field: exchTransId
+        transformation: rename
+      - name: latency_stats_prcx
+        source_field: latencyStatsPRCX
+        transformation: rename
+      - name: latency_stats_prcs
+        source_field: latencyStatsPRCS
+        transformation: rename
+      - name: latency_stats_vtio
+        source_field: latencyStatsVTIO
+        transformation: rename
+      - name: latency_stats_bkio
+        source_field: latencyStatsBKIO
+        transformation: rename
+      - name: latency_stats_qmio
+        source_field: latencyStatsQMIO
+        transformation: rename
+      - name: latency_stats_itio
+        source_field: latencyStatsITIO
+        transformation: rename
+      - name: latency_stats_itex
+        source_field: latencyStatsITEX
+        transformation: rename
+      - name: exchange_timestamp
+        source_field: props.exchangeTimestamp
+        transformation: unnest
+      - name: exchange_timestamp_ns
+        source_field: props.exchangeTimestamp_ns
+        transformation: unnest
+      - name: fanout_index
+        source_field: fanoutIndex
+        transformation: rename
+      - name: bv_update_sequence_number
+        source_field: props.bvUpdateSequenceNumber
+        transformation: unnest
+      - name: bv_update_instrument_hash
+        source_field: props.bvUpdateInstrumentHash
+        transformation: unnest
+      - name: underlying_sequence_number
+        source_field: props.underlyingSequenceNumber
+        transformation: unnest
+      - name: underlying_instrument_hash
+        source_field: props.underlyingInstrumentHash
+        transformation: unnest
+      - name: is_bv_invalid
+        source_field: props.IsBvInvalid
+        transformation: unnest
+      - name: underlying_exe_exch
+        source_field: props.underlyingExeExch
+        transformation: unnest
+      - name: underlying_exe_exch_name
+        source_field: props.underlyingExeExch_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: is_spark
+        source_field: props.isSpark
+        transformation: unnest
+      - name: ref_inst_curve_id
+        source_field: props.refInstCurveId
+        transformation: unnest
+      - name: ref_inst_carry_id
+        source_field: props.refInstCarryId
+        transformation: unnest
+      - name: min_edge
+        source_field: minEdge
+        transformation: rename
+      - name: raw_min_edge
+        source_field: rawMinEdge
+        transformation: rename
+      - name: is_ref_theo_invalid
+        source_field: props.isRefTheoInvalid
+        transformation: unnest
+      - name: lb_enabled
+        source_field: props.lbEnabled
+        transformation: unnest
+      - name: edge_model_type
+        source_field: props.edgeModelType
+        transformation: unnest
+      - name: edge_model_type_name
+        source_field: props.edgeModelType_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: streamsource_stream_id
+        source_field: props.streamSource.streamId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: streamsource_event_id
+        source_field: props.streamSource.eventId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: streamsource_message_id
+        source_field: props.streamSource.messageId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: datasource_pid
+        source_field: props.dataSource.pid
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: datasource_hostname
+        source_field: props.dataSource.hostname
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: is_negative_edge_allowed
+        source_field: isNegativeEdgeAllowed
+        transformation: rename
+      - name: bid_price_0
+        source_field: props.bid_price_0
+        transformation: unnest
+      - name: ask_price_0
+        source_field: props.ask_price_0
+        transformation: unnest
+      - name: ask_volume_0
+        source_field: props.ask_volume_0
+        transformation: unnest
+      - name: bid_volume_0
+        source_field: props.bid_volume_0
+        transformation: unnest
+      - name: latency_stats_bvio
+        source_field: latencyStatsBVIO
+        transformation: rename
+      - name: ref_theoevent_stream_id
+        source_field: props.refTheoEvent.streamId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: ref_theoevent_event_id
+        source_field: props.refTheoEvent.eventId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: base_size
+        source_field: baseSize
+        transformation: rename
+
+  # ---------------------------------------------------------------------------
+  # oroswingdata
+  # ---------------------------------------------------------------------------
+  - name: oroswingdata
+    staging_file: stg_raw__oroswingdata.sql
+    mart_file: oroswingdata.sql
+    source: parquet_data_dynamic/oroswingdata
+    dedup_keys: [streamsource_stream_id, streamsource_event_id, streamsource_message_id]
+    mart_notes: |
+      Dedup directly in mart via QUALIFY ROW_NUMBER().
+      Note: dedup keys do NOT include datasource_pid/datasource_hostname (unlike other tables).
+      Instrument enrichment via LEFT JOIN to int_raw__instruments_agg.
+    columns_excluded_at_mart: [kafka_message_timestamp, record_written_timestamp, partition_timestamp_local, partition_number]
+    enrichment_columns_from_instruments: [mako_symbol, currency, inst_type_name, term, strike, option_type, option_type_name, expiry_timestamp]
+    columns:
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: symbol
+        source_field: props.symbol
+        transformation: unnest
+      - name: portfolio
+        source_field: props.portfolio
+        transformation: unnest
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+        notes: only included when is_intraday == false
+      - name: pid
+        source_field: "NULL"
+        transformation: cast
+        type: INTEGER
+        notes: hardcoded NULL; only included when is_intraday == false
+      - name: hostname
+        source_field: "NULL"
+        transformation: cast
+        type: VARCHAR
+        notes: hardcoded NULL; only included when is_intraday == false
+      - name: datasource_pid
+        source_field: props.dataSource.pid
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: datasource_hostname
+        source_field: props.dataSource.hostname
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: instrument_hash
+        source_field: props.instrumentHash
+        transformation: unnest
+      - name: algo
+        source_field: props.algo
+        transformation: unnest
+      - name: ref_curve_id
+        source_field: props.refCurveId
+        transformation: unnest
+      - name: ref_carry_id
+        source_field: props.refCarryId
+        transformation: unnest
+      - name: ref_tv
+        source_field: props.refTv
+        transformation: unnest
+      - name: ref_delta
+        source_field: props.refDelta
+        transformation: unnest
+      - name: ref_gamma
+        source_field: props.refGamma
+        transformation: unnest
+      - name: ref_base_price
+        source_field: props.refBasePrice
+        transformation: unnest
+      - name: ref_roll
+        source_field: props.refRoll
+        transformation: unnest
+      - name: raw_bv_bid
+        source_field: props.rawBvBid
+        transformation: unnest
+      - name: raw_bv_bid_size
+        source_field: props.rawBvBidSize
+        transformation: unnest
+      - name: raw_bv_ask
+        source_field: props.rawBvAsk
+        transformation: unnest
+      - name: raw_bv_ask_size
+        source_field: props.rawBvAskSize
+        transformation: unnest
+      - name: layered_base_bid
+        source_field: props.layeredBaseBid
+        transformation: unnest
+      - name: layered_base_bid_size
+        source_field: props.layeredBaseBidSize
+        transformation: unnest
+      - name: layered_base_ask
+        source_field: props.layeredBaseAsk
+        transformation: unnest
+      - name: layered_base_ask_size
+        source_field: props.layeredBaseAskSize
+        transformation: unnest
+      - name: layered_base_adjustment
+        source_field: props.layeredBaseAdjustment
+        transformation: unnest
+      - name: odr_adjustment
+        source_field: props.odrAdjustment
+        transformation: unnest
+      - name: inflight_deflection_tv_adjustment_bid
+        source_field: props.inflightDeflectionTvAdjustmentBid
+        transformation: unnest
+      - name: inflight_deflection_tv_adjustment_ask
+        source_field: props.inflightDeflectionTvAdjustmentAsk
+        transformation: unnest
+      - name: internal_tv_adjustment_bid
+        source_field: props.internalTvAdjustmentBid
+        transformation: unnest
+      - name: internal_tv_adjustment_ask
+        source_field: props.internalTvAdjustmentAsk
+        transformation: unnest
+      - name: nhr_adjustment_bid
+        source_field: props.nhrAdjustmentBid
+        transformation: unnest
+      - name: nhr_adjustment_ask
+        source_field: props.nhrAdjustmentAsk
+        transformation: unnest
+      - name: base_edge_bid
+        source_field: props.baseEdgeBid
+        transformation: unnest
+      - name: base_edge_ask
+        source_field: props.baseEdgeAsk
+        transformation: unnest
+      - name: fees
+        source_field: props.fees
+        transformation: unnest
+      - name: roll
+        source_field: props.roll
+        transformation: unnest
+      - name: bv_side
+        source_field: props.bvSide_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: delta_adjusted_base_price
+        source_field: props.deltaAdjustedBasePrice
+        transformation: unnest
+      - name: tv
+        source_field: props.tv
+        transformation: unnest
+      - name: base_sequence_number
+        source_field: "NULL"
+        transformation: cast
+        type: INTEGER
+        notes: hardcoded NULL placeholder
+      - name: option_sequence_number
+        source_field: props.optionSequenceNumber
+        transformation: unnest
+      - name: base_instrument_hash
+        source_field: "NULL"
+        transformation: cast
+        type: VARCHAR
+        notes: hardcoded NULL placeholder
+      - name: bv_update_sequence_number
+        source_field: props.bvUpdateSequenceNumber
+        transformation: unnest
+      - name: bv_update_instrument_hash
+        source_field: props.bvUpdateInstrumentHash
+        transformation: unnest
+      - name: underlying_sequence_number
+        source_field: props.underlyingSequenceNumber
+        transformation: unnest
+      - name: underlying_instrument_hash
+        source_field: props.underlyingInstrumentHash
+        transformation: unnest
+      - name: hardware_nic_rx_timestamp
+        source_field: props.hardwareNicRxTimestamp
+        transformation: unnest
+      - name: hardware_nic_rx_timestamp_ns
+        source_field: props.hardwareNicRxTimestamp_ns
+        transformation: unnest
+      - name: event_timestamp
+        source_field: props.eventTimestamp
+        transformation: unnest
+      - name: event_timestamp_ns
+        source_field: props.eventTimestamp_ns
+        transformation: unnest
+      - name: event_type
+        source_field: eventType
+        transformation: rename
+      - name: market_price
+        source_field: marketPrice
+        transformation: rename
+      - name: market_size
+        source_field: marketSize
+        transformation: rename
+      - name: routed_price
+        source_field: routedPrice
+        transformation: rename
+      - name: routed_size
+        source_field: routedSize
+        transformation: rename
+      - name: routed_buy_sell
+        source_field: routedBuySell_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: avg_trade_price
+        source_field: avgTradePrice
+        transformation: rename
+      - name: swing_edge
+        source_field: swingEdge
+        transformation: rename
+      - name: trade_volume
+        source_field: tradeVolume
+        transformation: rename
+      - name: user_id
+        source_field: userId
+        transformation: rename
+      - name: mako_order_id
+        source_field: makoOrderId
+        transformation: rename
+      - name: exch_order_id
+        source_field: exchOrderId
+        transformation: rename
+      - name: exch_trans_id
+        source_field: exchTransId
+        transformation: rename
+      - name: latency_stats_prcx
+        source_field: latencyStatsPRCX
+        transformation: rename
+      - name: latency_stats_prcs
+        source_field: latencyStatsPRCS
+        transformation: rename
+      - name: latency_stats_vtio
+        source_field: latencyStatsVTIO
+        transformation: rename
+      - name: latency_stats_bkio
+        source_field: latencyStatsBKIO
+        transformation: rename
+      - name: latency_stats_qmio
+        source_field: latencyStatsQMIO
+        transformation: rename
+      - name: latency_stats_itio
+        source_field: latencyStatsITIO
+        transformation: rename
+      - name: latency_stats_itex
+        source_field: latencyStatsITEX
+        transformation: rename
+      - name: order_type_name
+        source_field: orderType_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: order_type
+        source_field: orderType
+        transformation: cast
+        type: VARCHAR
+        notes: CAST(orderType AS VARCHAR)
+      - name: trigger_source_name
+        source_field: TriggerSource_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: trigger_source
+        source_field: TriggerSource
+        transformation: cast
+        type: VARCHAR
+        notes: CAST(TriggerSource AS VARCHAR)
+      - name: is_bv_invalid
+        source_field: props.IsBvInvalid
+        transformation: unnest
+      - name: exchange_timestamp
+        source_field: props.exchangeTimestamp
+        transformation: unnest
+      - name: exchange_timestamp_ns
+        source_field: props.exchangeTimestamp_ns
+        transformation: unnest
+      - name: underlying_exe_exch
+        source_field: props.underlyingExeExch
+        transformation: unnest
+      - name: underlying_exe_exch_name
+        source_field: props.underlyingExeExch_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: is_spark
+        source_field: props.isSpark
+        transformation: unnest
+      - name: ref_inst_carry_id
+        source_field: props.refInstCarryId
+        transformation: unnest
+      - name: ref_inst_curve_id
+        source_field: props.refInstCurveId
+        transformation: unnest
+      - name: is_ref_theo_invalid
+        source_field: props.isRefTheoInvalid
+        transformation: unnest
+      - name: lb_enabled
+        source_field: props.lbEnabled
+        transformation: unnest
+      - name: edge_model_type
+        source_field: props.edgeModelType
+        transformation: unnest
+      - name: edge_model_type_name
+        source_field: props.edgeModelType_name
+        transformation: unnest
+        notes: enum name extraction (_name suffix)
+      - name: ref_theoevent_event_id
+        source_field: props.refTheoEvent.eventId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: ref_theoevent_stream_id
+        source_field: props.refTheoEvent.streamId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: streamsource_stream_id
+        source_field: props.streamSource.streamId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: streamsource_event_id
+        source_field: props.streamSource.eventId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: streamsource_message_id
+        source_field: props.streamSource.messageId
+        transformation: unnest
+        notes: nested struct two levels deep
+      - name: bid_price_0
+        source_field: props.bid_price_0
+        transformation: unnest
+      - name: bid_volume_0
+        source_field: props.bid_volume_0
+        transformation: unnest
+      - name: ask_price_0
+        source_field: props.ask_price_0
+        transformation: unnest
+      - name: ask_volume_0
+        source_field: props.ask_volume_0
+        transformation: unnest
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: direct
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+
+  # ---------------------------------------------------------------------------
+  # marketdata
+  # ---------------------------------------------------------------------------
+  - name: marketdata
+    staging_file: stg_raw__marketdata.sql
+    mart_file: marketdata.sql
+    source: parquet_data_dynamic/marketdata
+    dedup_keys: []
+    dedup_notes: no ROW_NUMBER dedup at mart layer; uses SELECT DISTINCT only
+    mart_notes: |
+      No explicit ROW_NUMBER dedup - uses SELECT DISTINCT.
+      Instrument enrichment via LEFT JOIN to int_raw__instruments_agg.
+    columns_excluded_at_mart: [kafka_message_timestamp, record_written_timestamp, partition_timestamp_local, partition_number]
+    enrichment_columns_from_instruments: [mako_symbol, currency, inst_type_name, term, strike, option_type, option_type_name, expiry_timestamp]
+    columns:
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: direct
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: symbol
+        source_field: symbol
+        transformation: direct
+        notes: top-level field (not under props)
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+        notes: only included when is_intraday == false
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: event_date
+        source_field: message_trade_date
+        transformation: derive
+        notes: "make_date(message_trade_date.year, message_trade_date.month, message_trade_date.day)"
+        type: DATE
+      - name: exchange_timestamp
+        source_field: exchangeTimestamp
+        transformation: rename
+      - name: hw_nic_rx_timestamp
+        source_field: hardwareNicRxTimestamp
+        transformation: rename
+      - name: mako_ingress_timestamp
+        source_field: makoIngressTimestamp
+        transformation: rename
+      - name: software_timestamp
+        source_field: softwareRxTimestamp
+        transformation: rename
+      - name: exchange_timestamp_ns
+        source_field: exchangeTimestamp_ns
+        transformation: rename
+      - name: hw_nic_rx_timestamp_ns
+        source_field: hardwareNicRxTimestamp_ns
+        transformation: rename
+      - name: mako_ingress_timestamp_ns
+        source_field: makoIngressTimestamp_ns
+        transformation: rename
+      - name: software_timestamp_ns
+        source_field: softwareRxTimestamp_ns
+        transformation: rename
+      - name: instrument_hash
+        source_field: instrumentHash
+        transformation: rename
+      - name: event_type
+        source_field: eventType
+        transformation: rename
+      - name: sequence_number
+        source_field: sequenceNumber
+        transformation: rename
+      - name: side
+        source_field: side
+        transformation: direct
+      - name: price
+        source_field: price
+        transformation: direct
+      - name: quantity
+        source_field: quantity
+        transformation: direct
+      - name: order_id
+        source_field: orderId
+        transformation: rename
+      - name: order_position
+        source_field: orderPosition
+        transformation: rename
+      - name: market_state
+        source_field: marketState
+        transformation: rename
+      - name: keyframe
+        source_field: keyframe
+        transformation: direct
+      - name: instrument_type
+        source_field: instrumentType_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: data_order_identifier
+        source_field: dataOrderIdentifier
+        transformation: rename
+      - name: data_timestamp
+        source_field: dataTimestamp
+        transformation: rename
+      - name: data_timestamp_ns
+        source_field: dataTimestamp_ns
+        transformation: rename
+      - name: is_snap
+        source_field: "FALSE"
+        transformation: derive
+        notes: hardcoded FALSE literal
+        type: BOOLEAN
+      - name: fill_quantity
+        source_field: fillQuantity
+        transformation: rename
+      - name: hidden_quantity
+        source_field: hiddenQuantity
+        transformation: rename
+      - name: cancel_quantity
+        source_field: cancelQuantity
+        transformation: rename
+      - name: mako_sequence_number
+        source_field: makoSequenceNumber
+        transformation: rename
+      - name: datasource_pid
+        source_field: dataSource.pid
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: datasource_hostname
+        source_field: dataSource.hostname
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_stream_id
+        source_field: streamSource.streamId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_event_id
+        source_field: streamSource.eventId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_message_id
+        source_field: streamSource.messageId
+        transformation: unnest
+        notes: top-level struct (not under props)
+
+  # ---------------------------------------------------------------------------
+  # marketdataext
+  # ---------------------------------------------------------------------------
+  - name: marketdataext
+    staging_file: stg_raw__marketdataext.sql
+    mart_file: marketdataext.sql
+    source: parquet_data_dynamic/marketdataext
+    dedup_keys: [datasource_hostname, streamsource_stream_id, streamsource_event_id, streamsource_message_id]
+    dedup_notes: uses datasource_hostname but NOT datasource_pid (unlike most tables)
+    mart_notes: |
+      Dedup directly in mart via QUALIFY ROW_NUMBER().
+      Instrument enrichment via LEFT JOIN to int_raw__instruments_agg.
+    columns_excluded_at_mart: [kafka_message_timestamp, record_written_timestamp, partition_timestamp_local, partition_number]
+    enrichment_columns_from_instruments: [mako_symbol, currency, inst_type_name, term, strike, option_type, option_type_name, expiry_timestamp]
+    columns:
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: direct
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: symbol
+        source_field: symbol
+        transformation: direct
+        notes: top-level field (not under props)
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+        notes: only included when is_intraday == false
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: mako_ingress_timestamp
+        source_field: makoIngressTimestamp
+        transformation: rename
+      - name: mako_ingress_timestamp_ns
+        source_field: makoIngressTimestamp_ns
+        transformation: rename
+      - name: hardware_nic_rx_timestamp
+        source_field: hardwareNicRxTimestamp
+        transformation: rename
+      - name: hardware_nic_rx_timestamp_ns
+        source_field: hardwareNicRxTimestamp_ns
+        transformation: rename
+      - name: software_timestamp
+        source_field: softwareRxTimestamp
+        transformation: rename
+      - name: software_timestamp_ns
+        source_field: softwareRxTimestamp_ns
+        transformation: rename
+      - name: exchange_timestamp
+        source_field: exchangeTimestamp
+        transformation: rename
+      - name: exchange_timestamp_ns
+        source_field: exchangeTimestamp_ns
+        transformation: rename
+      - name: sequence_number
+        source_field: sequenceNumber
+        transformation: rename
+      - name: market_trade_id
+        source_field: marketTradeId
+        transformation: rename
+      - name: message_trade_date
+        source_field: message_trade_date
+        transformation: derive
+        notes: "make_date(message_trade_date.year, message_trade_date.month, message_trade_date.day)"
+        type: DATE
+      - name: price
+        source_field: price
+        transformation: direct
+      - name: size
+        source_field: size
+        transformation: direct
+      - name: buy_sell
+        source_field: side_name
+        transformation: rename
+        notes: "renamed from side_name to buy_sell; comment says 'Assuming side_name contains the buy/sell indicator'"
+      - name: buyer_id
+        source_field: buyerId
+        transformation: rename
+      - name: seller_id
+        source_field: sellerId
+        transformation: rename
+      - name: trade_exchange_timestamp
+        source_field: tradeExchangeTimestamp
+        transformation: rename
+      - name: trade_exchange_timestamp_ns
+        source_field: tradeExchangeTimestamp_ns
+        transformation: rename
+      - name: trade_ingress_timestamp
+        source_field: tradeIngressTimestamp
+        transformation: rename
+      - name: trade_ingress_timestamp_ns
+        source_field: tradeIngressTimestamp_ns
+        transformation: rename
+      - name: event_type
+        source_field: eventType
+        transformation: rename
+      - name: event_type_name
+        source_field: eventType_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: entering_firm_id
+        source_field: enteringFirmId
+        transformation: rename
+      - name: order_id
+        source_field: orderId
+        transformation: rename
+      - name: instrument_hash
+        source_field: instrumentHash
+        transformation: rename
+      - name: datasource_pid
+        source_field: dataSource.pid
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: datasource_hostname
+        source_field: dataSource.hostname
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_stream_id
+        source_field: streamSource.streamId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_event_id
+        source_field: streamSource.eventId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_message_id
+        source_field: streamSource.messageId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: aggressor_exchange_timestamp
+        source_field: aggressorExchangeTimestamp
+        transformation: rename
+      - name: aggressor_exchange_timestamp_ns
+        source_field: aggressorExchangeTimestamp_ns
+        transformation: rename
+      - name: sent_exchange_timestamp
+        source_field: sentExchangeTimestamp
+        transformation: rename
+      - name: sent_exchange_timestamp_ns
+        source_field: sentExchangeTimestamp_ns
+        transformation: rename
+
+  # ---------------------------------------------------------------------------
+  # marketdepth
+  # ---------------------------------------------------------------------------
+  - name: marketdepth
+    staging_file: stg_raw__marketdepth.sql
+    mart_file: marketdepth.sql
+    source: parquet_data_dynamic/marketdepth
+    dedup_keys: []
+    dedup_notes: no ROW_NUMBER dedup at mart layer; uses SELECT DISTINCT only
+    mart_notes: |
+      No explicit ROW_NUMBER dedup - uses SELECT DISTINCT.
+      Instrument enrichment via LEFT JOIN to int_raw__instruments_agg.
+    columns_excluded_at_mart: [kafka_message_timestamp, record_written_timestamp, partition_timestamp_local, partition_number]
+    enrichment_columns_from_instruments: [mako_symbol, currency, inst_type_name, term, strike, option_type, option_type_name, expiry_timestamp]
+    columns:
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: direct
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: symbol
+        source_field: symbol
+        transformation: direct
+        notes: top-level field (not under props)
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+        notes: only included when is_intraday == false
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: event_date
+        source_field: exchangeTimestamp
+        transformation: cast
+        type: DATE
+        notes: "CAST(exchangeTimestamp AS DATE)"
+      - name: exchange_timestamp
+        source_field: exchangeTimestamp
+        transformation: rename
+      - name: exchange_timestamp_ns
+        source_field: exchangeTimestamp_ns
+        transformation: rename
+      - name: hw_nic_rx_timestamp
+        source_field: hardwareNicRxTimestamp
+        transformation: rename
+      - name: hw_nic_rx_timestamp_ns
+        source_field: hardwareNicRxTimestamp_ns
+        transformation: rename
+      - name: mako_ingress_timestamp
+        source_field: makoIngressTimestamp
+        transformation: rename
+      - name: mako_ingress_timestamp_ns
+        source_field: makoIngressTimestamp_ns
+        transformation: rename
+      - name: software_timestamp
+        source_field: softwareRxTimestamp
+        transformation: rename
+      - name: software_timestamp_ns
+        source_field: softwareRxTimestamp_ns
+        transformation: rename
+      - name: instrument_hash
+        source_field: instrumentHash
+        transformation: rename
+      - name: sequence_number
+        source_field: sequenceNumber
+        transformation: rename
+      # --- Ask prices (array expansion) ---
+      - name: ask_price_0
+        source_field: asks[1].price
+        transformation: array_expand
+        notes: "COALESCE(asks[1].price, 0) - 1-indexed DuckDB array"
+      - name: ask_price_1
+        source_field: asks[2].price
+        transformation: array_expand
+        notes: "COALESCE(asks[2].price, 0)"
+      - name: ask_price_2
+        source_field: asks[3].price
+        transformation: array_expand
+        notes: "COALESCE(asks[3].price, 0)"
+      - name: ask_price_3
+        source_field: asks[4].price
+        transformation: array_expand
+        notes: "COALESCE(asks[4].price, 0)"
+      - name: ask_price_4
+        source_field: asks[5].price
+        transformation: array_expand
+        notes: "COALESCE(asks[5].price, 0)"
+      # --- Bid prices (array expansion) ---
+      - name: bid_price_0
+        source_field: bids[1].price
+        transformation: array_expand
+        notes: "COALESCE(bids[1].price, 0)"
+      - name: bid_price_1
+        source_field: bids[2].price
+        transformation: array_expand
+        notes: "COALESCE(bids[2].price, 0)"
+      - name: bid_price_2
+        source_field: bids[3].price
+        transformation: array_expand
+        notes: "COALESCE(bids[3].price, 0)"
+      - name: bid_price_3
+        source_field: bids[4].price
+        transformation: array_expand
+        notes: "COALESCE(bids[4].price, 0)"
+      - name: bid_price_4
+        source_field: bids[5].price
+        transformation: array_expand
+        notes: "COALESCE(bids[5].price, 0)"
+      # --- Ask volumes (array expansion) ---
+      - name: ask_volume_0
+        source_field: asks[1].volume
+        transformation: array_expand
+        notes: "COALESCE(asks[1].volume, 0)"
+      - name: ask_volume_1
+        source_field: asks[2].volume
+        transformation: array_expand
+        notes: "COALESCE(asks[2].volume, 0)"
+      - name: ask_volume_2
+        source_field: asks[3].volume
+        transformation: array_expand
+        notes: "COALESCE(asks[3].volume, 0)"
+      - name: ask_volume_3
+        source_field: asks[4].volume
+        transformation: array_expand
+        notes: "COALESCE(asks[4].volume, 0)"
+      - name: ask_volume_4
+        source_field: asks[5].volume
+        transformation: array_expand
+        notes: "COALESCE(asks[5].volume, 0)"
+      # --- Bid volumes (array expansion) ---
+      - name: bid_volume_0
+        source_field: bids[1].volume
+        transformation: array_expand
+        notes: "COALESCE(bids[1].volume, 0)"
+      - name: bid_volume_1
+        source_field: bids[2].volume
+        transformation: array_expand
+        notes: "COALESCE(bids[2].volume, 0)"
+      - name: bid_volume_2
+        source_field: bids[3].volume
+        transformation: array_expand
+        notes: "COALESCE(bids[3].volume, 0)"
+      - name: bid_volume_3
+        source_field: bids[4].volume
+        transformation: array_expand
+        notes: "COALESCE(bids[4].volume, 0)"
+      - name: bid_volume_4
+        source_field: bids[5].volume
+        transformation: array_expand
+        notes: "COALESCE(bids[5].volume, 0)"
+      # --- Ask orders (array expansion) ---
+      - name: ask_orders_0
+        source_field: asks[1].orders
+        transformation: array_expand
+        notes: "COALESCE(asks[1].orders, 0)"
+      - name: ask_orders_1
+        source_field: asks[2].orders
+        transformation: array_expand
+        notes: "COALESCE(asks[2].orders, 0)"
+      - name: ask_orders_2
+        source_field: asks[3].orders
+        transformation: array_expand
+        notes: "COALESCE(asks[3].orders, 0)"
+      - name: ask_orders_3
+        source_field: asks[4].orders
+        transformation: array_expand
+        notes: "COALESCE(asks[4].orders, 0)"
+      - name: ask_orders_4
+        source_field: asks[5].orders
+        transformation: array_expand
+        notes: "COALESCE(asks[5].orders, 0)"
+      # --- Bid orders (array expansion) ---
+      - name: bid_orders_0
+        source_field: bids[1].orders
+        transformation: array_expand
+        notes: "COALESCE(bids[1].orders, 0)"
+      - name: bid_orders_1
+        source_field: bids[2].orders
+        transformation: array_expand
+        notes: "COALESCE(bids[2].orders, 0)"
+      - name: bid_orders_2
+        source_field: bids[3].orders
+        transformation: array_expand
+        notes: "COALESCE(bids[3].orders, 0)"
+      - name: bid_orders_3
+        source_field: bids[4].orders
+        transformation: array_expand
+        notes: "COALESCE(bids[4].orders, 0)"
+      - name: bid_orders_4
+        source_field: bids[5].orders
+        transformation: array_expand
+        notes: "COALESCE(bids[5].orders, 0)"
+      # --- Implied bid (struct extraction) ---
+      - name: implied_bid_price
+        source_field: impliedBid.price
+        transformation: unnest
+        notes: "COALESCE(impliedBid.price, 0)"
+      - name: implied_bid_volume
+        source_field: impliedBid.volume
+        transformation: unnest
+        notes: "COALESCE(impliedBid.volume, 0)"
+      - name: implied_bid_orders
+        source_field: impliedBid.orders
+        transformation: unnest
+        notes: "COALESCE(impliedBid.orders, 0)"
+      # --- Implied ask (struct extraction) ---
+      - name: implied_ask_price
+        source_field: impliedAsk.price
+        transformation: unnest
+        notes: "COALESCE(impliedAsk.price, 0)"
+      - name: implied_ask_volume
+        source_field: impliedAsk.volume
+        transformation: unnest
+        notes: "COALESCE(impliedAsk.volume, 0)"
+      - name: implied_ask_orders
+        source_field: impliedAsk.orders
+        transformation: unnest
+        notes: "COALESCE(impliedAsk.orders, 0)"
+      - name: keyframe
+        source_field: keyframe
+        transformation: direct
+      - name: data_timestamp
+        source_field: dataTimestamp
+        transformation: rename
+      - name: data_timestamp_ns
+        source_field: dataTimestamp_ns
+        transformation: rename
+      - name: data_order_identifier
+        source_field: dataOrderIdentifier
+        transformation: rename
+      - name: streamsource_stream_id
+        source_field: streamSource.streamId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_event_id
+        source_field: streamSource.eventId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_message_id
+        source_field: streamSource.messageId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: datasource_pid
+        source_field: dataSource.pid
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: datasource_hostname
+        source_field: dataSource.hostname
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: market_state
+        source_field: marketState
+        transformation: rename
+
+  # ---------------------------------------------------------------------------
+  # theodata
+  # ---------------------------------------------------------------------------
+  - name: theodata
+    staging_file: stg_raw__theodata.sql
+    mart_file: theodata.sql
+    source: parquet_data_dynamic/theodata
+    dedup_keys: [datasource_pid, datasource_hostname, streamsource_stream_id, streamsource_event_id, streamsource_message_id]
+    dedup_notes: |
+      For brazil/eurex/arb exchanges, uses alternative dedup keys:
+      [instrument_hash, theo_event_tx_timestamp_ns, carry_id, curve_id]
+    mart_notes: |
+      Dedup directly in mart via QUALIFY ROW_NUMBER() (standard exchanges).
+      For brazil/eurex/arb: no ROW_NUMBER dedup, just SELECT DISTINCT.
+      Instrument enrichment via LEFT JOIN to int_raw__instruments_agg.
+    columns_excluded_at_mart: [kafka_message_timestamp, record_written_timestamp, partition_timestamp_local, partition_number]
+    enrichment_columns_from_instruments: [mako_symbol, currency, inst_type_name, term, strike, option_type, option_type_name, expiry_timestamp]
+    columns:
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: direct
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: symbol
+        source_field: symbol
+        transformation: direct
+        notes: top-level field (not under props)
+      - name: portfolio
+        source_field: portfolio
+        transformation: direct
+        notes: top-level field (not under props)
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: event_date
+        source_field: TheoEventTxTimestamp
+        transformation: cast
+        type: DATE
+        notes: "CAST(TheoEventTxTimestamp AS DATE)"
+      - name: theo_event_tx_timestamp
+        source_field: TheoEventTxTimestamp
+        transformation: rename
+      - name: theo_event_tx_timestamp_ns
+        source_field: TheoEventTxTimestamp_ns
+        transformation: rename
+      - name: when_timestamp
+        source_field: whenTimestamp
+        transformation: rename
+      - name: when_timestamp_ns
+        source_field: whenTimestamp_ns
+        transformation: rename
+      - name: source_event_timestamp
+        source_field: sourceEventTimestamp
+        transformation: rename
+      - name: source_event_timestamp_ns
+        source_field: sourceEventTimestamp_ns
+        transformation: rename
+      - name: theo_compute_timestamp_start
+        source_field: theoComputeTimestampStart
+        transformation: rename
+      - name: theo_compute_timestamp_start_ns
+        source_field: theoComputeTimestampStart_ns
+        transformation: rename
+      - name: theo_compute_timestamp_stop
+        source_field: theoComputeTimestampStop
+        transformation: rename
+      - name: theo_compute_timestamp_stop_ns
+        source_field: theoComputeTimestampStop_ns
+        transformation: rename
+      - name: theo_compute_type
+        source_field: theoComputeType_name
+        transformation: rename
+        notes: enum name extraction (_name suffix)
+      - name: instrument_hash
+        source_field: instrumentHash
+        transformation: rename
+      - name: curve_id
+        source_field: curveId
+        transformation: rename
+      - name: carry_id
+        source_field: carryId
+        transformation: rename
+      - name: stream_id
+        source_field: streamId
+        transformation: rename
+      - name: tv
+        source_field: tv
+        transformation: direct
+      - name: tv_offset
+        source_field: tvOffset
+        transformation: rename
+      - name: delta
+        source_field: delta
+        transformation: direct
+      - name: gamma
+        source_field: gamma
+        transformation: direct
+      - name: vega
+        source_field: vega
+        transformation: direct
+      - name: theta
+        source_field: theta
+        transformation: direct
+      - name: rho
+        source_field: rho
+        transformation: direct
+      - name: tte
+        source_field: tte
+        transformation: direct
+      - name: raw_delta
+        source_field: rawDelta
+        transformation: rename
+      - name: raw_gamma
+        source_field: rawGamma
+        transformation: rename
+      - name: vol
+        source_field: vol
+        transformation: direct
+      - name: norm_strike
+        source_field: normStrike
+        transformation: rename
+      - name: under
+        source_field: under
+        transformation: direct
+      - name: roll
+        source_field: roll
+        transformation: direct
+      - name: forward
+        source_field: forward
+        transformation: direct
+      - name: short_rate
+        source_field: shortRate
+        transformation: rename
+      - name: offset_id
+        source_field: offsetId
+        transformation: rename
+      - name: greek_atm
+        source_field: pmGreeks.greekAtm
+        transformation: unnest
+      - name: greek_skew
+        source_field: pmGreeks.greekSkew
+        transformation: unnest
+      - name: greek_call_skew
+        source_field: pmGreeks.greekCallSkew
+        transformation: unnest
+      - name: greek_put_k
+        source_field: pmGreeks.greekPutK
+        transformation: unnest
+      - name: greek_call_k
+        source_field: pmGreeks.greekCallK
+        transformation: unnest
+      - name: greek_put_a
+        source_field: pmGreeks.greekPutA
+        transformation: unnest
+      - name: greek_call_a
+        source_field: pmGreeks.greekCallA
+        transformation: unnest
+      - name: greek_put_b
+        source_field: pmGreeks.greekPutB
+        transformation: unnest
+      - name: greek_call_b
+        source_field: pmGreeks.greekCallB
+        transformation: unnest
+      - name: greek_datm
+        source_field: pmGreeks.greekDatm
+        transformation: unnest
+      - name: param_atm
+        source_field: pmGreeks.paramAtm
+        transformation: unnest
+      - name: param_skew
+        source_field: pmGreeks.paramSkew
+        transformation: unnest
+      - name: param_call_skew
+        source_field: pmGreeks.paramCallSkew
+        transformation: unnest
+      - name: param_put_k
+        source_field: pmGreeks.paramPutK
+        transformation: unnest
+      - name: param_call_k
+        source_field: pmGreeks.paramCallK
+        transformation: unnest
+      - name: param_s_vol
+        source_field: pmGreeks.paramSvol
+        transformation: unnest
+      - name: datasource_pid
+        source_field: dataSource.pid
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: datasource_hostname
+        source_field: dataSource.hostname
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_stream_id
+        source_field: streamSource.streamId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_event_id
+        source_field: streamSource.eventId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_message_id
+        source_field: streamSource.messageId
+        transformation: unnest
+        notes: top-level struct (not under props)
+
+  # ---------------------------------------------------------------------------
+  # tradedata
+  # ---------------------------------------------------------------------------
+  - name: tradedata
+    staging_file: stg_raw__tradedata.sql
+    mart_file: tradedata.sql
+    source: parquet_data_dynamic/tradedata
+    dedup_keys: []
+    dedup_notes: no ROW_NUMBER dedup at mart layer; uses SELECT DISTINCT only
+    mart_notes: |
+      No explicit ROW_NUMBER dedup - uses SELECT DISTINCT.
+      Instrument enrichment via LEFT JOIN to int_raw__instruments_agg.
+    columns_excluded_at_mart: [kafka_message_timestamp, record_written_timestamp, partition_timestamp_local, partition_number]
+    enrichment_columns_from_instruments: [mako_symbol, currency, inst_type_name, term, strike, option_type, option_type_name, expiry_timestamp]
+    columns:
+      - name: kafka_message_timestamp
+        source_field: kafka_message_timestamp
+        transformation: direct
+      - name: record_written_timestamp
+        source_field: record_written_timestamp
+        transformation: direct
+      - name: kafka_partition
+        source_field: kafka_partition
+        transformation: direct
+      - name: kafka_offset
+        source_field: kafka_offset
+        transformation: direct
+      - name: symbol
+        source_field: symbol
+        transformation: direct
+        notes: top-level field (not under props)
+      - name: portfolio
+        source_field: portfolio
+        transformation: direct
+        notes: top-level field (not under props)
+      - name: trade_date
+        source_field: trade_date
+        transformation: direct
+        notes: only included when is_intraday == false
+      - name: partition_timestamp_local
+        source_field: partition_timestamp_local
+        transformation: direct
+      - name: partition_number
+        source_field: partition_number
+        transformation: direct
+      - name: mako_id
+        source_field: makoId
+        transformation: rename
+      - name: trader_id
+        source_field: traderId
+        transformation: rename
+      - name: algorithm
+        source_field: algorithm
+        transformation: direct
+      - name: routed_exchange
+        source_field: routedExchange
+        transformation: rename
+      - name: executable_exchange
+        source_field: executableExchange
+        transformation: rename
+      - name: channel
+        source_field: channel
+        transformation: direct
+      - name: transaction_properties
+        source_field: transactionProperties
+        transformation: rename
+      - name: tag_book
+        source_field: tagBook
+        transformation: rename
+      - name: tag_exchange
+        source_field: tagExchange
+        transformation: rename
+      - name: tag_user
+        source_field: tagUser
+        transformation: rename
+      - name: revision
+        source_field: revision
+        transformation: direct
+      - name: inventory
+        source_field: inventory
+        transformation: direct
+      - name: account
+        source_field: account
+        transformation: direct
+      - name: fill_id
+        source_field: fillId
+        transformation: rename
+      - name: user_id
+        source_field: userId
+        transformation: rename
+      - name: user_order_id
+        source_field: userOrderId
+        transformation: rename
+      - name: transaction_id
+        source_field: transactionId
+        transformation: rename
+      - name: order_id
+        source_field: orderId
+        transformation: rename
+      - name: exchange_transaction_id
+        source_field: exchangeTransactionId
+        transformation: rename
+      - name: exchange_order_id
+        source_field: exchangeOrderId
+        transformation: rename
+      - name: transaction_timestamp
+        source_field: transactionTimestamp
+        transformation: rename
+      - name: transaction_timestamp_ns
+        source_field: transactionTimestamp_ns
+        transformation: rename
+      - name: exchange_date
+        source_field: exchangeDate
+        transformation: derive
+        notes: "make_date(exchangeDate.year, exchangeDate.month, exchangeDate.day)"
+        type: DATE
+      - name: exchange_timestamp
+        source_field: exchangeTimestamp
+        transformation: rename
+      - name: exchange_timestamp_ns
+        source_field: exchangeTimestamp_ns
+        transformation: rename
+      - name: exchange_info
+        source_field: exchangeInfo
+        transformation: rename
+      - name: exchange_info_bits
+        source_field: exchangeInfoBits
+        transformation: rename
+      - name: exchange_qualifier
+        source_field: exchangeQualifier
+        transformation: rename
+      - name: statistics
+        source_field: statistics
+        transformation: direct
+      - name: position_type
+        source_field: positionType
+        transformation: rename
+      - name: position_id
+        source_field: positionId
+        transformation: rename
+      - name: size
+        source_field: size
+        transformation: direct
+      - name: tv
+        source_field: tv
+        transformation: direct
+      - name: ectv
+        source_field: ectv
+        transformation: direct
+      - name: settlement
+        source_field: settlement
+        transformation: direct
+      - name: settlement_date
+        source_field: settlementDate
+        transformation: derive
+        notes: |
+          CASE WHEN COALESCE(settlementDate.year, 0) = 0
+            OR COALESCE(settlementDate.month, 0) = 0
+            OR COALESCE(settlementDate.day, 0) = 0
+          THEN DATE '1970-01-01'
+          ELSE make_date(settlementDate.year, settlementDate.month, settlementDate.day)
+          END
+        type: DATE
+      - name: pos_currency
+        source_field: currency
+        transformation: rename
+        notes: renamed to pos_currency to avoid collision with instruments enrichment currency
+      - name: pos_value_currency
+        source_field: valueCurrency
+        transformation: rename
+      - name: cash_value
+        source_field: cashValue
+        transformation: rename
+      - name: mgmt_timestamp
+        source_field: mgmtTimestamp
+        transformation: rename
+      - name: mgmt_timestamp_ns
+        source_field: mgmtTimestamp_ns
+        transformation: rename
+      - name: max_trade_id
+        source_field: maxTradeId
+        transformation: rename
+      - name: agg_pos_timestamp
+        source_field: aggPosTimestamp
+        transformation: rename
+      - name: agg_pos_timestamp_ns
+        source_field: aggPosTimestamp_ns
+        transformation: rename
+      - name: agg_pos_date
+        source_field: aggPosDate
+        transformation: derive
+        notes: "make_date(aggPosDate.year, aggPosDate.month, aggPosDate.day)"
+        type: DATE
+      - name: price
+        source_field: price
+        transformation: direct
+      - name: deflection_scale
+        source_field: deflectionScale
+        transformation: rename
+      - name: curve_id
+        source_field: curveId
+        transformation: rename
+      - name: carry_id
+        source_field: carryId
+        transformation: rename
+      - name: revision_timestamp
+        source_field: revisionTimestamp
+        transformation: rename
+      - name: revision_timestamp_ns
+        source_field: revisionTimestamp_ns
+        transformation: rename
+      - name: trade_id
+        source_field: tradeId
+        transformation: rename
+      - name: company_position
+        source_field: companyPosition
+        transformation: rename
+      - name: traded_size
+        source_field: tradedSize
+        transformation: rename
+      - name: message_trade_date
+        source_field: message_trade_date
+        transformation: derive
+        notes: "make_date(message_trade_date.year, message_trade_date.month, message_trade_date.day)"
+        type: DATE
+      - name: value_date
+        source_field: valueDate
+        transformation: derive
+        notes: |
+          CASE WHEN COALESCE(valueDate.year, 0) = 0
+            OR COALESCE(valueDate.month, 0) = 0
+            OR COALESCE(valueDate.day, 0) = 0
+          THEN DATE '1970-01-01'
+          ELSE make_date(valueDate.year, valueDate.month, valueDate.day)
+          END
+        type: DATE
+      - name: counterparty
+        source_field: counterparty
+        transformation: direct
+      - name: text
+        source_field: text
+        transformation: direct
+      - name: revisor
+        source_field: revisor
+        transformation: direct
+      - name: instrument_hash
+        source_field: instrumentHash
+        transformation: rename
+      - name: datasource_pid
+        source_field: dataSource.pid
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: datasource_hostname
+        source_field: dataSource.hostname
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_stream_id
+        source_field: streamSource.streamId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_event_id
+        source_field: streamSource.eventId
+        transformation: unnest
+        notes: top-level struct (not under props)
+      - name: streamsource_message_id
+        source_field: streamSource.messageId
+        transformation: unnest
+        notes: top-level struct (not under props)
+
+# ---------------------------------------------------------------------------
+# Instrument enrichment columns (from int_raw__instruments_agg)
+# ---------------------------------------------------------------------------
+# These columns are added via LEFT JOIN on instrument_hash = parent_instrument_hash
+# at the mart layer for most tables (all except brokertrade which has its own pipeline).
+#
+# Columns from instruments join:
+#   - mako_symbol: MAX(symbol) from instruments; used to override empty symbol via COALESCE
+#   - currency: MAX(currency)
+#   - inst_type_name: MAX(inst_type_name) or 'COMBO' for combo instruments
+#   - term: MAX(term) or NULL for combos
+#   - strike: MAX(strike) or NULL for combos
+#   - option_type: MAX(option_type) or NULL for combos
+#   - option_type_name: MAX(option_type_name) or NULL for combos
+#   - expiry_timestamp: MAX(expiry_timestamp) or NULL for combos
+#
+# The instruments_agg model is a UNION ALL of:
+#   - Combo instruments (parent_is_combo = TRUE): grouped by (trade_date, parent_instrument_hash)
+#   - Non-combo instruments (parent_is_combo = FALSE): grouped by (trade_date, parent_instrument_hash)

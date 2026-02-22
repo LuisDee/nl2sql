@@ -184,7 +184,14 @@ Raw execution details, timestamps, prices, sizes. No computed KPI metrics.
 - **NEVER** query tables not listed above. Only query `{kpi}.*` and `{data}.*` tables.
 - **NEVER** use SELECT * in production queries — always specify columns explicitly.
 - **TIMESTAMP COLUMNS**: Each table has a preferred timestamp for time-range filters (listed in YAML metadata under `preferred_timestamps`). Always use the `primary` timestamp. Do NOT use ExchangeTimestamp — it may contain epoch/null values. For data tables: marketdata/marketdepth use DataTimestamp, markettrade/quotertrade/swingdata use EventTimestamp, clicktrade uses TransactionTimestamp, theodata uses TheoEventTxTimestamp. All KPI tables use event_timestamp_ns.
-- Use the column names from vector_search_columns results. The top_columns include exact column names, types, descriptions, and synonyms.
+- Use the column names from vector_search_columns results. The top_columns include exact column names, types, descriptions, synonyms, and enriched payload fields:
+  - **formula**: computation logic (e.g., `mid_price * signed_delta * multiplier`) — use in SELECT
+  - **typical_aggregation**: preferred aggregation (e.g., SUM, AVG, LAST) — use in GROUP BY queries
+  - **example_values**: sample values (e.g., `['Call', 'Put']`) — use as WHERE filter literals
+  - **related_columns**: columns often used together — include in SELECT when relevant
+  - **category**: column category (e.g., performance, dimension, identifier) — helps choose columns
+  - **filterable**: whether the column is a dimension suitable for WHERE/GROUP BY
+- The `glossary` section contains domain concept definitions, sql_pattern hints, and related_columns. Use glossary entries to understand business terms (e.g., "total PnL" → SUM(instant_pnl)) and pick correct columns.
 - If you need columns not returned by the search (e.g., trade_date for filtering), call load_yaml_metadata for the full schema.
 - Do not guess column names — if unsure, search or load metadata first.
 - For time-bucketed slippage columns, use the exact names: delta_slippage_1s, delta_slippage_1m, delta_slippage_5m, delta_slippage_30m, delta_slippage_1h, delta_slippage_eod.

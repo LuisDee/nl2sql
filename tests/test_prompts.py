@@ -191,6 +191,40 @@ class TestTradeTaxonomyInPrompt:
         assert "event_timestamp_ns" in result
 
 
+class TestPayloadFieldGuidance:
+    """Prompt must instruct the LLM to use enriched payload fields from column search."""
+
+    def _make_ctx(self, state=None):
+        ctx = MagicMock()
+        ctx.state = state or {}
+        return ctx
+
+    def test_mentions_formula_field(self):
+        """Prompt should tell LLM to use formula from column search results."""
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "formula" in result.lower()
+
+    def test_mentions_aggregation_field(self):
+        """Prompt should tell LLM to use typical_aggregation from column search."""
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "aggregation" in result.lower()
+
+    def test_mentions_example_values_field(self):
+        """Prompt should tell LLM to use example_values for filter literals."""
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "example_values" in result or "example values" in result.lower()
+
+    def test_mentions_related_columns_field(self):
+        """Prompt should tell LLM to use related_columns for joins/grouping."""
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "related_columns" in result or "related columns" in result.lower()
+
+    def test_mentions_glossary_context(self):
+        """Prompt should tell LLM to use glossary results for domain concepts."""
+        result = build_nl2sql_instruction(self._make_ctx())
+        assert "glossary" in result.lower()
+
+
 class TestPromptCaching:
     """Tests for the static/dynamic prompt split and caching."""
 

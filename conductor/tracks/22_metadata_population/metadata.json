@@ -1,0 +1,11 @@
+{
+  "id": "22_metadata_population",
+  "name": "Metadata Population, Verification & Data Profiling",
+  "wave": 17,
+  "complexity": "L",
+  "status": "new",
+  "dependencies": ["18_yaml_schema_enrichment"],
+  "interfaces_owned": ["populated_metadata", "data_profiling_pipeline", "heuristic_enrichment_script"],
+  "interfaces_consumed": ["enriched_yaml_schema", "yaml_catalog", "bigquery"],
+  "prerequisites": ["C++ trading repo access (for formula verification)", "KPI pipeline repo access (for business_rules verification)"]
+}

@@ -3,11 +3,11 @@
 ## Phase 1: Formula Verification & Extraction (FR-1)
 
 ### Task 1.1: Write formula enrichment script
-- [~] Create `scripts/enrich_formulas.py` that reads `metadata/kpi_computations.yaml` and updates KPI table YAMLs
-- [ ] Script verifies existing 318 formulas against source, flags mismatches
-- [ ] Script adds missing formulas for columns found in kpi_computations.yaml
-- [ ] Script includes intermediate calculations (mid_base_val, delta, etc.)
-- [ ] Write tests for the enrichment logic
+- [x] Create `scripts/enrich_formulas.py` that reads `metadata/kpi_computations.yaml` and updates KPI table YAMLs
+- [x] Script verifies existing 318 formulas against source, flags mismatches
+- [x] Script adds missing formulas for columns found in kpi_computations.yaml
+- [x] Script includes intermediate calculations (mid_base_val, delta, etc.)
+- [x] Write tests for the enrichment logic (5561eae)
 
 ### Task 1.2: Run formula enrichment and verify
 - [ ] Run the script against all 5 KPI table YAMLs

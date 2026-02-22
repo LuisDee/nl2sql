@@ -100,6 +100,12 @@ def create_embedding_tables(
           description STRING NOT NULL,
           embedding_text STRING,
           synonyms ARRAY<STRING>,
+          category STRING,
+          formula STRING,
+          typical_aggregation STRING,
+          filterable BOOL,
+          example_values ARRAY<STRING>,
+          related_columns ARRAY<STRING>,
           embedding ARRAY<FLOAT64>,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
         );
@@ -130,6 +136,30 @@ def create_embedding_tables(
     for sql in sqls:
         bq.execute_query(sql)
     logger.info("created_embedding_tables", fqn=fqn)
+
+
+def migrate_payload_columns(bq: BigQueryProtocol, s: Settings) -> None:
+    """Add payload columns to existing column_embeddings table (idempotent).
+
+    For fresh setups, create_embedding_tables() already includes these columns.
+    This migration handles existing tables that predate the payload columns.
+    """
+    fqn = f"{s.gcp_project}.{s.metadata_dataset}"
+    columns = [
+        ("category", "STRING"),
+        ("formula", "STRING"),
+        ("typical_aggregation", "STRING"),
+        ("filterable", "BOOL"),
+        ("example_values", "ARRAY<STRING>"),
+        ("related_columns", "ARRAY<STRING>"),
+    ]
+    for col_name, col_type in columns:
+        sql = (
+            f"ALTER TABLE `{fqn}.column_embeddings` "
+            f"ADD COLUMN IF NOT EXISTS {col_name} {col_type};"
+        )
+        bq.execute_query(sql)
+    logger.info("migrated_payload_columns", fqn=fqn)
 
 
 def populate_symbols(bq: BigQueryProtocol, s: Settings) -> None:

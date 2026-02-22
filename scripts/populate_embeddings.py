@@ -137,6 +137,10 @@ def populate_column_embeddings(
                 filterable=col.get("filterable"),
                 example_values=col.get("example_values"),
             )
+            # Payload columns (generation context — not embedded)
+            example_vals = col.get("example_values") or []
+            related_cols = col.get("related_columns") or []
+
             rows.append(
                 {
                     "dataset_name": dataset_name,
@@ -146,6 +150,12 @@ def populate_column_embeddings(
                     "description": description,
                     "synonyms": synonyms,
                     "embedding_text": embedding_text,
+                    "category": col.get("category"),
+                    "formula": col.get("formula"),
+                    "typical_aggregation": col.get("typical_aggregation"),
+                    "filterable": col.get("filterable"),
+                    "example_values": [str(v) for v in example_vals],
+                    "related_columns": related_cols,
                 }
             )
 
@@ -161,6 +171,33 @@ def populate_column_embeddings(
             synonyms_array = (
                 f"[{synonyms_str}]" if synonyms_str else "CAST([] AS ARRAY<STRING>)"
             )
+
+            # Payload columns (nullable)
+            cat = f"'{r['category']}'" if r["category"] else "CAST(NULL AS STRING)"
+            formula = (
+                f"'{_escape_sql_string(r['formula'])}'"
+                if r["formula"]
+                else "CAST(NULL AS STRING)"
+            )
+            agg = (
+                f"'{r['typical_aggregation']}'"
+                if r["typical_aggregation"]
+                else "CAST(NULL AS STRING)"
+            )
+            filt = (
+                str(r["filterable"]).upper()
+                if r["filterable"] is not None
+                else "CAST(NULL AS BOOL)"
+            )
+            ev_str = ", ".join(
+                f"'{_escape_sql_string(v)}'" for v in r["example_values"]
+            )
+            ev_array = f"[{ev_str}]" if ev_str else "CAST([] AS ARRAY<STRING>)"
+            rc_str = ", ".join(
+                f"'{_escape_sql_string(c)}'" for c in r["related_columns"]
+            )
+            rc_array = f"[{rc_str}]" if rc_str else "CAST([] AS ARRAY<STRING>)"
+
             struct_rows.append(
                 f"STRUCT('{r['dataset_name']}' AS dataset_name, "
                 f"'{r['table_name']}' AS table_name, "
@@ -168,7 +205,13 @@ def populate_column_embeddings(
                 f"'{r['column_type']}' AS column_type, "
                 f"'{desc}' AS description, "
                 f"'{emb_text}' AS embedding_text, "
-                f"{synonyms_array} AS synonyms)"
+                f"{synonyms_array} AS synonyms, "
+                f"{cat} AS category, "
+                f"{formula} AS formula, "
+                f"{agg} AS typical_aggregation, "
+                f"{filt} AS filterable, "
+                f"{ev_array} AS example_values, "
+                f"{rc_array} AS related_columns)"
             )
 
         unnest_list = ",\n            ".join(struct_rows)
@@ -188,12 +231,23 @@ def populate_column_embeddings(
                      column_type = source.column_type,
                      synonyms = source.synonyms,
                      embedding_text = source.embedding_text,
+                     category = source.category,
+                     formula = source.formula,
+                     typical_aggregation = source.typical_aggregation,
+                     filterable = source.filterable,
+                     example_values = source.example_values,
+                     related_columns = source.related_columns,
                      embedding = NULL,
                      updated_at = CURRENT_TIMESTAMP()
         WHEN NOT MATCHED THEN
-          INSERT (dataset_name, table_name, column_name, column_type, description, synonyms, embedding_text)
+          INSERT (dataset_name, table_name, column_name, column_type, description,
+                  synonyms, embedding_text, category, formula, typical_aggregation,
+                  filterable, example_values, related_columns)
           VALUES (source.dataset_name, source.table_name, source.column_name,
-                  source.column_type, source.description, source.synonyms, source.embedding_text);
+                  source.column_type, source.description, source.synonyms,
+                  source.embedding_text, source.category, source.formula,
+                  source.typical_aggregation, source.filterable,
+                  source.example_values, source.related_columns);
         """
         bq.execute_query(sql)
         count += len(batch)

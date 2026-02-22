@@ -15,6 +15,7 @@ from scripts.run_embeddings import (
     create_metadata_dataset,
     create_vector_indexes,
     generate_embeddings,
+    migrate_payload_columns,
     populate_schema_embeddings,
     populate_symbols,
     verify_embedding_model,
@@ -174,6 +175,39 @@ class TestCreateEmbeddingTables:
         sqls = _sql_calls(bq)
         for sql in sqls:
             assert fqn in sql
+
+    def test_column_embeddings_has_payload_columns(self):
+        bq = _make_bq()
+        create_embedding_tables(bq, settings)
+
+        sqls = _sql_calls(bq)
+        col_sql = sqls[1]
+        assert "category STRING" in col_sql
+        assert "formula STRING" in col_sql
+        assert "typical_aggregation STRING" in col_sql
+        assert "filterable BOOL" in col_sql
+        assert "example_values ARRAY<STRING>" in col_sql
+        assert "related_columns ARRAY<STRING>" in col_sql
+
+
+class TestMigratePayloadColumns:
+    def test_migrate_adds_payload_columns(self):
+        bq = _make_bq()
+        migrate_payload_columns(bq, settings)
+
+        sqls = _sql_calls(bq)
+        # Should issue ALTER TABLE ADD COLUMN for each payload column
+        assert any("ALTER TABLE" in sql and "category" in sql for sql in sqls)
+
+    def test_migrate_is_idempotent(self):
+        """IF NOT EXISTS prevents errors when columns already exist."""
+
+        bq = _make_bq()
+        migrate_payload_columns(bq, settings)
+
+        sqls = _sql_calls(bq)
+        for sql in sqls:
+            assert "IF NOT EXISTS" in sql
 
 
 # ---------------------------------------------------------------------------

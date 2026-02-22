@@ -533,6 +533,96 @@ class TestPopulateColumnEmbeddings:
         sql = bq.execute_query.call_args_list[0][0][0]
         assert sql.count("STRUCT(") == 3
 
+    # -- Payload columns --
+
+    def _make_enriched_tables(self):
+        """Table YAML with enrichment fields populated."""
+        return [
+            {
+                "table": {
+                    "name": "markettrade",
+                    "dataset": "{kpi_dataset}",
+                    "layer": "kpi",
+                    "columns": [
+                        {
+                            "name": "instant_pnl",
+                            "type": "FLOAT64",
+                            "description": "PnL at trade time",
+                            "category": "measure",
+                            "typical_aggregation": "SUM",
+                            "formula": "theo_price - trade_price",
+                            "related_columns": ["instant_edge", "instant_pnl_w_fees"],
+                            "filterable": False,
+                        },
+                        {
+                            "name": "exchange",
+                            "type": "STRING",
+                            "description": "Exchange",
+                            "category": "dimension",
+                            "filterable": True,
+                            "example_values": ["ICE", "Eurex", "NSE"],
+                        },
+                    ],
+                }
+            }
+        ]
+
+    def test_merge_sql_contains_payload_columns(self):
+        from scripts.populate_embeddings import populate_column_embeddings
+
+        bq = MagicMock()
+        tables = self._make_enriched_tables()
+        populate_column_embeddings(bq, tables, settings)
+        sql = bq.execute_query.call_args_list[0][0][0]
+        assert "AS category" in sql
+        assert "AS formula" in sql
+        assert "AS typical_aggregation" in sql
+        assert "AS filterable" in sql
+        assert "AS example_values" in sql
+        assert "AS related_columns" in sql
+
+    def test_merge_sql_includes_category_value(self):
+        from scripts.populate_embeddings import populate_column_embeddings
+
+        bq = MagicMock()
+        tables = self._make_enriched_tables()
+        populate_column_embeddings(bq, tables, settings)
+        sql = bq.execute_query.call_args_list[0][0][0]
+        assert "'measure'" in sql
+        assert "'dimension'" in sql
+
+    def test_merge_update_includes_payload_columns(self):
+        from scripts.populate_embeddings import populate_column_embeddings
+
+        bq = MagicMock()
+        tables = self._make_enriched_tables()
+        populate_column_embeddings(bq, tables, settings)
+        sql = bq.execute_query.call_args_list[0][0][0]
+        assert "category = source.category" in sql
+        assert "formula = source.formula" in sql
+
+    def test_merge_insert_includes_payload_columns(self):
+        from scripts.populate_embeddings import populate_column_embeddings
+
+        bq = MagicMock()
+        tables = self._make_enriched_tables()
+        populate_column_embeddings(bq, tables, settings)
+        sql = bq.execute_query.call_args_list[0][0][0]
+        # INSERT column list should include payload columns
+        assert "category" in sql
+        assert "formula" in sql
+
+    def test_null_enrichment_fields_produce_null_in_sql(self):
+        """Columns without enrichment fields produce NULL payload values."""
+        from scripts.populate_embeddings import populate_column_embeddings
+
+        bq = MagicMock()
+        tables = self._make_tables()  # No enrichment fields
+        populate_column_embeddings(bq, tables, settings)
+        sql = bq.execute_query.call_args_list[0][0][0]
+        # Should have CAST(NULL AS STRING) for missing string fields
+        assert "NULL" in sql
+
 
 class TestPopulateQueryMemory:
     def _make_examples(self):

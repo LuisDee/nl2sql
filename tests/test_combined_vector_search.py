@@ -2,7 +2,9 @@
 
 from nl2sql_agent.tools._deps import clear_vector_cache, get_cached_vector_result
 from nl2sql_agent.tools.vector_search import (
+    _COLUMN_SEARCH_SQL,
     fetch_few_shot_examples,
+    vector_search_columns,
     vector_search_tables,
 )
 
@@ -211,6 +213,88 @@ class TestCombinedSearchSqlTemplate:
         assert "routing_signal" in _COMBINED_SEARCH_SQL, (
             "_COMBINED_SEARCH_SQL drops routing_signal — examples lose routing hints"
         )
+
+
+class TestColumnSearchPayloadColumns:
+    """Column search CTE includes payload columns from column_embeddings."""
+
+    def test_column_search_sql_includes_payload_columns(self):
+        """The _COLUMN_SEARCH_SQL CTE must SELECT payload columns."""
+        assert "category" in _COLUMN_SEARCH_SQL
+        assert "formula" in _COLUMN_SEARCH_SQL
+        assert "typical_aggregation" in _COLUMN_SEARCH_SQL
+        assert "filterable" in _COLUMN_SEARCH_SQL
+        assert "example_values" in _COLUMN_SEARCH_SQL
+        assert "related_columns" in _COLUMN_SEARCH_SQL
+
+    def test_column_search_sql_includes_source_field(self):
+        """Column search results include 'column' AS source field."""
+        assert "'column' AS source" in _COLUMN_SEARCH_SQL
+
+    def test_column_search_sql_includes_glossary_arm(self):
+        """Column search CTE includes glossary_embeddings UNION arm."""
+        assert "glossary_embeddings" in _COLUMN_SEARCH_SQL
+        assert "'glossary' AS search_type" in _COLUMN_SEARCH_SQL
+
+
+class TestColumnSearchGlossaryResults:
+    """vector_search_columns() separates glossary results from column results."""
+
+    def setup_method(self):
+        clear_vector_cache()
+
+    def test_returns_glossary_key(self, mock_bq):
+        """Result dict includes a 'glossary' key for glossary entries."""
+        mock_bq.set_query_response(
+            "question_embedding",
+            [
+                {
+                    "search_type": "column_search",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "markettrade",
+                    "best_column_distance": 0.12,
+                    "matching_columns": 1,
+                    "top_columns": [],
+                },
+            ],
+        )
+
+        result = vector_search_columns("what was the PnL?")
+
+        assert result["status"] == "success"
+        assert "glossary" in result
+
+    def test_glossary_results_separated(self, mock_bq):
+        """Glossary results are in 'glossary' key, not mixed with tables."""
+        mock_bq.set_query_response(
+            "question_embedding",
+            [
+                {
+                    "search_type": "column_search",
+                    "dataset_name": "nl2sql_omx_kpi",
+                    "table_name": "markettrade",
+                    "best_column_distance": 0.12,
+                    "matching_columns": 1,
+                    "top_columns": [],
+                },
+                {
+                    "search_type": "glossary",
+                    "name": "total PnL",
+                    "definition": "Sum of instant_pnl.",
+                    "synonyms": ["aggregate pnl"],
+                    "related_columns": ["markettrade.instant_pnl"],
+                    "category": "performance",
+                    "sql_pattern": "SUM(instant_pnl)",
+                    "distance": 0.08,
+                },
+            ],
+        )
+
+        result = vector_search_columns("what was the PnL?")
+
+        assert len(result["tables"]) == 1
+        assert len(result["glossary"]) == 1
+        assert result["glossary"][0]["name"] == "total PnL"
 
 
 class TestVectorCacheIsolation:

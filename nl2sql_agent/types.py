@@ -74,6 +74,7 @@ class ColumnSearchResult(TypedDict):
 
     status: str
     tables: list[dict[str, Any]]
+    glossary: list[dict[str, Any]]
     examples: list[dict[str, Any]]
 
 

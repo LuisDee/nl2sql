@@ -122,7 +122,7 @@ ORDER BY distance ASC
 """
 
 # Column-level search: searches column_embeddings, aggregates by table,
-# and also pre-fetches few-shot examples in one round-trip.
+# pre-fetches few-shot examples, and searches glossary in one round-trip.
 _COLUMN_SEARCH_SQL = """
 WITH question_embedding AS (
     SELECT ml_generate_embedding_result AS embedding
@@ -134,12 +134,19 @@ WITH question_embedding AS (
 ),
 column_matches AS (
     SELECT
+        'column' AS source,
         base.dataset_name,
         base.table_name,
         base.column_name,
         base.column_type,
         base.description,
         base.synonyms,
+        base.category,
+        base.formula,
+        base.typical_aggregation,
+        base.filterable,
+        base.example_values,
+        base.related_columns,
         ROUND(distance, 4) AS distance
     FROM VECTOR_SEARCH(
         (SELECT * FROM `{metadata_dataset}.column_embeddings`),
@@ -157,12 +164,32 @@ table_scores AS (
         MIN(distance) AS best_column_distance,
         COUNT(*) AS matching_columns,
         ARRAY_AGG(
-            STRUCT(column_name, column_type, description, synonyms, distance)
+            STRUCT(column_name, column_type, description, synonyms,
+                   category, formula, typical_aggregation, filterable,
+                   example_values, related_columns, distance)
             ORDER BY distance
             LIMIT {max_per_table}
         ) AS top_columns
     FROM column_matches
     GROUP BY dataset_name, table_name
+),
+glossary_results AS (
+    SELECT
+        'glossary' AS search_type,
+        base.name,
+        base.definition,
+        base.synonyms,
+        base.related_columns,
+        base.category,
+        base.sql_pattern,
+        ROUND(distance, 4) AS distance
+    FROM VECTOR_SEARCH(
+        (SELECT * FROM `{metadata_dataset}.glossary_embeddings`),
+        'embedding',
+        (SELECT embedding FROM question_embedding),
+        top_k => {glossary_top_k},
+        distance_type => 'COSINE'
+    )
 ),
 example_results AS (
     SELECT
@@ -407,6 +434,7 @@ def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:
         embedding_model=settings.embedding_model_ref,
         column_top_k=settings.column_search_top_k,
         max_per_table=settings.column_search_max_per_table,
+        glossary_top_k=3,
         example_top_k=settings.vector_search_top_k,
         table_limit=10,
     )
@@ -420,8 +448,9 @@ def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:
             params=[{"name": "question", "type": "STRING", "value": question}],
         )
 
-        # Separate column results from example results
+        # Separate column results, glossary results, and example results
         tables = []
+        glossary = []
         examples = []
         for row in table_rows:
             search_type = row.get("search_type", "")
@@ -433,6 +462,18 @@ def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:
                         "best_column_distance": row["best_column_distance"],
                         "matching_columns": row["matching_columns"],
                         "top_columns": row["top_columns"],
+                    }
+                )
+            elif search_type == "glossary":
+                glossary.append(
+                    {
+                        "name": row.get("name", ""),
+                        "definition": row.get("definition", ""),
+                        "synonyms": row.get("synonyms", []),
+                        "related_columns": row.get("related_columns", []),
+                        "category": row.get("category", ""),
+                        "sql_pattern": row.get("sql_pattern", ""),
+                        "distance": row.get("distance", 0),
                     }
                 )
             elif search_type == "example":
@@ -457,9 +498,15 @@ def vector_search_columns(question: str) -> ColumnSearchResult | ErrorResult:
         logger.info(
             "vector_search_columns_complete",
             table_count=len(tables),
+            glossary_count=len(glossary),
             example_count=len(examples),
         )
-        return {"status": "success", "tables": tables, "examples": examples}
+        return {
+            "status": "success",
+            "tables": tables,
+            "glossary": glossary,
+            "examples": examples,
+        }
 
     except Exception as e:
         logger.warning("column_search_failed_falling_back", error=str(e))

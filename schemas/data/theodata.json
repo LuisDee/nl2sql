@@ -1,0 +1,404 @@
+[
+  {
+    "name": "kafka_partition",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "kafka_offset",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "event_date",
+    "type": "DATE",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "theo_event_tx_timestamp",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "theo_event_tx_timestamp_ns",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "when_timestamp",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "when_timestamp_ns",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "source_event_timestamp",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "source_event_timestamp_ns",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "theo_compute_timestamp_start",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "theo_compute_timestamp_start_ns",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "theo_compute_timestamp_stop",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "theo_compute_timestamp_stop_ns",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "theo_compute_type",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "instrument_hash",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "curve_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "carry_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "stream_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "tv",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "tv_offset",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "delta",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "gamma",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "vega",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "theta",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "rho",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "tte",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "raw_delta",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "raw_gamma",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "vol",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "norm_strike",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "under",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "roll",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "forward",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "short_rate",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "offset_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_atm",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_skew",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_call_skew",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_put_k",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_call_k",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_put_a",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_call_a",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_put_b",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_call_b",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "greek_datm",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "param_atm",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "param_skew",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "param_call_skew",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "param_put_k",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "param_call_k",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "param_s_vol",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "datasource_pid",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "datasource_hostname",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "streamsource_stream_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "streamsource_event_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "streamsource_message_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "strike",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "option_type",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "option_type_name",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "expiry_timestamp",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "mako_symbol",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "currency",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "inst_type_name",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "term",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "trade_date",
+    "type": "DATE",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "portfolio",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "symbol",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  }
+]

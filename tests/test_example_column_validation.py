@@ -236,3 +236,60 @@ class TestExampleColumnNames:
                         f"tables_used combines markettrade with {tables & mako_tables}. "
                         "markettrade already contains Mako trades."
                     )
+
+    def test_all_example_columns_exist_in_catalog(self):
+        """Every dot-referenced column in example SQL must exist in the union of referenced tables."""
+        errors = []
+        for yaml_file in [
+            "kpi_examples.yaml",
+            "data_examples.yaml",
+            "routing_examples.yaml",
+        ]:
+            path = EXAMPLES_DIR / yaml_file
+            if not path.exists():
+                continue
+            with open(path) as f:
+                data = yaml.safe_load(f)
+
+            for ex in data.get("examples", []):
+                tables_used = ex.get("tables_used", [])
+                dataset_ref = ex.get("dataset", "")
+                if not tables_used:
+                    continue
+                layer = _get_table_layer(tables_used[0], dataset_ref)
+                sql_cols = _extract_sql_identifiers(ex["sql"])
+
+                # Collect columns from ALL tables used in this query
+                all_catalog_cols: set[str] = set()
+                for table in tables_used:
+                    all_catalog_cols |= _load_catalog_columns(layer, table)
+
+                if not all_catalog_cols:
+                    continue
+
+                # Case-insensitive comparison (BQ columns are case-insensitive)
+                # Also normalize underscores for CamelCase vs snake_case mismatch
+                # (e.g. DataTimestamp vs data_timestamp — both refer to the same BQ column)
+                catalog_lower = {c.lower() for c in all_catalog_cols}
+                catalog_normalized = {
+                    c.lower().replace("_", "") for c in all_catalog_cols
+                }
+
+                # Filter out false positives: pure numbers, short tokens
+                invalid = {
+                    c
+                    for c in sql_cols
+                    if c.lower() not in catalog_lower
+                    and c.lower().replace("_", "") not in catalog_normalized
+                    and not c.isdigit()
+                    and len(c) > 1
+                }
+                if invalid:
+                    errors.append(
+                        f"{yaml_file}: Q='{ex['question'][:50]}' "
+                        f"tables={tables_used} invalid_cols={sorted(invalid)}"
+                    )
+
+        assert not errors, (
+            "Example SQL references columns not in catalog:\n" + "\n".join(errors)
+        )

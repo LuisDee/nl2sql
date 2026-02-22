@@ -1,22 +1,14 @@
-"""Extract BigQuery schemas from nl2sql_omx_kpi and nl2sql_omx_data tables.
+"""Extract BigQuery schemas to JSON ground truth files.
+
+Reads project/dataset config from pydantic-settings (.env) and queries
+INFORMATION_SCHEMA to extract column metadata for all tables.
 
 Usage:
     python setup/extract_schemas.py
 
 Output:
-    schemas/kpi/brokertrade.json
-    schemas/kpi/clicktrade.json
-    schemas/kpi/markettrade.json
-    schemas/kpi/otoswing.json
-    schemas/kpi/quotertrade.json
-    schemas/data/brokertrade.json
-    schemas/data/clicktrade.json
-    schemas/data/markettrade.json
-    schemas/data/swingdata.json
-    schemas/data/quotertrade.json
-    schemas/data/theodata.json
-    schemas/data/marketdata.json
-    schemas/data/marketdepth.json
+    schemas/kpi/{brokertrade,clicktrade,markettrade,otoswing,quotertrade}.json
+    schemas/data/{clicktrade,markettrade,swingdata,quotertrade,theodata,marketdata,marketdepth}.json
 
 Each JSON file contains an array of objects with: name, type, mode, description.
 """
@@ -26,19 +18,21 @@ from pathlib import Path
 
 from google.cloud import bigquery
 
-# --- Configuration ---
-PROJECT = "cloud-data-n-base-d4b3"
+from nl2sql_agent.config import Settings
+
+# --- Configuration (from pydantic-settings / .env) ---
+_settings = Settings()
+PROJECT = _settings.gcp_project
 
 DATASETS = {
-    "nl2sql_omx_kpi": [
+    _settings.kpi_dataset: [
         "brokertrade",
         "clicktrade",
         "markettrade",
         "otoswing",
         "quotertrade",
     ],
-    "nl2sql_omx_data": [
-        "brokertrade",
+    _settings.data_dataset: [
         "clicktrade",
         "markettrade",
         "swingdata",
@@ -82,7 +76,7 @@ def extract_schema(
 
 
 def main() -> None:
-    client = bigquery.Client(project=PROJECT, location="europe-west2")
+    client = bigquery.Client(project=PROJECT, location=_settings.bq_location)
 
     for dataset, tables in DATASETS.items():
         # Create output subdirectory: schemas/kpi/ or schemas/data/

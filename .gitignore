@@ -23,8 +23,8 @@ nl2sql_agent/.adk/
 sample_data/
 sample_data.tar.gz
 
-# Extracted schemas (regeneratable)
-schemas/
+# Extracted schemas — committed as ground truth for validation tests
+# schemas/
 
 # IDE
 .idea/

@@ -272,3 +272,86 @@ class TestExamplesValidation:
             assert "trade_date" in ex["sql"], (
                 f"Example '{ex['question'][:50]}...' must filter on trade_date"
             )
+
+
+class TestSharedColumnsValidation:
+    """Validate that shared_columns in _dataset.yaml exist in actual table YAMLs."""
+
+    def test_kpi_shared_columns_exist_in_tables(self):
+        """Every shared_column in kpi/_dataset.yaml must exist in at least one KPI table YAML."""
+        dataset_yaml = load_yaml(CATALOG_DIR / "kpi" / "_dataset.yaml")
+        shared_cols = list(dataset_yaml["dataset"].get("shared_columns", {}).keys())
+
+        # Collect all column names from the 5 KPI table YAMLs
+        all_kpi_columns = set()
+        for table in [
+            "markettrade",
+            "quotertrade",
+            "brokertrade",
+            "clicktrade",
+            "otoswing",
+        ]:
+            table_yaml = load_yaml(CATALOG_DIR / "kpi" / f"{table}.yaml")
+            for col in table_yaml["table"]["columns"]:
+                all_kpi_columns.add(col["name"])
+
+        missing = [c for c in shared_cols if c not in all_kpi_columns]
+        assert not missing, f"Shared columns not found in any KPI table YAML: {missing}"
+
+
+class TestRoutingColumnReferences:
+    """Validate that column names referenced in routing docs and prompts exist in the catalog."""
+
+    def test_routing_yaml_column_references_exist(self):
+        """Column names mentioned in _routing.yaml must exist in the catalog."""
+        # Collect all column names from all table YAMLs
+        all_columns = set()
+        for table_data in load_all_table_yamls():
+            for col in table_data["table"]["columns"]:
+                all_columns.add(col["name"])
+
+        # Also add shared_columns from dataset YAMLs
+        for subdir in ["kpi", "data"]:
+            ds_path = CATALOG_DIR / subdir / "_dataset.yaml"
+            if ds_path.exists():
+                ds = load_yaml(ds_path)
+                shared = ds.get("dataset", {}).get("shared_columns", {})
+                all_columns.update(shared.keys())
+
+        # Known column names referenced in _routing.yaml kpi_vs_data_general
+        routing_yaml = load_yaml(CATALOG_DIR / "_routing.yaml")
+        general_desc = routing_yaml.get("routing_descriptions", {}).get(
+            "kpi_vs_data_general", ""
+        )
+
+        # Extract potential column references (snake_case words that look like columns)
+        import re
+
+        potential_cols = re.findall(
+            r"\b([a-z][a-z0-9]*(?:_[a-z0-9]+)+)\b", general_desc
+        )
+
+        # Filter to known patterns (exclude non-column terms)
+        non_columns = {
+            "kpi_vs_data_general",
+            "kpi_dataset",
+            "data_dataset",
+            "proto_source",
+            "market_data",
+            "kpi_table",
+            "raw_proto",
+            "silver_layer",
+            "gold_layer",
+        }
+        column_refs = [c for c in potential_cols if c not in non_columns and len(c) > 3]
+
+        # Also allow column family prefixes (e.g. delta_slippage → delta_slippage_1s exists)
+        missing = [
+            c
+            for c in column_refs
+            if c not in all_columns
+            and not any(col.startswith(c + "_") for col in all_columns)
+        ]
+        assert not missing, (
+            f"_routing.yaml references columns not in any catalog: {missing}"
+        )

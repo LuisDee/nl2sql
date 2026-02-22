@@ -129,7 +129,7 @@ dataset:
       were placed, quoting levels (prices), sizes offered, and fill information.
       Use this when the trader asks "what levels were we quoting at 11:15" or
       "what was the quoter doing for symbol X". kpi.quotertrade contains computed
-      performance metrics for quoter fills: edge_bps, instant_pnl, slippage,
-      delta_bucket. Use KPI when the trader asks "how did quoter fills perform"
+      performance metrics for quoter fills: instant_edge, instant_pnl, slippage
+      decomposition. Use KPI when the trader asks "how did quoter fills perform"
       or "what was edge on quoter trades". The key signal is whether the question
       is about activity/timing (data) or performance/metrics (kpi).

@@ -5,7 +5,7 @@ dataset:
     KPI (Key Performance Indicators) for OMX options trading. Gold layer.
     Contains one table per trade origin, all sharing the same KPI column structure.
     Each row represents one trade with computed performance metrics:
-    edge_bps, instant_pnl, slippage, delta_bucket, required_edge_bps.
+    instant_edge, instant_pnl, instant_pnl_w_fees, delta_slippage at multiple intervals.
 
   tables:
     - brokertrade
@@ -67,21 +67,13 @@ dataset:
         to join across tables or to identify exact contracts. Traders rarely reference
         this directly but it is essential for precise contract-level queries.
       synonyms: ["contract id", "instrument id"]
-    edge_bps:
+    instant_edge:
       description: >
-        Difference between machine fair value (theo) and actual trade price,
-        measured in basis points. Positive = traded better than fair value (captured
-        edge), negative = traded worse. This is the primary performance metric traders
-        care about. Calculated as ((theo - trade_price) / trade_price) * 10000 for
-        buys, inverted for sells. Always present on every KPI row.
-      synonyms: ["edge", "the edge", "how much edge", "trading edge"]
-    required_edge_bps:
-      description: >
-        Minimum edge threshold set by risk management for this trade. The firm requires
-        a certain amount of edge before a trade is considered acceptable. Comparing
-        edge_bps to required_edge_bps reveals whether the trade met the firm's edge
-        hurdle. If edge_bps < required_edge_bps, the trade underperformed the threshold.
-      synonyms: ["required edge", "edge requirement", "minimum edge", "edge threshold"]
+        Instantaneous edge (theoretical profit per unit) at the moment of trade
+        execution. Positive = traded better than fair value (captured edge),
+        negative = traded worse. This is the primary performance metric traders
+        care about. Always present on every KPI row.
+      synonyms: ["edge", "the edge", "how much edge", "trading edge", "edge_bps"]
     instant_pnl:
       description: >
         Immediate profit or loss from the trade at execution time, measured in the
@@ -90,23 +82,11 @@ dataset:
         negative = loss. Commonly aggregated via SUM to get total PnL for a period,
         portfolio, or symbol.
       synonyms: ["PnL", "instant PnL", "profit", "loss", "P&L", "pnl"]
-    delta_bucket:
+    instant_pnl_w_fees:
       description: >
-        Standard delta categorisation bucket that groups trades by moneyness of the
-        option at the time of trade. Delta measures how much the option price moves
-        per unit move in the underlying. Common buckets are 0-25 (far OTM), 25-40
-        (moderate OTM), 40-60 (near ATM), and 60+ (ITM). Used to analyze performance
-        by moneyness segment.
-      synonyms: ["delta range", "moneyness bucket"]
-      example_values: ["0-25", "25-40", "40-60", "60+"]
-    slippage:
-      description: >
-        Execution slippage metric measuring the difference between expected fill price
-        and actual fill price. Positive slippage means the trade executed worse than
-        expected. This is further decomposed into delta_slippage, vol_slippage,
-        roll_slippage, and other_slippage at various time intervals. The top-level
-        slippage column is the aggregate measure.
-      synonyms: ["slip", "execution slippage"]
+        Instant PnL with fees deducted. Same as instant_pnl but after subtracting
+        exchange fees and clearing costs. Present on every KPI row.
+      synonyms: ["pnl with fees", "net pnl", "pnl after fees"]
 
   enum_reference:
     trade_side:
@@ -194,7 +174,7 @@ dataset:
     kpi_vs_data_same_table_name: >
       Both {kpi_dataset} and {data_dataset} contain tables with the same names
       (brokertrade, clicktrade, markettrade, quotertrade). The KPI dataset has
-      enriched performance metrics (edge_bps, instant_pnl, slippage, delta_bucket).
+      enriched performance metrics (instant_edge, instant_pnl, slippage decomposition).
       The data dataset has raw trade execution details (exact timestamps, prices,
       sizes, fill information). If the question is about performance, edge, PnL,
       or slippage, use KPI. If the question is about raw execution details, timestamps,

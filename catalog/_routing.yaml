@@ -2,8 +2,8 @@ routing_descriptions:
 
   kpi_vs_data_general: >
     The {kpi_dataset} dataset (gold layer) has KPI-enriched trade data with
-    computed metrics: edge_bps, instant_pnl, slippage, delta_bucket,
-    required_edge_bps. The {data_dataset} dataset (silver layer) has raw
+    computed metrics: instant_edge, instant_pnl, slippage decomposition (delta_slippage,
+    vol_slippage, etc. at multiple intervals). The {data_dataset} dataset (silver layer) has raw
     trade and market data with exact timestamps, prices, sizes, and execution
     details. Both datasets share some table names (brokertrade, clicktrade,
     markettrade, quotertrade). When the question asks about performance, edge,

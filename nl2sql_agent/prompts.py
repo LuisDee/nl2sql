@@ -153,7 +153,7 @@ There are two datasets per exchange (shown below with default {default_exchange}
 
 ### `{project}.{kpi}` (Gold Layer — KPI Metrics)
 Performance metrics with computed columns: instant_edge (edge), instant_pnl,
-instant_pnl_w_fees, delta_slippage at multiple intervals, delta_bucket.
+instant_pnl_w_fees, delta_slippage at multiple intervals.
 **5 tables, one per trade origin:**
 - **markettrade** — Exchange trades. DEFAULT when trade type is unspecified.
 - **quotertrade** — Auto-quoter fills. Use for "quoter edge", "quoter PnL".

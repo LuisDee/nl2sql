@@ -8,7 +8,7 @@ table:
     like residual_size, total_level_size, tv_bid/tv_ask, and last_update values. Use for analysing quoting behaviour,
     fill rates, and quote staleness. Partitioned by trade_date."
   disambiguation: "IMPORTANT: data.quotertrade contains raw quoter activity (timestamps, levels, sizes, quote management).
-    kpi.quotertrade contains performance metrics (edge_bps, instant_pnl, slippage, delta_bucket). Route to data.quotertrade
+    kpi.quotertrade contains performance metrics (instant_edge, instant_pnl, slippage decomposition). Route to data.quotertrade
     for questions about quoting levels, residual sizes, tv_bid/tv_ask, or quote update timing. Route to kpi.quotertrade
     for questions about quoter edge, PnL, or slippage."
   business_context: >

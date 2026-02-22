@@ -19,7 +19,10 @@ import argparse
 import csv
 from pathlib import Path
 
-from scripts.populate_glossary import populate_glossary_embeddings
+try:
+    from scripts.populate_glossary import populate_glossary_embeddings
+except ModuleNotFoundError:
+    from populate_glossary import populate_glossary_embeddings  # type: ignore[no-redef]
 
 from nl2sql_agent.catalog_loader import (
     CATALOG_DIR,

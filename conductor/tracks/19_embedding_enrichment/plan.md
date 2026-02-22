@@ -70,8 +70,8 @@
 - [x] Verify tests pass
 
 ### Task 3.3: Phase 3 checkpoint
-- [ ] Run full test suite
-- [ ] Manual verification: confirm pipeline step order in --help output
+- [x] Run full test suite
+- [x] Manual verification: confirm pipeline step order in --help output
 
 ---
 

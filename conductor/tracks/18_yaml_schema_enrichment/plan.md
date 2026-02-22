@@ -1,6 +1,6 @@
 # Plan: YAML Schema Enrichment & Data Profiling
 
-## Phase 1: Pydantic Schema Models & Validation Infrastructure
+## Phase 1: Pydantic Schema Models & Validation Infrastructure [checkpoint: 826f13a]
 
 ### Task 1.1: Create Pydantic validation models (fd88c1b)
 - [x] Create `catalog/schema.py` with `ColumnSchema`, `TableSchema`, `DatasetSchema` Pydantic models
@@ -19,26 +19,22 @@
 - [x] Outputs per-file validation results (pass/fail with error details)
 - [x] Exit code 0 if all valid, 1 if any errors
 
-### Phase 1 Completion — Verification and Checkpointing
-
 ---
 
-## Phase 2: Track Completion & Deferred Population Track
+## Phase 2: Track Completion & Deferred Population Track [checkpoint: d876526]
 
-### Task 2.1: Create deferred population track
-- [~] Create `conductor/tracks/22_metadata_population/metadata.json`
-- [ ] Create `conductor/tracks/22_metadata_population/brief.md` covering:
+### Task 2.1: Create deferred population track (d876526)
+- [x] Create `conductor/tracks/22_metadata_population/metadata.json`
+- [x] Create `conductor/tracks/22_metadata_population/brief.md` covering:
   - Heuristic enrichment script (scripts/enrich_columns.py)
   - BQ data profiling script (scripts/profile_columns.py)
   - Tiered population: Tier 1 human-curated, Tier 2 heuristic, Tier 3 LLM-assisted
   - Verification of ALL existing metadata (descriptions, synonyms, example_values, formulas)
   - Prerequisites: C++ repo access + KPI repo access for formula/business_rules verification
-- [ ] Update `conductor/tracks.md` with new track entry
-- [ ] Update `architect/dependency-graph.md` and `architect/execution-sequence.md`
+- [x] Update `conductor/tracks.md` with new track entry
+- [x] Update `architect/dependency-graph.md` and `architect/execution-sequence.md`
 
-### Task 2.2: Final validation pass
-- [ ] Run full test suite `pytest tests/ -v` — all tests pass
-- [ ] Run `scripts/validate_catalog.py --all` — zero errors
-- [ ] Verify Pydantic models accept enrichment fields when populated
-
-### Phase 2 Completion — Verification and Checkpointing
+### Task 2.2: Final validation pass (d876526)
+- [x] Run full test suite `pytest tests/ -v` — 639 passed, 0 failed
+- [x] Run `scripts/validate_catalog.py --all` — 14 files, 0 errors
+- [x] Verify Pydantic models accept enrichment fields when populated

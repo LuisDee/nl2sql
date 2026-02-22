@@ -145,7 +145,7 @@
 
 ---
 
-## [~] Track: YAML Schema Enrichment & Data Profiling
+## [x] Track: YAML Schema Enrichment & Data Profiling
 - **ID:** 18_yaml_schema_enrichment
 - **Wave:** 15
 - **Complexity:** L

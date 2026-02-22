@@ -1,0 +1,846 @@
+# Field Lineage Map: Proto -> Silver (Data Loader) -> Gold (KPI)
+# Traces key BigQuery columns from protobuf source through data-loader
+# transformations into KPI computation layer.
+#
+# Cross-references:
+#   - Proto definitions:          metadata/proto_fields.yaml
+#   - Data-loader transforms:     metadata/data_loader_transforms.yaml
+#   - KPI computations:           metadata/kpi_computations.yaml
+#
+# Notes:
+#   - "trade_types" lists the KPI trade types that use or compute the column
+#   - For computed columns (instant_edge, instant_pnl, etc.), the proto layer
+#     references the INPUT fields that feed the computation
+#   - contract_size comes from TradableInstrument (instrument enrichment),
+#     not from the trade proto itself
+
+lineages:
+
+  # =========================================================================
+  # 1. trade_price
+  # =========================================================================
+  - column: trade_price
+    description: "The execution price of the trade"
+    layers:
+      proto:
+        field: tradePrice
+        message: MarketTrade
+        type: double
+        file: data/MarketTrade.proto
+      silver:
+        column: trade_price
+        tables: [markettrade, quotertrade]
+        transformation: rename
+        source_field: tradePrice
+      gold:
+        column: trade_price
+        trade_types: [markettrade, quotertrade]
+        formula: pass-through
+        notes: >
+          For markettrade/quotertrade, trade_price is used directly from
+          silver. For otoswing, avg_trade_price (from avgTradePrice) is
+          used instead. For brokertrade, the price column comes from
+          detail.makoPrice or detail.marketPrice. For clicktrade, the
+          price column comes from PositionEvent.price.
+
+  # =========================================================================
+  # 2. trade_size
+  # =========================================================================
+  - column: trade_size
+    description: "The number of lots (contracts) traded; column name varies by trade type"
+    layers:
+      proto:
+        field: tradeSize
+        message: MarketTrade
+        type: uint32
+        file: data/MarketTrade.proto
+      silver:
+        column: trade_size
+        tables: [markettrade, quotertrade]
+        transformation: rename
+        source_field: tradeSize
+      gold:
+        column: trade_size
+        trade_types: [markettrade, quotertrade]
+        formula: pass-through
+        notes: >
+          Column name varies across trade types:
+          - markettrade: trade_size (from tradeSize, uint32)
+          - quotertrade: trade_size (from tradeSize, uint32)
+          - otoswing/swingdata: trade_volume (from tradeVolume, int32);
+            also has routed_size_capped for fired-at variants
+          - brokertrade: size (from detail.makoSize or detail.marketSize, int32);
+            ABS(size) used in KPI formulas; combo parents use total_traded_size
+          - clicktrade: size (from PositionEvent.size, int32); ABS(size) in KPI
+
+  # =========================================================================
+  # 3. contract_size
+  # =========================================================================
+  - column: contract_size
+    description: "Multiplier that converts per-lot values to currency; from instrument metadata"
+    layers:
+      proto:
+        field: contractSize
+        message: Option
+        type: double
+        file: data/TradableInstrument.proto
+      silver:
+        column: contract_size
+        table: instruments
+        transformation: unnest
+        source_field: "inst.option.contractSize (or inst.future.contractSize, inst.stock.contractSize, combo.contractSize)"
+      gold:
+        column: contract_size
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: pass-through
+        notes: >
+          contract_size is extracted from the TradableInstrument proto
+          during instrument enrichment. Every instrument subtype (Option,
+          Future, Stock, Index, Combo) has a contractSize field. The
+          int_raw__instruments_agg intermediate model aggregates this.
+          For brokertrade, contract_size is resolved in the intermediate
+          pipeline step int_raw__brokertrade_process_instruments_col.
+          The KPI notes explicitly state: "contract_size is streamed in
+          the proto payload (not computed by KPI)."
+
+  # =========================================================================
+  # 4. instant_edge
+  # =========================================================================
+  - column: instant_edge
+    description: "At-trade edge: difference between theoretical value and execution price"
+    layers:
+      proto:
+        field: tradePrice, tv (VtCommon.tv)
+        message: MarketTrade + VtCommon
+        type: double
+        file: data/MarketTrade.proto, data/VtCommon.proto
+      silver:
+        column: "[trade_price, tv, trade_aggressor_side, nhr_adjustment_bid]"
+        tables: [markettrade, quotertrade, swingdata]
+        transformation: rename
+        source_field: "tradePrice, props.tv, tradeAggressorSide_name, props.nhrAdjustmentBid"
+      gold:
+        column: instant_edge
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "varies by trade type (see below)"
+        notes: >
+          Markettrade: CASE WHEN trade_aggressor_side = 'BUY'
+            THEN (trade_price - tv) ELSE (tv - trade_price) END.
+          Quotertrade: ((tv - nhr_adjustment_bid) - trade_price) for BUY,
+            (trade_price - (tv - nhr_adjustment_bid)) for SELL.
+          Otoswing: ((tv - nhr_adjustment_bid) - avg_trade_price) for BUY
+            (zero if trade_volume = 0).
+          Clicktrade: (tv - price) for BUY, (price - tv) for SELL.
+          Brokertrade: (trade_tv - price) * market_mako_multiplier for BUY.
+          Note: markettrade uses raw tv; quotertrade/otoswing include
+          NHR adjustment; brokertrade uses trade_tv (original unmodified TV).
+
+  # =========================================================================
+  # 5. instant_pnl
+  # =========================================================================
+  - column: instant_pnl
+    description: "At-trade P&L in currency: edge * volume * contract_size"
+    layers:
+      proto:
+        field: tradePrice, tv (VtCommon.tv), tradeSize, contractSize (TradableInstrument)
+        message: MarketTrade + VtCommon + TradableInstrument
+        type: double
+        file: data/MarketTrade.proto, data/VtCommon.proto, data/TradableInstrument.proto
+      silver:
+        column: "[trade_price, tv, trade_size, contract_size, trade_aggressor_side]"
+        tables: [markettrade, quotertrade, swingdata]
+        transformation: rename
+        source_field: "tradePrice, props.tv, tradeSize"
+      gold:
+        column: instant_pnl
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "instant_edge * volume * contract_size (sign convention varies)"
+        notes: >
+          Markettrade: (trade_price - tv) * trade_size * contract_size for BUY.
+          Quotertrade: ((tv - nhr_adjustment_bid) - trade_price) * trade_size
+            * contract_size for BUY.
+          Otoswing: uses trade_volume (not trade_size) and avg_trade_price.
+          Clicktrade: uses ABS(size).
+          Brokertrade: uses ABS(size) and trade_tv, with market_mako_multiplier.
+
+  # =========================================================================
+  # 6. instant_pnl_w_fees
+  # =========================================================================
+  - column: instant_pnl_w_fees
+    description: "At-trade P&L after fee deduction"
+    layers:
+      proto:
+        field: tradePrice, tv (VtCommon.tv), tradeSize, fees (VtCommon.fees), contractSize
+        message: MarketTrade + VtCommon + TradableInstrument
+        type: double
+        file: data/MarketTrade.proto, data/VtCommon.proto, data/TradableInstrument.proto
+      silver:
+        column: "[trade_price, tv, trade_size, fees, contract_size, trade_aggressor_side]"
+        tables: [markettrade, quotertrade, swingdata]
+        transformation: rename
+        source_field: "tradePrice, props.tv, tradeSize, props.fees"
+      gold:
+        column: instant_pnl_w_fees
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "(edge - fees) * volume * contract_size"
+        notes: >
+          Same as instant_pnl but subtracts per-lot fees before
+          multiplying by volume and contract_size.
+          Clicktrade: fees hardcoded to 0.
+          Brokertrade: has 9 different fee methods (Per Lot, bp of
+          Underlying Price Per Lot, Per Trade, bp of Premium, Pct of
+          Premium, Per 1000 Lot x CSize, No Fee, NULL, unrecognized).
+          Brokerage rate is adjusted by counterparty suffix (F=free,
+          H=half, Q=quarter).
+
+  # =========================================================================
+  # 7. delta_slippage_{interval}
+  # =========================================================================
+  - column: delta_slippage_{interval}
+    description: "P&L from underlying price movement at each time interval post-trade"
+    layers:
+      proto:
+        field: "refDelta, refGamma, rawBvBid, rawBvAsk, refBasePrice (VtCommon); contractSize (TradableInstrument)"
+        message: VtCommon + TradableInstrument
+        type: double
+        file: data/VtCommon.proto, data/TradableInstrument.proto
+      silver:
+        column: "[ref_delta, ref_gamma, raw_bv_bid, raw_bv_ask, ref_base_price, trade_size, contract_size]"
+        tables: [markettrade, quotertrade, swingdata]
+        transformation: unnest
+        source_field: "props.refDelta, props.refGamma, props.rawBvBid, props.rawBvAsk, props.refBasePrice"
+      gold:
+        column: "delta_slippage_{interval} (e.g. delta_slippage_1s, delta_slippage_5m)"
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "((calculated_base_val_{interval} - mid_base_val) * delta) * volume * contract_size * buy_sell_multiplier"
+        notes: >
+          Per-interval column expanded for each time interval (1s, 5s,
+          10s, 30s, 1m, 5m, 30m, 1h, eod, 1D, 5D, etc.).
+          delta is gamma-adjusted: ref_delta + (base_val - ref_base_price) * ref_gamma.
+          mid_base_val = (raw_bv_bid + raw_bv_ask) / 2 for markettrade/quotertrade.
+          Otoswing uses swing_mid_base_val instead of mid_base_val.
+          Brokertrade: delta_slippage is zero for ref trades; includes
+          market_mako_multiplier.
+          calculated_base_val_{interval} comes from post-trade snap data.
+
+  # =========================================================================
+  # 8. trade_date
+  # =========================================================================
+  - column: trade_date
+    description: "The trading date (business date); used as partition key in BigQuery"
+    layers:
+      proto:
+        field: tradeDate
+        message: MarketTrade
+        type: pb.Date
+        file: data/MarketTrade.proto
+      silver:
+        column: trade_date
+        tables: [markettrade, quotertrade, swingdata, oroswingdata, brokertrade, theodata, marketdata, marketdataext]
+        transformation: direct
+        source_field: trade_date
+      gold:
+        column: trade_date
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: pass-through
+        notes: >
+          For most trade types, trade_date comes as a top-level field in
+          the proto (optional pb.Date). For brokertrade, it is derived
+          from key.tradeDate (year, month, day components) via MAKE_DATE.
+          Used as the BQ partition column; all queries should filter on
+          trade_date for performance.
+
+  # =========================================================================
+  # 9. event_timestamp_ns
+  # =========================================================================
+  - column: event_timestamp_ns
+    description: "Nanosecond-precision timestamp of when the VT processed the event"
+    layers:
+      proto:
+        field: eventTimestamp
+        message: VtCommon
+        type: google.protobuf.Timestamp
+        file: data/VtCommon.proto
+      silver:
+        column: event_timestamp_ns
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.eventTimestamp_ns
+      gold:
+        column: event_timestamp_ns
+        trade_types: [markettrade, quotertrade, otoswing]
+        formula: pass-through
+        notes: >
+          The _ns suffix columns are nanosecond integer representations
+          of the corresponding Timestamp proto fields. The non-_ns
+          variant (event_timestamp) is a TIMESTAMP type. For brokertrade,
+          the equivalent is trade_timestamp_ns (from tradeTimeStamp_ns).
+          For clicktrade (PositionEvent), transactionTimestamp serves
+          a similar role.
+
+  # =========================================================================
+  # 10. tv (theoretical value)
+  # =========================================================================
+  - column: tv
+    description: "Theoretical value of the instrument at trade time"
+    layers:
+      proto:
+        field: tv
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: tv
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.tv
+      gold:
+        column: tv
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "varies by trade type (see below)"
+        notes: >
+          Sources vary significantly by trade type:
+          - markettrade: tv from VtCommon.tv (props.tv), used directly
+          - quotertrade: tv is CASE-selected from tv_bid/tv_ask/tv_theo
+            based on trade_side and combo status
+          - otoswing: tv is CASE-selected from oto_tv/tv_theo based on
+            combo status
+          - clicktrade: tv = tv_theo (from TheoData, not VtCommon)
+          - brokertrade: tv from detail.theos.tv (OraTheoreticals), then
+            gamma-adjusted in KPI; instant_edge uses trade_tv (unadjusted)
+          For theodata table, tv comes directly from TheoData.tv
+          (top-level field, not nested under props).
+
+  # =========================================================================
+  # 11. delta
+  # =========================================================================
+  - column: delta
+    description: "Option delta (rate of change of option price w.r.t. underlying)"
+    layers:
+      proto:
+        field: refDelta
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: ref_delta
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.refDelta
+      gold:
+        column: delta
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "ref_delta + (base_val - ref_base_price) * ref_gamma (gamma-adjusted)"
+        notes: >
+          In the KPI layer, delta is always gamma-adjusted from ref_delta:
+          - markettrade: ref_delta + (mid_base_val - ref_base_price) * ref_gamma
+            where mid_base_val = (raw_bv_bid + raw_bv_ask) / 2
+          - quotertrade: ref_delta + (delta_adjusted_base_price - ref_base_price) * ref_gamma
+            (first adjustment); a second adjustment adds (mid_base_val - delta_adjusted_base_price) * ref_gamma
+          - otoswing: same as quotertrade pattern
+          - clicktrade: uses delta_theo directly (no initial gamma adjustment);
+            later: delta + (mid_base_val + reference_roll - forward) * ref_gamma
+          - brokertrade: back-calculated for ref components from size ratios;
+            delta_theo otherwise, then gamma-adjusted
+
+  # =========================================================================
+  # 12. mid_base_val
+  # =========================================================================
+  - column: mid_base_val
+    description: "Mid-market base value: average of bid and ask base valuations"
+    layers:
+      proto:
+        field: "rawBvBid, rawBvAsk"
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: "[raw_bv_bid, raw_bv_ask]"
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: "props.rawBvBid, props.rawBvAsk"
+      gold:
+        column: mid_base_val
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "(raw_bv_bid + raw_bv_ask) / 2"
+        notes: >
+          Computed identically for markettrade, quotertrade.
+          Otoswing calls it swing_mid_base_val but formula is the same.
+          Clicktrade: uses ref_base_val (not bid/ask average).
+          Brokertrade: (ul_bid_price_0 + ul_ask_price_0) / 2, or
+          falls back to under when use_under_for_mid_base_val is set.
+          Used in delta_slippage and other slippage calculations as the
+          baseline for measuring underlying price movement.
+
+  # =========================================================================
+  # 13. buy_sell_multiplier
+  # =========================================================================
+  - column: buy_sell_multiplier
+    description: "Sign convention for trade direction (+1 or -1)"
+    layers:
+      proto:
+        field: "tradeAggressorSide (MarketTrade), tradeSide (QuoterTrade), routedBuySell (SwingData)"
+        message: "MarketTrade / QuoterTrade / SwingData"
+        type: "pb.BuySell"
+        file: "data/MarketTrade.proto, data/QuoterTrade.proto, data/SwingData.proto"
+      silver:
+        column: "[trade_aggressor_side, trade_side, routed_buy_sell]"
+        tables: [markettrade, quotertrade, swingdata]
+        transformation: rename
+        source_field: "tradeAggressorSide_name, tradeSide_name, routedBuySell_name"
+      gold:
+        column: buy_sell_multiplier
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "CASE WHEN side = 'BUY' THEN +1/-1 ELSE -1/+1 END"
+        notes: >
+          CRITICAL: markettrade is the ONLY type with reversed sign:
+          -1 for BUY, +1 for SELL (Mako's perspective on the aggressor).
+          All other types: +1 for BUY, -1 for SELL.
+          Source field varies: trade_aggressor_side (markettrade),
+          trade_side (quotertrade, clicktrade, brokertrade),
+          routed_buy_sell (otoswing).
+
+  # =========================================================================
+  # 14. vol_slippage_{interval}
+  # =========================================================================
+  - column: vol_slippage_{interval}
+    description: "P&L from implied volatility changes at each time interval, with path correction"
+    layers:
+      proto:
+        field: "refDelta, refGamma, rawBvBid, rawBvAsk (VtCommon); vega, vol, gamma (TheoData snaps)"
+        message: VtCommon + TheoData
+        type: double
+        file: data/VtCommon.proto, data/theoData.proto
+      silver:
+        column: "[ref_delta, ref_gamma, raw_bv_bid, raw_bv_ask, trade_size, contract_size]"
+        tables: [markettrade, quotertrade, swingdata]
+        transformation: unnest
+        source_field: "props.refDelta, props.refGamma, props.rawBvBid, props.rawBvAsk"
+      gold:
+        column: "vol_slippage_{interval} (e.g. vol_slippage_1s, vol_slippage_5m)"
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "((vol_{interval} - vol) * ((vega_{interval} + vega) / 2) - vol_path_estimate_{interval}) * volume * contract_size * buy_sell_multiplier"
+        notes: >
+          Path-corrected volatility slippage. vol_path_estimate differs by
+          trade type (uses raw_delta_mid_bv for markettrade/quotertrade/otoswing,
+          raw_delta for clicktrade/brokertrade). The vol_{interval} and
+          vega_{interval} values come from post-trade snap joins.
+          Brokertrade additionally includes market_mako_multiplier.
+
+  # =========================================================================
+  # 15. nhr_adjustment_bid
+  # =========================================================================
+  - column: nhr_adjustment_bid
+    description: "Near-hit-ratio adjustment to bid edge based on local strike position"
+    layers:
+      proto:
+        field: nhrAdjustmentBid
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: nhr_adjustment_bid
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.nhrAdjustmentBid
+      gold:
+        column: nhr_adjustment_bid
+        trade_types: [quotertrade, otoswing]
+        formula: pass-through
+        notes: >
+          Used in instant_edge formulas for quotertrade and otoswing:
+          edge = (tv - nhr_adjustment_bid) - trade_price.
+          Not used in markettrade or clicktrade instant_edge formulas.
+          Present in silver for all VtCommon-based tables but only
+          incorporated into KPI calculations for quotertrade and otoswing.
+
+  # =========================================================================
+  # 16. symbol
+  # =========================================================================
+  - column: symbol
+    description: "Mako instrument symbol identifier"
+    layers:
+      proto:
+        field: symbol
+        message: VtCommon
+        type: string
+        file: data/VtCommon.proto
+      silver:
+        column: symbol
+        tables: [markettrade, quotertrade, swingdata, oroswingdata, theodata, marketdata, marketdataext]
+        transformation: unnest
+        source_field: props.symbol
+      gold:
+        column: symbol
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: "COALESCE(NULLIF(data_deduped.symbol, ''), instruments.mako_symbol, 'MISSING_SYMBOL')"
+        notes: >
+          At the mart layer, symbol is overridden:
+          COALESCE(NULLIF(symbol, ''), mako_symbol, 'MISSING_SYMBOL').
+          The mako_symbol comes from int_raw__instruments_agg via LEFT JOIN.
+          For VtCommon-based tables, symbol is unnested from props.symbol.
+          For marketdata/marketdataext/theodata, symbol is a top-level
+          field (not nested under props). For brokertrade, symbol is not
+          directly present; contract_name from key.contractName serves
+          a similar role, and symbol comes from instrument enrichment.
+
+  # =========================================================================
+  # 17. instrument_hash
+  # =========================================================================
+  - column: instrument_hash
+    description: "SHA-256 hash uniquely identifying a Mako instrument"
+    layers:
+      proto:
+        field: instrumentHash
+        message: VtCommon
+        type: string
+        file: data/VtCommon.proto
+      silver:
+        column: instrument_hash
+        tables: [markettrade, quotertrade, swingdata, oroswingdata, brokertrade, theodata, marketdata, marketdataext]
+        transformation: unnest
+        source_field: props.instrumentHash
+      gold:
+        column: instrument_hash
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: pass-through
+        notes: >
+          Core join key for instrument enrichment (LEFT JOIN to
+          int_raw__instruments_agg on instrument_hash = parent_instrument_hash).
+          For VtCommon-based tables, extracted from props.instrumentHash.
+          For brokertrade, extracted from key.instrumentHash.
+          For marketdata/theodata, it is a top-level field: instrumentHash.
+          In TradableInstrument proto, instrumentHash is field 1 and is
+          the SHA-256 of the instrument composition string.
+
+  # =========================================================================
+  # 18. avg_trade_price (otoswing-specific trade_price equivalent)
+  # =========================================================================
+  - column: avg_trade_price
+    description: "Average fill price for otoswing/oroswing trades (equivalent to trade_price)"
+    layers:
+      proto:
+        field: avgTradePrice
+        message: SwingData
+        type: double
+        file: data/SwingData.proto
+      silver:
+        column: avg_trade_price
+        tables: [swingdata, oroswingdata]
+        transformation: rename
+        source_field: avgTradePrice
+      gold:
+        column: avg_trade_price
+        trade_types: [otoswing]
+        formula: pass-through
+        notes: >
+          Used in place of trade_price for otoswing KPI calculations.
+          Represents the average price across constituent fills of a
+          swing order. OroSwingData also has this field with the same
+          semantics.
+
+  # =========================================================================
+  # 19. trade_volume (otoswing-specific trade_size equivalent)
+  # =========================================================================
+  - column: trade_volume
+    description: "Filled volume for otoswing trades; 0 if swung and missed"
+    layers:
+      proto:
+        field: tradeVolume
+        message: SwingData
+        type: int32
+        file: data/SwingData.proto
+      silver:
+        column: trade_volume
+        tables: [swingdata, oroswingdata]
+        transformation: rename
+        source_field: tradeVolume
+      gold:
+        column: trade_volume
+        trade_types: [otoswing]
+        formula: pass-through
+        notes: >
+          Used in place of trade_size for otoswing KPI calculations.
+          A value of 0 means the swing order was sent but no fill was
+          received. Fired-at variants use routed_size_capped instead.
+
+  # =========================================================================
+  # 20. fees
+  # =========================================================================
+  - column: fees
+    description: "Per-lot fee estimate at time of trade"
+    layers:
+      proto:
+        field: fees
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: fees
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.fees
+      gold:
+        column: fees
+        trade_types: [markettrade, quotertrade, otoswing, clicktrade, brokertrade]
+        formula: pass-through
+        notes: >
+          From VtCommon for markettrade/quotertrade/otoswing.
+          Clicktrade: hardcoded to 0.
+          Brokertrade: per-lot fees are 0 in the standard formula;
+          brokerage fees are handled separately via fee_method and
+          brokerage_rate.
+
+  # =========================================================================
+  # 21. ref_delta
+  # =========================================================================
+  - column: ref_delta
+    description: "Reference delta from last vol curve update (input to gamma-adjusted delta)"
+    layers:
+      proto:
+        field: refDelta
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: ref_delta
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.refDelta
+      gold:
+        column: ref_delta
+        trade_types: [markettrade, quotertrade, otoswing]
+        formula: pass-through
+        notes: >
+          Pass-through to KPI where it is used as input to compute
+          gamma-adjusted delta. For brokertrade, delta comes from
+          detail.theos.delta (OraTheoreticals). For clicktrade,
+          delta_theo is used directly.
+
+  # =========================================================================
+  # 22. ref_gamma
+  # =========================================================================
+  - column: ref_gamma
+    description: "Reference gamma from last vol curve update (used for delta/TV adjustments)"
+    layers:
+      proto:
+        field: refGamma
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: ref_gamma
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.refGamma
+      gold:
+        column: ref_gamma
+        trade_types: [markettrade, quotertrade, otoswing]
+        formula: pass-through
+        notes: >
+          Used in gamma adjustment formulas across all trade types.
+          For brokertrade, gamma comes from detail.theos.gamma.
+
+  # =========================================================================
+  # 23. raw_bv_bid / raw_bv_ask
+  # =========================================================================
+  - column: raw_bv_bid
+    description: "Unadjusted base value bid price at time of event"
+    layers:
+      proto:
+        field: rawBvBid
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: raw_bv_bid
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.rawBvBid
+      gold:
+        column: raw_bv_bid
+        trade_types: [markettrade, quotertrade, otoswing]
+        formula: pass-through
+        notes: >
+          Used to compute mid_base_val = (raw_bv_bid + raw_bv_ask) / 2.
+          Also used in delta_slippage and vol_path_estimate calculations.
+
+  # =========================================================================
+  # 24. bid_price_0 / ask_price_0 (top-of-book)
+  # =========================================================================
+  - column: bid_price_0
+    description: "Bid-side unadjusted top-of-book price"
+    layers:
+      proto:
+        field: bid_price_0
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: bid_price_0
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.bid_price_0
+      gold:
+        column: bid_price_0
+        trade_types: [markettrade, quotertrade, otoswing]
+        formula: pass-through
+        notes: >
+          Top-of-book bid price. For brokertrade, the equivalent
+          ul_bid_price_0 and ul_ask_price_0 are used to compute
+          mid_base_val.
+
+  # =========================================================================
+  # 25. delta_adjusted_base_price
+  # =========================================================================
+  - column: delta_adjusted_base_price
+    description: "Raw base value plus ODR/layered base adjustments"
+    layers:
+      proto:
+        field: deltaAdjustedBasePrice
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: delta_adjusted_base_price
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.deltaAdjustedBasePrice
+      gold:
+        column: delta_adjusted_base_price
+        trade_types: [quotertrade, otoswing]
+        formula: pass-through
+        notes: >
+          Used in quotertrade and otoswing for the first gamma adjustment
+          of delta: ref_delta + (delta_adjusted_base_price - ref_base_price)
+          * ref_gamma. Also used in mid_tv/swing_mid_tv calculation.
+          Not used in markettrade KPI (which gamma-adjusts delta using
+          mid_base_val directly).
+
+  # =========================================================================
+  # 26. edge (proto-level, markettrade only)
+  # =========================================================================
+  - column: edge
+    description: "Edge seen in the trade by the VT, compared to tv at time of trade (proto-level)"
+    layers:
+      proto:
+        field: edge
+        message: MarketTrade
+        type: double
+        file: data/MarketTrade.proto
+      silver:
+        column: edge
+        table: markettrade
+        transformation: direct
+        source_field: edge
+      gold:
+        column: edge
+        trade_types: [markettrade]
+        formula: pass-through
+        notes: >
+          This is the proto-level edge field, distinct from instant_edge
+          which is computed in the KPI layer. The proto edge is the VT's
+          own calculation at trade time. The KPI instant_edge recalculates
+          from trade_price and tv. Note: AGENTS.md flags that example SQL
+          incorrectly references 'edge' when it should use 'instant_edge'.
+
+  # =========================================================================
+  # 27. routed_price (otoswing)
+  # =========================================================================
+  - column: routed_price
+    description: "Price sent in our order message to exchange (otoswing fired-at calculations)"
+    layers:
+      proto:
+        field: routedPrice
+        message: SwingData
+        type: double
+        file: data/SwingData.proto
+      silver:
+        column: routed_price
+        tables: [swingdata, oroswingdata]
+        transformation: rename
+        source_field: routedPrice
+      gold:
+        column: routed_price
+        trade_types: [otoswing]
+        formula: pass-through
+        notes: >
+          Used in fired-at variants of instant_edge and instant_pnl
+          for otoswing: instant_edge_fired_at =
+          ((tv - nhr_adjustment_bid) - routed_price) for BUY.
+
+  # =========================================================================
+  # 28. size (brokertrade / clicktrade)
+  # =========================================================================
+  - column: size
+    description: "Trade size for brokertrade (from detail.makoSize/marketSize) and clicktrade (from PositionEvent.size)"
+    layers:
+      proto:
+        field: "makoSize (FillInfo) / size (PositionEvent)"
+        message: "FillInfo / PositionEvent"
+        type: "int32"
+        file: "data/OffFloorData.proto / data/PosData.proto"
+      silver:
+        column: "mako_size / market_size (brokertrade); size (tradedata/clicktrade)"
+        tables: [brokertrade]
+        transformation: unnest
+        source_field: "detail.makoSize, detail.marketSize"
+      gold:
+        column: size
+        trade_types: [brokertrade, clicktrade]
+        formula: "combo parents adjusted via total_traded_size; ABS(size) used in formulas"
+        notes: >
+          For brokertrade, mako_size and market_size are split in the
+          intermediate pipeline (int_raw__brokertrade_build_market_mako_trades).
+          Combo parents use total_traded_size. The sign of size determines
+          trade_side (positive=BUY, negative=SELL). All slippage formulas
+          use ABS(size).
+
+  # =========================================================================
+  # 29. ref_base_price
+  # =========================================================================
+  - column: ref_base_price
+    description: "Unadjusted raw base value on last vol curve update"
+    layers:
+      proto:
+        field: refBasePrice
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: ref_base_price
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.refBasePrice
+      gold:
+        column: ref_base_price
+        trade_types: [markettrade, quotertrade, otoswing]
+        formula: pass-through
+        notes: >
+          Used in gamma adjustment of delta:
+          delta = ref_delta + (base_val - ref_base_price) * ref_gamma.
+
+  # =========================================================================
+  # 30. layered_base_adjustment / odr_adjustment
+  # =========================================================================
+  - column: layered_base_adjustment
+    description: "Adjustment to raw base value due to layered quoting"
+    layers:
+      proto:
+        field: layeredBaseAdjustment
+        message: VtCommon
+        type: double
+        file: data/VtCommon.proto
+      silver:
+        column: layered_base_adjustment
+        tables: [markettrade, quotertrade, swingdata, oroswingdata]
+        transformation: unnest
+        source_field: props.layeredBaseAdjustment
+      gold:
+        column: layered_base_adjustment
+        trade_types: [markettrade, quotertrade, otoswing]
+        formula: pass-through
+        notes: >
+          Combined with odr_adjustment to form base_adjustment =
+          layered_base_adjustment + odr_adjustment in KPI layer.
+          Clicktrade and brokertrade set base_adjustment to 0.

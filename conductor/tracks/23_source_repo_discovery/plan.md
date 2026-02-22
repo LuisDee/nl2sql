@@ -58,17 +58,17 @@
 ## Phase 3: Cross-Repo Routing & Lineage
 
 ### Task 3.1: Create cross-repo routing guide
-- [ ] Write `metadata/ROUTING.md` mapping data concepts to repo locations
-- [ ] Include: by-data-concept routing, by-BQ-table routing, cross-repo dependency chain
-- [ ] Verify all BQ tables are covered (5 KPI + 8 data = 13 tables)
+- [x] Write `metadata/ROUTING.md` mapping data concepts to repo locations
+- [x] Include: by-data-concept routing, by-BQ-table routing, cross-repo dependency chain
+- [x] Verify all BQ tables are covered (5 KPI + 8 data = 13 tables)
 
 ### Task 3.2: Build field lineage map
-- [ ] Write validation tests for `metadata/field_lineage.yaml` schema
-- [ ] For key columns (instant_edge, instant_pnl, instant_pnl_w_fees, delta_slippage_*, trade_date, event_timestamp_ns, mid_price, trade_price, signed_delta), trace: proto field → silver column → gold column + formula
-- [ ] Cross-reference against proto_fields.yaml, data_loader_transforms.yaml, kpi_computations.yaml
-- [ ] Output to `metadata/field_lineage.yaml`
+- [x] Write validation tests for `metadata/field_lineage.yaml` schema
+- [x] For key columns (instant_edge, instant_pnl, instant_pnl_w_fees, delta_slippage_*, trade_date, event_timestamp_ns, mid_price, trade_price, signed_delta), trace: proto field → silver column → gold column + formula
+- [x] Cross-reference against proto_fields.yaml, data_loader_transforms.yaml, kpi_computations.yaml
+- [x] Output to `metadata/field_lineage.yaml`
 
 ### Task 3.3: Phase 3 checkpoint
-- [ ] All metadata files complete: proto_fields.yaml, data_loader_transforms.yaml, kpi_computations.yaml, ROUTING.md, field_lineage.yaml
-- [ ] Run full test suite
+- [x] All metadata files complete: proto_fields.yaml, data_loader_transforms.yaml, kpi_computations.yaml, ROUTING.md, field_lineage.yaml
+- [x] Run full test suite (733 passed)
 - [ ] Human review: verify routing guide is accurate, lineage traces are correct

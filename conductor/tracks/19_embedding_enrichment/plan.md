@@ -56,18 +56,18 @@
 ## Phase 3: Glossary Population Script + Pipeline Integration
 
 ### Task 3.1: Create scripts/populate_glossary.py
-- [ ] Write tests for glossary embedding text builder (`{name}: {definition}. Also known as: {synonyms}`) and MERGE SQL generation
-- [ ] Create `scripts/populate_glossary.py` (reads glossary.yaml, builds embedding text, MERGEs into glossary_embeddings)
-- [ ] Verify tests pass
+- [x] Write tests for glossary embedding text builder (`{name}: {definition}. Also known as: {synonyms}`) and MERGE SQL generation
+- [x] Create `scripts/populate_glossary.py` (reads glossary.yaml, builds embedding text, MERGEs into glossary_embeddings)
+- [x] Verify tests pass
 
 ### Task 3.2: Integrate glossary into run_embeddings.py pipeline
-- [ ] Write tests for new pipeline steps
-- [ ] Update `create_embedding_tables()` with `glossary_embeddings` table DDL
-- [ ] Add `populate-glossary` step to STEPS dict
-- [ ] Update `generate_embeddings()` to include ML.GENERATE_EMBEDDING on `glossary_embeddings`
-- [ ] Update `create_vector_indexes()` to include `glossary_embeddings` vector index
-- [ ] Verify step order: create-tables → populate-columns → populate-glossary → generate-embeddings → create-indexes
-- [ ] Verify tests pass
+- [x] Write tests for new pipeline steps
+- [x] Update `create_embedding_tables()` with `glossary_embeddings` table DDL
+- [x] Add `populate-glossary` step to STEPS dict
+- [x] Update `generate_embeddings()` to include ML.GENERATE_EMBEDDING on `glossary_embeddings`
+- [x] Update `create_vector_indexes()` to include `glossary_embeddings` vector index
+- [x] Verify step order: create-tables → populate-columns → populate-glossary → generate-embeddings → create-indexes
+- [x] Verify tests pass
 
 ### Task 3.3: Phase 3 checkpoint
 - [ ] Run full test suite

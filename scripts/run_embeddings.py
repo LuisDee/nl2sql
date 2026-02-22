@@ -19,6 +19,8 @@ import argparse
 import csv
 from pathlib import Path
 
+from scripts.populate_glossary import populate_glossary_embeddings
+
 from nl2sql_agent.catalog_loader import (
     CATALOG_DIR,
     load_routing_rules,
@@ -123,6 +125,20 @@ def create_embedding_tables(
           validated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
           success_count INT64 DEFAULT 1,
           embedding ARRAY<FLOAT64>
+        );
+        """,
+        f"""
+        {create_stmt} `{fqn}.glossary_embeddings` (
+          id STRING DEFAULT GENERATE_UUID(),
+          name STRING NOT NULL,
+          definition STRING NOT NULL,
+          embedding_text STRING,
+          synonyms ARRAY<STRING>,
+          related_columns ARRAY<STRING>,
+          category STRING,
+          sql_pattern STRING,
+          embedding ARRAY<FLOAT64>,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
         );
         """,
         f"""
@@ -391,6 +407,26 @@ def populate_schema_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
     logger.info("populated_schema_embeddings_complete")
 
 
+def populate_glossary(bq: BigQueryProtocol, s: Settings) -> None:
+    """Step 4b: Populate glossary_embeddings from glossary.yaml.
+
+    Reads glossary entries, builds embedding text, and MERGEs into BQ.
+    """
+    glossary_path = CATALOG_DIR / "glossary.yaml"
+    if not glossary_path.exists():
+        logger.warning("glossary_yaml_not_found", path=str(glossary_path))
+        return
+
+    data = load_yaml(glossary_path)
+    entries = data.get("glossary", {}).get("entries", [])
+    if not entries:
+        logger.warning("glossary_empty")
+        return
+
+    count = populate_glossary_embeddings(bq, entries, s)
+    logger.info("populated_glossary", count=count)
+
+
 def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
     """Step 5: Generate embeddings for all rows that don't have them yet.
 
@@ -434,6 +470,19 @@ def generate_embeddings(bq: BigQueryProtocol, s: Settings) -> None:
         )
         WHERE t.embedding IS NULL OR ARRAY_LENGTH(t.embedding) = 0;
         """,
+        # Glossary embeddings
+        f"""
+        UPDATE `{fqn}.glossary_embeddings` t
+        SET embedding = (
+          SELECT ml_generate_embedding_result
+          FROM ML.GENERATE_EMBEDDING(
+            MODEL `{model}`,
+            (SELECT COALESCE(t.embedding_text, t.definition) AS content),
+            STRUCT(TRUE AS flatten_json_output, 'RETRIEVAL_DOCUMENT' AS task_type)
+          )
+        )
+        WHERE t.embedding IS NULL OR ARRAY_LENGTH(t.embedding) = 0;
+        """,
         # Query memory
         f"""
         UPDATE `{fqn}.query_memory` t
@@ -470,6 +519,11 @@ def create_vector_indexes(bq: BigQueryProtocol, s: Settings) -> None:
         f"""
         CREATE VECTOR INDEX IF NOT EXISTS idx_column_embeddings
         ON `{fqn}.column_embeddings`(embedding)
+        OPTIONS (index_type = 'TREE_AH', distance_type = 'COSINE');
+        """,
+        f"""
+        CREATE VECTOR INDEX IF NOT EXISTS idx_glossary_embeddings
+        ON `{fqn}.glossary_embeddings`(embedding)
         OPTIONS (index_type = 'TREE_AH', distance_type = 'COSINE');
         """,
         f"""
@@ -560,6 +614,7 @@ STEPS = {
     "create-tables": create_embedding_tables,
     "populate-schema": populate_schema_embeddings,
     "populate-symbols": populate_symbols,
+    "populate-glossary": populate_glossary,
     "generate-embeddings": generate_embeddings,
     "create-indexes": create_vector_indexes,
     "test-search": test_vector_search,
@@ -571,6 +626,7 @@ ALL_STEPS_ORDER = [
     "create-tables",
     "populate-schema",
     "populate-symbols",
+    "populate-glossary",
     "generate-embeddings",
     "create-indexes",
     "test-search",

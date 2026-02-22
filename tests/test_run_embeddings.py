@@ -16,6 +16,7 @@ from scripts.run_embeddings import (
     create_vector_indexes,
     generate_embeddings,
     migrate_payload_columns,
+    populate_glossary,
     populate_schema_embeddings,
     populate_symbols,
     verify_embedding_model,
@@ -99,11 +100,11 @@ class TestVerifyEmbeddingModel:
 
 
 class TestCreateEmbeddingTables:
-    def test_creates_four_tables(self):
+    def test_creates_five_tables(self):
         bq = _make_bq()
         create_embedding_tables(bq, settings)
 
-        assert bq.execute_query.call_count == 4
+        assert bq.execute_query.call_count == 5
 
     def test_default_uses_if_not_exists(self):
         bq = _make_bq()
@@ -121,11 +122,11 @@ class TestCreateEmbeddingTables:
         create_embedding_tables(bq, settings, force=True)
 
         sqls = _sql_calls(bq)
-        # First three tables use CREATE OR REPLACE
-        for sql in sqls[:3]:
+        # First four tables use CREATE OR REPLACE
+        for sql in sqls[:4]:
             assert "CREATE OR REPLACE TABLE" in sql
         # symbol_exchange_map always uses IF NOT EXISTS (hardcoded)
-        assert "IF NOT EXISTS" in sqls[3]
+        assert "IF NOT EXISTS" in sqls[4]
 
     def test_creates_schema_embeddings_table(self):
         bq = _make_bq()
@@ -156,12 +157,27 @@ class TestCreateEmbeddingTables:
         assert "question STRING" in qm_sql
         assert "sql_query STRING" in qm_sql
 
+    def test_creates_glossary_embeddings_table(self):
+        bq = _make_bq()
+        create_embedding_tables(bq, settings)
+
+        sqls = _sql_calls(bq)
+        glossary_sql = sqls[3]
+        assert "glossary_embeddings" in glossary_sql
+        assert "name STRING" in glossary_sql
+        assert "definition STRING" in glossary_sql
+        assert "embedding_text STRING" in glossary_sql
+        assert "synonyms ARRAY<STRING>" in glossary_sql
+        assert "related_columns ARRAY<STRING>" in glossary_sql
+        assert "category STRING" in glossary_sql
+        assert "sql_pattern STRING" in glossary_sql
+
     def test_creates_symbol_exchange_map_table(self):
         bq = _make_bq()
         create_embedding_tables(bq, settings)
 
         sqls = _sql_calls(bq)
-        sym_sql = sqls[3]
+        sym_sql = sqls[4]
         assert "symbol_exchange_map" in sym_sql
         assert "symbol STRING" in sym_sql
         assert "exchange STRING" in sym_sql
@@ -375,11 +391,11 @@ class TestPopulateSchemaEmbeddings:
 
 
 class TestGenerateEmbeddings:
-    def test_generates_three_update_sqls(self):
+    def test_generates_four_update_sqls(self):
         bq = _make_bq()
         generate_embeddings(bq, settings)
 
-        assert bq.execute_query.call_count == 3
+        assert bq.execute_query.call_count == 4
 
     def test_uses_array_length_check(self):
         bq = _make_bq()
@@ -395,11 +411,12 @@ class TestGenerateEmbeddings:
         generate_embeddings(bq, settings)
 
         sqls = _sql_calls(bq)
-        # schema_embeddings and column_embeddings use RETRIEVAL_DOCUMENT
+        # schema_embeddings, column_embeddings, glossary_embeddings use RETRIEVAL_DOCUMENT
         assert "RETRIEVAL_DOCUMENT" in sqls[0]
         assert "RETRIEVAL_DOCUMENT" in sqls[1]
+        assert "RETRIEVAL_DOCUMENT" in sqls[2]
         # query_memory uses RETRIEVAL_QUERY
-        assert "RETRIEVAL_QUERY" in sqls[2]
+        assert "RETRIEVAL_QUERY" in sqls[3]
 
     def test_updates_correct_tables(self):
         bq = _make_bq()
@@ -408,7 +425,8 @@ class TestGenerateEmbeddings:
         sqls = _sql_calls(bq)
         assert "schema_embeddings" in sqls[0]
         assert "column_embeddings" in sqls[1]
-        assert "query_memory" in sqls[2]
+        assert "glossary_embeddings" in sqls[2]
+        assert "query_memory" in sqls[3]
 
     def test_uses_ml_generate_embedding(self):
         bq = _make_bq()
@@ -443,11 +461,11 @@ class TestGenerateEmbeddings:
 
 
 class TestCreateVectorIndexes:
-    def test_creates_three_indexes(self):
+    def test_creates_four_indexes(self):
         bq = _make_bq()
         create_vector_indexes(bq, settings)
 
-        assert bq.execute_query.call_count == 3
+        assert bq.execute_query.call_count == 4
 
     def test_uses_if_not_exists(self):
         bq = _make_bq()
@@ -481,6 +499,7 @@ class TestCreateVectorIndexes:
         all_sql = " ".join(sqls)
         assert "schema_embeddings" in all_sql
         assert "column_embeddings" in all_sql
+        assert "glossary_embeddings" in all_sql
         assert "query_memory" in all_sql
 
     def test_indexes_embedding_column(self):
@@ -602,6 +621,46 @@ class TestBuildRoutingDescriptions:
 
         for desc in descs:
             assert len(desc.strip()) > 0
+
+
+# ---------------------------------------------------------------------------
+# TestPopulateGlossaryStep
+# ---------------------------------------------------------------------------
+
+
+class TestPopulateGlossaryStep:
+    def test_populate_glossary_calls_bq(self):
+        bq = _make_bq()
+        populate_glossary(bq, settings)
+
+        # Should have called execute_query at least once (for the MERGE)
+        assert bq.execute_query.call_count >= 1
+
+    def test_populate_glossary_merge_targets_glossary_embeddings(self):
+        bq = _make_bq()
+        populate_glossary(bq, settings)
+
+        sqls = _sql_calls(bq)
+        assert any("glossary_embeddings" in sql for sql in sqls)
+
+
+# ---------------------------------------------------------------------------
+# TestPipelineStepOrder
+# ---------------------------------------------------------------------------
+
+
+class TestPipelineStepOrder:
+    def test_populate_glossary_before_generate_embeddings(self):
+        from scripts.run_embeddings import ALL_STEPS_ORDER
+
+        glossary_idx = ALL_STEPS_ORDER.index("populate-glossary")
+        generate_idx = ALL_STEPS_ORDER.index("generate-embeddings")
+        assert glossary_idx < generate_idx
+
+    def test_populate_glossary_in_steps_dict(self):
+        from scripts.run_embeddings import STEPS
+
+        assert "populate-glossary" in STEPS
 
 
 # ---------------------------------------------------------------------------

@@ -78,26 +78,26 @@
 ## Phase 4: Vector Search CTE + Prompt Integration
 
 ### Task 4.1a: Add payload columns to column search CTE arm
-- [ ] Write tests for enriched column CTE: results include payload fields (category, formula, example_values, related_columns, typical_aggregation, filterable), results include `'column' AS source` field
-- [ ] Update column search arm of `_COLUMN_SEARCH_SQL` in `vector_search.py` to SELECT payload columns and add `'column' AS source`
-- [ ] Update `ColumnSearchResult` TypedDict to include payload fields and source key
-- [ ] Verify tests pass
+- [x] Write tests for enriched column CTE: results include payload fields (category, formula, example_values, related_columns, typical_aggregation, filterable), results include `'column' AS source` field
+- [x] Update column search arm of `_COLUMN_SEARCH_SQL` in `vector_search.py` to SELECT payload columns and add `'column' AS source`
+- [x] Update `ColumnSearchResult` TypedDict to include payload fields and source key
+- [x] Verify tests pass
 
 ### Task 4.1b: Add glossary UNION arm to vector search CTE
-- [ ] Write tests for glossary CTE: glossary results returned with `source='glossary'`, per-source top-K ranking (top-30 columns + top-3 glossary)
-- [ ] Add glossary UNION arm to `_COLUMN_SEARCH_SQL` with `'glossary' AS source`
-- [ ] Verify tests pass
+- [x] Write tests for glossary CTE: glossary results returned with `source='glossary'`, per-source top-K ranking (top-30 columns + top-3 glossary)
+- [x] Add glossary UNION arm to `_COLUMN_SEARCH_SQL` with `'glossary' AS source`
+- [x] Verify tests pass
 
 ### Task 4.2: Format glossary results in tool output
-- [ ] Write tests for `vector_search_columns()` return structure with glossary entries formatted as a dedicated Business Context section (separate from column schema context)
-- [ ] Update `vector_search_columns()` to separate glossary rows from column rows and format glossary into `## Business Context` section
-- [ ] Verify tests pass
+- [x] Write tests for `vector_search_columns()` return structure with glossary entries formatted as a dedicated Business Context section (separate from column schema context)
+- [x] Update `vector_search_columns()` to separate glossary rows from column rows and format glossary into `## Business Context` section
+- [x] Verify tests pass
 
 ### Task 4.3: Format payload fields in prompt builder
-- [ ] Write tests for prompt builder: column context block includes Formula, Aggregation, Values, Related Columns when present in payload
-- [ ] Update prompt builder to format payload fields into column context block (e.g., `column_name (type) [category]: description | Formula: ... | Aggregation: SUM | Values: [Call, Put]`)
-- [ ] Verify tests pass
+- [x] Write tests for prompt builder: column context block includes Formula, Aggregation, Values, Related Columns when present in payload
+- [x] Update prompt builder to format payload fields into column context block (e.g., `column_name (type) [category]: description | Formula: ... | Aggregation: SUM | Values: [Call, Put]`)
+- [x] Verify tests pass
 
 ### Task 4.4: Phase 4 checkpoint
-- [ ] Run full test suite
-- [ ] Manual verification: confirm vector_search_columns() output includes column results with payload, glossary Business Context section, and prompt builder formats all payload fields
+- [x] Run full test suite (696 passed)
+- [x] Manual verification: confirm vector_search_columns() output includes column results with payload, glossary Business Context section, and prompt builder formats all payload fields

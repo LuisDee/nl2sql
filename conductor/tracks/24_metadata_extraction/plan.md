@@ -10,13 +10,13 @@
 - [x] Write tests for the enrichment logic (5561eae)
 
 ### Task 1.2: Run formula enrichment and verify
-- [ ] Run the script against all 5 KPI table YAMLs
-- [ ] Validate output with `catalog/schema.py`
-- [ ] Launch source repo agent to spot-check 10 formulas against KPI repo SQL
-- [ ] Commit changes
+- [x] Run the script against all 5 KPI table YAMLs (657 added, 283 updated, 29 verified)
+- [x] Validate output with `catalog/schema.py` (72 tests pass)
+- [x] Launch source repo agent to spot-check 10 formulas against KPI repo SQL (10/10 pass)
+- [x] Commit changes (de86e7a)
 
 ### Task 1.3: Phase 1 checkpoint
-- [ ] All KPI formulas verified and updated
+- [x] All KPI formulas verified and updated (969 total across 5 tables)
 - [ ] Human review: spot-check 5 formula changes
 
 ---

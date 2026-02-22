@@ -168,6 +168,209 @@ class TestBuildEmbeddingText:
         result_empty = build_embedding_text("t", "c", "STRING", "kpi", "desc", [])
         assert result_none == result_empty
 
+    # -- Enrichment: category tag --
+
+    def test_category_tag_included_for_measure(self):
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "instant_pnl",
+            "FLOAT64",
+            "kpi",
+            "Profit and loss at time of trade",
+            ["pnl", "profit"],
+            category="measure",
+        )
+        assert "[measure]" in result
+        assert "Profit and loss" in result
+
+    def test_category_tag_included_for_dimension(self):
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "exchange",
+            "STRING",
+            "kpi",
+            "Exchange where trade was executed",
+            ["venue"],
+            category="dimension",
+        )
+        assert "[dimension]" in result
+
+    def test_category_tag_included_for_time(self):
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "trade_date",
+            "DATE",
+            "kpi",
+            "Date of trade",
+            None,
+            category="time",
+        )
+        assert "[time]" in result
+
+    def test_no_category_tag_when_none(self):
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "symbol",
+            "STRING",
+            "kpi",
+            "Traded symbol",
+            None,
+            category=None,
+        )
+        assert "[" not in result or "(STRING" in result
+
+    # -- Enrichment: example_values for filterable dimensions --
+
+    def test_example_values_for_filterable_dimension(self):
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "exchange",
+            "STRING",
+            "kpi",
+            "Exchange where trade was executed",
+            ["venue"],
+            category="dimension",
+            filterable=True,
+            example_values=["ICE", "Eurex", "NSE", "OMX", "KRX"],
+        )
+        assert "Values: ICE, Eurex, NSE, OMX, KRX" in result
+
+    def test_example_values_capped_at_5(self):
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "portfolio",
+            "STRING",
+            "kpi",
+            "Portfolio name",
+            None,
+            category="dimension",
+            filterable=True,
+            example_values=["A", "B", "C", "D", "E", "F", "G"],
+        )
+        assert "Values: A, B, C, D, E" in result
+        assert "F" not in result
+
+    def test_no_example_values_for_non_filterable(self):
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "instant_pnl",
+            "FLOAT64",
+            "kpi",
+            "PnL",
+            None,
+            category="measure",
+            filterable=False,
+            example_values=["1.5", "2.0"],
+        )
+        assert "Values:" not in result
+
+    def test_no_example_values_for_non_dimension(self):
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "trade_date",
+            "DATE",
+            "kpi",
+            "Date of trade",
+            None,
+            category="time",
+            filterable=True,
+            example_values=["2024-01-01"],
+        )
+        assert "Values:" not in result
+
+    def test_no_example_values_when_filterable_not_set(self):
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "exchange",
+            "STRING",
+            "kpi",
+            "Exchange",
+            None,
+            category="dimension",
+            filterable=None,
+            example_values=["ICE"],
+        )
+        assert "Values:" not in result
+
+    # -- Enrichment: full format with all fields --
+
+    def test_full_enriched_format(self):
+        """Measure with category, description, synonyms (no values)."""
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "instant_pnl",
+            "FLOAT64",
+            "kpi",
+            "Profit and loss at time of trade in base currency",
+            ["pnl", "profit", "gross pnl"],
+            category="measure",
+        )
+        expected_start = "markettrade.instant_pnl (FLOAT64, kpi)"
+        assert result.startswith(expected_start)
+        assert "[measure]" in result
+        assert "Profit and loss" in result
+        assert "Also known as: pnl, profit, gross pnl" in result
+        assert "Values:" not in result
+
+    def test_full_enriched_filterable_dimension(self):
+        """Filterable dimension with category, values, description, synonyms."""
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "exchange",
+            "STRING",
+            "kpi",
+            "Exchange where the trade was executed",
+            ["exchange name", "venue"],
+            category="dimension",
+            filterable=True,
+            example_values=["ICE", "Eurex", "NSE", "OMX", "KRX"],
+        )
+        assert "[dimension]" in result
+        assert "Exchange where the trade was executed" in result
+        assert "Also known as: exchange name, venue" in result
+        assert "Values: ICE, Eurex, NSE, OMX, KRX" in result
+
+    # -- Graceful degradation --
+
+    def test_backwards_compatible_no_enrichment_args(self):
+        """Without enrichment kwargs, output is identical to current format."""
+        from scripts.populate_embeddings import build_embedding_text
+
+        result = build_embedding_text(
+            "markettrade",
+            "symbol",
+            "STRING",
+            "kpi",
+            "The traded symbol",
+            ["sym"],
+        )
+        assert "[" not in result or "(STRING" in result
+        assert "Values:" not in result
+        assert "The traded symbol" in result
+        assert "Also known as: sym" in result
+
 
 class TestPopulateColumnEmbeddings:
     def _make_tables(self):

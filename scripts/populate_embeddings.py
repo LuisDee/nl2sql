@@ -51,24 +51,43 @@ def build_embedding_text(
     layer: str,
     description: str,
     synonyms: list[str] | None,
+    *,
+    category: str | None = None,
+    filterable: bool | None = None,
+    example_values: list | None = None,
 ) -> str:
     """Build enriched text for column embedding.
 
     Produces a single string optimised for semantic search that includes
     table context, column metadata, description, and synonyms.
 
-    Format: "{table}.{col} ({type}, {layer}): {desc}. Also known as: {synonyms}"
+    Enrichment fields (when present):
+    - [category] tag aids retrieval by signalling dimension/measure/time/identifier
+    - example_values (≤5) for filterable dimensions aids exact-match queries
+
+    Fields NOT embedded (generation context only, returned as payload):
+    - formula, related_columns, typical_aggregation
     """
     header = f"{table_name}.{column_name} ({column_type}, {layer})"
-    parts = [header]
+    parts: list[str] = []
+
+    if category:
+        parts.append(f"[{category}]")
+
     if description:
         parts.append(description)
+
     if synonyms:
         parts.append(f"Also known as: {', '.join(synonyms)}")
-    # Join header with ": " then remaining parts with ". "
-    if len(parts) == 1:
+
+    # Only include example_values for filterable dimensions (≤5 values)
+    if filterable and category == "dimension" and example_values:
+        vals = [str(v) for v in example_values[:5]]
+        parts.append(f"Values: {', '.join(vals)}")
+
+    if not parts:
         return header
-    return f"{header}: {'. '.join(parts[1:])}"
+    return f"{header}: {'. '.join(parts)}"
 
 
 def populate_column_embeddings(
@@ -114,6 +133,9 @@ def populate_column_embeddings(
                 layer=layer,
                 description=description,
                 synonyms=synonyms,
+                category=col.get("category"),
+                filterable=col.get("filterable"),
+                example_values=col.get("example_values"),
             )
             rows.append(
                 {

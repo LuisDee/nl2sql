@@ -3,28 +3,28 @@
 ## Phase 1: Repo Profiling
 
 ### Task 1.1: Profile CPP repo
-- [ ] Run sub-agent to explore `repos/cpp/`: directory tree (top 3 levels), README, build configs, `source/pb/` structure
-- [ ] Generate `repos/cpp/AGENTS.md` repo card with all required sections (Purpose, Tech Stack, Directory Map, Key Entry Points, Data Models, Common Patterns, Gotchas, When to Use)
-- [ ] Identify which proto files under `source/pb/` correspond to our BQ tables (markettrade, quotertrade, brokertrade, clicktrade, otoswing, theodata, marketdata, marketdepth, swingdata)
-- [ ] Document in repo card: which proto messages map to which tables, which fields are subset of the full proto
+- [x] Run sub-agent to explore `repos/cpp/`: directory tree (top 3 levels), README, build configs, `source/pb/` structure
+- [x] Generate `repos/cpp/AGENTS.md` repo card with all required sections (Purpose, Tech Stack, Directory Map, Key Entry Points, Data Models, Common Patterns, Gotchas, When to Use)
+- [x] Identify which proto files under `source/pb/` correspond to our BQ tables (markettrade, quotertrade, brokertrade, clicktrade, otoswing, theodata, marketdata, marketdepth, swingdata)
+- [x] Document in repo card: which proto messages map to which tables, which fields are subset of the full proto
 
 ### Task 1.2: Profile data-library repo
-- [ ] Run sub-agent to explore `repos/data-library/`: directory tree, README, Go modules, config files
-- [ ] Generate `repos/data-library/AGENTS.md` repo card
-- [ ] Identify how proto messages are consumed: deserialization handlers, field mapping logic, any renames or type conversions at the Go layer
+- [x] Run sub-agent to explore `repos/data-library/`: directory tree, README, Go modules, config files
+- [x] Generate `repos/data-library/AGENTS.md` repo card
+- [x] Identify how proto messages are consumed: deserialization handlers, field mapping logic, any renames or type conversions at the Go layer
 
 ### Task 1.3: Profile data-loader repo
-- [ ] Run sub-agent to explore `repos/data-loader/`: directory tree, README, Python/SQL files, config
-- [ ] Generate `repos/data-loader/AGENTS.md` repo card
-- [ ] Identify transformation scripts: which files handle which tables, where column renames/casts/derivations happen
+- [x] Run sub-agent to explore `repos/data-loader/`: directory tree, README, Python/SQL files, config
+- [x] Generate `repos/data-loader/AGENTS.md` repo card
+- [x] Identify transformation scripts: which files handle which tables, where column renames/casts/derivations happen
 
 ### Task 1.4: Profile KPI repo
-- [ ] Run sub-agent to explore `repos/kpi/`: directory tree, README, Python/SQL files, config
-- [ ] Generate `repos/kpi/AGENTS.md` repo card
-- [ ] Identify computation logic: which files compute which KPI columns, where formulas for instant_edge, instant_pnl, delta_slippage_* are defined
+- [x] Run sub-agent to explore `repos/kpi/`: directory tree, README, Python/SQL files, config
+- [x] Generate `repos/kpi/AGENTS.md` repo card
+- [x] Identify computation logic: which files compute which KPI columns, where formulas for instant_edge, instant_pnl, delta_slippage_* are defined
 
 ### Task 1.5: Phase 1 checkpoint
-- [ ] All 4 repo cards complete and reviewed
+- [x] All 4 repo cards complete and reviewed
 - [ ] Human verification: repo cards accurately describe each repo's purpose and structure
 
 ---

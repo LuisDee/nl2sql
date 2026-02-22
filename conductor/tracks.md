@@ -191,7 +191,7 @@
 
 ---
 
-## [~] Track: Source Repo Discovery & Profiling Framework
+## [x] Track: Source Repo Discovery & Profiling Framework
 - **ID:** 23_source_repo_discovery
 - **Wave:** 16
 - **Complexity:** L

@@ -1,0 +1,234 @@
+glossary:
+  entries:
+    # --- PnL variants ---
+
+    - name: total PnL
+      definition: >-
+        Sum of instant_pnl across all trades. Measures gross profitability before
+        fees. Formula: SUM(instant_pnl). Use instant_pnl_w_fees for net PnL.
+      synonyms:
+        - total profit
+        - aggregate pnl
+        - gross pnl
+        - P&L
+      related_columns:
+        - markettrade.instant_pnl
+        - quotertrade.instant_pnl
+        - brokertrade.instant_pnl
+        - clicktrade.instant_pnl
+        - otoswing.instant_pnl
+      category: performance
+      sql_pattern: "SUM(instant_pnl)"
+
+    - name: net PnL
+      definition: >-
+        Sum of instant_pnl_w_fees across all trades. Measures true profitability
+        after exchange fees and clearing costs. Formula: SUM(instant_pnl_w_fees).
+        This is instant_pnl minus fees.
+      synonyms:
+        - pnl after fees
+        - pnl with fees
+        - net profit
+        - true pnl
+      related_columns:
+        - markettrade.instant_pnl_w_fees
+        - markettrade.fees
+        - markettrade.instant_pnl
+      category: performance
+      sql_pattern: "SUM(instant_pnl_w_fees)"
+
+    - name: mark-to-mid PnL
+      definition: >-
+        PnL computed by marking the trade to mid-market theoretical value rather
+        than the execution reference TV. Stored as mark_to_mid_pnl (before fees)
+        and mark_to_mid_pnl_w_fees (after fees). Alternative P&L perspective.
+      synonyms:
+        - mid pnl
+        - mark to mid
+        - mtm pnl
+      related_columns:
+        - markettrade.mark_to_mid_pnl
+        - markettrade.mark_to_mid_pnl_w_fees
+      category: performance
+
+    - name: PnL disambiguation
+      definition: >-
+        When a trader asks for "PnL" without qualification, default to
+        instant_pnl (gross, before fees). If they say "net PnL" or "after fees",
+        use instant_pnl_w_fees. If they say "mark to mid", use mark_to_mid_pnl.
+        Never mix PnL variants in a single aggregation.
+      synonyms:
+        - pnl rules
+        - which pnl
+        - pnl column selection
+      related_columns:
+        - markettrade.instant_pnl
+        - markettrade.instant_pnl_w_fees
+        - markettrade.mark_to_mid_pnl
+      category: disambiguation
+
+    # --- Edge metrics ---
+
+    - name: edge
+      definition: >-
+        Instantaneous edge per unit (in ticks) at trade execution. The column is
+        instant_edge. Measures the difference between execution price and fair
+        value (tv). Positive = traded better than fair value. This is the most
+        commonly queried KPI metric on the trading desk.
+      synonyms:
+        - trading edge
+        - capture
+        - theoretical edge
+        - edge_bps
+        - instant edge
+      related_columns:
+        - markettrade.instant_edge
+        - markettrade.tv
+        - markettrade.trade_price
+      category: performance
+      sql_pattern: "AVG(instant_edge)"
+
+    - name: good fill
+      definition: >-
+        A trade where the edge captured is positive, meaning the execution price
+        was better than fair value. Typically defined as instant_edge > 0 or
+        edge_ticks > 0 depending on context. Used to measure execution quality.
+      synonyms:
+        - positive edge
+        - good execution
+        - favorable fill
+      related_columns:
+        - markettrade.instant_edge
+      category: performance
+      sql_pattern: "instant_edge > 0"
+
+    # --- Slippage decomposition ---
+
+    - name: slippage
+      definition: >-
+        Time-bucketed PnL decomposition measuring how trade value changes after
+        execution. Decomposed into delta_slippage (underlying price movement),
+        vol_slippage (volatility changes), roll_slippage (carry/dividend changes),
+        and other_slippage (residual including gamma). Total slippage =
+        delta + vol + roll + other. Each component is available at 9 standard
+        intraday intervals plus EOD and multiday.
+      synonyms:
+        - price slippage
+        - execution slippage
+        - slippage decomposition
+        - total slippage
+      related_columns:
+        - markettrade.delta_slippage_1s
+        - markettrade.vol_slippage_1s
+        - markettrade.roll_slippage_1s
+        - markettrade.other_slippage_1s
+        - markettrade.total_slippage_1s
+      category: performance
+
+    - name: slippage intervals
+      definition: >-
+        Slippage columns follow the naming pattern {family}_{interval}. The 9
+        standard intraday intervals are 1s, 5s, 10s, 30s, 1m, 5m, 10m, 30m, 1h.
+        EOD uses the suffix eod. Multiday uses 1D and 5D. Example:
+        delta_slippage_5m, vol_slippage_1h, total_slippage_1D. Per-unit variants
+        append _per_unit (e.g. delta_slippage_5m_per_unit).
+      synonyms:
+        - interval naming
+        - slippage time buckets
+        - slippage intervals
+      related_columns:
+        - markettrade.delta_slippage_1s
+        - markettrade.delta_slippage_5m
+        - markettrade.delta_slippage_1h
+        - markettrade.delta_slippage_1D
+      category: naming_convention
+
+    # --- Trade type taxonomy ---
+
+    - name: trade type taxonomy
+      definition: >-
+        markettrade is the superset of ALL market trades from all participants.
+        quotertrade, brokertrade, clicktrade, and otoswing are Mako-specific
+        subsets. CRITICAL: never SUM markettrade with any of the four Mako tables
+        — that double-counts. For all trades use markettrade alone. For Mako-only
+        totals, UNION ALL the four Mako tables.
+      synonyms:
+        - table selection
+        - trade tables
+        - which table
+        - double counting
+      related_columns:
+        - markettrade.trade_type
+      category: disambiguation
+
+    - name: combo trade
+      definition: >-
+        A multi-leg trade (e.g. straddle, strangle, calendar spread). When
+        is_parent=TRUE, the row contains aggregated combo-level KPIs summed
+        across all legs. When is_parent=FALSE, each row is a single leg.
+        Default to is_parent=TRUE unless the trader specifically wants leg-level
+        detail. The parent_combo_type_name column describes the combo type.
+      synonyms:
+        - spread
+        - multi-leg
+        - straddle
+        - strangle
+        - combo
+      related_columns:
+        - markettrade.is_parent
+        - markettrade.parent_is_combo
+        - markettrade.no_legs
+        - markettrade.parent_combo_type_name
+      category: trade_structure
+
+    # --- Timestamp conventions ---
+
+    - name: trade date filtering
+      definition: >-
+        All KPI and data tables are partitioned on trade_date (DATE). Every query
+        MUST include a WHERE trade_date filter for performance. If the user
+        doesn't specify a date, default to CURRENT_DATE(). For "today's trades"
+        use WHERE trade_date = CURRENT_DATE(). For date ranges use BETWEEN.
+      synonyms:
+        - today
+        - date filter
+        - partition filter
+        - current date
+      related_columns:
+        - markettrade.trade_date
+      category: query_pattern
+      sql_pattern: "WHERE trade_date = CURRENT_DATE()"
+
+    - name: event timestamp
+      definition: >-
+        Nanosecond-precision timestamp of trade execution, stored as
+        event_timestamp_ns (INT64). This is the primary timestamp for time-range
+        filtering within a day. Use trade_date for date-level filtering and
+        event_timestamp_ns for intraday precision.
+      synonyms:
+        - execution time
+        - trade time
+        - timestamp
+        - nano timestamp
+      related_columns:
+        - markettrade.event_timestamp_ns
+      category: naming_convention
+
+    # --- KPI vs data distinction ---
+
+    - name: KPI vs data dataset
+      definition: >-
+        The KPI dataset contains performance metrics (instant_edge, instant_pnl,
+        slippage decomposition, Greeks). The data dataset contains raw execution
+        details (timestamps, prices, sizes, fills, market depth). If the question
+        is about performance, edge, PnL, or slippage, use KPI tables. If the
+        question is about raw execution details, timestamps, or fill information,
+        use data tables.
+      synonyms:
+        - which dataset
+        - dataset selection
+        - kpi or data
+      related_columns:
+        - markettrade.instant_edge
+        - markettrade.instant_pnl
+      category: disambiguation

@@ -28,14 +28,14 @@
 - [x] Verify tests pass
 
 ### Task 2.2a: Create catalog/glossary.yaml — high-priority concepts (10-15 entries)
-- [ ] Create `catalog/glossary.yaml` with first batch of high-priority concepts that traders actively ask about:
+- [x] Create `catalog/glossary.yaml` with first batch of high-priority concepts that traders actively ask about:
   - PnL variants: total PnL (SUM instant_pnl), net PnL (SUM instant_pnl_w_fees), mark-to-mid PnL, PnL disambiguation rules
   - Edge metrics: edge concept (spans edge_bps, instant_edge, edge_ticks), good fill (edge_bps > 0 threshold)
   - Slippage decomposition: delta_slippage + vega_slippage + gamma_slippage + theta_slippage + residual, interval naming pattern ({family}_{interval})
   - Trade type taxonomy: combo vs leg (is_parent flag), markettrade as superset, clicktrade/quotertrade/hedgetrade specialisations
   - Timestamp conventions: "the close" (exchange-specific timestamps), trade_date default to CURRENT_DATE()
-- [ ] Add CI validation test for glossary.yaml against Pydantic model in `tests/test_catalog_validation.py`
-- [ ] Verify tests pass
+- [x] Add CI validation test for glossary.yaml against Pydantic model in `tests/test_catalog_validation.py`
+- [x] Verify tests pass
 
 ### Task 2.2b: Expand glossary.yaml — remaining concepts (10-15 entries)
 - [ ] Add second batch of concepts:

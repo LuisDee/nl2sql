@@ -11,7 +11,7 @@ and becomes progressively stricter as enrichment is applied.
 
 import pytest
 
-from catalog.schema import ColumnSchema, DatasetSchema, TableSchema
+from catalog.schema import ColumnSchema, DatasetSchema, GlossarySchema, TableSchema
 from nl2sql_agent.catalog_loader import CATALOG_DIR, load_yaml
 
 # -- Table YAMLs -----------------------------------------------------------
@@ -110,3 +110,28 @@ class TestDatasetYamlValidation:
         validated = DatasetSchema(**ds_data)
         assert validated.layer == layer
         assert len(validated.tables) > 0
+
+
+class TestGlossaryYamlValidation:
+    """glossary.yaml validates against GlossarySchema."""
+
+    def test_glossary_yaml_validates(self):
+        """Load glossary.yaml and validate against Pydantic model."""
+        path = CATALOG_DIR / "glossary.yaml"
+        data = load_yaml(path)
+
+        validated = GlossarySchema(**data["glossary"])
+        assert len(validated.entries) > 0
+
+    def test_glossary_entries_have_required_fields(self):
+        """Every glossary entry has name, definition, synonyms, related_columns."""
+        path = CATALOG_DIR / "glossary.yaml"
+        data = load_yaml(path)
+        validated = GlossarySchema(**data["glossary"])
+
+        for entry in validated.entries:
+            assert entry.name, "Glossary entry missing name"
+            assert entry.definition, f"Entry '{entry.name}' missing definition"
+            assert entry.related_columns is not None, (
+                f"Entry '{entry.name}' missing related_columns"
+            )

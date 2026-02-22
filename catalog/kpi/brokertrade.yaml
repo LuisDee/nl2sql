@@ -536,6 +536,7 @@ table:
     - broker fee rate
     business_rules: Must be interpreted alongside fee_method. Raw number without units on its own.
     source: Raw field from broker trade booking system
+    formula: "CASE WHEN brokerage_rate IS NULL THEN 0 WHEN LENGTH(counterparty) = 4 AND RIGHT(counterparty, 1) = 'F' THEN 0 WHEN LENGTH(counterparty) = 4 AND RIGHT(counterparty, 1) = 'H' THEN brokerage_rate / 2 WHEN LENGTH(counterparty) = 4 AND RIGHT(counterparty, 1) = 'Q' THEN brokerage_rate / 4 ELSE brokerage_rate END"
   - name: total_leg_lots
     type: FLOAT
     description: >-
@@ -3282,6 +3283,7 @@ table:
     synonyms:
     - mid base value
     - mid bv
+    formula: '(ul_bid_price_0 + ul_ask_price_0) / 2'
   - name: base_adjustment
     type: INTEGER
     description: >-
@@ -3290,6 +3292,7 @@ table:
       produce the calculated_base_val used in slippage decomposition. Typically zero for standard trades.
     synonyms:
     - bv adjustment
+    formula: '0'
   - name: fees
     type: INTEGER
     description: >-
@@ -3302,6 +3305,7 @@ table:
     - transaction costs
     - clearing fees
     - exch fees
+    formula: '0'
   - name: trade_side
     type: STRING
     description: >-
@@ -3316,6 +3320,7 @@ table:
     example_values:
     - Buy
     - Sell
+    formula: "CASE WHEN parent_is_combo = true AND is_parent = true AND leg_ratio_at_zero_index * size_at_zero_index > 0 THEN 'BUY' WHEN parent_is_combo = true AND is_parent = true AND leg_ratio_at_zero_index * size_at_zero_index < 0 THEN 'SELL' WHEN size > 0 THEN 'BUY' WHEN size < 0 THEN 'SELL' ELSE 'NULL' END"
   - name: size
     type: INTEGER
     description: >-
@@ -3329,6 +3334,7 @@ table:
     - contracts
     - volume
     - trade size
+    formula: "CASE WHEN is_parent = true AND trade_side = 'BUY' THEN CAST(total_traded_size AS INT64) WHEN is_parent = true AND trade_side = 'SELL' THEN CAST(total_traded_size * -1 AS INT64) ELSE CAST(size AS INT64) END"
   - name: buy_sell_multiplier
     type: INTEGER
     description: >-
@@ -3339,7 +3345,7 @@ table:
     synonyms:
     - direction multiplier
     - bs multiplier
-    formula: +1 if trade_side = 'Buy', -1 if trade_side = 'Sell'
+    formula: "CASE WHEN trade_side IN ('BUY', '66') THEN 1 WHEN trade_side IN ('SELL', '83') THEN -1 ELSE 0 END"
     business_rules: Always +1 or -1. Multiplied into all PnL and slippage calculations.
   - name: market_mako_multiplier
     type: INTEGER
@@ -3350,7 +3356,7 @@ table:
       context. Multiplied into instant_pnl_w_fees and tv_offset_slippage calculations.
     synonyms:
     - mako market multiplier
-    formula: CASE WHEN market_or_mako_trade='market' THEN -1 ELSE 1 END
+    formula: "CASE WHEN market_or_mako_trade = 'market' THEN -1 ELSE 1 END"
     business_rules: KPI-Added field. Unique to brokertrade. Combined with buy_sell_multiplier in PnL formulas.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: adjusted_trade_ref_price
@@ -3361,6 +3367,7 @@ table:
       calculations. More accurate than raw ref_price for slippage decomposition.
     synonyms:
     - adjusted ref price
+    formula: 'trade_ref_price + adjusted_roll'
   - name: ref_trade_side
     type: STRING
     description: >-
@@ -3378,7 +3385,7 @@ table:
       May differ from buy_sell_multiplier when the hedge is in the opposite direction to the option.
     synonyms:
     - ref direction multiplier
-    formula: +1 if ref_trade_side = 'Buy', -1 if ref_trade_side = 'Sell'
+    formula: "CASE WHEN ref_trade_side IN ('BUY', '66') THEN 1 WHEN ref_trade_side IN ('SELL', '83') THEN -1 ELSE 0 END"
   - name: instant_edge
     type: FLOAT
     description: >-
@@ -3393,7 +3400,7 @@ table:
     - edge_bps
     - instant edge
     - theoretical edge
-    formula: (trade_tv - price) * buy_sell_multiplier
+    formula: "CASE WHEN trade_side = 'BUY' THEN (trade_tv - price) * market_mako_multiplier WHEN trade_side = 'SELL' THEN (price - trade_tv) * market_mako_multiplier ELSE 0 END"
     business_rules: Positive = profitable trade relative to model. Key KPI metric.
   - name: instant_pnl
     type: FLOAT
@@ -3408,7 +3415,7 @@ table:
     - loss
     - instant profit
     - gross pnl
-    formula: instant_edge * ABS(size) * contract_size
+    formula: "CASE WHEN trade_side = 'BUY' THEN (trade_tv - price) * ABS(size) * contract_size * market_mako_multiplier WHEN trade_side = 'SELL' THEN (price - trade_tv) * ABS(size) * contract_size * market_mako_multiplier ELSE 0 END"
     business_rules: Gross PnL before fees. Use instant_pnl_w_fees for net.
   - name: instant_pnl_w_fees
     type: FLOAT
@@ -3425,7 +3432,7 @@ table:
     - pnl net
     - net profit
     - pnl after costs
-    formula: instant_pnl - exchange_fees - brokerage_cost (where brokerage_cost depends on fee_method)
+    formula: 'See fee_methods below'
     business_rules: >-
       Unique to brokertrade. The definitive net PnL metric. Brokerage cost formula varies by
       fee_method: Per Lot = brokerage_rate * total_leg_lots; bp of Premium = brokerage_rate/10000
@@ -3440,6 +3447,7 @@ table:
     synonyms:
     - tv move 1s_option_component
     - theo change 1s option_component
+    formula: '(adjusted_tv_1s - trade_tv)'
   - name: tv_change_buysell_1s_option_component
     type: STRING
     description: >-
@@ -3449,6 +3457,7 @@ table:
     synonyms:
     - pnl 1s_option_component
     - signed tv change 1s option_component
+    formula: '(adjusted_tv_1s - trade_tv) * buy_sell_multiplier'
   - name: tv_change_1s_ref_component
     type: FLOAT
     description: >-
@@ -3458,6 +3467,7 @@ table:
     synonyms:
     - tv move 1s_ref_component
     - theo change 1s ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1s - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_1s_ref_component
     type: FLOAT
     description: >-
@@ -3467,6 +3477,7 @@ table:
     synonyms:
     - pnl 1s_ref_component
     - signed tv change 1s ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1s - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_5s_option_component
     type: STRING
     description: >-
@@ -3476,6 +3487,7 @@ table:
     synonyms:
     - tv move 5s_option_component
     - theo change 5s option_component
+    formula: '(adjusted_tv_5s - trade_tv)'
   - name: tv_change_buysell_5s_option_component
     type: STRING
     description: >-
@@ -3485,6 +3497,7 @@ table:
     synonyms:
     - pnl 5s_option_component
     - signed tv change 5s option_component
+    formula: '(adjusted_tv_5s - trade_tv) * buy_sell_multiplier'
   - name: tv_change_5s_ref_component
     type: FLOAT
     description: >-
@@ -3494,6 +3507,7 @@ table:
     synonyms:
     - tv move 5s_ref_component
     - theo change 5s ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5s - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_5s_ref_component
     type: FLOAT
     description: >-
@@ -3503,6 +3517,7 @@ table:
     synonyms:
     - pnl 5s_ref_component
     - signed tv change 5s ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5s - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_10s_option_component
     type: STRING
     description: >-
@@ -3512,6 +3527,7 @@ table:
     synonyms:
     - tv move 10s_option_component
     - theo change 10s option_component
+    formula: '(adjusted_tv_10s - trade_tv)'
   - name: tv_change_buysell_10s_option_component
     type: STRING
     description: >-
@@ -3521,6 +3537,7 @@ table:
     synonyms:
     - pnl 10s_option_component
     - signed tv change 10s option_component
+    formula: '(adjusted_tv_10s - trade_tv) * buy_sell_multiplier'
   - name: tv_change_10s_ref_component
     type: FLOAT
     description: >-
@@ -3530,6 +3547,7 @@ table:
     synonyms:
     - tv move 10s_ref_component
     - theo change 10s ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_10s - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_10s_ref_component
     type: FLOAT
     description: >-
@@ -3539,6 +3557,7 @@ table:
     synonyms:
     - pnl 10s_ref_component
     - signed tv change 10s ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_10s - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_30s_option_component
     type: STRING
     description: >-
@@ -3548,6 +3567,7 @@ table:
     synonyms:
     - tv move 30s_option_component
     - theo change 30s option_component
+    formula: '(adjusted_tv_30s - trade_tv)'
   - name: tv_change_buysell_30s_option_component
     type: STRING
     description: >-
@@ -3557,6 +3577,7 @@ table:
     synonyms:
     - pnl 30s_option_component
     - signed tv change 30s option_component
+    formula: '(adjusted_tv_30s - trade_tv) * buy_sell_multiplier'
   - name: tv_change_30s_ref_component
     type: FLOAT
     description: >-
@@ -3566,6 +3587,7 @@ table:
     synonyms:
     - tv move 30s_ref_component
     - theo change 30s ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_30s - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_30s_ref_component
     type: FLOAT
     description: >-
@@ -3575,6 +3597,7 @@ table:
     synonyms:
     - pnl 30s_ref_component
     - signed tv change 30s ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_30s - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_1m_option_component
     type: STRING
     description: >-
@@ -3584,6 +3607,7 @@ table:
     synonyms:
     - tv move 1m_option_component
     - theo change 1m option_component
+    formula: '(adjusted_tv_1m - trade_tv)'
   - name: tv_change_buysell_1m_option_component
     type: STRING
     description: >-
@@ -3593,6 +3617,7 @@ table:
     synonyms:
     - pnl 1m_option_component
     - signed tv change 1m option_component
+    formula: '(adjusted_tv_1m - trade_tv) * buy_sell_multiplier'
   - name: tv_change_1m_ref_component
     type: FLOAT
     description: >-
@@ -3602,6 +3627,7 @@ table:
     synonyms:
     - tv move 1m_ref_component
     - theo change 1m ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1m - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_1m_ref_component
     type: FLOAT
     description: >-
@@ -3611,6 +3637,7 @@ table:
     synonyms:
     - pnl 1m_ref_component
     - signed tv change 1m ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1m - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_5m_option_component
     type: STRING
     description: >-
@@ -3620,6 +3647,7 @@ table:
     synonyms:
     - tv move 5m_option_component
     - theo change 5m option_component
+    formula: '(adjusted_tv_5m - trade_tv)'
   - name: tv_change_buysell_5m_option_component
     type: STRING
     description: >-
@@ -3629,6 +3657,7 @@ table:
     synonyms:
     - pnl 5m_option_component
     - signed tv change 5m option_component
+    formula: '(adjusted_tv_5m - trade_tv) * buy_sell_multiplier'
   - name: tv_change_5m_ref_component
     type: FLOAT
     description: >-
@@ -3638,6 +3667,7 @@ table:
     synonyms:
     - tv move 5m_ref_component
     - theo change 5m ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5m - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_5m_ref_component
     type: FLOAT
     description: >-
@@ -3647,6 +3677,7 @@ table:
     synonyms:
     - pnl 5m_ref_component
     - signed tv change 5m ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5m - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_10m_option_component
     type: STRING
     description: >-
@@ -3656,6 +3687,7 @@ table:
     synonyms:
     - tv move 10m_option_component
     - theo change 10m option_component
+    formula: '(adjusted_tv_10m - trade_tv)'
   - name: tv_change_buysell_10m_option_component
     type: STRING
     description: >-
@@ -3665,6 +3697,7 @@ table:
     synonyms:
     - pnl 10m_option_component
     - signed tv change 10m option_component
+    formula: '(adjusted_tv_10m - trade_tv) * buy_sell_multiplier'
   - name: tv_change_10m_ref_component
     type: FLOAT
     description: >-
@@ -3674,6 +3707,7 @@ table:
     synonyms:
     - tv move 10m_ref_component
     - theo change 10m ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_10m - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_10m_ref_component
     type: FLOAT
     description: >-
@@ -3683,6 +3717,7 @@ table:
     synonyms:
     - pnl 10m_ref_component
     - signed tv change 10m ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_10m - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_30m_option_component
     type: STRING
     description: >-
@@ -3692,6 +3727,7 @@ table:
     synonyms:
     - tv move 30m_option_component
     - theo change 30m option_component
+    formula: '(adjusted_tv_30m - trade_tv)'
   - name: tv_change_buysell_30m_option_component
     type: STRING
     description: >-
@@ -3701,6 +3737,7 @@ table:
     synonyms:
     - pnl 30m_option_component
     - signed tv change 30m option_component
+    formula: '(adjusted_tv_30m - trade_tv) * buy_sell_multiplier'
   - name: tv_change_30m_ref_component
     type: FLOAT
     description: >-
@@ -3710,6 +3747,7 @@ table:
     synonyms:
     - tv move 30m_ref_component
     - theo change 30m ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_30m - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_30m_ref_component
     type: FLOAT
     description: >-
@@ -3719,6 +3757,7 @@ table:
     synonyms:
     - pnl 30m_ref_component
     - signed tv change 30m ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_30m - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_1h_option_component
     type: STRING
     description: >-
@@ -3728,6 +3767,7 @@ table:
     synonyms:
     - tv move 1h_option_component
     - theo change 1h option_component
+    formula: '(adjusted_tv_1h - trade_tv)'
   - name: tv_change_buysell_1h_option_component
     type: STRING
     description: >-
@@ -3737,6 +3777,7 @@ table:
     synonyms:
     - pnl 1h_option_component
     - signed tv change 1h option_component
+    formula: '(adjusted_tv_1h - trade_tv) * buy_sell_multiplier'
   - name: tv_change_1h_ref_component
     type: FLOAT
     description: >-
@@ -3746,6 +3787,7 @@ table:
     synonyms:
     - tv move 1h_ref_component
     - theo change 1h ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1h - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_1h_ref_component
     type: FLOAT
     description: >-
@@ -3755,6 +3797,7 @@ table:
     synonyms:
     - pnl 1h_ref_component
     - signed tv change 1h ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1h - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_eod_option_component
     type: STRING
     description: >-
@@ -3764,6 +3807,7 @@ table:
     synonyms:
     - tv move eod_option_component
     - theo change eod option_component
+    formula: '(adjusted_tv_eod - trade_tv)'
   - name: tv_change_buysell_eod_option_component
     type: STRING
     description: >-
@@ -3773,6 +3817,7 @@ table:
     synonyms:
     - pnl eod_option_component
     - signed tv change eod option_component
+    formula: '(adjusted_tv_eod - trade_tv) * buy_sell_multiplier'
   - name: tv_change_eod_ref_component
     type: STRING
     description: >-
@@ -3782,6 +3827,7 @@ table:
     synonyms:
     - tv move eod_ref_component
     - theo change eod ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_eod - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_eod_ref_component
     type: STRING
     description: >-
@@ -3791,6 +3837,7 @@ table:
     synonyms:
     - pnl eod_ref_component
     - signed tv change eod ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_eod - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_1D_option_component
     type: STRING
     description: >-
@@ -3800,6 +3847,7 @@ table:
     synonyms:
     - tv move 1d_option_component
     - theo change 1d option_component
+    formula: '(adjusted_tv_1D - trade_tv)'
   - name: tv_change_buysell_1D_option_component
     type: STRING
     description: >-
@@ -3809,6 +3857,7 @@ table:
     synonyms:
     - pnl 1d_option_component
     - signed tv change 1d option_component
+    formula: '(adjusted_tv_1D - trade_tv) * buy_sell_multiplier'
   - name: tv_change_1D_ref_component
     type: STRING
     description: >-
@@ -3818,6 +3867,7 @@ table:
     synonyms:
     - tv move 1d_ref_component
     - theo change 1d ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1D - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_1D_ref_component
     type: STRING
     description: >-
@@ -3827,6 +3877,7 @@ table:
     synonyms:
     - pnl 1d_ref_component
     - signed tv change 1d ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1D - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: tv_change_5D_option_component
     type: STRING
     description: >-
@@ -3836,6 +3887,7 @@ table:
     synonyms:
     - tv move 5d_option_component
     - theo change 5d option_component
+    formula: '(adjusted_tv_5D - trade_tv)'
   - name: tv_change_buysell_5D_option_component
     type: STRING
     description: >-
@@ -3845,6 +3897,7 @@ table:
     synonyms:
     - pnl 5d_option_component
     - signed tv change 5d option_component
+    formula: '(adjusted_tv_5D - trade_tv) * buy_sell_multiplier'
   - name: tv_change_5D_ref_component
     type: STRING
     description: >-
@@ -3854,6 +3907,7 @@ table:
     synonyms:
     - tv move 5d_ref_component
     - theo change 5d ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5D - trade_ref_price) ELSE 0 END'
   - name: tv_change_buysell_5D_ref_component
     type: STRING
     description: >-
@@ -3863,6 +3917,7 @@ table:
     synonyms:
     - pnl 5d_ref_component
     - signed tv change 5d ref_component
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5D - trade_ref_price) * ref_buy_sell_multiplier ELSE 0 END'
   - name: other_slippage_1s_per_unit_option_component
     type: STRING
     description: >-
@@ -3871,6 +3926,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1s.
     synonyms:
     - other slip 1s
+    formula: '((adjusted_tv_1s - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_1s_per_unit + roll_slippage_1s_per_unit)'
   - name: other_slippage_1s_option_component
     type: STRING
     description: >-
@@ -3879,6 +3935,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1s.
     synonyms:
     - other slip 1s
+    formula: '((adjusted_tv_1s - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_1s + roll_slippage_1s)'
   - name: other_slippage_1s_per_unit_ref_component
     type: STRING
     description: >-
@@ -3887,6 +3944,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1s.
     synonyms:
     - other slip 1s
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1s - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_1s_per_unit + roll_slippage_1s_per_unit) ELSE 0 END'
   - name: other_slippage_1s_ref_component
     type: STRING
     description: >-
@@ -3895,6 +3953,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1s.
     synonyms:
     - other slip 1s
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1s - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_1s + roll_slippage_1s) ELSE 0 END'
   - name: other_slippage_5s_per_unit_option_component
     type: STRING
     description: >-
@@ -3903,6 +3962,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5s.
     synonyms:
     - other slip 5s
+    formula: '((adjusted_tv_5s - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_5s_per_unit + roll_slippage_5s_per_unit)'
   - name: other_slippage_5s_option_component
     type: STRING
     description: >-
@@ -3911,6 +3971,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5s.
     synonyms:
     - other slip 5s
+    formula: '((adjusted_tv_5s - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_5s + roll_slippage_5s)'
   - name: other_slippage_5s_per_unit_ref_component
     type: STRING
     description: >-
@@ -3919,6 +3980,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5s.
     synonyms:
     - other slip 5s
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5s - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_5s_per_unit + roll_slippage_5s_per_unit) ELSE 0 END'
   - name: other_slippage_5s_ref_component
     type: STRING
     description: >-
@@ -3927,6 +3989,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5s.
     synonyms:
     - other slip 5s
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5s - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_5s + roll_slippage_5s) ELSE 0 END'
   - name: other_slippage_10s_per_unit_option_component
     type: STRING
     description: >-
@@ -3935,6 +3998,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 10s.
     synonyms:
     - other slip 10s
+    formula: '((adjusted_tv_10s - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_10s_per_unit + roll_slippage_10s_per_unit)'
   - name: other_slippage_10s_option_component
     type: STRING
     description: >-
@@ -3943,6 +4007,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 10s.
     synonyms:
     - other slip 10s
+    formula: '((adjusted_tv_10s - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_10s + roll_slippage_10s)'
   - name: other_slippage_10s_per_unit_ref_component
     type: STRING
     description: >-
@@ -3951,6 +4016,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 10s.
     synonyms:
     - other slip 10s
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_10s - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_10s_per_unit + roll_slippage_10s_per_unit) ELSE 0 END'
   - name: other_slippage_10s_ref_component
     type: STRING
     description: >-
@@ -3959,6 +4025,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 10s.
     synonyms:
     - other slip 10s
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_10s - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_10s + roll_slippage_10s) ELSE 0 END'
   - name: other_slippage_30s_per_unit_option_component
     type: STRING
     description: >-
@@ -3967,6 +4034,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 30s.
     synonyms:
     - other slip 30s
+    formula: '((adjusted_tv_30s - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_30s_per_unit + roll_slippage_30s_per_unit)'
   - name: other_slippage_30s_option_component
     type: STRING
     description: >-
@@ -3975,6 +4043,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 30s.
     synonyms:
     - other slip 30s
+    formula: '((adjusted_tv_30s - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_30s + roll_slippage_30s)'
   - name: other_slippage_30s_per_unit_ref_component
     type: STRING
     description: >-
@@ -3983,6 +4052,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 30s.
     synonyms:
     - other slip 30s
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_30s - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_30s_per_unit + roll_slippage_30s_per_unit) ELSE 0 END'
   - name: other_slippage_30s_ref_component
     type: STRING
     description: >-
@@ -3991,6 +4061,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 30s.
     synonyms:
     - other slip 30s
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_30s - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_30s + roll_slippage_30s) ELSE 0 END'
   - name: other_slippage_1m_per_unit_option_component
     type: STRING
     description: >-
@@ -3999,6 +4070,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1m.
     synonyms:
     - other slip 1m
+    formula: '((adjusted_tv_1m - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_1m_per_unit + roll_slippage_1m_per_unit)'
   - name: other_slippage_1m_option_component
     type: STRING
     description: >-
@@ -4007,6 +4079,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1m.
     synonyms:
     - other slip 1m
+    formula: '((adjusted_tv_1m - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_1m + roll_slippage_1m)'
   - name: other_slippage_1m_per_unit_ref_component
     type: STRING
     description: >-
@@ -4015,6 +4088,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1m.
     synonyms:
     - other slip 1m
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1m - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_1m_per_unit + roll_slippage_1m_per_unit) ELSE 0 END'
   - name: other_slippage_1m_ref_component
     type: STRING
     description: >-
@@ -4023,6 +4097,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1m.
     synonyms:
     - other slip 1m
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1m - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_1m + roll_slippage_1m) ELSE 0 END'
   - name: other_slippage_5m_per_unit_option_component
     type: STRING
     description: >-
@@ -4031,6 +4106,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5m.
     synonyms:
     - other slip 5m
+    formula: '((adjusted_tv_5m - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_5m_per_unit + roll_slippage_5m_per_unit)'
   - name: other_slippage_5m_option_component
     type: STRING
     description: >-
@@ -4039,6 +4115,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5m.
     synonyms:
     - other slip 5m
+    formula: '((adjusted_tv_5m - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_5m + roll_slippage_5m)'
   - name: other_slippage_5m_per_unit_ref_component
     type: STRING
     description: >-
@@ -4047,6 +4124,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5m.
     synonyms:
     - other slip 5m
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5m - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_5m_per_unit + roll_slippage_5m_per_unit) ELSE 0 END'
   - name: other_slippage_5m_ref_component
     type: STRING
     description: >-
@@ -4055,6 +4133,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5m.
     synonyms:
     - other slip 5m
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5m - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_5m + roll_slippage_5m) ELSE 0 END'
   - name: other_slippage_10m_per_unit_option_component
     type: STRING
     description: >-
@@ -4063,6 +4142,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 10m.
     synonyms:
     - other slip 10m
+    formula: '((adjusted_tv_10m - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_10m_per_unit + roll_slippage_10m_per_unit)'
   - name: other_slippage_10m_option_component
     type: STRING
     description: >-
@@ -4071,6 +4151,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 10m.
     synonyms:
     - other slip 10m
+    formula: '((adjusted_tv_10m - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_10m + roll_slippage_10m)'
   - name: other_slippage_10m_per_unit_ref_component
     type: STRING
     description: >-
@@ -4079,6 +4160,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 10m.
     synonyms:
     - other slip 10m
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_10m - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_10m_per_unit + roll_slippage_10m_per_unit) ELSE 0 END'
   - name: other_slippage_10m_ref_component
     type: STRING
     description: >-
@@ -4087,6 +4169,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 10m.
     synonyms:
     - other slip 10m
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_10m - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_10m + roll_slippage_10m) ELSE 0 END'
   - name: other_slippage_30m_per_unit_option_component
     type: STRING
     description: >-
@@ -4095,6 +4178,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 30m.
     synonyms:
     - other slip 30m
+    formula: '((adjusted_tv_30m - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_30m_per_unit + roll_slippage_30m_per_unit)'
   - name: other_slippage_30m_option_component
     type: STRING
     description: >-
@@ -4103,6 +4187,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 30m.
     synonyms:
     - other slip 30m
+    formula: '((adjusted_tv_30m - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_30m + roll_slippage_30m)'
   - name: other_slippage_30m_per_unit_ref_component
     type: STRING
     description: >-
@@ -4111,6 +4196,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 30m.
     synonyms:
     - other slip 30m
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_30m - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_30m_per_unit + roll_slippage_30m_per_unit) ELSE 0 END'
   - name: other_slippage_30m_ref_component
     type: STRING
     description: >-
@@ -4119,6 +4205,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 30m.
     synonyms:
     - other slip 30m
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_30m - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_30m + roll_slippage_30m) ELSE 0 END'
   - name: other_slippage_1h_per_unit_option_component
     type: STRING
     description: >-
@@ -4127,6 +4214,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1h.
     synonyms:
     - other slip 1h
+    formula: '((adjusted_tv_1h - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_1h_per_unit + roll_slippage_1h_per_unit)'
   - name: other_slippage_1h_option_component
     type: STRING
     description: >-
@@ -4135,6 +4223,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1h.
     synonyms:
     - other slip 1h
+    formula: '((adjusted_tv_1h - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_1h + roll_slippage_1h)'
   - name: other_slippage_1h_per_unit_ref_component
     type: STRING
     description: >-
@@ -4143,6 +4232,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1h.
     synonyms:
     - other slip 1h
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1h - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_1h_per_unit + roll_slippage_1h_per_unit) ELSE 0 END'
   - name: other_slippage_1h_ref_component
     type: STRING
     description: >-
@@ -4151,6 +4241,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1h.
     synonyms:
     - other slip 1h
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1h - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_1h + roll_slippage_1h) ELSE 0 END'
   - name: other_slippage_eod_per_unit_option_component
     type: STRING
     description: >-
@@ -4159,6 +4250,7 @@ table:
       changes. The unexplained component in the slippage decomposition at end-of-day.
     synonyms:
     - other slip eod
+    formula: '((adjusted_tv_eod - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_eod_per_unit + roll_slippage_eod_per_unit)'
   - name: other_slippage_eod_option_component
     type: STRING
     description: >-
@@ -4167,6 +4259,7 @@ table:
       changes. The unexplained component in the slippage decomposition at end-of-day.
     synonyms:
     - other slip eod
+    formula: '((adjusted_tv_eod - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_eod + roll_slippage_eod)'
   - name: other_slippage_eod_per_unit_ref_component
     type: STRING
     description: >-
@@ -4175,6 +4268,7 @@ table:
       changes. The unexplained component in the slippage decomposition at end-of-day.
     synonyms:
     - other slip eod
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_eod - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_eod_per_unit + roll_slippage_eod_per_unit) ELSE 0 END'
   - name: other_slippage_eod_ref_component
     type: STRING
     description: >-
@@ -4183,6 +4277,7 @@ table:
       changes. The unexplained component in the slippage decomposition at end-of-day.
     synonyms:
     - other slip eod
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_eod - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_eod + roll_slippage_eod) ELSE 0 END'
   - name: other_slippage_1D_per_unit_option_component
     type: STRING
     description: >-
@@ -4191,6 +4286,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1 day.
     synonyms:
     - other slip 1d
+    formula: '((adjusted_tv_1D - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_1D_per_unit + roll_slippage_1D_per_unit)'
   - name: other_slippage_1D_option_component
     type: STRING
     description: >-
@@ -4199,6 +4295,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1 day.
     synonyms:
     - other slip 1d
+    formula: '((adjusted_tv_1D - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_1D + roll_slippage_1D)'
   - name: other_slippage_1D_per_unit_ref_component
     type: STRING
     description: >-
@@ -4207,6 +4304,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1 day.
     synonyms:
     - other slip 1d
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1D - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_1D_per_unit + roll_slippage_1D_per_unit) ELSE 0 END'
   - name: other_slippage_1D_ref_component
     type: STRING
     description: >-
@@ -4215,6 +4313,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 1 day.
     synonyms:
     - other slip 1d
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_1D - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_1D + roll_slippage_1D) ELSE 0 END'
   - name: other_slippage_5D_per_unit_option_component
     type: STRING
     description: >-
@@ -4223,6 +4322,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5 day.
     synonyms:
     - other slip 5d
+    formula: '((adjusted_tv_5D - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_5D_per_unit + roll_slippage_5D_per_unit)'
   - name: other_slippage_5D_option_component
     type: STRING
     description: >-
@@ -4231,6 +4331,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5 day.
     synonyms:
     - other slip 5d
+    formula: '((adjusted_tv_5D - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_5D + roll_slippage_5D)'
   - name: other_slippage_5D_per_unit_ref_component
     type: STRING
     description: >-
@@ -4239,6 +4340,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5 day.
     synonyms:
     - other slip 5d
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5D - trade_ref_price) * ref_buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * ref_contract_size * market_mako_multiplier - (delta_slippage_5D_per_unit + roll_slippage_5D_per_unit) ELSE 0 END'
   - name: other_slippage_5D_ref_component
     type: STRING
     description: >-
@@ -4247,6 +4349,7 @@ table:
       changes. The unexplained component in the slippage decomposition at 5 day.
     synonyms:
     - other slip 5d
+    formula: 'CASE WHEN is_ref_trade THEN (calculated_base_val_5D - trade_ref_price) * ref_buy_sell_multiplier * ref_contract_size * ABS(ref_size) * market_mako_multiplier - (delta_slippage_5D + roll_slippage_5D) ELSE 0 END'
   - name: vol_path_estimate_1s
     type: FLOAT
     description: >-
@@ -4255,6 +4358,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at 1s.
     synonyms:
     - vol path 1s
+    formula: '((calculated_base_val_1s - mid_base_val) * ((delta_1s - raw_delta_1s) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_1s_per_unit
     type: FLOAT
     description: >-
@@ -4264,6 +4368,7 @@ table:
     synonyms:
     - vol slip 1s
     - vol slippage per unit 1s
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_1s
     type: FLOAT
     description: >-
@@ -4273,7 +4378,7 @@ table:
     synonyms:
     - vol slip 1s
     - vol slippage 1s
-    formula: vol_slippage_1s_per_unit * ABS(size) * contract_size
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_1s_per_unit
     type: FLOAT
     description: >-
@@ -4283,6 +4388,7 @@ table:
     synonyms:
     - other slip 1s
     - residual slip 1s
+    formula: '((adjusted_tv_1s - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_1s_per_unit + roll_slippage_1s_per_unit)'
   - name: other_slippage_1s
     type: FLOAT
     description: >-
@@ -4292,7 +4398,7 @@ table:
     synonyms:
     - other slip 1s
     - residual slippage 1s
-    formula: other_slippage_1s_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_1s - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_1s + roll_slippage_1s)'
   - name: tv_1s
     type: FLOAT
     description: >-
@@ -4403,7 +4509,7 @@ table:
     synonyms:
     - tv move 1s
     - theo change 1s
-    formula: tv_1s - tv (theoretical value change over 1 second)
+    formula: '(adjusted_tv_1s - trade_tv)'
   - name: tv_change_buysell_1s
     type: FLOAT
     description: >-
@@ -4414,7 +4520,7 @@ table:
     - pnl 1s
     - forward pnl 1s
     - slippage 1s
-    formula: tv_change_1s * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_1s - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_1s_per_unit
     type: FLOAT
     description: >-
@@ -4424,6 +4530,7 @@ table:
     synonyms:
     - roll slip 1s
     - roll slippage per unit 1s
+    formula: '((reference_roll_1s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_1s
     type: FLOAT
     description: >-
@@ -4433,7 +4540,7 @@ table:
     synonyms:
     - roll slip 1s
     - roll slippage 1s
-    formula: roll_slippage_1s_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_1s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_1s
     type: FLOAT
     description: >-
@@ -4444,6 +4551,7 @@ table:
     synonyms:
     - adj tv 1s
     - adjusted theo 1s
+    formula: 'tv_1s + delta_1s * (calculated_base_val_1s - (under_1s - roll_1s)) + 0.5 * gamma_1s * POW((calculated_base_val_1s - (under_1s - roll_1s)), 2)'
   - name: delta_slippage_1s_per_unit
     type: FLOAT
     description: >-
@@ -4453,6 +4561,7 @@ table:
     synonyms:
     - delta slip 1s
     - delta slippage per unit 1s
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_1s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_1s
     type: FLOAT
     description: >-
@@ -4462,7 +4571,7 @@ table:
     synonyms:
     - delta slip 1s
     - delta slippage 1s
-    formula: delta_slippage_1s_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_1s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_1s_per_unit
     type: FLOAT
     description: >-
@@ -4473,7 +4582,7 @@ table:
     synonyms:
     - manual slippage per unit 1s
     - tv offset slip 1s
-    formula: (tv_offset_1s - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_1s - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_1s
@@ -4485,7 +4594,7 @@ table:
     synonyms:
     - manual slippage 1s
     - tv offset slippage 1s
-    formula: tv_offset_slippage_1s_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_1s - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_5s
@@ -4496,6 +4605,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at 5s.
     synonyms:
     - vol path 5s
+    formula: '((calculated_base_val_5s - mid_base_val) * ((delta_5s - raw_delta_5s) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_5s_per_unit
     type: FLOAT
     description: >-
@@ -4505,6 +4615,7 @@ table:
     synonyms:
     - vol slip 5s
     - vol slippage per unit 5s
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_5s
     type: FLOAT
     description: >-
@@ -4514,7 +4625,7 @@ table:
     synonyms:
     - vol slip 5s
     - vol slippage 5s
-    formula: vol_slippage_5s_per_unit * ABS(size) * contract_size
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_5s_per_unit
     type: FLOAT
     description: >-
@@ -4524,6 +4635,7 @@ table:
     synonyms:
     - other slip 5s
     - residual slip 5s
+    formula: '((adjusted_tv_5s - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_5s_per_unit + roll_slippage_5s_per_unit)'
   - name: other_slippage_5s
     type: FLOAT
     description: >-
@@ -4533,7 +4645,7 @@ table:
     synonyms:
     - other slip 5s
     - residual slippage 5s
-    formula: other_slippage_5s_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_5s - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_5s + roll_slippage_5s)'
   - name: tv_5s
     type: FLOAT
     description: >-
@@ -4644,7 +4756,7 @@ table:
     synonyms:
     - tv move 5s
     - theo change 5s
-    formula: tv_5s - tv (theoretical value change over 5 seconds)
+    formula: '(adjusted_tv_5s - trade_tv)'
   - name: tv_change_buysell_5s
     type: FLOAT
     description: >-
@@ -4655,7 +4767,7 @@ table:
     - pnl 5s
     - forward pnl 5s
     - slippage 5s
-    formula: tv_change_5s * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_5s - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_5s_per_unit
     type: FLOAT
     description: >-
@@ -4665,6 +4777,7 @@ table:
     synonyms:
     - roll slip 5s
     - roll slippage per unit 5s
+    formula: '((reference_roll_5s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_5s
     type: FLOAT
     description: >-
@@ -4674,7 +4787,7 @@ table:
     synonyms:
     - roll slip 5s
     - roll slippage 5s
-    formula: roll_slippage_5s_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_5s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_5s
     type: FLOAT
     description: >-
@@ -4685,6 +4798,7 @@ table:
     synonyms:
     - adj tv 5s
     - adjusted theo 5s
+    formula: 'tv_5s + delta_5s * (calculated_base_val_5s - (under_5s - roll_5s)) + 0.5 * gamma_5s * POW((calculated_base_val_5s - (under_5s - roll_5s)), 2)'
   - name: delta_slippage_5s_per_unit
     type: FLOAT
     description: >-
@@ -4694,6 +4808,7 @@ table:
     synonyms:
     - delta slip 5s
     - delta slippage per unit 5s
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_5s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_5s
     type: FLOAT
     description: >-
@@ -4703,7 +4818,7 @@ table:
     synonyms:
     - delta slip 5s
     - delta slippage 5s
-    formula: delta_slippage_5s_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_5s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_5s_per_unit
     type: FLOAT
     description: >-
@@ -4714,7 +4829,7 @@ table:
     synonyms:
     - manual slippage per unit 5s
     - tv offset slip 5s
-    formula: (tv_offset_5s - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_5s - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_5s
@@ -4726,7 +4841,7 @@ table:
     synonyms:
     - manual slippage 5s
     - tv offset slippage 5s
-    formula: tv_offset_slippage_5s_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_5s - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_10s
@@ -4737,6 +4852,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at 10s.
     synonyms:
     - vol path 10s
+    formula: '((calculated_base_val_10s - mid_base_val) * ((delta_10s - raw_delta_10s) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_10s_per_unit
     type: FLOAT
     description: >-
@@ -4746,6 +4862,7 @@ table:
     synonyms:
     - vol slip 10s
     - vol slippage per unit 10s
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_10s
     type: FLOAT
     description: >-
@@ -4755,7 +4872,7 @@ table:
     synonyms:
     - vol slip 10s
     - vol slippage 10s
-    formula: vol_slippage_10s_per_unit * ABS(size) * contract_size
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_10s_per_unit
     type: FLOAT
     description: >-
@@ -4765,6 +4882,7 @@ table:
     synonyms:
     - other slip 10s
     - residual slip 10s
+    formula: '((adjusted_tv_10s - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_10s_per_unit + roll_slippage_10s_per_unit)'
   - name: other_slippage_10s
     type: FLOAT
     description: >-
@@ -4774,7 +4892,7 @@ table:
     synonyms:
     - other slip 10s
     - residual slippage 10s
-    formula: other_slippage_10s_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_10s - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_10s + roll_slippage_10s)'
   - name: tv_10s
     type: FLOAT
     description: >-
@@ -4885,7 +5003,7 @@ table:
     synonyms:
     - tv move 10s
     - theo change 10s
-    formula: tv_10s - tv (theoretical value change over 10 seconds)
+    formula: '(adjusted_tv_10s - trade_tv)'
   - name: tv_change_buysell_10s
     type: FLOAT
     description: >-
@@ -4896,7 +5014,7 @@ table:
     - pnl 10s
     - forward pnl 10s
     - slippage 10s
-    formula: tv_change_10s * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_10s - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_10s_per_unit
     type: FLOAT
     description: >-
@@ -4906,6 +5024,7 @@ table:
     synonyms:
     - roll slip 10s
     - roll slippage per unit 10s
+    formula: '((reference_roll_10s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_10s
     type: FLOAT
     description: >-
@@ -4915,7 +5034,7 @@ table:
     synonyms:
     - roll slip 10s
     - roll slippage 10s
-    formula: roll_slippage_10s_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_10s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_10s
     type: FLOAT
     description: >-
@@ -4926,6 +5045,7 @@ table:
     synonyms:
     - adj tv 10s
     - adjusted theo 10s
+    formula: 'tv_10s + delta_10s * (calculated_base_val_10s - (under_10s - roll_10s)) + 0.5 * gamma_10s * POW((calculated_base_val_10s - (under_10s - roll_10s)), 2)'
   - name: delta_slippage_10s_per_unit
     type: FLOAT
     description: >-
@@ -4935,6 +5055,7 @@ table:
     synonyms:
     - delta slip 10s
     - delta slippage per unit 10s
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_10s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_10s
     type: FLOAT
     description: >-
@@ -4944,7 +5065,7 @@ table:
     synonyms:
     - delta slip 10s
     - delta slippage 10s
-    formula: delta_slippage_10s_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_10s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_10s_per_unit
     type: FLOAT
     description: >-
@@ -4955,7 +5076,7 @@ table:
     synonyms:
     - manual slippage per unit 10s
     - tv offset slip 10s
-    formula: (tv_offset_10s - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_10s - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_10s
@@ -4967,7 +5088,7 @@ table:
     synonyms:
     - manual slippage 10s
     - tv offset slippage 10s
-    formula: tv_offset_slippage_10s_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_10s - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_30s
@@ -4978,6 +5099,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at 30s.
     synonyms:
     - vol path 30s
+    formula: '((calculated_base_val_30s - mid_base_val) * ((delta_30s - raw_delta_30s) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_30s_per_unit
     type: FLOAT
     description: >-
@@ -4987,6 +5109,7 @@ table:
     synonyms:
     - vol slip 30s
     - vol slippage per unit 30s
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_30s
     type: FLOAT
     description: >-
@@ -4996,7 +5119,7 @@ table:
     synonyms:
     - vol slip 30s
     - vol slippage 30s
-    formula: vol_slippage_30s_per_unit * ABS(size) * contract_size
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_30s_per_unit
     type: FLOAT
     description: >-
@@ -5006,6 +5129,7 @@ table:
     synonyms:
     - other slip 30s
     - residual slip 30s
+    formula: '((adjusted_tv_30s - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_30s_per_unit + roll_slippage_30s_per_unit)'
   - name: other_slippage_30s
     type: FLOAT
     description: >-
@@ -5015,7 +5139,7 @@ table:
     synonyms:
     - other slip 30s
     - residual slippage 30s
-    formula: other_slippage_30s_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_30s - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_30s + roll_slippage_30s)'
   - name: tv_30s
     type: FLOAT
     description: >-
@@ -5126,7 +5250,7 @@ table:
     synonyms:
     - tv move 30s
     - theo change 30s
-    formula: tv_30s - tv (theoretical value change over 30 seconds)
+    formula: '(adjusted_tv_30s - trade_tv)'
   - name: tv_change_buysell_30s
     type: FLOAT
     description: >-
@@ -5137,7 +5261,7 @@ table:
     - pnl 30s
     - forward pnl 30s
     - slippage 30s
-    formula: tv_change_30s * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_30s - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_30s_per_unit
     type: FLOAT
     description: >-
@@ -5147,6 +5271,7 @@ table:
     synonyms:
     - roll slip 30s
     - roll slippage per unit 30s
+    formula: '((reference_roll_30s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_30s
     type: FLOAT
     description: >-
@@ -5156,7 +5281,7 @@ table:
     synonyms:
     - roll slip 30s
     - roll slippage 30s
-    formula: roll_slippage_30s_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_30s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_30s
     type: FLOAT
     description: >-
@@ -5167,6 +5292,7 @@ table:
     synonyms:
     - adj tv 30s
     - adjusted theo 30s
+    formula: 'tv_30s + delta_30s * (calculated_base_val_30s - (under_30s - roll_30s)) + 0.5 * gamma_30s * POW((calculated_base_val_30s - (under_30s - roll_30s)), 2)'
   - name: delta_slippage_30s_per_unit
     type: FLOAT
     description: >-
@@ -5176,6 +5302,7 @@ table:
     synonyms:
     - delta slip 30s
     - delta slippage per unit 30s
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_30s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_30s
     type: FLOAT
     description: >-
@@ -5185,7 +5312,7 @@ table:
     synonyms:
     - delta slip 30s
     - delta slippage 30s
-    formula: delta_slippage_30s_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_30s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_30s_per_unit
     type: FLOAT
     description: >-
@@ -5196,7 +5323,7 @@ table:
     synonyms:
     - manual slippage per unit 30s
     - tv offset slip 30s
-    formula: (tv_offset_30s - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_30s - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_30s
@@ -5208,7 +5335,7 @@ table:
     synonyms:
     - manual slippage 30s
     - tv offset slippage 30s
-    formula: tv_offset_slippage_30s_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_30s - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_1m
@@ -5219,6 +5346,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at 1m.
     synonyms:
     - vol path 1m
+    formula: '((calculated_base_val_1m - mid_base_val) * ((delta_1m - raw_delta_1m) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_1m_per_unit
     type: FLOAT
     description: >-
@@ -5228,6 +5356,7 @@ table:
     synonyms:
     - vol slip 1m
     - vol slippage per unit 1m
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_1m
     type: FLOAT
     description: >-
@@ -5237,7 +5366,7 @@ table:
     synonyms:
     - vol slip 1m
     - vol slippage 1m
-    formula: vol_slippage_1m_per_unit * ABS(size) * contract_size
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_1m_per_unit
     type: FLOAT
     description: >-
@@ -5247,6 +5376,7 @@ table:
     synonyms:
     - other slip 1m
     - residual slip 1m
+    formula: '((adjusted_tv_1m - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_1m_per_unit + roll_slippage_1m_per_unit)'
   - name: other_slippage_1m
     type: FLOAT
     description: >-
@@ -5256,7 +5386,7 @@ table:
     synonyms:
     - other slip 1m
     - residual slippage 1m
-    formula: other_slippage_1m_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_1m - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_1m + roll_slippage_1m)'
   - name: tv_1m
     type: FLOAT
     description: >-
@@ -5367,7 +5497,7 @@ table:
     synonyms:
     - tv move 1m
     - theo change 1m
-    formula: tv_1m - tv (theoretical value change over 1 minute)
+    formula: '(adjusted_tv_1m - trade_tv)'
   - name: tv_change_buysell_1m
     type: FLOAT
     description: >-
@@ -5378,7 +5508,7 @@ table:
     - pnl 1m
     - forward pnl 1m
     - slippage 1m
-    formula: tv_change_1m * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_1m - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_1m_per_unit
     type: FLOAT
     description: >-
@@ -5388,6 +5518,7 @@ table:
     synonyms:
     - roll slip 1m
     - roll slippage per unit 1m
+    formula: '((reference_roll_1m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_1m
     type: FLOAT
     description: >-
@@ -5397,7 +5528,7 @@ table:
     synonyms:
     - roll slip 1m
     - roll slippage 1m
-    formula: roll_slippage_1m_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_1m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_1m
     type: FLOAT
     description: >-
@@ -5408,6 +5539,7 @@ table:
     synonyms:
     - adj tv 1m
     - adjusted theo 1m
+    formula: 'tv_1m + delta_1m * (calculated_base_val_1m - (under_1m - roll_1m)) + 0.5 * gamma_1m * POW((calculated_base_val_1m - (under_1m - roll_1m)), 2)'
   - name: delta_slippage_1m_per_unit
     type: FLOAT
     description: >-
@@ -5417,6 +5549,7 @@ table:
     synonyms:
     - delta slip 1m
     - delta slippage per unit 1m
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_1m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_1m
     type: FLOAT
     description: >-
@@ -5426,7 +5559,7 @@ table:
     synonyms:
     - delta slip 1m
     - delta slippage 1m
-    formula: delta_slippage_1m_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_1m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_1m_per_unit
     type: FLOAT
     description: >-
@@ -5437,7 +5570,7 @@ table:
     synonyms:
     - manual slippage per unit 1m
     - tv offset slip 1m
-    formula: (tv_offset_1m - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_1m - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_1m
@@ -5449,7 +5582,7 @@ table:
     synonyms:
     - manual slippage 1m
     - tv offset slippage 1m
-    formula: tv_offset_slippage_1m_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_1m - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_5m
@@ -5460,6 +5593,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at 5m.
     synonyms:
     - vol path 5m
+    formula: '((calculated_base_val_5m - mid_base_val) * ((delta_5m - raw_delta_5m) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_5m_per_unit
     type: FLOAT
     description: >-
@@ -5469,6 +5603,7 @@ table:
     synonyms:
     - vol slip 5m
     - vol slippage per unit 5m
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_5m
     type: FLOAT
     description: >-
@@ -5478,7 +5613,7 @@ table:
     synonyms:
     - vol slip 5m
     - vol slippage 5m
-    formula: vol_slippage_5m_per_unit * ABS(size) * contract_size
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_5m_per_unit
     type: FLOAT
     description: >-
@@ -5488,6 +5623,7 @@ table:
     synonyms:
     - other slip 5m
     - residual slip 5m
+    formula: '((adjusted_tv_5m - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_5m_per_unit + roll_slippage_5m_per_unit)'
   - name: other_slippage_5m
     type: FLOAT
     description: >-
@@ -5497,7 +5633,7 @@ table:
     synonyms:
     - other slip 5m
     - residual slippage 5m
-    formula: other_slippage_5m_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_5m - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_5m + roll_slippage_5m)'
   - name: tv_5m
     type: FLOAT
     description: >-
@@ -5608,7 +5744,7 @@ table:
     synonyms:
     - tv move 5m
     - theo change 5m
-    formula: tv_5m - tv (theoretical value change over 5 minutes)
+    formula: '(adjusted_tv_5m - trade_tv)'
   - name: tv_change_buysell_5m
     type: FLOAT
     description: >-
@@ -5619,7 +5755,7 @@ table:
     - pnl 5m
     - forward pnl 5m
     - slippage 5m
-    formula: tv_change_5m * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_5m - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_5m_per_unit
     type: FLOAT
     description: >-
@@ -5629,6 +5765,7 @@ table:
     synonyms:
     - roll slip 5m
     - roll slippage per unit 5m
+    formula: '((reference_roll_5m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_5m
     type: FLOAT
     description: >-
@@ -5638,7 +5775,7 @@ table:
     synonyms:
     - roll slip 5m
     - roll slippage 5m
-    formula: roll_slippage_5m_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_5m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_5m
     type: FLOAT
     description: >-
@@ -5649,6 +5786,7 @@ table:
     synonyms:
     - adj tv 5m
     - adjusted theo 5m
+    formula: 'tv_5m + delta_5m * (calculated_base_val_5m - (under_5m - roll_5m)) + 0.5 * gamma_5m * POW((calculated_base_val_5m - (under_5m - roll_5m)), 2)'
   - name: delta_slippage_5m_per_unit
     type: FLOAT
     description: >-
@@ -5658,6 +5796,7 @@ table:
     synonyms:
     - delta slip 5m
     - delta slippage per unit 5m
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_5m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_5m
     type: FLOAT
     description: >-
@@ -5667,7 +5806,7 @@ table:
     synonyms:
     - delta slip 5m
     - delta slippage 5m
-    formula: delta_slippage_5m_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_5m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_5m_per_unit
     type: FLOAT
     description: >-
@@ -5678,7 +5817,7 @@ table:
     synonyms:
     - manual slippage per unit 5m
     - tv offset slip 5m
-    formula: (tv_offset_5m - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_5m - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_5m
@@ -5690,7 +5829,7 @@ table:
     synonyms:
     - manual slippage 5m
     - tv offset slippage 5m
-    formula: tv_offset_slippage_5m_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_5m - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_10m
@@ -5701,6 +5840,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at 10m.
     synonyms:
     - vol path 10m
+    formula: '((calculated_base_val_10m - mid_base_val) * ((delta_10m - raw_delta_10m) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_10m_per_unit
     type: FLOAT
     description: >-
@@ -5710,6 +5850,7 @@ table:
     synonyms:
     - vol slip 10m
     - vol slippage per unit 10m
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_10m
     type: FLOAT
     description: >-
@@ -5719,7 +5860,7 @@ table:
     synonyms:
     - vol slip 10m
     - vol slippage 10m
-    formula: vol_slippage_10m_per_unit * ABS(size) * contract_size
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_10m_per_unit
     type: FLOAT
     description: >-
@@ -5729,6 +5870,7 @@ table:
     synonyms:
     - other slip 10m
     - residual slip 10m
+    formula: '((adjusted_tv_10m - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_10m_per_unit + roll_slippage_10m_per_unit)'
   - name: other_slippage_10m
     type: FLOAT
     description: >-
@@ -5738,7 +5880,7 @@ table:
     synonyms:
     - other slip 10m
     - residual slippage 10m
-    formula: other_slippage_10m_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_10m - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_10m + roll_slippage_10m)'
   - name: tv_10m
     type: FLOAT
     description: >-
@@ -5849,7 +5991,7 @@ table:
     synonyms:
     - tv move 10m
     - theo change 10m
-    formula: tv_10m - tv (theoretical value change over 10 minutes)
+    formula: '(adjusted_tv_10m - trade_tv)'
   - name: tv_change_buysell_10m
     type: FLOAT
     description: >-
@@ -5860,7 +6002,7 @@ table:
     - pnl 10m
     - forward pnl 10m
     - slippage 10m
-    formula: tv_change_10m * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_10m - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_10m_per_unit
     type: FLOAT
     description: >-
@@ -5870,6 +6012,7 @@ table:
     synonyms:
     - roll slip 10m
     - roll slippage per unit 10m
+    formula: '((reference_roll_10m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_10m
     type: FLOAT
     description: >-
@@ -5879,7 +6022,7 @@ table:
     synonyms:
     - roll slip 10m
     - roll slippage 10m
-    formula: roll_slippage_10m_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_10m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_10m
     type: FLOAT
     description: >-
@@ -5890,6 +6033,7 @@ table:
     synonyms:
     - adj tv 10m
     - adjusted theo 10m
+    formula: 'tv_10m + delta_10m * (calculated_base_val_10m - (under_10m - roll_10m)) + 0.5 * gamma_10m * POW((calculated_base_val_10m - (under_10m - roll_10m)), 2)'
   - name: delta_slippage_10m_per_unit
     type: FLOAT
     description: >-
@@ -5899,6 +6043,7 @@ table:
     synonyms:
     - delta slip 10m
     - delta slippage per unit 10m
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_10m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_10m
     type: FLOAT
     description: >-
@@ -5908,7 +6053,7 @@ table:
     synonyms:
     - delta slip 10m
     - delta slippage 10m
-    formula: delta_slippage_10m_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_10m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_10m_per_unit
     type: FLOAT
     description: >-
@@ -5919,7 +6064,7 @@ table:
     synonyms:
     - manual slippage per unit 10m
     - tv offset slip 10m
-    formula: (tv_offset_10m - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_10m - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_10m
@@ -5931,7 +6076,7 @@ table:
     synonyms:
     - manual slippage 10m
     - tv offset slippage 10m
-    formula: tv_offset_slippage_10m_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_10m - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_30m
@@ -5942,6 +6087,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at 30m.
     synonyms:
     - vol path 30m
+    formula: '((calculated_base_val_30m - mid_base_val) * ((delta_30m - raw_delta_30m) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_30m_per_unit
     type: FLOAT
     description: >-
@@ -5951,6 +6097,7 @@ table:
     synonyms:
     - vol slip 30m
     - vol slippage per unit 30m
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_30m
     type: FLOAT
     description: >-
@@ -5960,7 +6107,7 @@ table:
     synonyms:
     - vol slip 30m
     - vol slippage 30m
-    formula: vol_slippage_30m_per_unit * ABS(size) * contract_size
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_30m_per_unit
     type: FLOAT
     description: >-
@@ -5970,6 +6117,7 @@ table:
     synonyms:
     - other slip 30m
     - residual slip 30m
+    formula: '((adjusted_tv_30m - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_30m_per_unit + roll_slippage_30m_per_unit)'
   - name: other_slippage_30m
     type: FLOAT
     description: >-
@@ -5979,7 +6127,7 @@ table:
     synonyms:
     - other slip 30m
     - residual slippage 30m
-    formula: other_slippage_30m_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_30m - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_30m + roll_slippage_30m)'
   - name: tv_30m
     type: FLOAT
     description: >-
@@ -6090,7 +6238,7 @@ table:
     synonyms:
     - tv move 30m
     - theo change 30m
-    formula: tv_30m - tv (theoretical value change over 30 minutes)
+    formula: '(adjusted_tv_30m - trade_tv)'
   - name: tv_change_buysell_30m
     type: FLOAT
     description: >-
@@ -6101,7 +6249,7 @@ table:
     - pnl 30m
     - forward pnl 30m
     - slippage 30m
-    formula: tv_change_30m * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_30m - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_30m_per_unit
     type: FLOAT
     description: >-
@@ -6111,6 +6259,7 @@ table:
     synonyms:
     - roll slip 30m
     - roll slippage per unit 30m
+    formula: '((reference_roll_30m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_30m
     type: FLOAT
     description: >-
@@ -6120,7 +6269,7 @@ table:
     synonyms:
     - roll slip 30m
     - roll slippage 30m
-    formula: roll_slippage_30m_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_30m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_30m
     type: FLOAT
     description: >-
@@ -6131,6 +6280,7 @@ table:
     synonyms:
     - adj tv 30m
     - adjusted theo 30m
+    formula: 'tv_30m + delta_30m * (calculated_base_val_30m - (under_30m - roll_30m)) + 0.5 * gamma_30m * POW((calculated_base_val_30m - (under_30m - roll_30m)), 2)'
   - name: delta_slippage_30m_per_unit
     type: FLOAT
     description: >-
@@ -6140,6 +6290,7 @@ table:
     synonyms:
     - delta slip 30m
     - delta slippage per unit 30m
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_30m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_30m
     type: FLOAT
     description: >-
@@ -6149,7 +6300,7 @@ table:
     synonyms:
     - delta slip 30m
     - delta slippage 30m
-    formula: delta_slippage_30m_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_30m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_30m_per_unit
     type: FLOAT
     description: >-
@@ -6160,7 +6311,7 @@ table:
     synonyms:
     - manual slippage per unit 30m
     - tv offset slip 30m
-    formula: (tv_offset_30m - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_30m - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_30m
@@ -6172,7 +6323,7 @@ table:
     synonyms:
     - manual slippage 30m
     - tv offset slippage 30m
-    formula: tv_offset_slippage_30m_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_30m - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_1h
@@ -6183,6 +6334,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at 1h.
     synonyms:
     - vol path 1h
+    formula: '((calculated_base_val_1h - mid_base_val) * ((delta_1h - raw_delta_1h) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_1h_per_unit
     type: FLOAT
     description: >-
@@ -6192,6 +6344,7 @@ table:
     synonyms:
     - vol slip 1h
     - vol slippage per unit 1h
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_1h
     type: FLOAT
     description: >-
@@ -6201,7 +6354,7 @@ table:
     synonyms:
     - vol slip 1h
     - vol slippage 1h
-    formula: vol_slippage_1h_per_unit * ABS(size) * contract_size
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_1h_per_unit
     type: FLOAT
     description: >-
@@ -6211,6 +6364,7 @@ table:
     synonyms:
     - other slip 1h
     - residual slip 1h
+    formula: '((adjusted_tv_1h - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_1h_per_unit + roll_slippage_1h_per_unit)'
   - name: other_slippage_1h
     type: FLOAT
     description: >-
@@ -6220,7 +6374,7 @@ table:
     synonyms:
     - other slip 1h
     - residual slippage 1h
-    formula: other_slippage_1h_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_1h - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_1h + roll_slippage_1h)'
   - name: tv_1h
     type: FLOAT
     description: >-
@@ -6331,7 +6485,7 @@ table:
     synonyms:
     - tv move 1h
     - theo change 1h
-    formula: tv_1h - tv (theoretical value change over 1 hour)
+    formula: '(adjusted_tv_1h - trade_tv)'
   - name: tv_change_buysell_1h
     type: FLOAT
     description: >-
@@ -6342,7 +6496,7 @@ table:
     - pnl 1h
     - forward pnl 1h
     - slippage 1h
-    formula: tv_change_1h * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_1h - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_1h_per_unit
     type: FLOAT
     description: >-
@@ -6352,6 +6506,7 @@ table:
     synonyms:
     - roll slip 1h
     - roll slippage per unit 1h
+    formula: '((reference_roll_1h - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_1h
     type: FLOAT
     description: >-
@@ -6361,7 +6516,7 @@ table:
     synonyms:
     - roll slip 1h
     - roll slippage 1h
-    formula: roll_slippage_1h_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_1h - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_1h
     type: FLOAT
     description: >-
@@ -6372,6 +6527,7 @@ table:
     synonyms:
     - adj tv 1h
     - adjusted theo 1h
+    formula: 'tv_1h + delta_1h * (calculated_base_val_1h - (under_1h - roll_1h)) + 0.5 * gamma_1h * POW((calculated_base_val_1h - (under_1h - roll_1h)), 2)'
   - name: delta_slippage_1h_per_unit
     type: FLOAT
     description: >-
@@ -6381,6 +6537,7 @@ table:
     synonyms:
     - delta slip 1h
     - delta slippage per unit 1h
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_1h - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_1h
     type: FLOAT
     description: >-
@@ -6390,7 +6547,7 @@ table:
     synonyms:
     - delta slip 1h
     - delta slippage 1h
-    formula: delta_slippage_1h_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_1h - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_1h_per_unit
     type: FLOAT
     description: >-
@@ -6401,7 +6558,7 @@ table:
     synonyms:
     - manual slippage per unit 1h
     - tv offset slip 1h
-    formula: (tv_offset_1h - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_1h - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_1h
@@ -6413,7 +6570,7 @@ table:
     synonyms:
     - manual slippage 1h
     - tv offset slippage 1h
-    formula: tv_offset_slippage_1h_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_1h - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_eod
@@ -6424,6 +6581,7 @@ table:
       slippage calculation, separating expected vol moves from unexpected slippage at end-of-day.
     synonyms:
     - vol path eod
+    formula: '((calculated_base_val_eod - mid_base_val) * ((delta_eod - raw_delta_eod) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_eod_per_unit
     type: FLOAT
     description: >-
@@ -6433,6 +6591,7 @@ table:
     synonyms:
     - vol slip eod
     - vol slippage per unit eod
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_eod
     type: FLOAT
     description: >-
@@ -6442,7 +6601,7 @@ table:
     synonyms:
     - vol slip eod
     - vol slippage eod
-    formula: vol_slippage_eod_per_unit * ABS(size) * contract_size
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_eod_per_unit
     type: FLOAT
     description: >-
@@ -6452,6 +6611,7 @@ table:
     synonyms:
     - other slip eod
     - residual slip eod
+    formula: '((adjusted_tv_eod - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_eod_per_unit + roll_slippage_eod_per_unit)'
   - name: other_slippage_eod
     type: FLOAT
     description: >-
@@ -6461,7 +6621,7 @@ table:
     synonyms:
     - other slip eod
     - residual slippage eod
-    formula: other_slippage_eod_per_unit * ABS(size) * contract_size
+    formula: '((adjusted_tv_eod - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_eod + roll_slippage_eod)'
   - name: tv_eod
     type: FLOAT
     description: >-
@@ -6572,7 +6732,7 @@ table:
     synonyms:
     - tv move eod
     - theo change eod
-    formula: tv_eod - tv (theoretical value change over end of day)
+    formula: '(adjusted_tv_eod - trade_tv)'
   - name: tv_change_buysell_eod
     type: FLOAT
     description: >-
@@ -6583,7 +6743,7 @@ table:
     - pnl eod
     - forward pnl eod
     - slippage eod
-    formula: tv_change_eod * buy_sell_multiplier * ABS(size) * contract_size
+    formula: '(adjusted_tv_eod - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_eod_per_unit
     type: FLOAT
     description: >-
@@ -6593,6 +6753,7 @@ table:
     synonyms:
     - roll slip eod
     - roll slippage per unit eod
+    formula: '((reference_roll_eod - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_eod
     type: FLOAT
     description: >-
@@ -6602,7 +6763,7 @@ table:
     synonyms:
     - roll slip eod
     - roll slippage eod
-    formula: roll_slippage_eod_per_unit * ABS(size) * contract_size
+    formula: '((reference_roll_eod - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_eod
     type: FLOAT
     description: >-
@@ -6613,6 +6774,7 @@ table:
     synonyms:
     - adj tv eod
     - adjusted theo eod
+    formula: 'tv_eod + delta_eod * (calculated_base_val_eod - (under_eod - roll_eod)) + 0.5 * gamma_eod * POW((calculated_base_val_eod - (under_eod - roll_eod)), 2)'
   - name: delta_slippage_eod_per_unit
     type: FLOAT
     description: >-
@@ -6622,6 +6784,7 @@ table:
     synonyms:
     - delta slip eod
     - delta slippage per unit eod
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_eod - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_eod
     type: FLOAT
     description: >-
@@ -6631,7 +6794,7 @@ table:
     synonyms:
     - delta slip eod
     - delta slippage eod
-    formula: delta_slippage_eod_per_unit * ABS(size) * contract_size
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_eod - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_eod_per_unit
     type: FLOAT
     description: >-
@@ -6642,7 +6805,7 @@ table:
     synonyms:
     - manual slippage per unit eod
     - tv offset slip eod
-    formula: (tv_offset_eod - tv_offset) * buy_sell_multiplier * market_mako_multiplier
+    formula: '(tv_offset_eod - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: tv_offset_slippage_eod
@@ -6654,7 +6817,7 @@ table:
     synonyms:
     - manual slippage eod
     - tv offset slippage eod
-    formula: tv_offset_slippage_eod_per_unit * ABS(size) * contract_size
+    formula: '(tv_offset_eod - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
     business_rules: Unique to brokertrade. Captures aggregate impact of manual TV overrides.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
   - name: vol_path_estimate_1D
@@ -6665,6 +6828,7 @@ table:
       vol slippage calculation at 1 day. May be NULL if the 1 day snapshot is unavailable.
     synonyms:
     - vol path 1d
+    formula: '((calculated_base_val_1D - mid_base_val) * ((delta_1D - raw_delta_1D) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_1D_per_unit
     type: STRING
     description: >-
@@ -6674,6 +6838,7 @@ table:
     synonyms:
     - vol slip 1d
     - vol slippage per unit 1d
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_1D
     type: STRING
     description: >-
@@ -6683,6 +6848,7 @@ table:
     synonyms:
     - vol slip 1d
     - vol slippage 1d
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_1D_per_unit
     type: STRING
     description: >-
@@ -6692,6 +6858,7 @@ table:
     synonyms:
     - other slip 1d
     - residual slip 1d
+    formula: '((adjusted_tv_1D - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_1D_per_unit + roll_slippage_1D_per_unit)'
   - name: other_slippage_1D
     type: STRING
     description: >-
@@ -6700,6 +6867,7 @@ table:
     synonyms:
     - other slip 1d
     - residual slippage 1d
+    formula: '((adjusted_tv_1D - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_1D + roll_slippage_1D)'
   - name: tv_1D
     type: STRING
     description: >-
@@ -6804,6 +6972,7 @@ table:
     synonyms:
     - tv move 1d
     - theo change 1d
+    formula: '(adjusted_tv_1D - trade_tv)'
   - name: tv_change_buysell_1D
     type: STRING
     description: >-
@@ -6813,6 +6982,7 @@ table:
     synonyms:
     - pnl 1d
     - forward pnl 1d
+    formula: '(adjusted_tv_1D - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_1D_per_unit
     type: STRING
     description: >-
@@ -6820,6 +6990,7 @@ table:
       impact from calendar roll changes at the longer interval. Part of slippage decomposition.
     synonyms:
     - roll slip 1d
+    formula: '((reference_roll_1D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_1D
     type: STRING
     description: >-
@@ -6828,6 +6999,7 @@ table:
     synonyms:
     - roll slip 1d
     - roll slippage 1d
+    formula: '((reference_roll_1D - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_1D
     type: STRING
     description: >-
@@ -6837,6 +7009,7 @@ table:
     synonyms:
     - adj tv 1d
     - adjusted theo 1d
+    formula: 'tv_1D + delta_1D * (calculated_base_val_1D - (under_1D - roll_1D)) + 0.5 * gamma_1D * POW((calculated_base_val_1D - (under_1D - roll_1D)), 2)'
   - name: delta_slippage_1D_per_unit
     type: FLOAT
     description: >-
@@ -6845,6 +7018,7 @@ table:
     synonyms:
     - delta slip 1d
     - delta slippage per unit 1d
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_1D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_1D
     type: FLOAT
     description: >-
@@ -6853,6 +7027,7 @@ table:
     synonyms:
     - delta slip 1d
     - delta slippage 1d
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_1D - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_1D_per_unit
     type: STRING
     description: >-
@@ -6862,6 +7037,7 @@ table:
     - manual slippage per unit 1d
     business_rules: Unique to brokertrade.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
+    formula: '(tv_offset_1D - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: tv_offset_slippage_1D
     type: STRING
     description: >-
@@ -6871,6 +7047,7 @@ table:
     - manual slippage 1d
     business_rules: Unique to brokertrade.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
+    formula: '(tv_offset_1D - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_path_estimate_5D
     type: STRING
     description: >-
@@ -6879,6 +7056,7 @@ table:
       vol slippage calculation at 5 day. May be NULL if the 5 day snapshot is unavailable.
     synonyms:
     - vol path 5d
+    formula: '((calculated_base_val_5D - mid_base_val) * ((delta_5D - raw_delta_5D) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_5D_per_unit
     type: STRING
     description: >-
@@ -6888,6 +7066,7 @@ table:
     synonyms:
     - vol slip 5d
     - vol slippage per unit 5d
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: vol_slippage_5D
     type: STRING
     description: >-
@@ -6897,6 +7076,7 @@ table:
     synonyms:
     - vol slip 5d
     - vol slippage 5d
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: other_slippage_5D_per_unit
     type: STRING
     description: >-
@@ -6906,6 +7086,7 @@ table:
     synonyms:
     - other slip 5d
     - residual slip 5d
+    formula: '((adjusted_tv_5D - trade_tv) * buy_sell_multiplier * COALESCE(ABS(leg_ratio), 1) * contract_size * market_mako_multiplier) - (delta_slippage_5D_per_unit + roll_slippage_5D_per_unit)'
   - name: other_slippage_5D
     type: STRING
     description: >-
@@ -6914,6 +7095,7 @@ table:
     synonyms:
     - other slip 5d
     - residual slippage 5d
+    formula: '((adjusted_tv_5D - trade_tv) * buy_sell_multiplier * contract_size * ABS(size) * market_mako_multiplier) - (delta_slippage_5D + roll_slippage_5D)'
   - name: tv_5D
     type: STRING
     description: >-
@@ -7018,6 +7200,7 @@ table:
     synonyms:
     - tv move 5d
     - theo change 5d
+    formula: '(adjusted_tv_5D - trade_tv)'
   - name: tv_change_buysell_5D
     type: STRING
     description: >-
@@ -7027,6 +7210,7 @@ table:
     synonyms:
     - pnl 5d
     - forward pnl 5d
+    formula: '(adjusted_tv_5D - trade_tv) * buy_sell_multiplier'
   - name: roll_slippage_5D_per_unit
     type: STRING
     description: >-
@@ -7034,6 +7218,7 @@ table:
       impact from calendar roll changes at the longer interval. Part of slippage decomposition.
     synonyms:
     - roll slip 5d
+    formula: '((reference_roll_5D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: roll_slippage_5D
     type: STRING
     description: >-
@@ -7042,6 +7227,7 @@ table:
     synonyms:
     - roll slip 5d
     - roll slippage 5d
+    formula: '((reference_roll_5D - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: adjusted_tv_5D
     type: STRING
     description: >-
@@ -7051,6 +7237,7 @@ table:
     synonyms:
     - adj tv 5d
     - adjusted theo 5d
+    formula: 'tv_5D + delta_5D * (calculated_base_val_5D - (under_5D - roll_5D)) + 0.5 * gamma_5D * POW((calculated_base_val_5D - (under_5D - roll_5D)), 2)'
   - name: delta_slippage_5D_per_unit
     type: FLOAT
     description: >-
@@ -7059,6 +7246,7 @@ table:
     synonyms:
     - delta slip 5d
     - delta slippage per unit 5d
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_5D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: delta_slippage_5D
     type: FLOAT
     description: >-
@@ -7067,6 +7255,7 @@ table:
     synonyms:
     - delta slip 5d
     - delta slippage 5d
+    formula: 'CASE WHEN is_ref_trade THEN 0 ELSE ((calculated_base_val_5D - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier END'
   - name: tv_offset_slippage_5D_per_unit
     type: STRING
     description: >-
@@ -7076,6 +7265,7 @@ table:
     - manual slippage per unit 5d
     business_rules: Unique to brokertrade.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
+    formula: '(tv_offset_5D - tv_offset) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: tv_offset_slippage_5D
     type: STRING
     description: >-
@@ -7085,6 +7275,7 @@ table:
     - manual slippage 5d
     business_rules: Unique to brokertrade.
     source: KPI-Added (kpi_brokertrade_calculations.sql)
+    formula: '(tv_offset_5D - tv_offset) * ABS(size) * contract_size * buy_sell_multiplier * market_mako_multiplier'
   - name: calculated_base_val_eod
     type: FLOAT
     description: >-
@@ -7121,6 +7312,7 @@ table:
     - hedge ratio
     - trade delta
     source: 'OffFloorData.proto :: BrokerTrade.detail.theos.delta'
+    formula: 'CASE WHEN is_ref_component = 1 THEN SAFE_DIVIDE(size * contract_size, ABS(SAFE_DIVIDE(size_at_zero_index * contract_size_at_zero_index, leg_ratio_at_zero_index))) * -1 ELSE delta_theo END'
   - name: gamma
     type: FLOAT
     description: >-
@@ -7247,6 +7439,7 @@ table:
     - TV
     - model price
     source: 'OffFloorData.proto :: BrokerTrade.detail.theos.tv'
+    formula: 'CASE WHEN is_ref_trade THEN tv + delta * (adjusted_trade_ref_price - forward) + 0.5 * gamma * POW((adjusted_trade_ref_price - forward), 2) ELSE tv + delta * (mid_base_val + adjusted_roll - forward) + 0.5 * gamma * POW((mid_base_val + adjusted_roll - forward), 2) END'
   - name: tte_1s
     type: FLOAT
     description: >-
@@ -7792,6 +7985,7 @@ table:
     synonyms:
     - equity roll
     - stock roll adjustment
+    formula: 'forward - under'
   - name: reference_roll
     type: FLOAT
     description: >-
@@ -7801,6 +7995,7 @@ table:
     synonyms:
     - ref roll
     - reference roll value
+    formula: '(forward - under) + roll'
   - name: abs_traded_size
     type: FLOAT
     description: >-

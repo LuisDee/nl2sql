@@ -2506,6 +2506,7 @@ table:
     - mid underlying
     - mid base
     - mid bv
+    formula: '(raw_bv_bid + raw_bv_ask) / 2'
   - name: raw_delta_mid_bv
     type: FLOAT
     description: Raw (unadjusted) delta computed at the mid base value at the time of the quoter fill. The delta
@@ -2513,6 +2514,7 @@ table:
       and mid-TV calculations in the quoter fill KPI pipeline.
     synonyms:
     - delta at mid
+    formula: 'raw_delta_mid_bv + (((raw_bv_bid + raw_bv_ask) / 2) - (under - roll)) * raw_gamma'
   - name: base_adjustment
     type: FLOAT
     description: Total base (underlying) price adjustment applied at the time of the quoter fill. Summarizes all
@@ -2521,6 +2523,7 @@ table:
     synonyms:
     - base adj
     - underlying adjustment
+    formula: 'layered_base_adjustment + odr_adjustment'
   - name: tv
     type: FLOAT
     description: Theoretical value (fair value, theo) of the option at the time of the quoter fill, in the
@@ -2534,6 +2537,7 @@ table:
     - machine price
     - TV
     business_rules: Used in instant_edge formula. tv differs from mid_tv for quotertrade.
+    formula: "CASE WHEN parent_is_combo = TRUE AND is_parent = FALSE THEN tv_theo WHEN trade_side NOT IN ('BUYSELL_BUY', '66') THEN tv_ask WHEN trade_side IN ('BUYSELL_SELL', '83') AND parent_is_combo = false THEN tv_ask WHEN trade_side IN ('BUYSELL_BUY', '66') AND parent_is_combo = false THEN tv_bid WHEN trade_side IN ('BUYSELL_SELL', '83') AND parent_is_combo = TRUE AND is_parent = TRUE THEN tv_ask WHEN trade_side IN ('BUYSELL_BUY', '66') AND parent_is_combo = TRUE AND is_parent = TRUE THEN tv_bid ELSE tv_ask END"
   - name: buy_sell_multiplier
     type: INTEGER
     description: Direction multiplier for the quoter fill. +1 for buy (quoter was filled on their bid) and -1
@@ -2545,6 +2549,7 @@ table:
     - bs multiplier
     example_values: [1, -1]
     business_rules: +1 = buy (filled on bid), -1 = sell (filled on ask)
+    formula: "CASE WHEN trade_side IN ('BUYSELL_BUY', '66') THEN 1 WHEN trade_side NOT IN ('BUYSELL_BUY', '66') THEN -1 END"
   - name: mid_tv
     type: FLOAT
     description: Mid-point theoretical value, the skew-neutral fair value of the option computed using the
@@ -2569,7 +2574,7 @@ table:
     - trading edge
     - quoter edge
     - fill edge
-    formula: "CASE WHEN trade_side='BUYSELL_BUY' THEN ((tv - nhr_adjustment_bid) - trade_price) WHEN trade_side='BUYSELL_SELL' THEN (trade_price - (tv - nhr_adjustment_bid)) ELSE 0 END"
+    formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((tv - nhr_adjustment_bid) - trade_price) WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (tv - nhr_adjustment_bid)) ELSE 0 END"
     source: kpi_quotertrade_calculations.sql
     business_rules: Positive = favorable fill. Uses NHR-adjusted TV, not raw TV.
   - name: instant_pnl
@@ -2584,7 +2589,7 @@ table:
     - loss
     - instant profit
     - quoter pnl
-    formula: instant_edge * trade_size * contract_size
+    formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((tv - nhr_adjustment_bid) - trade_price) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (tv - nhr_adjustment_bid)) * trade_size * contract_size ELSE 0 END"
     business_rules: Does not include fees. Use instant_pnl_w_fees for net.
   - name: instant_pnl_w_fees
     type: FLOAT
@@ -2596,7 +2601,7 @@ table:
     - net PnL
     - profit after fees
     - net profit
-    formula: instant_pnl - fees
+    formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN (((tv - nhr_adjustment_bid) - trade_price) - fees) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN ((trade_price - (tv - nhr_adjustment_bid)) - fees) * trade_size * contract_size ELSE 0 END"
     business_rules: Preferred metric for actual quoter profitability analysis.
   - name: instant_edge_mid_tv
     type: FLOAT
@@ -2609,6 +2614,7 @@ table:
     - edge to mid
     source: kpi_quotertrade_calculations.sql
     business_rules: Unique to quotertrade. Uses mid_tv instead of TV as reference.
+    formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((mid_tv - nhr_adjustment_bid) - trade_price) WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (mid_tv - nhr_adjustment_bid)) ELSE 0 END"
   - name: instant_pnl_mid_tv
     type: FLOAT
     description: Instant PnL calculated relative to the mid-point theoretical value (mid_tv). Unique to quotertrade.
@@ -2620,6 +2626,7 @@ table:
     - pnl to mid
     source: kpi_quotertrade_calculations.sql
     business_rules: Unique to quotertrade. Skew-neutral PnL measurement.
+    formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((mid_tv - nhr_adjustment_bid) - trade_price) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (mid_tv - nhr_adjustment_bid)) * trade_size * contract_size ELSE 0 END"
   - name: instant_pnl_w_fees_mid_tv
     type: FLOAT
     description: Instant PnL relative to mid_tv after deducting exchange and clearing fees. The net skew-neutral
@@ -2630,6 +2637,7 @@ table:
     - mid pnl with fees
     source: kpi_quotertrade_calculations.sql
     business_rules: Most complete quoter profitability metric (skew-neutral + net of fees).
+    formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN (((mid_tv - nhr_adjustment_bid) - trade_price) - fees) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN ((trade_price - (mid_tv - nhr_adjustment_bid)) - fees) * trade_size * contract_size ELSE 0 END"
   - name: mark_to_mid_pnl_per_unit
     type: FLOAT
     description: Mark-to-mid PnL per unit, measuring the skew component of the fill. Represents the per-unit
@@ -2639,6 +2647,7 @@ table:
     - skew pnl per unit
     - mark to mid per unit
     source: kpi_quotertrade_calculations.sql
+    formula: '(tv - mid_tv) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * -1'
   - name: mark_to_mid_pnl
     type: FLOAT
     description: Mark-to-mid PnL in currency units, measuring the total skew component of the fill. Calculated
@@ -2669,30 +2678,35 @@ table:
     description: Estimated volatility path at the 1-second horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 1s horizon.
     synonyms: []
+    formula: '((calculated_base_val_1s - mid_base_val) * ((delta_1s - raw_delta_mid_bv_1s) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_1s_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the 1-second horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 1s
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1s
     type: FLOAT
     description: Total volatility-driven slippage at the 1-second horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 1s.
     synonyms:
     - vol slip 1s
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_1s_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the 1-second horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 1s
+    formula: '(tv_change_buysell_1s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1s_per_unit + roll_slippage_1s_per_unit)'
   - name: other_slippage_1s
     type: FLOAT
     description: Total residual slippage at the 1-second horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 1s.
     synonyms:
     - other slip 1s
+    formula: '(tv_change_buysell_1s * contract_size * trade_size) - (delta_slippage_1s + roll_slippage_1s)'
   - name: tv_1s
     type: FLOAT
     description: Theoretical value (fair value) of the option at the 1-second snapshot after the quoter
@@ -2764,70 +2778,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 1s
+    formula: '(adjusted_tv_1s - mid_tv)'
   - name: tv_change_buysell_1s
     type: FLOAT
     description: Direction-adjusted TV change at the 1-second horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 1s mark. The primary slippage metric.
     synonyms:
     - pnl 1s
+    formula: '(adjusted_tv_1s - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_1s_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the 1-second horizon. Measures PnL impact from calendar
       roll changes between fill and 1s. In price units per contract.
     synonyms:
     - roll slip 1s
+    formula: '((reference_roll_1s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1s
     type: FLOAT
     description: Total roll-driven slippage at the 1-second horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 1s.
     synonyms:
     - roll slip 1s
+    formula: '((reference_roll_1s - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1s
     type: FLOAT
     description: Adjusted theoretical value at the 1-second snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_1s = adjusted_tv_1s - mid_tv.
     synonyms: []
+    formula: 'tv_1s + delta_1s * (calculated_base_val_1s - (under_1s - roll_1s)) + 0.5 * gamma_1s * POW((calculated_base_val_1s - (under_1s - roll_1s)), 2)'
   - name: delta_slippage_1s_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the 1-second horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 1s
+    formula: '((calculated_base_val_1s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1s
     type: FLOAT
     description: Total delta-driven slippage at the 1-second horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 1s.
     synonyms:
     - delta slip 1s
+    formula: '((calculated_base_val_1s - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_5s
     type: FLOAT
     description: Estimated volatility path at the 5-second horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 5s horizon.
     synonyms: []
+    formula: '((calculated_base_val_5s - mid_base_val) * ((delta_5s - raw_delta_mid_bv_5s) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_5s_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the 5-second horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 5s
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5s
     type: FLOAT
     description: Total volatility-driven slippage at the 5-second horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 5s.
     synonyms:
     - vol slip 5s
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_5s_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the 5-second horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 5s
+    formula: '(tv_change_buysell_5s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5s_per_unit + roll_slippage_5s_per_unit)'
   - name: other_slippage_5s
     type: FLOAT
     description: Total residual slippage at the 5-second horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 5s.
     synonyms:
     - other slip 5s
+    formula: '(tv_change_buysell_5s * contract_size * trade_size) - (delta_slippage_5s + roll_slippage_5s)'
   - name: tv_5s
     type: FLOAT
     description: Theoretical value (fair value) of the option at the 5-second snapshot after the quoter
@@ -2899,70 +2925,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 5s
+    formula: '(adjusted_tv_5s - mid_tv)'
   - name: tv_change_buysell_5s
     type: FLOAT
     description: Direction-adjusted TV change at the 5-second horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 5s mark. The primary slippage metric.
     synonyms:
     - pnl 5s
+    formula: '(adjusted_tv_5s - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_5s_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the 5-second horizon. Measures PnL impact from calendar
       roll changes between fill and 5s. In price units per contract.
     synonyms:
     - roll slip 5s
+    formula: '((reference_roll_5s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5s
     type: FLOAT
     description: Total roll-driven slippage at the 5-second horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 5s.
     synonyms:
     - roll slip 5s
+    formula: '((reference_roll_5s - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_5s
     type: FLOAT
     description: Adjusted theoretical value at the 5-second snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_5s = adjusted_tv_5s - mid_tv.
     synonyms: []
+    formula: 'tv_5s + delta_5s * (calculated_base_val_5s - (under_5s - roll_5s)) + 0.5 * gamma_5s * POW((calculated_base_val_5s - (under_5s - roll_5s)), 2)'
   - name: delta_slippage_5s_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the 5-second horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 5s
+    formula: '((calculated_base_val_5s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_5s
     type: FLOAT
     description: Total delta-driven slippage at the 5-second horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 5s.
     synonyms:
     - delta slip 5s
+    formula: '((calculated_base_val_5s - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_10s
     type: FLOAT
     description: Estimated volatility path at the 10-second horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 10s horizon.
     synonyms: []
+    formula: '((calculated_base_val_10s - mid_base_val) * ((delta_10s - raw_delta_mid_bv_10s) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_10s_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the 10-second horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 10s
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_10s
     type: FLOAT
     description: Total volatility-driven slippage at the 10-second horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 10s.
     synonyms:
     - vol slip 10s
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_10s_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the 10-second horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 10s
+    formula: '(tv_change_buysell_10s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10s_per_unit + roll_slippage_10s_per_unit)'
   - name: other_slippage_10s
     type: FLOAT
     description: Total residual slippage at the 10-second horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 10s.
     synonyms:
     - other slip 10s
+    formula: '(tv_change_buysell_10s * contract_size * trade_size) - (delta_slippage_10s + roll_slippage_10s)'
   - name: tv_10s
     type: FLOAT
     description: Theoretical value (fair value) of the option at the 10-second snapshot after the quoter
@@ -3034,70 +3072,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 10s
+    formula: '(adjusted_tv_10s - mid_tv)'
   - name: tv_change_buysell_10s
     type: FLOAT
     description: Direction-adjusted TV change at the 10-second horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 10s mark. The primary slippage metric.
     synonyms:
     - pnl 10s
+    formula: '(adjusted_tv_10s - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_10s_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the 10-second horizon. Measures PnL impact from calendar
       roll changes between fill and 10s. In price units per contract.
     synonyms:
     - roll slip 10s
+    formula: '((reference_roll_10s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_10s
     type: FLOAT
     description: Total roll-driven slippage at the 10-second horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 10s.
     synonyms:
     - roll slip 10s
+    formula: '((reference_roll_10s - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_10s
     type: FLOAT
     description: Adjusted theoretical value at the 10-second snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_10s = adjusted_tv_10s - mid_tv.
     synonyms: []
+    formula: 'tv_10s + delta_10s * (calculated_base_val_10s - (under_10s - roll_10s)) + 0.5 * gamma_10s * POW((calculated_base_val_10s - (under_10s - roll_10s)), 2)'
   - name: delta_slippage_10s_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the 10-second horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 10s
+    formula: '((calculated_base_val_10s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_10s
     type: FLOAT
     description: Total delta-driven slippage at the 10-second horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 10s.
     synonyms:
     - delta slip 10s
+    formula: '((calculated_base_val_10s - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_30s
     type: FLOAT
     description: Estimated volatility path at the 30-second horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 30s horizon.
     synonyms: []
+    formula: '((calculated_base_val_30s - mid_base_val) * ((delta_30s - raw_delta_mid_bv_30s) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_30s_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the 30-second horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 30s
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_30s
     type: FLOAT
     description: Total volatility-driven slippage at the 30-second horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 30s.
     synonyms:
     - vol slip 30s
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_30s_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the 30-second horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 30s
+    formula: '(tv_change_buysell_30s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30s_per_unit + roll_slippage_30s_per_unit)'
   - name: other_slippage_30s
     type: FLOAT
     description: Total residual slippage at the 30-second horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 30s.
     synonyms:
     - other slip 30s
+    formula: '(tv_change_buysell_30s * contract_size * trade_size) - (delta_slippage_30s + roll_slippage_30s)'
   - name: tv_30s
     type: FLOAT
     description: Theoretical value (fair value) of the option at the 30-second snapshot after the quoter
@@ -3169,70 +3219,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 30s
+    formula: '(adjusted_tv_30s - mid_tv)'
   - name: tv_change_buysell_30s
     type: FLOAT
     description: Direction-adjusted TV change at the 30-second horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 30s mark. The primary slippage metric.
     synonyms:
     - pnl 30s
+    formula: '(adjusted_tv_30s - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_30s_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the 30-second horizon. Measures PnL impact from calendar
       roll changes between fill and 30s. In price units per contract.
     synonyms:
     - roll slip 30s
+    formula: '((reference_roll_30s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_30s
     type: FLOAT
     description: Total roll-driven slippage at the 30-second horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 30s.
     synonyms:
     - roll slip 30s
+    formula: '((reference_roll_30s - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_30s
     type: FLOAT
     description: Adjusted theoretical value at the 30-second snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_30s = adjusted_tv_30s - mid_tv.
     synonyms: []
+    formula: 'tv_30s + delta_30s * (calculated_base_val_30s - (under_30s - roll_30s)) + 0.5 * gamma_30s * POW((calculated_base_val_30s - (under_30s - roll_30s)), 2)'
   - name: delta_slippage_30s_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the 30-second horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 30s
+    formula: '((calculated_base_val_30s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_30s
     type: FLOAT
     description: Total delta-driven slippage at the 30-second horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 30s.
     synonyms:
     - delta slip 30s
+    formula: '((calculated_base_val_30s - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_1m
     type: FLOAT
     description: Estimated volatility path at the 1-minute horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 1m horizon.
     synonyms: []
+    formula: '((calculated_base_val_1m - mid_base_val) * ((delta_1m - raw_delta_mid_bv_1m) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_1m_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the 1-minute horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 1m
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1m
     type: FLOAT
     description: Total volatility-driven slippage at the 1-minute horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 1m.
     synonyms:
     - vol slip 1m
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_1m_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the 1-minute horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 1m
+    formula: '(tv_change_buysell_1m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1m_per_unit + roll_slippage_1m_per_unit)'
   - name: other_slippage_1m
     type: FLOAT
     description: Total residual slippage at the 1-minute horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 1m.
     synonyms:
     - other slip 1m
+    formula: '(tv_change_buysell_1m * contract_size * trade_size) - (delta_slippage_1m + roll_slippage_1m)'
   - name: tv_1m
     type: FLOAT
     description: Theoretical value (fair value) of the option at the 1-minute snapshot after the quoter
@@ -3304,70 +3366,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 1m
+    formula: '(adjusted_tv_1m - mid_tv)'
   - name: tv_change_buysell_1m
     type: FLOAT
     description: Direction-adjusted TV change at the 1-minute horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 1m mark. The primary slippage metric.
     synonyms:
     - pnl 1m
+    formula: '(adjusted_tv_1m - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_1m_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the 1-minute horizon. Measures PnL impact from calendar
       roll changes between fill and 1m. In price units per contract.
     synonyms:
     - roll slip 1m
+    formula: '((reference_roll_1m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1m
     type: FLOAT
     description: Total roll-driven slippage at the 1-minute horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 1m.
     synonyms:
     - roll slip 1m
+    formula: '((reference_roll_1m - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1m
     type: FLOAT
     description: Adjusted theoretical value at the 1-minute snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_1m = adjusted_tv_1m - mid_tv.
     synonyms: []
+    formula: 'tv_1m + delta_1m * (calculated_base_val_1m - (under_1m - roll_1m)) + 0.5 * gamma_1m * POW((calculated_base_val_1m - (under_1m - roll_1m)), 2)'
   - name: delta_slippage_1m_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the 1-minute horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 1m
+    formula: '((calculated_base_val_1m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1m
     type: FLOAT
     description: Total delta-driven slippage at the 1-minute horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 1m.
     synonyms:
     - delta slip 1m
+    formula: '((calculated_base_val_1m - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_5m
     type: FLOAT
     description: Estimated volatility path at the 5-minute horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 5m horizon.
     synonyms: []
+    formula: '((calculated_base_val_5m - mid_base_val) * ((delta_5m - raw_delta_mid_bv_5m) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_5m_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the 5-minute horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 5m
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5m
     type: FLOAT
     description: Total volatility-driven slippage at the 5-minute horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 5m.
     synonyms:
     - vol slip 5m
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_5m_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the 5-minute horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 5m
+    formula: '(tv_change_buysell_5m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5m_per_unit + roll_slippage_5m_per_unit)'
   - name: other_slippage_5m
     type: FLOAT
     description: Total residual slippage at the 5-minute horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 5m.
     synonyms:
     - other slip 5m
+    formula: '(tv_change_buysell_5m * contract_size * trade_size) - (delta_slippage_5m + roll_slippage_5m)'
   - name: tv_5m
     type: FLOAT
     description: Theoretical value (fair value) of the option at the 5-minute snapshot after the quoter
@@ -3439,70 +3513,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 5m
+    formula: '(adjusted_tv_5m - mid_tv)'
   - name: tv_change_buysell_5m
     type: FLOAT
     description: Direction-adjusted TV change at the 5-minute horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 5m mark. The primary slippage metric.
     synonyms:
     - pnl 5m
+    formula: '(adjusted_tv_5m - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_5m_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the 5-minute horizon. Measures PnL impact from calendar
       roll changes between fill and 5m. In price units per contract.
     synonyms:
     - roll slip 5m
+    formula: '((reference_roll_5m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5m
     type: FLOAT
     description: Total roll-driven slippage at the 5-minute horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 5m.
     synonyms:
     - roll slip 5m
+    formula: '((reference_roll_5m - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_5m
     type: FLOAT
     description: Adjusted theoretical value at the 5-minute snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_5m = adjusted_tv_5m - mid_tv.
     synonyms: []
+    formula: 'tv_5m + delta_5m * (calculated_base_val_5m - (under_5m - roll_5m)) + 0.5 * gamma_5m * POW((calculated_base_val_5m - (under_5m - roll_5m)), 2)'
   - name: delta_slippage_5m_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the 5-minute horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 5m
+    formula: '((calculated_base_val_5m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_5m
     type: FLOAT
     description: Total delta-driven slippage at the 5-minute horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 5m.
     synonyms:
     - delta slip 5m
+    formula: '((calculated_base_val_5m - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_10m
     type: FLOAT
     description: Estimated volatility path at the 10-minute horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 10m horizon.
     synonyms: []
+    formula: '((calculated_base_val_10m - mid_base_val) * ((delta_10m - raw_delta_mid_bv_10m) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_10m_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the 10-minute horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 10m
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_10m
     type: FLOAT
     description: Total volatility-driven slippage at the 10-minute horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 10m.
     synonyms:
     - vol slip 10m
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_10m_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the 10-minute horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 10m
+    formula: '(tv_change_buysell_10m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10m_per_unit + roll_slippage_10m_per_unit)'
   - name: other_slippage_10m
     type: FLOAT
     description: Total residual slippage at the 10-minute horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 10m.
     synonyms:
     - other slip 10m
+    formula: '(tv_change_buysell_10m * contract_size * trade_size) - (delta_slippage_10m + roll_slippage_10m)'
   - name: tv_10m
     type: FLOAT
     description: Theoretical value (fair value) of the option at the 10-minute snapshot after the quoter
@@ -3574,70 +3660,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 10m
+    formula: '(adjusted_tv_10m - mid_tv)'
   - name: tv_change_buysell_10m
     type: FLOAT
     description: Direction-adjusted TV change at the 10-minute horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 10m mark. The primary slippage metric.
     synonyms:
     - pnl 10m
+    formula: '(adjusted_tv_10m - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_10m_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the 10-minute horizon. Measures PnL impact from calendar
       roll changes between fill and 10m. In price units per contract.
     synonyms:
     - roll slip 10m
+    formula: '((reference_roll_10m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_10m
     type: FLOAT
     description: Total roll-driven slippage at the 10-minute horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 10m.
     synonyms:
     - roll slip 10m
+    formula: '((reference_roll_10m - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_10m
     type: FLOAT
     description: Adjusted theoretical value at the 10-minute snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_10m = adjusted_tv_10m - mid_tv.
     synonyms: []
+    formula: 'tv_10m + delta_10m * (calculated_base_val_10m - (under_10m - roll_10m)) + 0.5 * gamma_10m * POW((calculated_base_val_10m - (under_10m - roll_10m)), 2)'
   - name: delta_slippage_10m_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the 10-minute horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 10m
+    formula: '((calculated_base_val_10m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_10m
     type: FLOAT
     description: Total delta-driven slippage at the 10-minute horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 10m.
     synonyms:
     - delta slip 10m
+    formula: '((calculated_base_val_10m - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_30m
     type: FLOAT
     description: Estimated volatility path at the 30-minute horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 30m horizon.
     synonyms: []
+    formula: '((calculated_base_val_30m - mid_base_val) * ((delta_30m - raw_delta_mid_bv_30m) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_30m_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the 30-minute horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 30m
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_30m
     type: FLOAT
     description: Total volatility-driven slippage at the 30-minute horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 30m.
     synonyms:
     - vol slip 30m
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_30m_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the 30-minute horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 30m
+    formula: '(tv_change_buysell_30m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30m_per_unit + roll_slippage_30m_per_unit)'
   - name: other_slippage_30m
     type: FLOAT
     description: Total residual slippage at the 30-minute horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 30m.
     synonyms:
     - other slip 30m
+    formula: '(tv_change_buysell_30m * contract_size * trade_size) - (delta_slippage_30m + roll_slippage_30m)'
   - name: tv_30m
     type: FLOAT
     description: Theoretical value (fair value) of the option at the 30-minute snapshot after the quoter
@@ -3709,70 +3807,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 30m
+    formula: '(adjusted_tv_30m - mid_tv)'
   - name: tv_change_buysell_30m
     type: FLOAT
     description: Direction-adjusted TV change at the 30-minute horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 30m mark. The primary slippage metric.
     synonyms:
     - pnl 30m
+    formula: '(adjusted_tv_30m - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_30m_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the 30-minute horizon. Measures PnL impact from calendar
       roll changes between fill and 30m. In price units per contract.
     synonyms:
     - roll slip 30m
+    formula: '((reference_roll_30m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_30m
     type: FLOAT
     description: Total roll-driven slippage at the 30-minute horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 30m.
     synonyms:
     - roll slip 30m
+    formula: '((reference_roll_30m - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_30m
     type: FLOAT
     description: Adjusted theoretical value at the 30-minute snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_30m = adjusted_tv_30m - mid_tv.
     synonyms: []
+    formula: 'tv_30m + delta_30m * (calculated_base_val_30m - (under_30m - roll_30m)) + 0.5 * gamma_30m * POW((calculated_base_val_30m - (under_30m - roll_30m)), 2)'
   - name: delta_slippage_30m_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the 30-minute horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 30m
+    formula: '((calculated_base_val_30m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_30m
     type: FLOAT
     description: Total delta-driven slippage at the 30-minute horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 30m.
     synonyms:
     - delta slip 30m
+    formula: '((calculated_base_val_30m - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_1h
     type: FLOAT
     description: Estimated volatility path at the 1-hour horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 1h horizon.
     synonyms: []
+    formula: '((calculated_base_val_1h - mid_base_val) * ((delta_1h - raw_delta_mid_bv_1h) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_1h_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the 1-hour horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 1h
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1h
     type: FLOAT
     description: Total volatility-driven slippage at the 1-hour horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 1h.
     synonyms:
     - vol slip 1h
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_1h_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the 1-hour horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 1h
+    formula: '(tv_change_buysell_1h * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1h_per_unit + roll_slippage_1h_per_unit)'
   - name: other_slippage_1h
     type: FLOAT
     description: Total residual slippage at the 1-hour horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 1h.
     synonyms:
     - other slip 1h
+    formula: '(tv_change_buysell_1h * contract_size * trade_size) - (delta_slippage_1h + roll_slippage_1h)'
   - name: tv_1h
     type: FLOAT
     description: Theoretical value (fair value) of the option at the 1-hour snapshot after the quoter
@@ -3844,70 +3954,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 1h
+    formula: '(adjusted_tv_1h - mid_tv)'
   - name: tv_change_buysell_1h
     type: FLOAT
     description: Direction-adjusted TV change at the 1-hour horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 1h mark. The primary slippage metric.
     synonyms:
     - pnl 1h
+    formula: '(adjusted_tv_1h - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_1h_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the 1-hour horizon. Measures PnL impact from calendar
       roll changes between fill and 1h. In price units per contract.
     synonyms:
     - roll slip 1h
+    formula: '((reference_roll_1h - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1h
     type: FLOAT
     description: Total roll-driven slippage at the 1-hour horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 1h.
     synonyms:
     - roll slip 1h
+    formula: '((reference_roll_1h - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1h
     type: FLOAT
     description: Adjusted theoretical value at the 1-hour snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_1h = adjusted_tv_1h - mid_tv.
     synonyms: []
+    formula: 'tv_1h + delta_1h * (calculated_base_val_1h - (under_1h - roll_1h)) + 0.5 * gamma_1h * POW((calculated_base_val_1h - (under_1h - roll_1h)), 2)'
   - name: delta_slippage_1h_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the 1-hour horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 1h
+    formula: '((calculated_base_val_1h - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1h
     type: FLOAT
     description: Total delta-driven slippage at the 1-hour horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 1h.
     synonyms:
     - delta slip 1h
+    formula: '((calculated_base_val_1h - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_eod
     type: FLOAT
     description: Estimated volatility path at the end-of-day horizon. Used internally for decomposing
       slippage into vol-driven and other components at the eod horizon.
     synonyms: []
+    formula: '((calculated_base_val_eod - mid_base_val) * ((delta_eod - raw_delta_mid_bv_eod) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_eod_per_unit
     type: FLOAT
     description: Per-unit volatility-driven slippage at the end-of-day horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip eod
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_eod
     type: FLOAT
     description: Total volatility-driven slippage at the end-of-day horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and eod.
     synonyms:
     - vol slip eod
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_eod_per_unit
     type: FLOAT
     description: Per-unit residual slippage at the end-of-day horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip eod
+    formula: '(tv_change_buysell_eod * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_eod_per_unit + roll_slippage_eod_per_unit)'
   - name: other_slippage_eod
     type: FLOAT
     description: Total residual slippage at the end-of-day horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and eod.
     synonyms:
     - other slip eod
+    formula: '(tv_change_buysell_eod * contract_size * trade_size) - (delta_slippage_eod + roll_slippage_eod)'
   - name: tv_eod
     type: FLOAT
     description: Theoretical value (fair value) of the option at the end-of-day snapshot after the quoter
@@ -3979,70 +4101,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move eod
+    formula: '(adjusted_tv_eod - mid_tv)'
   - name: tv_change_buysell_eod
     type: FLOAT
     description: Direction-adjusted TV change at the end-of-day horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the eod mark. The primary slippage metric.
     synonyms:
     - pnl eod
+    formula: '(adjusted_tv_eod - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_eod_per_unit
     type: FLOAT
     description: Per-unit roll-driven slippage at the end-of-day horizon. Measures PnL impact from calendar
       roll changes between fill and eod. In price units per contract.
     synonyms:
     - roll slip eod
+    formula: '((reference_roll_eod - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_eod
     type: FLOAT
     description: Total roll-driven slippage at the end-of-day horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and eod.
     synonyms:
     - roll slip eod
+    formula: '((reference_roll_eod - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_eod
     type: FLOAT
     description: Adjusted theoretical value at the end-of-day snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_eod = adjusted_tv_eod - mid_tv.
     synonyms: []
+    formula: 'tv_eod + delta_eod * (calculated_base_val_eod - (under_eod - roll_eod)) + 0.5 * gamma_eod * POW((calculated_base_val_eod - (under_eod - roll_eod)), 2)'
   - name: delta_slippage_eod_per_unit
     type: FLOAT
     description: Per-unit delta-driven slippage at the end-of-day horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip eod
+    formula: '((calculated_base_val_eod - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_eod
     type: FLOAT
     description: Total delta-driven slippage at the end-of-day horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and eod.
     synonyms:
     - delta slip eod
+    formula: '((calculated_base_val_eod - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_1D
     type: STRING
     description: Estimated volatility path at the 1-day horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 1D horizon.
     synonyms: []
+    formula: '((calculated_base_val_1D - mid_base_val) * ((delta_1D - raw_delta_mid_bv_1D) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_1D_per_unit
     type: STRING
     description: Per-unit volatility-driven slippage at the 1-day horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 1d
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1D
     type: STRING
     description: Total volatility-driven slippage at the 1-day horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 1D.
     synonyms:
     - vol slip 1d
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_1D_per_unit
     type: STRING
     description: Per-unit residual slippage at the 1-day horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 1d
+    formula: '(tv_change_buysell_1D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1D_per_unit + roll_slippage_1D_per_unit)'
   - name: other_slippage_1D
     type: STRING
     description: Total residual slippage at the 1-day horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 1D.
     synonyms:
     - other slip 1d
+    formula: '(tv_change_buysell_1D * contract_size * trade_size) - (delta_slippage_1D + roll_slippage_1D)'
   - name: tv_1D
     type: STRING
     description: Theoretical value (fair value) of the option at the 1-day snapshot after the quoter
@@ -4114,70 +4248,82 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 1d
+    formula: '(adjusted_tv_1D - mid_tv)'
   - name: tv_change_buysell_1D
     type: STRING
     description: Direction-adjusted TV change at the 1-day horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 1D mark. The primary slippage metric.
     synonyms:
     - pnl 1d
+    formula: '(adjusted_tv_1D - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_1D_per_unit
     type: STRING
     description: Per-unit roll-driven slippage at the 1-day horizon. Measures PnL impact from calendar
       roll changes between fill and 1D. In price units per contract.
     synonyms:
     - roll slip 1d
+    formula: '((reference_roll_1D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1D
     type: STRING
     description: Total roll-driven slippage at the 1-day horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 1D.
     synonyms:
     - roll slip 1d
+    formula: '((reference_roll_1D - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1D
     type: STRING
     description: Adjusted theoretical value at the 1-day snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_1D = adjusted_tv_1D - mid_tv.
     synonyms: []
+    formula: 'tv_1D + delta_1D * (calculated_base_val_1D - (under_1D - roll_1D)) + 0.5 * gamma_1D * POW((calculated_base_val_1D - (under_1D - roll_1D)), 2)'
   - name: delta_slippage_1D_per_unit
     type: STRING
     description: Per-unit delta-driven slippage at the 1-day horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 1d
+    formula: '((calculated_base_val_1D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1D
     type: STRING
     description: Total delta-driven slippage at the 1-day horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 1D.
     synonyms:
     - delta slip 1d
+    formula: '((calculated_base_val_1D - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_5D
     type: STRING
     description: Estimated volatility path at the 5-day horizon. Used internally for decomposing
       slippage into vol-driven and other components at the 5D horizon.
     synonyms: []
+    formula: '((calculated_base_val_5D - mid_base_val) * ((delta_5D - raw_delta_mid_bv_5D) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_5D_per_unit
     type: STRING
     description: Per-unit volatility-driven slippage at the 5-day horizon. Measures how much of the
       TV change was due to implied volatility movement vs delta or other factors. In price units per contract.
     synonyms:
     - vol slip 5d
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5D
     type: STRING
     description: Total volatility-driven slippage at the 5-day horizon in currency units (per-unit times
       size). Measures the aggregate PnL impact from implied volatility changes between fill and 5D.
     synonyms:
     - vol slip 5d
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * trade_size * contract_size * buy_sell_multiplier'
   - name: other_slippage_5D_per_unit
     type: STRING
     description: Per-unit residual slippage at the 5-day horizon not attributable to delta, vol, or roll.
       Captures higher-order effects and model noise. In price units per contract.
     synonyms:
     - other slip 5d
+    formula: '(tv_change_buysell_5D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5D_per_unit + roll_slippage_5D_per_unit)'
   - name: other_slippage_5D
     type: STRING
     description: Total residual slippage at the 5-day horizon in currency units. Captures PnL changes not
       explained by delta, vol, or roll movements between fill and 5D.
     synonyms:
     - other slip 5d
+    formula: '(tv_change_buysell_5D * contract_size * trade_size) - (delta_slippage_5D + roll_slippage_5D)'
   - name: tv_5D
     type: STRING
     description: Theoretical value (fair value) of the option at the 5-day snapshot after the quoter
@@ -4249,41 +4395,48 @@ table:
       Positive means the option appreciated; negative means depreciated.
     synonyms:
     - tv move 5d
+    formula: '(adjusted_tv_5D - mid_tv)'
   - name: tv_change_buysell_5D
     type: STRING
     description: Direction-adjusted TV change at the 5-day horizon. Multiplied by buy_sell_multiplier
       so positive always means the fill was profitable at the 5D mark. The primary slippage metric.
     synonyms:
     - pnl 5d
+    formula: '(adjusted_tv_5D - mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_5D_per_unit
     type: STRING
     description: Per-unit roll-driven slippage at the 5-day horizon. Measures PnL impact from calendar
       roll changes between fill and 5D. In price units per contract.
     synonyms:
     - roll slip 5d
+    formula: '((reference_roll_5D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5D
     type: STRING
     description: Total roll-driven slippage at the 5-day horizon in currency units. Measures aggregate
       PnL impact from calendar roll changes between fill and 5D.
     synonyms:
     - roll slip 5d
+    formula: '((reference_roll_5D - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_5D
     type: STRING
     description: Adjusted theoretical value at the 5-day snapshot after the quoter fill. The TV with
       all adjustments (offset, roll) applied. Used in tv_change_5D = adjusted_tv_5D - mid_tv.
     synonyms: []
+    formula: 'tv_5D + delta_5D * (calculated_base_val_5D - (under_5D - roll_5D)) + 0.5 * gamma_5D * POW((calculated_base_val_5D - (under_5D - roll_5D)), 2)'
   - name: delta_slippage_5D_per_unit
     type: STRING
     description: Per-unit delta-driven slippage at the 5-day horizon. Measures how much of the TV
       change was caused by underlying price movement (delta effect). In price units per contract.
     synonyms:
     - delta slip 5d
+    formula: '((calculated_base_val_5D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_5D
     type: STRING
     description: Total delta-driven slippage at the 5-day horizon in currency units. Measures aggregate PnL
       impact from underlying price movement between fill and 5D.
     synonyms:
     - delta slip 5d
+    formula: '((calculated_base_val_5D - mid_base_val) * delta) * trade_size * contract_size * buy_sell_multiplier'
   - name: calculated_base_val_eod
     type: FLOAT
     description: Calculated base (underlying) value at the end-of-day snapshot. The underlying price used
@@ -4308,6 +4461,7 @@ table:
     - delta exposure
     - hedge ratio
     - delta at fill
+    formula: 'ref_delta + (delta_adjusted_base_price - ref_base_price) * ref_gamma'
   - name: gamma
     type: FLOAT
     description: Option gamma at the time of the quoter fill, measuring the rate of change of delta per unit
@@ -4744,12 +4898,14 @@ table:
       the roll adjustment, separate from the general calendar roll. Used in roll slippage decomposition.
     synonyms:
     - stock roll at fill
+    formula: 'forward - under'
   - name: reference_roll
     type: FLOAT
     description: Reference roll value at the time of the quoter fill. The baseline roll assumption used by
       the pricing engine. Used alongside roll for understanding roll adjustments in slippage calculations.
     synonyms:
     - ref roll at fill
+    formula: 'CASE WHEN parent_is_combo = TRUE THEN ((forward - under) + roll) ELSE ((forward - under) + ref_roll) END'
   - name: is_expiry_trade
     type: BOOLEAN
     description: Whether the quoter fill occurred on the option's expiry day. Expiry-day fills have unique

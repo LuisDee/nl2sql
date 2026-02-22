@@ -11,6 +11,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 
 import yaml
@@ -190,7 +191,7 @@ def enrich_table_yaml(
         if existing is None:
             col["formula"] = source_formula
             stats["added"] += 1
-        elif existing.strip() != source_formula.strip():
+        elif str(existing).strip() != source_formula.strip():
             col["formula"] = source_formula
             stats["updated"] += 1
         else:
@@ -202,27 +203,121 @@ def enrich_table_yaml(
 
 
 # ---------------------------------------------------------------------------
-# YAML I/O helpers
+# Surgical YAML editing (text-level, avoids reformatting)
 # ---------------------------------------------------------------------------
 
 
-def _load_yaml(path: Path) -> dict:
-    """Load a YAML file."""
-    with open(path) as f:
-        return yaml.safe_load(f)
+def _quote_for_yaml(formula: str) -> str:
+    """Quote a formula string for safe single-line YAML scalar output."""
+    # Collapse any embedded newlines + surrounding whitespace to a single space
+    formula = re.sub(r"\s*\n\s*", " ", formula).strip()
+    if "'" in formula:
+        escaped = formula.replace('"', '\\"')
+        return f'"{escaped}"'
+    return f"'{formula}'"
 
 
-def _write_yaml(path: Path, data: dict) -> None:
-    """Write data back to a YAML file preserving readability."""
-    with open(path, "w") as f:
-        yaml.dump(
-            data,
-            f,
-            default_flow_style=False,
-            allow_unicode=True,
-            sort_keys=False,
-            width=120,
-        )
+def _build_change_list(
+    yaml_path: Path,
+    formula_index: dict[str, str],
+) -> tuple[dict[str, tuple[str, str]], dict[str, int]]:
+    """Determine formula changes needed without modifying the file.
+
+    Returns:
+        (changes, stats) where changes is ``{col_name: (action, formula)}``
+        and action is ``'add'`` or ``'update'``.
+    """
+    data = yaml.safe_load(yaml_path.read_text())
+    changes: dict[str, tuple[str, str]] = {}
+    stats: dict[str, int] = {
+        "added": 0,
+        "updated": 0,
+        "verified": 0,
+        "total_in_source": 0,
+    }
+
+    for col in data.get("table", {}).get("columns", []):
+        col_name = col["name"]
+        if col_name not in formula_index:
+            continue
+        stats["total_in_source"] += 1
+        source_formula = formula_index[col_name]
+        existing = col.get("formula")
+
+        # Normalize whitespace for comparison (source may have newlines)
+        normalized_source = re.sub(r"\s+", " ", source_formula).strip()
+
+        if existing is None:
+            changes[col_name] = ("add", source_formula)
+            stats["added"] += 1
+        elif re.sub(r"\s+", " ", str(existing)).strip() != normalized_source:
+            changes[col_name] = ("update", source_formula)
+            stats["updated"] += 1
+        else:
+            stats["verified"] += 1
+
+    return changes, stats
+
+
+def _apply_changes_to_file(
+    yaml_path: Path,
+    changes: dict[str, tuple[str, str]],
+) -> None:
+    """Surgically apply formula additions/updates to a YAML file.
+
+    Only modifies formula lines; all other content is preserved byte-for-byte.
+    """
+    lines = yaml_path.read_text().splitlines()
+    result: list[str] = []
+    current_col: str | None = None
+    handled: set[str] = set()
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+
+        # Detect start of a new column block
+        col_match = re.match(r"^  - name: (.+?)(\s*#.*)?$", line)
+        if col_match:
+            # Insert formula for previous column if it needed one
+            if (
+                current_col is not None
+                and current_col in changes
+                and current_col not in handled
+            ):
+                _, formula = changes[current_col]
+                result.append(f"    formula: {_quote_for_yaml(formula)}")
+                handled.add(current_col)
+
+            current_col = col_match.group(1).strip()
+
+        # Detect and replace existing formula line
+        if re.match(r"^    formula:", line) and current_col in changes:
+            _, new_formula = changes[current_col]
+            result.append(f"    formula: {_quote_for_yaml(new_formula)}")
+            handled.add(current_col)
+            i += 1
+
+            # Skip continuation lines of old value (block scalars or
+            # plain scalars that wrap to the next line).  Continuation
+            # lines are indented deeper than the key (6+ spaces).
+            while i < len(lines) and lines[i].startswith("      "):
+                i += 1
+            continue
+
+        result.append(line)
+        i += 1
+
+    # Handle the very last column in the file
+    if (
+        current_col is not None
+        and current_col in changes
+        and current_col not in handled
+    ):
+        _, formula = changes[current_col]
+        result.append(f"    formula: {_quote_for_yaml(formula)}")
+
+    yaml_path.write_text("\n".join(result) + "\n")
 
 
 # ---------------------------------------------------------------------------
@@ -246,13 +341,13 @@ def main(dry_run: bool = False) -> dict[str, dict[str, int]]:
             print(f"SKIP: {yaml_path} not found")
             continue
 
-        data = _load_yaml(yaml_path)
         formula_index = build_formula_index(computations, table_name, intervals)
-        _, stats = enrich_table_yaml(data, formula_index, return_stats=True)
-        all_stats[table_name] = stats
+        changes, stats = _build_change_list(yaml_path, formula_index)
 
-        if not dry_run:
-            _write_yaml(yaml_path, data)
+        if not dry_run and changes:
+            _apply_changes_to_file(yaml_path, changes)
+
+        all_stats[table_name] = stats
 
         print(
             f"{table_name}: "

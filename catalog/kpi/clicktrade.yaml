@@ -2483,6 +2483,7 @@ table:
     synonyms:
     - mid underlying
     - base mid
+    formula: 'ref_base_val'
   - name: base_adjustment
     type: INTEGER
     description: >
@@ -2491,6 +2492,7 @@ table:
       affect underlying price comparison between trade time and slippage horizons.
     synonyms:
     - bv adjustment
+    formula: '0'
   - name: fees
     type: INTEGER
     description: >
@@ -2506,6 +2508,7 @@ table:
     business_rules: >
       Fees are always non-negative. Use instant_pnl_w_fees for net P&L which already subtracts
       fees, or compute instant_pnl - fees manually.
+    formula: '0'
   - name: trade_aggressor_side
     type: STRING
     description: >
@@ -2519,6 +2522,7 @@ table:
     example_values:
     - BUY
     - SELL
+    formula: "CASE WHEN price > tv THEN 'BUY' WHEN price < tv THEN 'SELL' ELSE 'NULL' END"
   - name: trade_side
     type: STRING
     description: >
@@ -2535,6 +2539,7 @@ table:
     - BUY
     - SELL
     source: 'derived from PosData.proto :: PositionEvent.size (sign determines side)'
+    formula: "CASE WHEN size > 0 THEN 'BUY' WHEN size < 0 THEN 'SELL' ELSE 'NULL' END"
   - name: size
     type: STRING
     description: >
@@ -2559,7 +2564,7 @@ table:
     example_values:
     - 1
     - -1
-    formula: '+1 when trade_side = BUY, -1 when trade_side = SELL'
+    formula: "CASE WHEN trade_side IN ('BUY', '66') THEN 1 WHEN trade_side IN ('SELL', '83') THEN -1 ELSE 0 END"
   - name: vol_path_estimate_1s
     type: FLOAT
     description: >
@@ -2568,6 +2573,7 @@ table:
       trade time to t+1s. Input to vol-slippage decomposition.
     synonyms:
     - vol path 1s
+    formula: '((calculated_base_val_1s - mid_base_val) * ((delta_1s - raw_delta_1s) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_1s_per_unit
     type: FLOAT
     description: >
@@ -2577,7 +2583,7 @@ table:
     synonyms:
     - vol slip 1s
     - volatility slippage 1s
-    formula: 'Derived from tv change attributable to implied vol movement over 1-second window'
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1s
     type: STRING
     description: >
@@ -2586,6 +2592,7 @@ table:
       between trade time and t+1s. Stored as STRING.
     synonyms:
     - vol slip 1s
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_1s_per_unit
     type: FLOAT
     description: >
@@ -2595,6 +2602,7 @@ table:
     synonyms:
     - other slip 1s
     - residual slippage 1s
+    formula: '(tv_change_buysell_1s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1s_per_unit + roll_slippage_1s_per_unit)'
   - name: other_slippage_1s
     type: STRING
     description: >
@@ -2602,6 +2610,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 1s
+    formula: '(tv_change_buysell_1s * contract_size * ABS(size)) - (delta_slippage_1s + roll_slippage_1s)'
   - name: tv_1s
     type: FLOAT
     description: >
@@ -2697,7 +2706,7 @@ table:
     synonyms:
     - tv move 1s
     - theo change 1s
-    formula: 'tv_1s - tv'
+    formula: '(adjusted_tv_1s - tv)'
   - name: tv_change_buysell_1s
     type: FLOAT
     description: >
@@ -2709,7 +2718,7 @@ table:
     - pnl 1s
     - slippage 1s
     - realized pnl 1s
-    formula: 'tv_change_1s * buy_sell_multiplier'
+    formula: '(adjusted_tv_1s - tv) * buy_sell_multiplier'
   - name: roll_slippage_1s_per_unit
     type: FLOAT
     description: >
@@ -2718,19 +2727,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 1s
-    formula: 'Derived from roll adjustment difference over 1-second window'
+    formula: '((reference_roll_1s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1s
     type: STRING
     description: >
       Total roll slippage at the 1-second horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 1s
+    formula: '((reference_roll_1s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1s
     type: FLOAT
     description: >
       Adjusted theoretical value at the 1-second snapshot, with roll and other corrections
       applied. May differ from tv_1s when adjustments are active.
     synonyms: []
+    formula: 'tv_1s + delta_1s * (calculated_base_val_1s - (under_1s - roll_1s)) + 0.5 * gamma_1s * POW((calculated_base_val_1s - (under_1s - roll_1s)), 2)'
   - name: delta_slippage_1s_per_unit
     type: FLOAT
     description: >
@@ -2739,7 +2750,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 1s
-    formula: 'Approximated as delta * (under_1s - under) / contract adjustment'
+    formula: '((calculated_base_val_1s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1s
     type: STRING
     description: >
@@ -2747,6 +2758,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 1s
+    formula: '((calculated_base_val_1s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_5s
     type: FLOAT
     description: >
@@ -2755,6 +2767,7 @@ table:
       trade time to t+5s. Input to vol-slippage decomposition.
     synonyms:
     - vol path 5s
+    formula: '((calculated_base_val_5s - mid_base_val) * ((delta_5s - raw_delta_5s) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_5s_per_unit
     type: FLOAT
     description: >
@@ -2764,7 +2777,7 @@ table:
     synonyms:
     - vol slip 5s
     - volatility slippage 5s
-    formula: 'Derived from tv change attributable to implied vol movement over 5-second window'
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5s
     type: STRING
     description: >
@@ -2773,6 +2786,7 @@ table:
       between trade time and t+5s. Stored as STRING.
     synonyms:
     - vol slip 5s
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_5s_per_unit
     type: FLOAT
     description: >
@@ -2782,6 +2796,7 @@ table:
     synonyms:
     - other slip 5s
     - residual slippage 5s
+    formula: '(tv_change_buysell_5s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5s_per_unit + roll_slippage_5s_per_unit)'
   - name: other_slippage_5s
     type: STRING
     description: >
@@ -2789,6 +2804,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 5s
+    formula: '(tv_change_buysell_5s * contract_size * ABS(size)) - (delta_slippage_5s + roll_slippage_5s)'
   - name: tv_5s
     type: FLOAT
     description: >
@@ -2884,7 +2900,7 @@ table:
     synonyms:
     - tv move 5s
     - theo change 5s
-    formula: 'tv_5s - tv'
+    formula: '(adjusted_tv_5s - tv)'
   - name: tv_change_buysell_5s
     type: FLOAT
     description: >
@@ -2896,7 +2912,7 @@ table:
     - pnl 5s
     - slippage 5s
     - realized pnl 5s
-    formula: 'tv_change_5s * buy_sell_multiplier'
+    formula: '(adjusted_tv_5s - tv) * buy_sell_multiplier'
   - name: roll_slippage_5s_per_unit
     type: FLOAT
     description: >
@@ -2905,19 +2921,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 5s
-    formula: 'Derived from roll adjustment difference over 5-second window'
+    formula: '((reference_roll_5s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5s
     type: STRING
     description: >
       Total roll slippage at the 5-second horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 5s
+    formula: '((reference_roll_5s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_5s
     type: FLOAT
     description: >
       Adjusted theoretical value at the 5-second snapshot, with roll and other corrections
       applied. May differ from tv_5s when adjustments are active.
     synonyms: []
+    formula: 'tv_5s + delta_5s * (calculated_base_val_5s - (under_5s - roll_5s)) + 0.5 * gamma_5s * POW((calculated_base_val_5s - (under_5s - roll_5s)), 2)'
   - name: delta_slippage_5s_per_unit
     type: FLOAT
     description: >
@@ -2926,7 +2944,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 5s
-    formula: 'Approximated as delta * (under_5s - under) / contract adjustment'
+    formula: '((calculated_base_val_5s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_5s
     type: STRING
     description: >
@@ -2934,6 +2952,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 5s
+    formula: '((calculated_base_val_5s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_10s
     type: FLOAT
     description: >
@@ -2942,6 +2961,7 @@ table:
       trade time to t+10s. Input to vol-slippage decomposition.
     synonyms:
     - vol path 10s
+    formula: '((calculated_base_val_10s - mid_base_val) * ((delta_10s - raw_delta_10s) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_10s_per_unit
     type: FLOAT
     description: >
@@ -2951,7 +2971,7 @@ table:
     synonyms:
     - vol slip 10s
     - volatility slippage 10s
-    formula: 'Derived from tv change attributable to implied vol movement over 10-second window'
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_10s
     type: STRING
     description: >
@@ -2960,6 +2980,7 @@ table:
       between trade time and t+10s. Stored as STRING.
     synonyms:
     - vol slip 10s
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_10s_per_unit
     type: FLOAT
     description: >
@@ -2969,6 +2990,7 @@ table:
     synonyms:
     - other slip 10s
     - residual slippage 10s
+    formula: '(tv_change_buysell_10s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10s_per_unit + roll_slippage_10s_per_unit)'
   - name: other_slippage_10s
     type: STRING
     description: >
@@ -2976,6 +2998,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 10s
+    formula: '(tv_change_buysell_10s * contract_size * ABS(size)) - (delta_slippage_10s + roll_slippage_10s)'
   - name: tv_10s
     type: FLOAT
     description: >
@@ -3071,7 +3094,7 @@ table:
     synonyms:
     - tv move 10s
     - theo change 10s
-    formula: 'tv_10s - tv'
+    formula: '(adjusted_tv_10s - tv)'
   - name: tv_change_buysell_10s
     type: FLOAT
     description: >
@@ -3083,7 +3106,7 @@ table:
     - pnl 10s
     - slippage 10s
     - realized pnl 10s
-    formula: 'tv_change_10s * buy_sell_multiplier'
+    formula: '(adjusted_tv_10s - tv) * buy_sell_multiplier'
   - name: roll_slippage_10s_per_unit
     type: FLOAT
     description: >
@@ -3092,19 +3115,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 10s
-    formula: 'Derived from roll adjustment difference over 10-second window'
+    formula: '((reference_roll_10s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_10s
     type: STRING
     description: >
       Total roll slippage at the 10-second horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 10s
+    formula: '((reference_roll_10s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_10s
     type: FLOAT
     description: >
       Adjusted theoretical value at the 10-second snapshot, with roll and other corrections
       applied. May differ from tv_10s when adjustments are active.
     synonyms: []
+    formula: 'tv_10s + delta_10s * (calculated_base_val_10s - (under_10s - roll_10s)) + 0.5 * gamma_10s * POW((calculated_base_val_10s - (under_10s - roll_10s)), 2)'
   - name: delta_slippage_10s_per_unit
     type: FLOAT
     description: >
@@ -3113,7 +3138,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 10s
-    formula: 'Approximated as delta * (under_10s - under) / contract adjustment'
+    formula: '((calculated_base_val_10s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_10s
     type: STRING
     description: >
@@ -3121,6 +3146,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 10s
+    formula: '((calculated_base_val_10s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_30s
     type: FLOAT
     description: >
@@ -3129,6 +3155,7 @@ table:
       trade time to t+30s. Input to vol-slippage decomposition.
     synonyms:
     - vol path 30s
+    formula: '((calculated_base_val_30s - mid_base_val) * ((delta_30s - raw_delta_30s) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_30s_per_unit
     type: FLOAT
     description: >
@@ -3138,7 +3165,7 @@ table:
     synonyms:
     - vol slip 30s
     - volatility slippage 30s
-    formula: 'Derived from tv change attributable to implied vol movement over 30-second window'
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_30s
     type: STRING
     description: >
@@ -3147,6 +3174,7 @@ table:
       between trade time and t+30s. Stored as STRING.
     synonyms:
     - vol slip 30s
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_30s_per_unit
     type: FLOAT
     description: >
@@ -3156,6 +3184,7 @@ table:
     synonyms:
     - other slip 30s
     - residual slippage 30s
+    formula: '(tv_change_buysell_30s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30s_per_unit + roll_slippage_30s_per_unit)'
   - name: other_slippage_30s
     type: STRING
     description: >
@@ -3163,6 +3192,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 30s
+    formula: '(tv_change_buysell_30s * contract_size * ABS(size)) - (delta_slippage_30s + roll_slippage_30s)'
   - name: tv_30s
     type: FLOAT
     description: >
@@ -3258,7 +3288,7 @@ table:
     synonyms:
     - tv move 30s
     - theo change 30s
-    formula: 'tv_30s - tv'
+    formula: '(adjusted_tv_30s - tv)'
   - name: tv_change_buysell_30s
     type: FLOAT
     description: >
@@ -3270,7 +3300,7 @@ table:
     - pnl 30s
     - slippage 30s
     - realized pnl 30s
-    formula: 'tv_change_30s * buy_sell_multiplier'
+    formula: '(adjusted_tv_30s - tv) * buy_sell_multiplier'
   - name: roll_slippage_30s_per_unit
     type: FLOAT
     description: >
@@ -3279,19 +3309,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 30s
-    formula: 'Derived from roll adjustment difference over 30-second window'
+    formula: '((reference_roll_30s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_30s
     type: STRING
     description: >
       Total roll slippage at the 30-second horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 30s
+    formula: '((reference_roll_30s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_30s
     type: FLOAT
     description: >
       Adjusted theoretical value at the 30-second snapshot, with roll and other corrections
       applied. May differ from tv_30s when adjustments are active.
     synonyms: []
+    formula: 'tv_30s + delta_30s * (calculated_base_val_30s - (under_30s - roll_30s)) + 0.5 * gamma_30s * POW((calculated_base_val_30s - (under_30s - roll_30s)), 2)'
   - name: delta_slippage_30s_per_unit
     type: FLOAT
     description: >
@@ -3300,7 +3332,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 30s
-    formula: 'Approximated as delta * (under_30s - under) / contract adjustment'
+    formula: '((calculated_base_val_30s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_30s
     type: STRING
     description: >
@@ -3308,6 +3340,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 30s
+    formula: '((calculated_base_val_30s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_1m
     type: FLOAT
     description: >
@@ -3316,6 +3349,7 @@ table:
       trade time to t+1m. Input to vol-slippage decomposition.
     synonyms:
     - vol path 1m
+    formula: '((calculated_base_val_1m - mid_base_val) * ((delta_1m - raw_delta_1m) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_1m_per_unit
     type: FLOAT
     description: >
@@ -3325,7 +3359,7 @@ table:
     synonyms:
     - vol slip 1m
     - volatility slippage 1m
-    formula: 'Derived from tv change attributable to implied vol movement over 1-minute window'
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1m
     type: STRING
     description: >
@@ -3334,6 +3368,7 @@ table:
       between trade time and t+1m. Stored as STRING.
     synonyms:
     - vol slip 1m
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_1m_per_unit
     type: FLOAT
     description: >
@@ -3343,6 +3378,7 @@ table:
     synonyms:
     - other slip 1m
     - residual slippage 1m
+    formula: '(tv_change_buysell_1m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1m_per_unit + roll_slippage_1m_per_unit)'
   - name: other_slippage_1m
     type: STRING
     description: >
@@ -3350,6 +3386,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 1m
+    formula: '(tv_change_buysell_1m * contract_size * ABS(size)) - (delta_slippage_1m + roll_slippage_1m)'
   - name: tv_1m
     type: FLOAT
     description: >
@@ -3445,7 +3482,7 @@ table:
     synonyms:
     - tv move 1m
     - theo change 1m
-    formula: 'tv_1m - tv'
+    formula: '(adjusted_tv_1m - tv)'
   - name: tv_change_buysell_1m
     type: FLOAT
     description: >
@@ -3457,7 +3494,7 @@ table:
     - pnl 1m
     - slippage 1m
     - realized pnl 1m
-    formula: 'tv_change_1m * buy_sell_multiplier'
+    formula: '(adjusted_tv_1m - tv) * buy_sell_multiplier'
   - name: roll_slippage_1m_per_unit
     type: FLOAT
     description: >
@@ -3466,19 +3503,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 1m
-    formula: 'Derived from roll adjustment difference over 1-minute window'
+    formula: '((reference_roll_1m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1m
     type: STRING
     description: >
       Total roll slippage at the 1-minute horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 1m
+    formula: '((reference_roll_1m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1m
     type: FLOAT
     description: >
       Adjusted theoretical value at the 1-minute snapshot, with roll and other corrections
       applied. May differ from tv_1m when adjustments are active.
     synonyms: []
+    formula: 'tv_1m + delta_1m * (calculated_base_val_1m - (under_1m - roll_1m)) + 0.5 * gamma_1m * POW((calculated_base_val_1m - (under_1m - roll_1m)), 2)'
   - name: delta_slippage_1m_per_unit
     type: FLOAT
     description: >
@@ -3487,7 +3526,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 1m
-    formula: 'Approximated as delta * (under_1m - under) / contract adjustment'
+    formula: '((calculated_base_val_1m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1m
     type: STRING
     description: >
@@ -3495,6 +3534,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 1m
+    formula: '((calculated_base_val_1m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_5m
     type: FLOAT
     description: >
@@ -3503,6 +3543,7 @@ table:
       trade time to t+5m. Input to vol-slippage decomposition.
     synonyms:
     - vol path 5m
+    formula: '((calculated_base_val_5m - mid_base_val) * ((delta_5m - raw_delta_5m) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_5m_per_unit
     type: FLOAT
     description: >
@@ -3512,7 +3553,7 @@ table:
     synonyms:
     - vol slip 5m
     - volatility slippage 5m
-    formula: 'Derived from tv change attributable to implied vol movement over 5-minute window'
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5m
     type: STRING
     description: >
@@ -3521,6 +3562,7 @@ table:
       between trade time and t+5m. Stored as STRING.
     synonyms:
     - vol slip 5m
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_5m_per_unit
     type: FLOAT
     description: >
@@ -3530,6 +3572,7 @@ table:
     synonyms:
     - other slip 5m
     - residual slippage 5m
+    formula: '(tv_change_buysell_5m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5m_per_unit + roll_slippage_5m_per_unit)'
   - name: other_slippage_5m
     type: STRING
     description: >
@@ -3537,6 +3580,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 5m
+    formula: '(tv_change_buysell_5m * contract_size * ABS(size)) - (delta_slippage_5m + roll_slippage_5m)'
   - name: tv_5m
     type: FLOAT
     description: >
@@ -3632,7 +3676,7 @@ table:
     synonyms:
     - tv move 5m
     - theo change 5m
-    formula: 'tv_5m - tv'
+    formula: '(adjusted_tv_5m - tv)'
   - name: tv_change_buysell_5m
     type: FLOAT
     description: >
@@ -3644,7 +3688,7 @@ table:
     - pnl 5m
     - slippage 5m
     - realized pnl 5m
-    formula: 'tv_change_5m * buy_sell_multiplier'
+    formula: '(adjusted_tv_5m - tv) * buy_sell_multiplier'
   - name: roll_slippage_5m_per_unit
     type: FLOAT
     description: >
@@ -3653,19 +3697,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 5m
-    formula: 'Derived from roll adjustment difference over 5-minute window'
+    formula: '((reference_roll_5m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5m
     type: STRING
     description: >
       Total roll slippage at the 5-minute horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 5m
+    formula: '((reference_roll_5m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_5m
     type: FLOAT
     description: >
       Adjusted theoretical value at the 5-minute snapshot, with roll and other corrections
       applied. May differ from tv_5m when adjustments are active.
     synonyms: []
+    formula: 'tv_5m + delta_5m * (calculated_base_val_5m - (under_5m - roll_5m)) + 0.5 * gamma_5m * POW((calculated_base_val_5m - (under_5m - roll_5m)), 2)'
   - name: delta_slippage_5m_per_unit
     type: FLOAT
     description: >
@@ -3674,7 +3720,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 5m
-    formula: 'Approximated as delta * (under_5m - under) / contract adjustment'
+    formula: '((calculated_base_val_5m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_5m
     type: STRING
     description: >
@@ -3682,6 +3728,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 5m
+    formula: '((calculated_base_val_5m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_10m
     type: FLOAT
     description: >
@@ -3690,6 +3737,7 @@ table:
       trade time to t+10m. Input to vol-slippage decomposition.
     synonyms:
     - vol path 10m
+    formula: '((calculated_base_val_10m - mid_base_val) * ((delta_10m - raw_delta_10m) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_10m_per_unit
     type: FLOAT
     description: >
@@ -3699,7 +3747,7 @@ table:
     synonyms:
     - vol slip 10m
     - volatility slippage 10m
-    formula: 'Derived from tv change attributable to implied vol movement over 10-minute window'
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_10m
     type: STRING
     description: >
@@ -3708,6 +3756,7 @@ table:
       between trade time and t+10m. Stored as STRING.
     synonyms:
     - vol slip 10m
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_10m_per_unit
     type: FLOAT
     description: >
@@ -3717,6 +3766,7 @@ table:
     synonyms:
     - other slip 10m
     - residual slippage 10m
+    formula: '(tv_change_buysell_10m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10m_per_unit + roll_slippage_10m_per_unit)'
   - name: other_slippage_10m
     type: STRING
     description: >
@@ -3724,6 +3774,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 10m
+    formula: '(tv_change_buysell_10m * contract_size * ABS(size)) - (delta_slippage_10m + roll_slippage_10m)'
   - name: tv_10m
     type: FLOAT
     description: >
@@ -3819,7 +3870,7 @@ table:
     synonyms:
     - tv move 10m
     - theo change 10m
-    formula: 'tv_10m - tv'
+    formula: '(adjusted_tv_10m - tv)'
   - name: tv_change_buysell_10m
     type: FLOAT
     description: >
@@ -3831,7 +3882,7 @@ table:
     - pnl 10m
     - slippage 10m
     - realized pnl 10m
-    formula: 'tv_change_10m * buy_sell_multiplier'
+    formula: '(adjusted_tv_10m - tv) * buy_sell_multiplier'
   - name: roll_slippage_10m_per_unit
     type: FLOAT
     description: >
@@ -3840,19 +3891,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 10m
-    formula: 'Derived from roll adjustment difference over 10-minute window'
+    formula: '((reference_roll_10m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_10m
     type: STRING
     description: >
       Total roll slippage at the 10-minute horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 10m
+    formula: '((reference_roll_10m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_10m
     type: FLOAT
     description: >
       Adjusted theoretical value at the 10-minute snapshot, with roll and other corrections
       applied. May differ from tv_10m when adjustments are active.
     synonyms: []
+    formula: 'tv_10m + delta_10m * (calculated_base_val_10m - (under_10m - roll_10m)) + 0.5 * gamma_10m * POW((calculated_base_val_10m - (under_10m - roll_10m)), 2)'
   - name: delta_slippage_10m_per_unit
     type: FLOAT
     description: >
@@ -3861,7 +3914,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 10m
-    formula: 'Approximated as delta * (under_10m - under) / contract adjustment'
+    formula: '((calculated_base_val_10m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_10m
     type: STRING
     description: >
@@ -3869,6 +3922,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 10m
+    formula: '((calculated_base_val_10m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_30m
     type: FLOAT
     description: >
@@ -3877,6 +3931,7 @@ table:
       trade time to t+30m. Input to vol-slippage decomposition.
     synonyms:
     - vol path 30m
+    formula: '((calculated_base_val_30m - mid_base_val) * ((delta_30m - raw_delta_30m) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_30m_per_unit
     type: FLOAT
     description: >
@@ -3886,7 +3941,7 @@ table:
     synonyms:
     - vol slip 30m
     - volatility slippage 30m
-    formula: 'Derived from tv change attributable to implied vol movement over 30-minute window'
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_30m
     type: STRING
     description: >
@@ -3895,6 +3950,7 @@ table:
       between trade time and t+30m. Stored as STRING.
     synonyms:
     - vol slip 30m
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_30m_per_unit
     type: FLOAT
     description: >
@@ -3904,6 +3960,7 @@ table:
     synonyms:
     - other slip 30m
     - residual slippage 30m
+    formula: '(tv_change_buysell_30m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30m_per_unit + roll_slippage_30m_per_unit)'
   - name: other_slippage_30m
     type: STRING
     description: >
@@ -3911,6 +3968,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 30m
+    formula: '(tv_change_buysell_30m * contract_size * ABS(size)) - (delta_slippage_30m + roll_slippage_30m)'
   - name: tv_30m
     type: FLOAT
     description: >
@@ -4006,7 +4064,7 @@ table:
     synonyms:
     - tv move 30m
     - theo change 30m
-    formula: 'tv_30m - tv'
+    formula: '(adjusted_tv_30m - tv)'
   - name: tv_change_buysell_30m
     type: FLOAT
     description: >
@@ -4018,7 +4076,7 @@ table:
     - pnl 30m
     - slippage 30m
     - realized pnl 30m
-    formula: 'tv_change_30m * buy_sell_multiplier'
+    formula: '(adjusted_tv_30m - tv) * buy_sell_multiplier'
   - name: roll_slippage_30m_per_unit
     type: FLOAT
     description: >
@@ -4027,19 +4085,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 30m
-    formula: 'Derived from roll adjustment difference over 30-minute window'
+    formula: '((reference_roll_30m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_30m
     type: STRING
     description: >
       Total roll slippage at the 30-minute horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 30m
+    formula: '((reference_roll_30m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_30m
     type: FLOAT
     description: >
       Adjusted theoretical value at the 30-minute snapshot, with roll and other corrections
       applied. May differ from tv_30m when adjustments are active.
     synonyms: []
+    formula: 'tv_30m + delta_30m * (calculated_base_val_30m - (under_30m - roll_30m)) + 0.5 * gamma_30m * POW((calculated_base_val_30m - (under_30m - roll_30m)), 2)'
   - name: delta_slippage_30m_per_unit
     type: FLOAT
     description: >
@@ -4048,7 +4108,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 30m
-    formula: 'Approximated as delta * (under_30m - under) / contract adjustment'
+    formula: '((calculated_base_val_30m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_30m
     type: STRING
     description: >
@@ -4056,6 +4116,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 30m
+    formula: '((calculated_base_val_30m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_1h
     type: FLOAT
     description: >
@@ -4064,6 +4125,7 @@ table:
       trade time to t+1h. Input to vol-slippage decomposition.
     synonyms:
     - vol path 1h
+    formula: '((calculated_base_val_1h - mid_base_val) * ((delta_1h - raw_delta_1h) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_1h_per_unit
     type: FLOAT
     description: >
@@ -4073,7 +4135,7 @@ table:
     synonyms:
     - vol slip 1h
     - volatility slippage 1h
-    formula: 'Derived from tv change attributable to implied vol movement over 1-hour window'
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1h
     type: STRING
     description: >
@@ -4082,6 +4144,7 @@ table:
       between trade time and t+1h. Stored as STRING.
     synonyms:
     - vol slip 1h
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_1h_per_unit
     type: FLOAT
     description: >
@@ -4091,6 +4154,7 @@ table:
     synonyms:
     - other slip 1h
     - residual slippage 1h
+    formula: '(tv_change_buysell_1h * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1h_per_unit + roll_slippage_1h_per_unit)'
   - name: other_slippage_1h
     type: STRING
     description: >
@@ -4098,6 +4162,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 1h
+    formula: '(tv_change_buysell_1h * contract_size * ABS(size)) - (delta_slippage_1h + roll_slippage_1h)'
   - name: tv_1h
     type: FLOAT
     description: >
@@ -4193,7 +4258,7 @@ table:
     synonyms:
     - tv move 1h
     - theo change 1h
-    formula: 'tv_1h - tv'
+    formula: '(adjusted_tv_1h - tv)'
   - name: tv_change_buysell_1h
     type: FLOAT
     description: >
@@ -4205,7 +4270,7 @@ table:
     - pnl 1h
     - slippage 1h
     - realized pnl 1h
-    formula: 'tv_change_1h * buy_sell_multiplier'
+    formula: '(adjusted_tv_1h - tv) * buy_sell_multiplier'
   - name: roll_slippage_1h_per_unit
     type: FLOAT
     description: >
@@ -4214,19 +4279,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 1h
-    formula: 'Derived from roll adjustment difference over 1-hour window'
+    formula: '((reference_roll_1h - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1h
     type: STRING
     description: >
       Total roll slippage at the 1-hour horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 1h
+    formula: '((reference_roll_1h - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1h
     type: FLOAT
     description: >
       Adjusted theoretical value at the 1-hour snapshot, with roll and other corrections
       applied. May differ from tv_1h when adjustments are active.
     synonyms: []
+    formula: 'tv_1h + delta_1h * (calculated_base_val_1h - (under_1h - roll_1h)) + 0.5 * gamma_1h * POW((calculated_base_val_1h - (under_1h - roll_1h)), 2)'
   - name: delta_slippage_1h_per_unit
     type: FLOAT
     description: >
@@ -4235,7 +4302,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 1h
-    formula: 'Approximated as delta * (under_1h - under) / contract adjustment'
+    formula: '((calculated_base_val_1h - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1h
     type: STRING
     description: >
@@ -4243,6 +4310,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 1h
+    formula: '((calculated_base_val_1h - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_eod
     type: FLOAT
     description: >
@@ -4251,6 +4319,7 @@ table:
       trade time to t+eod. Input to vol-slippage decomposition.
     synonyms:
     - vol path eod
+    formula: '((calculated_base_val_eod - mid_base_val) * ((delta_eod - raw_delta_eod) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_eod_per_unit
     type: FLOAT
     description: >
@@ -4260,7 +4329,7 @@ table:
     synonyms:
     - vol slip eod
     - volatility slippage eod
-    formula: 'Derived from tv change attributable to implied vol movement over end-of-day window'
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_eod
     type: STRING
     description: >
@@ -4269,6 +4338,7 @@ table:
       between trade time and t+eod. Stored as STRING.
     synonyms:
     - vol slip eod
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_eod_per_unit
     type: FLOAT
     description: >
@@ -4278,6 +4348,7 @@ table:
     synonyms:
     - other slip eod
     - residual slippage eod
+    formula: '(tv_change_buysell_eod * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_eod_per_unit + roll_slippage_eod_per_unit)'
   - name: other_slippage_eod
     type: STRING
     description: >
@@ -4285,6 +4356,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip eod
+    formula: '(tv_change_buysell_eod * contract_size * ABS(size)) - (delta_slippage_eod + roll_slippage_eod)'
   - name: tv_eod
     type: FLOAT
     description: >
@@ -4380,7 +4452,7 @@ table:
     synonyms:
     - tv move eod
     - theo change eod
-    formula: 'tv_eod - tv'
+    formula: '(adjusted_tv_eod - tv)'
   - name: tv_change_buysell_eod
     type: FLOAT
     description: >
@@ -4392,7 +4464,7 @@ table:
     - pnl eod
     - slippage eod
     - realized pnl eod
-    formula: 'tv_change_eod * buy_sell_multiplier'
+    formula: '(adjusted_tv_eod - tv) * buy_sell_multiplier'
   - name: roll_slippage_eod_per_unit
     type: FLOAT
     description: >
@@ -4401,19 +4473,21 @@ table:
       decomposition.
     synonyms:
     - roll slip eod
-    formula: 'Derived from roll adjustment difference over end-of-day window'
+    formula: '((reference_roll_eod - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_eod
     type: STRING
     description: >
       Total roll slippage at the end-of-day horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip eod
+    formula: '((reference_roll_eod - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_eod
     type: FLOAT
     description: >
       Adjusted theoretical value at the end-of-day snapshot, with roll and other corrections
       applied. May differ from tv_eod when adjustments are active.
     synonyms: []
+    formula: 'tv_eod + delta_eod * (calculated_base_val_eod - (under_eod - roll_eod)) + 0.5 * gamma_eod * POW((calculated_base_val_eod - (under_eod - roll_eod)), 2)'
   - name: delta_slippage_eod_per_unit
     type: FLOAT
     description: >
@@ -4422,7 +4496,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip eod
-    formula: 'Approximated as delta * (under_eod - under) / contract adjustment'
+    formula: '((calculated_base_val_eod - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_eod
     type: STRING
     description: >
@@ -4430,6 +4504,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip eod
+    formula: '((calculated_base_val_eod - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_1D
     type: STRING
     description: >
@@ -4438,6 +4513,7 @@ table:
       trade time to t+1D. Input to vol-slippage decomposition.
     synonyms:
     - vol path 1d
+    formula: '((calculated_base_val_1D - mid_base_val) * ((delta_1D - raw_delta_1D) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_1D_per_unit
     type: STRING
     description: >
@@ -4447,7 +4523,7 @@ table:
     synonyms:
     - vol slip 1d
     - volatility slippage 1d
-    formula: 'Derived from tv change attributable to implied vol movement over 1-day window'
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1D
     type: STRING
     description: >
@@ -4456,6 +4532,7 @@ table:
       between trade time and t+1D. Stored as STRING.
     synonyms:
     - vol slip 1d
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_1D_per_unit
     type: STRING
     description: >
@@ -4465,6 +4542,7 @@ table:
     synonyms:
     - other slip 1d
     - residual slippage 1d
+    formula: '(tv_change_buysell_1D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1D_per_unit + roll_slippage_1D_per_unit)'
   - name: other_slippage_1D
     type: STRING
     description: >
@@ -4472,6 +4550,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 1d
+    formula: '(tv_change_buysell_1D * contract_size * ABS(size)) - (delta_slippage_1D + roll_slippage_1D)'
   - name: tv_1D
     type: STRING
     description: >
@@ -4567,7 +4646,7 @@ table:
     synonyms:
     - tv move 1d
     - theo change 1d
-    formula: 'tv_1D - tv'
+    formula: '(adjusted_tv_1D - tv)'
   - name: tv_change_buysell_1D
     type: STRING
     description: >
@@ -4579,7 +4658,7 @@ table:
     - pnl 1d
     - slippage 1d
     - realized pnl 1d
-    formula: 'tv_change_1D * buy_sell_multiplier'
+    formula: '(adjusted_tv_1D - tv) * buy_sell_multiplier'
   - name: roll_slippage_1D_per_unit
     type: STRING
     description: >
@@ -4588,19 +4667,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 1d
-    formula: 'Derived from roll adjustment difference over 1-day window'
+    formula: '((reference_roll_1D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1D
     type: STRING
     description: >
       Total roll slippage at the 1-day horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 1d
+    formula: '((reference_roll_1D - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1D
     type: STRING
     description: >
       Adjusted theoretical value at the 1-day snapshot, with roll and other corrections
       applied. May differ from tv_1D when adjustments are active.
     synonyms: []
+    formula: 'tv_1D + delta_1D * (calculated_base_val_1D - (under_1D - roll_1D)) + 0.5 * gamma_1D * POW((calculated_base_val_1D - (under_1D - roll_1D)), 2)'
   - name: delta_slippage_1D_per_unit
     type: STRING
     description: >
@@ -4609,7 +4690,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 1d
-    formula: 'Approximated as delta * (under_1D - under) / contract adjustment'
+    formula: '((calculated_base_val_1D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1D
     type: STRING
     description: >
@@ -4617,6 +4698,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 1d
+    formula: '((calculated_base_val_1D - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_5D
     type: STRING
     description: >
@@ -4625,6 +4707,7 @@ table:
       trade time to t+5D. Input to vol-slippage decomposition.
     synonyms:
     - vol path 5d
+    formula: '((calculated_base_val_5D - mid_base_val) * ((delta_5D - raw_delta_5D) + (delta - raw_delta)) / 2)'
   - name: vol_slippage_5D_per_unit
     type: STRING
     description: >
@@ -4634,7 +4717,7 @@ table:
     synonyms:
     - vol slip 5d
     - volatility slippage 5d
-    formula: 'Derived from tv change attributable to implied vol movement over 5-day window'
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5D
     type: STRING
     description: >
@@ -4643,6 +4726,7 @@ table:
       between trade time and t+5D. Stored as STRING.
     synonyms:
     - vol slip 5d
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: other_slippage_5D_per_unit
     type: STRING
     description: >
@@ -4652,6 +4736,7 @@ table:
     synonyms:
     - other slip 5d
     - residual slippage 5d
+    formula: '(tv_change_buysell_5D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5D_per_unit + roll_slippage_5D_per_unit)'
   - name: other_slippage_5D
     type: STRING
     description: >
@@ -4659,6 +4744,7 @@ table:
       component after delta and vol slippage are removed. Stored as STRING.
     synonyms:
     - other slip 5d
+    formula: '(tv_change_buysell_5D * contract_size * ABS(size)) - (delta_slippage_5D + roll_slippage_5D)'
   - name: tv_5D
     type: STRING
     description: >
@@ -4754,7 +4840,7 @@ table:
     synonyms:
     - tv move 5d
     - theo change 5d
-    formula: 'tv_5D - tv'
+    formula: '(adjusted_tv_5D - tv)'
   - name: tv_change_buysell_5D
     type: STRING
     description: >
@@ -4766,7 +4852,7 @@ table:
     - pnl 5d
     - slippage 5d
     - realized pnl 5d
-    formula: 'tv_change_5D * buy_sell_multiplier'
+    formula: '(adjusted_tv_5D - tv) * buy_sell_multiplier'
   - name: roll_slippage_5D_per_unit
     type: STRING
     description: >
@@ -4775,19 +4861,21 @@ table:
       decomposition.
     synonyms:
     - roll slip 5d
-    formula: 'Derived from roll adjustment difference over 5-day window'
+    formula: '((reference_roll_5D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5D
     type: STRING
     description: >
       Total roll slippage at the 5-day horizon in dollar terms. Stored as STRING.
     synonyms:
     - roll slip 5d
+    formula: '((reference_roll_5D - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_5D
     type: STRING
     description: >
       Adjusted theoretical value at the 5-day snapshot, with roll and other corrections
       applied. May differ from tv_5D when adjustments are active.
     synonyms: []
+    formula: 'tv_5D + delta_5D * (calculated_base_val_5D - (under_5D - roll_5D)) + 0.5 * gamma_5D * POW((calculated_base_val_5D - (under_5D - roll_5D)), 2)'
   - name: delta_slippage_5D_per_unit
     type: STRING
     description: >
@@ -4796,7 +4884,7 @@ table:
       The largest slippage component for delta-heavy trades.
     synonyms:
     - delta slip 5d
-    formula: 'Approximated as delta * (under_5D - under) / contract adjustment'
+    formula: '((calculated_base_val_5D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_5D
     type: STRING
     description: >
@@ -4804,6 +4892,7 @@ table:
       underlying price movement. Stored as STRING.
     synonyms:
     - delta slip 5d
+    formula: '((calculated_base_val_5D - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
   - name: calculated_base_val_eod
     type: FLOAT
     description: >
@@ -4836,6 +4925,7 @@ table:
     - delta exposure
     - hedge ratio
     - greek delta
+    formula: 'delta_theo'
   - name: gamma
     type: FLOAT
     description: >
@@ -4955,6 +5045,7 @@ table:
     - TV
     - model price
     source: 'PosData.proto :: PositionEvent.tv'
+    formula: 'tv_theo'
   - name: instant_edge
     type: FLOAT
     description: >
@@ -4985,7 +5076,7 @@ table:
     - instant profit
     - gross pnl
     - P&L
-    formula: 'instant_edge * ABS(size) * contract_size'
+    formula: "CASE WHEN trade_side = 'BUY' THEN (tv - price) * ABS(size) * contract_size WHEN trade_side = 'SELL' THEN (price - tv) * ABS(size) * contract_size ELSE 0 END"
     source: kpi_clicktrade_calculations.sql
   - name: instant_pnl_w_fees
     type: FLOAT
@@ -4998,7 +5089,7 @@ table:
     - profit after fees
     - net profit
     - pnl net
-    formula: 'instant_pnl - fees'
+    formula: "CASE WHEN trade_side = 'BUY' THEN ((tv - price) - fees) * ABS(size) * contract_size WHEN trade_side = 'SELL' THEN ((price - tv) - fees) * ABS(size) * contract_size ELSE 0 END"
     source: kpi_clicktrade_calculations.sql
   - name: abs_traded_size
     type: FLOAT
@@ -5435,6 +5526,7 @@ table:
       specific to the underlying stock, accounting for dividend timing and borrowing costs.
       Used in the pricing model for accurate forward calculation.
     synonyms: []
+    formula: 'forward - under'
   - name: reference_roll
     type: FLOAT
     description: >
@@ -5442,6 +5534,7 @@ table:
       baseline for roll-slippage decomposition. Changes in roll between trade time and slippage
       horizons contribute to roll_slippage.
     synonyms: []
+    formula: '(forward - under) + roll'
   - name: is_expiry_trade
     type: BOOLEAN
     description: >

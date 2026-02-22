@@ -2718,12 +2718,14 @@ table:
       Raw (unadjusted) delta multiplied by the mid base value. An intermediate calculation used in the KPI
       engine. Not typically queried directly by traders.
     synonyms: []
+    formula: 'raw_delta_mid_bv + (((raw_bv_bid + raw_bv_ask) / 2) - (under - roll)) * raw_gamma'
   - name: base_adjustment
     type: FLOAT
     description: >-
       Base price adjustment applied during KPI calculation. Represents corrections to the underlying base
       value for specific pricing model requirements. Internal pipeline field, not typically queried.
     synonyms: []
+    formula: 'layered_base_adjustment + odr_adjustment'
   - name: buy_sell_multiplier
     type: INTEGER
     description: >-
@@ -2739,7 +2741,7 @@ table:
     - -1
     - 1
     - 0
-    formula: "CASE WHEN trade_aggressor_side = 'BUY' THEN -1 WHEN trade_aggressor_side = 'SELL' THEN 1 ELSE 0 END"
+    formula: "CASE WHEN trade_aggressor_side IN ('BUY', '66') THEN -1 WHEN trade_aggressor_side IN ('SELL', '83') THEN 1 ELSE 0 END"
     business_rules: BUY = -1, SELL = 1, UNKNOWN/NULL_BUYSELL = 0. Zero multiplier causes all slippage values to be 0.
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: instant_edge
@@ -2776,7 +2778,7 @@ table:
     - instant profit
     - dollar pnl
     - trade pnl
-    formula: 'instant_edge * trade_size * contract_size'
+    formula: "CASE WHEN trade_aggressor_side = 'BUY' THEN (trade_price - tv) * trade_size * contract_size WHEN trade_aggressor_side = 'SELL' THEN (tv - trade_price) * trade_size * contract_size ELSE 0 END"
     business_rules: >-
       Does NOT include fees. Use instant_pnl_w_fees for net PnL. For combos, parent instant_pnl is sum of
       leg values.
@@ -2793,7 +2795,7 @@ table:
     - net PnL
     - profit after fees
     - net profit
-    formula: instant_pnl - fees
+    formula: "CASE WHEN trade_aggressor_side = 'BUY' THEN ((trade_price - tv) - fees) * trade_size * contract_size WHEN trade_aggressor_side = 'SELL' THEN ((tv - trade_price) - fees) * trade_size * contract_size ELSE 0 END"
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_path_estimate_1s
     type: FLOAT
@@ -2802,7 +2804,7 @@ table:
       changes between trade time and 1 second. Subtracted from the raw vol impact in the vol_slippage
       formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 1 second
+    formula: '((calculated_base_val_1s - mid_base_val) * ((delta_1s - raw_delta_mid_bv_1s) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_1s_per_unit
     type: FLOAT
@@ -2815,7 +2817,7 @@ table:
     - vol slip 1s
     - vol pnl per unit 1s
     - volatility slip 1s
-    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s)'
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_1s
     type: FLOAT
@@ -2828,7 +2830,7 @@ table:
     - vol slip 1s
     - vol pnl 1s
     - volatility slippage 1s
-    formula: 'vol_slippage_1s_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_1s_per_unit
     type: FLOAT
@@ -2840,7 +2842,7 @@ table:
     - other slip 1s
     - residual slip 1s
     - unexplained slippage 1s
-    formula: '(tv_change_buysell_1s * contract_size * trade_size) - (delta_slippage_1s + roll_slippage_1s) — then per unit'
+    formula: '(tv_change_buysell_1s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1s_per_unit + roll_slippage_1s_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_1s
     type: FLOAT
@@ -2949,7 +2951,7 @@ table:
     synonyms:
     - tv move 1s
     - theo change 1s
-    formula: tv_1s - tv
+    formula: '(adjusted_tv_1s - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_1s
     type: FLOAT
@@ -2960,7 +2962,7 @@ table:
     synonyms:
     - pnl 1s
     - directional tv change 1s
-    formula: 'tv_change_1s * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_1s - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_1s_per_unit
     type: FLOAT
@@ -2971,7 +2973,7 @@ table:
     synonyms:
     - roll slip 1s
     - roll pnl per unit 1s
-    formula: '((reference_roll_1s - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_1s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_1s
     type: FLOAT
@@ -2982,7 +2984,7 @@ table:
     synonyms:
     - roll slip 1s
     - roll pnl 1s
-    formula: '((reference_roll_1s - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_1s - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_1s
     type: FLOAT
@@ -2991,7 +2993,7 @@ table:
       applied to the 1 second theodata snapshot. Used in total_slippage calculation: total_slippage =
       (adjusted_tv_1s - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 1 second with KPI adjustments
+    formula: 'tv_1s + delta_1s * (calculated_base_val_1s - (under_1s - roll_1s)) + 0.5 * gamma_1s * POW((calculated_base_val_1s - (under_1s - roll_1s)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_1s_per_unit
     type: FLOAT
@@ -3002,7 +3004,7 @@ table:
     synonyms:
     - delta slip 1s
     - delta pnl per unit 1s
-    formula: '(calculated_base_val_1s - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_1s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_1s
     type: FLOAT
@@ -3024,7 +3026,7 @@ table:
       vol changes between trade time and 5 seconds. Subtracted from the raw vol impact in the vol_slippage
       formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 5 seconds
+    formula: '((calculated_base_val_5s - mid_base_val) * ((delta_5s - raw_delta_mid_bv_5s) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_5s_per_unit
     type: FLOAT
@@ -3037,7 +3039,7 @@ table:
     - vol slip 5s
     - vol pnl per unit 5s
     - volatility slip 5s
-    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s)'
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_5s
     type: FLOAT
@@ -3050,7 +3052,7 @@ table:
     - vol slip 5s
     - vol pnl 5s
     - volatility slippage 5s
-    formula: 'vol_slippage_5s_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_5s_per_unit
     type: FLOAT
@@ -3062,7 +3064,7 @@ table:
     - other slip 5s
     - residual slip 5s
     - unexplained slippage 5s
-    formula: '(tv_change_buysell_5s * contract_size * trade_size) - (delta_slippage_5s + roll_slippage_5s) — then per unit'
+    formula: '(tv_change_buysell_5s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5s_per_unit + roll_slippage_5s_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_5s
     type: FLOAT
@@ -3173,7 +3175,7 @@ table:
     synonyms:
     - tv move 5s
     - theo change 5s
-    formula: tv_5s - tv
+    formula: '(adjusted_tv_5s - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_5s
     type: FLOAT
@@ -3184,7 +3186,7 @@ table:
     synonyms:
     - pnl 5s
     - directional tv change 5s
-    formula: 'tv_change_5s * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_5s - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_5s_per_unit
     type: FLOAT
@@ -3195,7 +3197,7 @@ table:
     synonyms:
     - roll slip 5s
     - roll pnl per unit 5s
-    formula: '((reference_roll_5s - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_5s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_5s
     type: FLOAT
@@ -3206,7 +3208,7 @@ table:
     synonyms:
     - roll slip 5s
     - roll pnl 5s
-    formula: '((reference_roll_5s - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_5s - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_5s
     type: FLOAT
@@ -3215,7 +3217,7 @@ table:
       corrections applied to the 5 seconds theodata snapshot. Used in total_slippage calculation:
       total_slippage = (adjusted_tv_5s - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 5 seconds with KPI adjustments
+    formula: 'tv_5s + delta_5s * (calculated_base_val_5s - (under_5s - roll_5s)) + 0.5 * gamma_5s * POW((calculated_base_val_5s - (under_5s - roll_5s)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_5s_per_unit
     type: FLOAT
@@ -3226,7 +3228,7 @@ table:
     synonyms:
     - delta slip 5s
     - delta pnl per unit 5s
-    formula: '(calculated_base_val_5s - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_5s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_5s
     type: FLOAT
@@ -3248,7 +3250,7 @@ table:
       vol changes between trade time and 10 seconds. Subtracted from the raw vol impact in the
       vol_slippage formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 10 seconds
+    formula: '((calculated_base_val_10s - mid_base_val) * ((delta_10s - raw_delta_mid_bv_10s) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_10s_per_unit
     type: FLOAT
@@ -3261,7 +3263,7 @@ table:
     - vol slip 10s
     - vol pnl per unit 10s
     - volatility slip 10s
-    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s)'
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_10s
     type: FLOAT
@@ -3274,7 +3276,7 @@ table:
     - vol slip 10s
     - vol pnl 10s
     - volatility slippage 10s
-    formula: 'vol_slippage_10s_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_10s_per_unit
     type: FLOAT
@@ -3286,7 +3288,7 @@ table:
     - other slip 10s
     - residual slip 10s
     - unexplained slippage 10s
-    formula: '(tv_change_buysell_10s * contract_size * trade_size) - (delta_slippage_10s + roll_slippage_10s) — then per unit'
+    formula: '(tv_change_buysell_10s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10s_per_unit + roll_slippage_10s_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_10s
     type: FLOAT
@@ -3397,7 +3399,7 @@ table:
     synonyms:
     - tv move 10s
     - theo change 10s
-    formula: tv_10s - tv
+    formula: '(adjusted_tv_10s - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_10s
     type: FLOAT
@@ -3408,7 +3410,7 @@ table:
     synonyms:
     - pnl 10s
     - directional tv change 10s
-    formula: 'tv_change_10s * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_10s - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_10s_per_unit
     type: FLOAT
@@ -3419,7 +3421,7 @@ table:
     synonyms:
     - roll slip 10s
     - roll pnl per unit 10s
-    formula: '((reference_roll_10s - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_10s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_10s
     type: FLOAT
@@ -3430,7 +3432,7 @@ table:
     synonyms:
     - roll slip 10s
     - roll pnl 10s
-    formula: '((reference_roll_10s - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_10s - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_10s
     type: FLOAT
@@ -3439,7 +3441,7 @@ table:
       corrections applied to the 10 seconds theodata snapshot. Used in total_slippage calculation:
       total_slippage = (adjusted_tv_10s - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 10 seconds with KPI adjustments
+    formula: 'tv_10s + delta_10s * (calculated_base_val_10s - (under_10s - roll_10s)) + 0.5 * gamma_10s * POW((calculated_base_val_10s - (under_10s - roll_10s)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_10s_per_unit
     type: FLOAT
@@ -3450,7 +3452,7 @@ table:
     synonyms:
     - delta slip 10s
     - delta pnl per unit 10s
-    formula: '(calculated_base_val_10s - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_10s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_10s
     type: FLOAT
@@ -3472,7 +3474,7 @@ table:
       vol changes between trade time and 30 seconds. Subtracted from the raw vol impact in the
       vol_slippage formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 30 seconds
+    formula: '((calculated_base_val_30s - mid_base_val) * ((delta_30s - raw_delta_mid_bv_30s) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_30s_per_unit
     type: FLOAT
@@ -3485,7 +3487,7 @@ table:
     - vol slip 30s
     - vol pnl per unit 30s
     - volatility slip 30s
-    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s)'
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_30s
     type: FLOAT
@@ -3498,7 +3500,7 @@ table:
     - vol slip 30s
     - vol pnl 30s
     - volatility slippage 30s
-    formula: 'vol_slippage_30s_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_30s_per_unit
     type: FLOAT
@@ -3510,7 +3512,7 @@ table:
     - other slip 30s
     - residual slip 30s
     - unexplained slippage 30s
-    formula: '(tv_change_buysell_30s * contract_size * trade_size) - (delta_slippage_30s + roll_slippage_30s) — then per unit'
+    formula: '(tv_change_buysell_30s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30s_per_unit + roll_slippage_30s_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_30s
     type: FLOAT
@@ -3621,7 +3623,7 @@ table:
     synonyms:
     - tv move 30s
     - theo change 30s
-    formula: tv_30s - tv
+    formula: '(adjusted_tv_30s - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_30s
     type: FLOAT
@@ -3632,7 +3634,7 @@ table:
     synonyms:
     - pnl 30s
     - directional tv change 30s
-    formula: 'tv_change_30s * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_30s - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_30s_per_unit
     type: FLOAT
@@ -3643,7 +3645,7 @@ table:
     synonyms:
     - roll slip 30s
     - roll pnl per unit 30s
-    formula: '((reference_roll_30s - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_30s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_30s
     type: FLOAT
@@ -3654,7 +3656,7 @@ table:
     synonyms:
     - roll slip 30s
     - roll pnl 30s
-    formula: '((reference_roll_30s - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_30s - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_30s
     type: FLOAT
@@ -3663,7 +3665,7 @@ table:
       corrections applied to the 30 seconds theodata snapshot. Used in total_slippage calculation:
       total_slippage = (adjusted_tv_30s - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 30 seconds with KPI adjustments
+    formula: 'tv_30s + delta_30s * (calculated_base_val_30s - (under_30s - roll_30s)) + 0.5 * gamma_30s * POW((calculated_base_val_30s - (under_30s - roll_30s)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_30s_per_unit
     type: FLOAT
@@ -3674,7 +3676,7 @@ table:
     synonyms:
     - delta slip 30s
     - delta pnl per unit 30s
-    formula: '(calculated_base_val_30s - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_30s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_30s
     type: FLOAT
@@ -3696,7 +3698,7 @@ table:
       changes between trade time and 1 minute. Subtracted from the raw vol impact in the vol_slippage
       formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 1 minute
+    formula: '((calculated_base_val_1m - mid_base_val) * ((delta_1m - raw_delta_mid_bv_1m) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_1m_per_unit
     type: FLOAT
@@ -3709,7 +3711,7 @@ table:
     - vol slip 1m
     - vol pnl per unit 1m
     - volatility slip 1m
-    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m)'
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_1m
     type: FLOAT
@@ -3722,7 +3724,7 @@ table:
     - vol slip 1m
     - vol pnl 1m
     - volatility slippage 1m
-    formula: 'vol_slippage_1m_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_1m_per_unit
     type: FLOAT
@@ -3734,7 +3736,7 @@ table:
     - other slip 1m
     - residual slip 1m
     - unexplained slippage 1m
-    formula: '(tv_change_buysell_1m * contract_size * trade_size) - (delta_slippage_1m + roll_slippage_1m) — then per unit'
+    formula: '(tv_change_buysell_1m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1m_per_unit + roll_slippage_1m_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_1m
     type: FLOAT
@@ -3843,7 +3845,7 @@ table:
     synonyms:
     - tv move 1m
     - theo change 1m
-    formula: tv_1m - tv
+    formula: '(adjusted_tv_1m - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_1m
     type: FLOAT
@@ -3854,7 +3856,7 @@ table:
     synonyms:
     - pnl 1m
     - directional tv change 1m
-    formula: 'tv_change_1m * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_1m - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_1m_per_unit
     type: FLOAT
@@ -3865,7 +3867,7 @@ table:
     synonyms:
     - roll slip 1m
     - roll pnl per unit 1m
-    formula: '((reference_roll_1m - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_1m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_1m
     type: FLOAT
@@ -3876,7 +3878,7 @@ table:
     synonyms:
     - roll slip 1m
     - roll pnl 1m
-    formula: '((reference_roll_1m - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_1m - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_1m
     type: FLOAT
@@ -3885,7 +3887,7 @@ table:
       applied to the 1 minute theodata snapshot. Used in total_slippage calculation: total_slippage =
       (adjusted_tv_1m - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 1 minute with KPI adjustments
+    formula: 'tv_1m + delta_1m * (calculated_base_val_1m - (under_1m - roll_1m)) + 0.5 * gamma_1m * POW((calculated_base_val_1m - (under_1m - roll_1m)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_1m_per_unit
     type: FLOAT
@@ -3896,7 +3898,7 @@ table:
     synonyms:
     - delta slip 1m
     - delta pnl per unit 1m
-    formula: '(calculated_base_val_1m - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_1m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_1m
     type: FLOAT
@@ -3918,7 +3920,7 @@ table:
       vol changes between trade time and 5 minutes. Subtracted from the raw vol impact in the vol_slippage
       formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 5 minutes
+    formula: '((calculated_base_val_5m - mid_base_val) * ((delta_5m - raw_delta_mid_bv_5m) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_5m_per_unit
     type: FLOAT
@@ -3931,7 +3933,7 @@ table:
     - vol slip 5m
     - vol pnl per unit 5m
     - volatility slip 5m
-    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m)'
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_5m
     type: FLOAT
@@ -3944,7 +3946,7 @@ table:
     - vol slip 5m
     - vol pnl 5m
     - volatility slippage 5m
-    formula: 'vol_slippage_5m_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_5m_per_unit
     type: FLOAT
@@ -3956,7 +3958,7 @@ table:
     - other slip 5m
     - residual slip 5m
     - unexplained slippage 5m
-    formula: '(tv_change_buysell_5m * contract_size * trade_size) - (delta_slippage_5m + roll_slippage_5m) — then per unit'
+    formula: '(tv_change_buysell_5m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5m_per_unit + roll_slippage_5m_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_5m
     type: FLOAT
@@ -4067,7 +4069,7 @@ table:
     synonyms:
     - tv move 5m
     - theo change 5m
-    formula: tv_5m - tv
+    formula: '(adjusted_tv_5m - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_5m
     type: FLOAT
@@ -4078,7 +4080,7 @@ table:
     synonyms:
     - pnl 5m
     - directional tv change 5m
-    formula: 'tv_change_5m * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_5m - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_5m_per_unit
     type: FLOAT
@@ -4089,7 +4091,7 @@ table:
     synonyms:
     - roll slip 5m
     - roll pnl per unit 5m
-    formula: '((reference_roll_5m - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_5m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_5m
     type: FLOAT
@@ -4100,7 +4102,7 @@ table:
     synonyms:
     - roll slip 5m
     - roll pnl 5m
-    formula: '((reference_roll_5m - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_5m - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_5m
     type: FLOAT
@@ -4109,7 +4111,7 @@ table:
       corrections applied to the 5 minutes theodata snapshot. Used in total_slippage calculation:
       total_slippage = (adjusted_tv_5m - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 5 minutes with KPI adjustments
+    formula: 'tv_5m + delta_5m * (calculated_base_val_5m - (under_5m - roll_5m)) + 0.5 * gamma_5m * POW((calculated_base_val_5m - (under_5m - roll_5m)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_5m_per_unit
     type: FLOAT
@@ -4120,7 +4122,7 @@ table:
     synonyms:
     - delta slip 5m
     - delta pnl per unit 5m
-    formula: '(calculated_base_val_5m - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_5m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_5m
     type: FLOAT
@@ -4142,7 +4144,7 @@ table:
       vol changes between trade time and 10 minutes. Subtracted from the raw vol impact in the
       vol_slippage formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 10 minutes
+    formula: '((calculated_base_val_10m - mid_base_val) * ((delta_10m - raw_delta_mid_bv_10m) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_10m_per_unit
     type: FLOAT
@@ -4155,7 +4157,7 @@ table:
     - vol slip 10m
     - vol pnl per unit 10m
     - volatility slip 10m
-    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m)'
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_10m
     type: FLOAT
@@ -4168,7 +4170,7 @@ table:
     - vol slip 10m
     - vol pnl 10m
     - volatility slippage 10m
-    formula: 'vol_slippage_10m_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_10m_per_unit
     type: FLOAT
@@ -4180,7 +4182,7 @@ table:
     - other slip 10m
     - residual slip 10m
     - unexplained slippage 10m
-    formula: '(tv_change_buysell_10m * contract_size * trade_size) - (delta_slippage_10m + roll_slippage_10m) — then per unit'
+    formula: '(tv_change_buysell_10m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10m_per_unit + roll_slippage_10m_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_10m
     type: FLOAT
@@ -4291,7 +4293,7 @@ table:
     synonyms:
     - tv move 10m
     - theo change 10m
-    formula: tv_10m - tv
+    formula: '(adjusted_tv_10m - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_10m
     type: FLOAT
@@ -4302,7 +4304,7 @@ table:
     synonyms:
     - pnl 10m
     - directional tv change 10m
-    formula: 'tv_change_10m * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_10m - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_10m_per_unit
     type: FLOAT
@@ -4313,7 +4315,7 @@ table:
     synonyms:
     - roll slip 10m
     - roll pnl per unit 10m
-    formula: '((reference_roll_10m - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_10m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_10m
     type: FLOAT
@@ -4324,7 +4326,7 @@ table:
     synonyms:
     - roll slip 10m
     - roll pnl 10m
-    formula: '((reference_roll_10m - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_10m - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_10m
     type: FLOAT
@@ -4333,7 +4335,7 @@ table:
       corrections applied to the 10 minutes theodata snapshot. Used in total_slippage calculation:
       total_slippage = (adjusted_tv_10m - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 10 minutes with KPI adjustments
+    formula: 'tv_10m + delta_10m * (calculated_base_val_10m - (under_10m - roll_10m)) + 0.5 * gamma_10m * POW((calculated_base_val_10m - (under_10m - roll_10m)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_10m_per_unit
     type: FLOAT
@@ -4344,7 +4346,7 @@ table:
     synonyms:
     - delta slip 10m
     - delta pnl per unit 10m
-    formula: '(calculated_base_val_10m - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_10m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_10m
     type: FLOAT
@@ -4366,7 +4368,7 @@ table:
       vol changes between trade time and 30 minutes. Subtracted from the raw vol impact in the
       vol_slippage formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 30 minutes
+    formula: '((calculated_base_val_30m - mid_base_val) * ((delta_30m - raw_delta_mid_bv_30m) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_30m_per_unit
     type: FLOAT
@@ -4379,7 +4381,7 @@ table:
     - vol slip 30m
     - vol pnl per unit 30m
     - volatility slip 30m
-    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m)'
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_30m
     type: FLOAT
@@ -4392,7 +4394,7 @@ table:
     - vol slip 30m
     - vol pnl 30m
     - volatility slippage 30m
-    formula: 'vol_slippage_30m_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_30m_per_unit
     type: FLOAT
@@ -4404,7 +4406,7 @@ table:
     - other slip 30m
     - residual slip 30m
     - unexplained slippage 30m
-    formula: '(tv_change_buysell_30m * contract_size * trade_size) - (delta_slippage_30m + roll_slippage_30m) — then per unit'
+    formula: '(tv_change_buysell_30m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30m_per_unit + roll_slippage_30m_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_30m
     type: FLOAT
@@ -4515,7 +4517,7 @@ table:
     synonyms:
     - tv move 30m
     - theo change 30m
-    formula: tv_30m - tv
+    formula: '(adjusted_tv_30m - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_30m
     type: FLOAT
@@ -4526,7 +4528,7 @@ table:
     synonyms:
     - pnl 30m
     - directional tv change 30m
-    formula: 'tv_change_30m * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_30m - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_30m_per_unit
     type: FLOAT
@@ -4537,7 +4539,7 @@ table:
     synonyms:
     - roll slip 30m
     - roll pnl per unit 30m
-    formula: '((reference_roll_30m - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_30m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_30m
     type: FLOAT
@@ -4548,7 +4550,7 @@ table:
     synonyms:
     - roll slip 30m
     - roll pnl 30m
-    formula: '((reference_roll_30m - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_30m - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_30m
     type: FLOAT
@@ -4557,7 +4559,7 @@ table:
       corrections applied to the 30 minutes theodata snapshot. Used in total_slippage calculation:
       total_slippage = (adjusted_tv_30m - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 30 minutes with KPI adjustments
+    formula: 'tv_30m + delta_30m * (calculated_base_val_30m - (under_30m - roll_30m)) + 0.5 * gamma_30m * POW((calculated_base_val_30m - (under_30m - roll_30m)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_30m_per_unit
     type: FLOAT
@@ -4568,7 +4570,7 @@ table:
     synonyms:
     - delta slip 30m
     - delta pnl per unit 30m
-    formula: '(calculated_base_val_30m - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_30m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_30m
     type: FLOAT
@@ -4590,7 +4592,7 @@ table:
       changes between trade time and 1 hour. Subtracted from the raw vol impact in the vol_slippage
       formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 1 hour
+    formula: '((calculated_base_val_1h - mid_base_val) * ((delta_1h - raw_delta_mid_bv_1h) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_1h_per_unit
     type: FLOAT
@@ -4603,7 +4605,7 @@ table:
     - vol slip 1h
     - vol pnl per unit 1h
     - volatility slip 1h
-    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h)'
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_1h
     type: FLOAT
@@ -4616,7 +4618,7 @@ table:
     - vol slip 1h
     - vol pnl 1h
     - volatility slippage 1h
-    formula: 'vol_slippage_1h_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_1h_per_unit
     type: FLOAT
@@ -4628,7 +4630,7 @@ table:
     - other slip 1h
     - residual slip 1h
     - unexplained slippage 1h
-    formula: '(tv_change_buysell_1h * contract_size * trade_size) - (delta_slippage_1h + roll_slippage_1h) — then per unit'
+    formula: '(tv_change_buysell_1h * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1h_per_unit + roll_slippage_1h_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_1h
     type: FLOAT
@@ -4737,7 +4739,7 @@ table:
     synonyms:
     - tv move 1h
     - theo change 1h
-    formula: tv_1h - tv
+    formula: '(adjusted_tv_1h - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_1h
     type: FLOAT
@@ -4748,7 +4750,7 @@ table:
     synonyms:
     - pnl 1h
     - directional tv change 1h
-    formula: 'tv_change_1h * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_1h - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_1h_per_unit
     type: FLOAT
@@ -4758,7 +4760,7 @@ table:
     synonyms:
     - roll slip 1h
     - roll pnl per unit 1h
-    formula: '((reference_roll_1h - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_1h - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_1h
     type: FLOAT
@@ -4769,7 +4771,7 @@ table:
     synonyms:
     - roll slip 1h
     - roll pnl 1h
-    formula: '((reference_roll_1h - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_1h - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_1h
     type: FLOAT
@@ -4778,7 +4780,7 @@ table:
       applied to the 1 hour theodata snapshot. Used in total_slippage calculation: total_slippage =
       (adjusted_tv_1h - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 1 hour with KPI adjustments
+    formula: 'tv_1h + delta_1h * (calculated_base_val_1h - (under_1h - roll_1h)) + 0.5 * gamma_1h * POW((calculated_base_val_1h - (under_1h - roll_1h)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_1h_per_unit
     type: FLOAT
@@ -4789,7 +4791,7 @@ table:
     synonyms:
     - delta slip 1h
     - delta pnl per unit 1h
-    formula: '(calculated_base_val_1h - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_1h - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_1h
     type: FLOAT
@@ -4811,7 +4813,7 @@ table:
       vol changes between trade time and end-of-day. Subtracted from the raw vol impact in the
       vol_slippage formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at end-of-day
+    formula: '((calculated_base_val_eod - mid_base_val) * ((delta_eod - raw_delta_mid_bv_eod) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_eod_per_unit
     type: FLOAT
@@ -4824,7 +4826,7 @@ table:
     - vol slip eod
     - vol pnl per unit eod
     - volatility slip eod
-    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod)'
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_eod
     type: FLOAT
@@ -4837,7 +4839,7 @@ table:
     - vol slip eod
     - vol pnl eod
     - volatility slippage eod
-    formula: 'vol_slippage_eod_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_eod_per_unit
     type: FLOAT
@@ -4849,7 +4851,7 @@ table:
     - other slip eod
     - residual slip eod
     - unexplained slippage eod
-    formula: '(tv_change_buysell_eod * contract_size * trade_size) - (delta_slippage_eod + roll_slippage_eod) — then per unit'
+    formula: '(tv_change_buysell_eod * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_eod_per_unit + roll_slippage_eod_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_eod
     type: FLOAT
@@ -4960,7 +4962,7 @@ table:
     synonyms:
     - tv move eod
     - theo change eod
-    formula: tv_eod - tv
+    formula: '(adjusted_tv_eod - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_eod
     type: FLOAT
@@ -4971,7 +4973,7 @@ table:
     synonyms:
     - pnl eod
     - directional tv change eod
-    formula: 'tv_change_eod * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_eod - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_eod_per_unit
     type: FLOAT
@@ -4982,7 +4984,7 @@ table:
     synonyms:
     - roll slip eod
     - roll pnl per unit eod
-    formula: '((reference_roll_eod - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_eod - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_eod
     type: FLOAT
@@ -4993,7 +4995,7 @@ table:
     synonyms:
     - roll slip eod
     - roll pnl eod
-    formula: '((reference_roll_eod - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_eod - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_eod
     type: FLOAT
@@ -5002,7 +5004,7 @@ table:
       corrections applied to the end-of-day theodata snapshot. Used in total_slippage calculation:
       total_slippage = (adjusted_tv_eod - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at end-of-day with KPI adjustments
+    formula: 'tv_eod + delta_eod * (calculated_base_val_eod - (under_eod - roll_eod)) + 0.5 * gamma_eod * POW((calculated_base_val_eod - (under_eod - roll_eod)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_eod_per_unit
     type: FLOAT
@@ -5013,7 +5015,7 @@ table:
     synonyms:
     - delta slip eod
     - delta pnl per unit eod
-    formula: '(calculated_base_val_eod - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_eod - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_eod
     type: FLOAT
@@ -5035,7 +5037,7 @@ table:
       path-dependent nature of vol changes between trade time and 1 day (next trading day). Subtracted
       from the raw vol impact in the vol_slippage formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 1 day (next trading day)
+    formula: '((calculated_base_val_1D - mid_base_val) * ((delta_1D - raw_delta_mid_bv_1D) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_1D_per_unit
     type: STRING
@@ -5049,7 +5051,7 @@ table:
     - vol slip 1D
     - vol pnl per unit 1D
     - volatility slip 1D
-    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D)'
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_1D
     type: STRING
@@ -5063,7 +5065,7 @@ table:
     - vol slip 1D
     - vol pnl 1D
     - volatility slippage 1D
-    formula: 'vol_slippage_1D_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_1D_per_unit
     type: STRING
@@ -5077,7 +5079,7 @@ table:
     - other slip 1D
     - residual slip 1D
     - unexplained slippage 1D
-    formula: '(tv_change_buysell_1D * contract_size * trade_size) - (delta_slippage_1D + roll_slippage_1D) — then per unit'
+    formula: '(tv_change_buysell_1D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1D_per_unit + roll_slippage_1D_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_1D
     type: STRING
@@ -5196,7 +5198,7 @@ table:
     - tv move 1d
     - tv move 1D
     - theo change 1D
-    formula: tv_1D - tv
+    formula: '(adjusted_tv_1D - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_1D
     type: STRING
@@ -5208,7 +5210,7 @@ table:
     - pnl 1d
     - pnl 1D
     - directional tv change 1D
-    formula: 'tv_change_1D * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_1D - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_1D_per_unit
     type: STRING
@@ -5220,7 +5222,7 @@ table:
     - roll slip 1d
     - roll slip 1D
     - roll pnl per unit 1D
-    formula: '((reference_roll_1D - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_1D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_1D
     type: STRING
@@ -5233,7 +5235,7 @@ table:
     - roll slip 1d
     - roll slip 1D
     - roll pnl 1D
-    formula: '((reference_roll_1D - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_1D - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_1D
     type: STRING
@@ -5243,7 +5245,7 @@ table:
       total_slippage calculation: total_slippage = (adjusted_tv_1D - tv) * trade_size * contract_size *
       buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 1 day (next trading day) with KPI adjustments
+    formula: 'tv_1D + delta_1D * (calculated_base_val_1D - (under_1D - roll_1D)) + 0.5 * gamma_1D * POW((calculated_base_val_1D - (under_1D - roll_1D)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_1D_per_unit
     type: STRING
@@ -5255,7 +5257,7 @@ table:
     - delta slip 1d
     - delta slip 1D
     - delta pnl per unit 1D
-    formula: '(calculated_base_val_1D - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_1D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_1D
     type: STRING
@@ -5278,7 +5280,7 @@ table:
       nature of vol changes between trade time and 5 days (next week). Subtracted from the raw vol impact
       in the vol_slippage formula to isolate true vol slippage from path effects.
     synonyms: []
-    formula: Path-dependent vol adjustment at 5 days (next week)
+    formula: '((calculated_base_val_5D - mid_base_val) * ((delta_5D - raw_delta_mid_bv_5D) + (delta - raw_delta_mid_bv)) / 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_5D_per_unit
     type: STRING
@@ -5292,7 +5294,7 @@ table:
     - vol slip 5D
     - vol pnl per unit 5D
     - volatility slip 5D
-    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D)'
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: vol_slippage_5D
     type: STRING
@@ -5306,7 +5308,7 @@ table:
     - vol slip 5D
     - vol pnl 5D
     - volatility slippage 5D
-    formula: 'vol_slippage_5D_per_unit * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_5D_per_unit
     type: STRING
@@ -5319,7 +5321,7 @@ table:
     - other slip 5D
     - residual slip 5D
     - unexplained slippage 5D
-    formula: '(tv_change_buysell_5D * contract_size * trade_size) - (delta_slippage_5D + roll_slippage_5D) — then per unit'
+    formula: '(tv_change_buysell_5D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5D_per_unit + roll_slippage_5D_per_unit)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: other_slippage_5D
     type: STRING
@@ -5437,7 +5439,7 @@ table:
     - tv move 5d
     - tv move 5D
     - theo change 5D
-    formula: tv_5D - tv
+    formula: '(adjusted_tv_5D - tv)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: tv_change_buysell_5D
     type: STRING
@@ -5449,7 +5451,7 @@ table:
     - pnl 5d
     - pnl 5D
     - directional tv change 5D
-    formula: 'tv_change_5D * buy_sell_multiplier (directional)'
+    formula: '(adjusted_tv_5D - tv) * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_5D_per_unit
     type: STRING
@@ -5461,7 +5463,7 @@ table:
     - roll slip 5d
     - roll slip 5D
     - roll pnl per unit 5D
-    formula: '((reference_roll_5D - ref_roll) * delta) — per unit'
+    formula: '((reference_roll_5D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: roll_slippage_5D
     type: STRING
@@ -5474,7 +5476,7 @@ table:
     - roll slip 5d
     - roll slip 5D
     - roll pnl 5D
-    formula: '((reference_roll_5D - ref_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
+    formula: '((reference_roll_5D - reference_roll) * delta) * trade_size * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: adjusted_tv_5D
     type: STRING
@@ -5483,7 +5485,7 @@ table:
       corrections applied to the 5 days (next week) theodata snapshot. Used in total_slippage calculation:
       total_slippage = (adjusted_tv_5D - tv) * trade_size * contract_size * buy_sell_multiplier.
     synonyms: []
-    formula: TV recalculated at 5 days (next week) with KPI adjustments
+    formula: 'tv_5D + delta_5D * (calculated_base_val_5D - (under_5D - roll_5D)) + 0.5 * gamma_5D * POW((calculated_base_val_5D - (under_5D - roll_5D)), 2)'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_5D_per_unit
     type: STRING
@@ -5495,7 +5497,7 @@ table:
     - delta slip 5d
     - delta slip 5D
     - delta pnl per unit 5D
-    formula: '(calculated_base_val_5D - mid_base_val) * delta — per unit'
+    formula: '((calculated_base_val_5D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
     source: KPI pipeline — kpi_markettrade_calculations.sql
   - name: delta_slippage_5D
     type: STRING
@@ -5541,7 +5543,7 @@ table:
     - delta exposure
     - hedge ratio
     - option delta
-    formula: 'ref_delta + (mid_base_val - ref_base_price) * ref_gamma'
+    formula: 'ref_delta + (((raw_bv_bid + raw_bv_ask) / 2) - ref_base_price) * ref_gamma'
     source: 'KPI pipeline — computed from MarketTrade.proto::VtCommon.refDelta, refGamma, refBasePrice'
   - name: gamma
     type: FLOAT
@@ -6051,12 +6053,14 @@ table:
       Stock roll value at the time of trade, representing the stock lending/borrowing cost component. Used
       in roll_slippage calculations for equity options.
     synonyms: []
+    formula: 'forward - under'
   - name: reference_roll
     type: FLOAT
     description: >-
       Reference roll at the time of trade, similar to ref_roll. Baseline for computing roll changes at
       each interval.
     synonyms: []
+    formula: 'CASE WHEN parent_is_combo = TRUE THEN ((forward - under) + roll) ELSE ((forward - under) + ref_roll) END'
   - name: is_expiry_trade
     type: BOOLEAN
     description: >-

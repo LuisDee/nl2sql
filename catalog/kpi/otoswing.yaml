@@ -2254,12 +2254,14 @@ table:
     - swing mid underlying
     - mid base value
     source: kpi_otoswing_calculations.sql
+    formula: '(raw_bv_bid + raw_bv_ask) / 2'
   - name: raw_delta_mid_bv
     type: FLOAT
     description: Raw (unadjusted) delta of the mid base value at the time of the OTO swing trade. Used internally in the pricing
       pipeline before adjustments are applied.
     synonyms:
     - raw mid delta
+    formula: 'raw_delta_mid_bv + (((raw_bv_bid + raw_bv_ask) / 2) - (under - roll)) * raw_gamma'
   - name: base_adjustment
     type: FLOAT
     description: Adjustment applied to the base (underlying) price for this OTO swing trade. Captures any systematic corrections
@@ -2268,6 +2270,7 @@ table:
     - base adj
     - underlying adjustment
     source: kpi_otoswing_calculations.sql
+    formula: 'layered_base_adjustment + odr_adjustment'
   - name: buy_sell_multiplier
     type: INTEGER
     description: 'Integer multiplier indicating trade direction: +1 for buy, -1 for sell. Used in all PnL and edge calculations
@@ -2277,6 +2280,7 @@ table:
     - side multiplier
     - bs multiplier
     business_rules: +1 = buy, -1 = sell. Multiply by edge to get directional PnL.
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN 1 ELSE -1 END"
   - name: tv
     type: FLOAT
     description: Theoretical value (fair value) of the option at the time of the OTO swing trade, as computed by the pricing
@@ -2290,6 +2294,7 @@ table:
     - TV
     business_rules: Primary fair-value reference for all instant_edge calculations. Check is_ref_theo_invalid for data quality.
     source: kpi_otoswing_normalized.sql
+    formula: 'CASE WHEN parent_is_combo = TRUE AND is_parent = TRUE THEN oto_tv WHEN parent_is_combo = TRUE AND is_parent = FALSE THEN tv_theo ELSE oto_tv END'
   - name: swing_mid_tv
     type: FLOAT
     description: Theoretical value computed using the swing mid base value instead of the standard delta-adjusted base price.
@@ -2321,7 +2326,7 @@ table:
     - trading edge
     - edge_bps
     - instant profit per unit
-    formula: buy_sell_multiplier * ((tv - nhr_adjustment) - avg_trade_price)
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (CASE WHEN trade_volume > 0 THEN ((tv - nhr_adjustment_bid) - avg_trade_price) ELSE 0 END) ELSE (CASE WHEN trade_volume > 0 THEN (avg_trade_price - (tv - nhr_adjustment_bid)) ELSE 0 END) END"
     business_rules: Based on avg_trade_price. Compare with instant_edge_fired_at for routed price version.
     source: kpi_otoswing_calculations.sql (KPI-Added)
   - name: instant_edge_fired_at
@@ -2335,8 +2340,7 @@ table:
     - fired edge
     - edge at fire
     - routed edge
-    formula: CASE WHEN routed_buy_sell IN (BUYSELL_BUY, 66) THEN ((tv - nhr_adjustment_bid) - routed_price) ELSE (routed_price
-      - (tv - nhr_adjustment_bid)) END
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((tv - nhr_adjustment_bid) - routed_price) ELSE (routed_price - (tv - nhr_adjustment_bid)) END"
     business_rules: 'Direction-aware: for buys, edge = theo - price; for sells, edge = price - theo. Uses NHR-adjusted TV.'
     source: kpi_otoswing_calculations.sql (KPI-Added)
   - name: instant_pnl
@@ -2350,7 +2354,7 @@ table:
     - loss
     - instant profit
     - trade pnl
-    formula: instant_edge * trade_volume * contract_size
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((tv - nhr_adjustment_bid) - avg_trade_price) * trade_volume * contract_size ELSE (avg_trade_price - (tv - nhr_adjustment_bid)) * trade_volume * contract_size END"
     business_rules: Based on trade_volume (filled). Compare with instant_pnl_fired_at for routed size version.
     source: kpi_otoswing_calculations.sql (KPI-Added)
   - name: instant_pnl_fired_at
@@ -2363,7 +2367,7 @@ table:
     - fired pnl
     - pnl at fire
     - routed pnl
-    formula: instant_edge_fired_at * routed_size * contract_size * buy_sell_multiplier
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((tv - nhr_adjustment_bid) - routed_price) * routed_size_capped * contract_size ELSE (routed_price - (tv - nhr_adjustment_bid)) * routed_size_capped * contract_size END"
     business_rules: Based on routed_size, not trade_volume. Compare with instant_pnl to measure execution slippage vs decision.
     source: kpi_otoswing_calculations.sql (KPI-Added)
   - name: instant_pnl_w_fees
@@ -2376,7 +2380,7 @@ table:
     - net PnL
     - profit after fees
     - net instant pnl
-    formula: instant_pnl - fees
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (((tv - nhr_adjustment_bid) - avg_trade_price) - fees) * trade_volume * contract_size ELSE ((avg_trade_price - (tv - nhr_adjustment_bid)) - fees) * trade_volume * contract_size END"
     source: kpi_otoswing_calculations.sql (KPI-Added)
   - name: instant_pnl_fired_at_w_fees
     type: FLOAT
@@ -2388,6 +2392,7 @@ table:
     - fired pnl with fees
     - net fire pnl
     source: kpi_otoswing_calculations.sql (KPI-Added)
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (((tv - nhr_adjustment_bid) - routed_price) - fees) * routed_size_capped * contract_size ELSE ((routed_price - (tv - nhr_adjustment_bid)) - fees) * routed_size_capped * contract_size END"
   - name: instant_edge_mid_tv
     type: FLOAT
     description: Instantaneous edge computed using swing_mid_tv as the fair value anchor instead of the standard TV. Measures
@@ -2395,7 +2400,7 @@ table:
       accounts for gamma effects.
     synonyms:
     - mid tv edge
-    formula: buy_sell_multiplier * (swing_mid_tv - avg_trade_price)
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (CASE WHEN trade_volume > 0 THEN ((swing_mid_tv - nhr_adjustment_bid) - avg_trade_price) ELSE 0 END) ELSE (CASE WHEN trade_volume > 0 THEN (avg_trade_price - (swing_mid_tv - nhr_adjustment_bid)) ELSE 0 END) END"
     source: kpi_otoswing_calculations.sql (KPI-Added)
   - name: instant_edge_fired_at_mid_tv
     type: FLOAT
@@ -2404,6 +2409,7 @@ table:
     synonyms:
     - fire edge mid tv
     source: kpi_otoswing_calculations.sql (KPI-Added)
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((swing_mid_tv - nhr_adjustment_bid) - routed_price) ELSE (routed_price - (swing_mid_tv - nhr_adjustment_bid)) END"
   - name: instant_pnl_mid_tv
     type: FLOAT
     description: Instantaneous PnL computed using swing_mid_tv as the fair value, multiplied by trade_volume and contract_size.
@@ -2411,6 +2417,7 @@ table:
     synonyms:
     - mid tv pnl
     source: kpi_otoswing_calculations.sql (KPI-Added)
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((swing_mid_tv - nhr_adjustment_bid) - avg_trade_price) * trade_volume * contract_size ELSE (avg_trade_price - (swing_mid_tv - nhr_adjustment_bid)) * trade_volume * contract_size END"
   - name: instant_pnl_fired_at_mid_tv
     type: FLOAT
     description: Instantaneous PnL at the fired price using swing_mid_tv, multiplied by routed_size and contract_size. Combines
@@ -2418,6 +2425,7 @@ table:
     synonyms:
     - fire pnl mid tv
     source: kpi_otoswing_calculations.sql (KPI-Added)
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((swing_mid_tv - nhr_adjustment_bid) - routed_price) * routed_size_capped * contract_size ELSE (routed_price - (swing_mid_tv - nhr_adjustment_bid)) * routed_size_capped * contract_size END"
   - name: instant_pnl_w_fees_mid_tv
     type: FLOAT
     description: Instantaneous PnL using swing_mid_tv including exchange and clearing fees. The net version of instant_pnl_mid_tv
@@ -2425,6 +2433,7 @@ table:
     synonyms:
     - mid tv net pnl
     source: kpi_otoswing_calculations.sql (KPI-Added)
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (((swing_mid_tv - nhr_adjustment_bid) - avg_trade_price) - fees) * trade_volume * contract_size ELSE ((avg_trade_price - (swing_mid_tv - nhr_adjustment_bid)) - fees) * trade_volume * contract_size END"
   - name: instant_pnl_fired_at_w_fees_mid_tv
     type: FLOAT
     description: Instantaneous PnL at fired price using swing_mid_tv including fees. The net fired_at version of PnL after
@@ -2432,6 +2441,7 @@ table:
     synonyms:
     - fire net pnl mid tv
     source: kpi_otoswing_calculations.sql (KPI-Added)
+    formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (((swing_mid_tv - nhr_adjustment_bid) - routed_price) - fees) * routed_size_capped * contract_size ELSE ((routed_price - (swing_mid_tv - nhr_adjustment_bid)) - fees) * routed_size_capped * contract_size END"
   - name: mark_to_mid_pnl_per_unit
     type: FLOAT
     description: Mark-to-mid PnL per unit, measuring the difference between the fill price and the mid-market theoretical
@@ -2440,6 +2450,7 @@ table:
     - m2m per unit
     - mark to mid per lot
     source: kpi_otoswing_calculations.sql (KPI-Added)
+    formula: '(tv - swing_mid_tv) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier * -1'
   - name: mark_to_mid_pnl
     type: FLOAT
     description: Total mark-to-mid PnL for this trade, computed as mark_to_mid_pnl_per_unit times trade_volume and contract_size.
@@ -2448,6 +2459,7 @@ table:
     - m2m pnl
     - mark to mid
     source: kpi_otoswing_calculations.sql (KPI-Added)
+    formula: '(tv - swing_mid_tv) * trade_volume * contract_size * buy_sell_multiplier * -1'
   - name: mark_to_mid_pnl_fired_at
     type: FLOAT
     description: Mark-to-mid PnL based on the fired (routed) price and routed_size rather than the average fill price and
@@ -2456,6 +2468,7 @@ table:
     - fire m2m pnl
     - mark to mid fire
     source: kpi_otoswing_calculations.sql (KPI-Added)
+    formula: '(tv - swing_mid_tv) * routed_size_capped * contract_size * buy_sell_multiplier * -1'
   - name: routed_buy_sell
     type: STRING
     description: Direction of the routed OTO swing order as a raw proto enum string. Values include BUYSELL_BUY (or numeric
@@ -2478,6 +2491,7 @@ table:
     description: Estimated volatility path effect at the 1 second horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and 1 second after.
     synonyms: []
+    formula: '((calculated_base_val_1s - swing_mid_base_val) * ((delta_1s - raw_delta_mid_bv_1s) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_1s_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the 1 second horizon, measuring how much of the
@@ -2486,12 +2500,14 @@ table:
     synonyms:
     - vol slip 1s
     - vol slip 1s per unit
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1s
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the 1 second horizon, measuring the total vol-driven
       PnL change from trade time to 1 second after. Equals vol_slippage_1s_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 1s
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_1s_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the 1 second horizon, measuring how much of
@@ -2500,12 +2516,14 @@ table:
     synonyms:
     - other slip 1s
     - other slip 1s per unit
+    formula: '(tv_change_buysell_1s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1s_per_unit + roll_slippage_1s_per_unit)'
   - name: other_slippage_1s
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the 1 second horizon, measuring the total other-driven
       PnL change from trade time to 1 second after. Equals other_slippage_1s_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip 1s
+    formula: '(tv_change_buysell_1s * contract_size * trade_volume) - (delta_slippage_1s + roll_slippage_1s)'
   - name: tv_1s
     type: FLOAT
     description: Theoretical value (fair value) at 1 second after the OTO swing trade, taken from the forward-looking theo
@@ -2576,12 +2594,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move 1s
+    formula: '(adjusted_tv_1s - swing_mid_tv)'
   - name: tv_change_buysell_1s
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at 1 second, representing the realized PnL per unit from the TV
       movement. Positive = profitable direction.
     synonyms:
     - pnl 1s
+    formula: '(adjusted_tv_1s - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_1s_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the 1 second horizon, measuring how much of the per-contract
@@ -2590,17 +2610,20 @@ table:
     synonyms:
     - roll slip 1s
     - roll slip 1s per unit
+    formula: '((reference_roll_1s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1s
     type: FLOAT
     description: Roll slippage component (total, in currency) at the 1 second horizon, measuring the total roll-driven PnL
       change from trade time to 1 second after. Equals roll_slippage_1s_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 1s
+    formula: '((reference_roll_1s - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1s
     type: FLOAT
     description: Adjusted theoretical value at 1 second after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_1s + delta_1s * (calculated_base_val_1s - (under_1s - roll_1s)) + 0.5 * gamma_1s * POW((calculated_base_val_1s - (under_1s - roll_1s)), 2)'
   - name: delta_slippage_1s_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the 1 second horizon, measuring how much of the per-contract
@@ -2609,12 +2632,14 @@ table:
     synonyms:
     - delta slip 1s
     - delta slip 1s per unit
+    formula: '((calculated_base_val_1s - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1s
     type: FLOAT
     description: Delta slippage component (total, in currency) at the 1 second horizon, measuring the total delta-driven PnL
       change from trade time to 1 second after. Equals delta_slippage_1s_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 1s
+    formula: '((calculated_base_val_1s - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1s_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the 1 second horizon, computed using routed_size (fired size) instead of
@@ -2626,6 +2651,7 @@ table:
     - fire vol pnl 1s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_1s for fill-based version.
+    formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_1s_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the 1 second horizon, computed using routed_size (fired size) instead
@@ -2638,6 +2664,7 @@ table:
     - fire unexplained pnl 1s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_1s for fill-based version.
+    formula: '(tv_change_buysell_1s * contract_size * routed_size_capped) - (delta_slippage_1s_fired_at + roll_slippage_1s_fired_at)'
   - name: delta_slippage_1s_fired_at
     type: FLOAT
     description: 'Delta slippage component at the 1 second horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -2649,6 +2676,7 @@ table:
     - fire delta pnl 1s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_1s for fill-based version.
+    formula: '((calculated_base_val_1s - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1s_fired_at
     type: FLOAT
     description: 'Roll slippage component at the 1 second horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -2660,11 +2688,13 @@ table:
     - fire roll pnl 1s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_1s for fill-based version.
+    formula: '((reference_roll_1s - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_5s
     type: FLOAT
     description: Estimated volatility path effect at the 5 seconds horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and 5 seconds after.
     synonyms: []
+    formula: '((calculated_base_val_5s - swing_mid_base_val) * ((delta_5s - raw_delta_mid_bv_5s) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_5s_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the 5 seconds horizon, measuring how much of the
@@ -2673,12 +2703,14 @@ table:
     synonyms:
     - vol slip 5s
     - vol slip 5s per unit
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5s
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the 5 seconds horizon, measuring the total vol-driven
       PnL change from trade time to 5 seconds after. Equals vol_slippage_5s_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 5s
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_5s_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the 5 seconds horizon, measuring how much of
@@ -2687,12 +2719,14 @@ table:
     synonyms:
     - other slip 5s
     - other slip 5s per unit
+    formula: '(tv_change_buysell_5s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5s_per_unit + roll_slippage_5s_per_unit)'
   - name: other_slippage_5s
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the 5 seconds horizon, measuring the total other-driven
       PnL change from trade time to 5 seconds after. Equals other_slippage_5s_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip 5s
+    formula: '(tv_change_buysell_5s * contract_size * trade_volume) - (delta_slippage_5s + roll_slippage_5s)'
   - name: tv_5s
     type: FLOAT
     description: Theoretical value (fair value) at 5 seconds after the OTO swing trade, taken from the forward-looking theo
@@ -2763,12 +2797,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move 5s
+    formula: '(adjusted_tv_5s - swing_mid_tv)'
   - name: tv_change_buysell_5s
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at 5 seconds, representing the realized PnL per unit from the TV
       movement. Positive = profitable direction.
     synonyms:
     - pnl 5s
+    formula: '(adjusted_tv_5s - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_5s_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the 5 seconds horizon, measuring how much of the per-contract
@@ -2777,17 +2813,20 @@ table:
     synonyms:
     - roll slip 5s
     - roll slip 5s per unit
+    formula: '((reference_roll_5s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5s
     type: FLOAT
     description: Roll slippage component (total, in currency) at the 5 seconds horizon, measuring the total roll-driven PnL
       change from trade time to 5 seconds after. Equals roll_slippage_5s_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 5s
+    formula: '((reference_roll_5s - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_5s
     type: FLOAT
     description: Adjusted theoretical value at 5 seconds after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_5s + delta_5s * (calculated_base_val_5s - (under_5s - roll_5s)) + 0.5 * gamma_5s * POW((calculated_base_val_5s - (under_5s - roll_5s)), 2)'
   - name: delta_slippage_5s_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the 5 seconds horizon, measuring how much of the per-contract
@@ -2796,12 +2835,14 @@ table:
     synonyms:
     - delta slip 5s
     - delta slip 5s per unit
+    formula: '((calculated_base_val_5s - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_5s
     type: FLOAT
     description: Delta slippage component (total, in currency) at the 5 seconds horizon, measuring the total delta-driven
       PnL change from trade time to 5 seconds after. Equals delta_slippage_5s_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 5s
+    formula: '((calculated_base_val_5s - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5s_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the 5 seconds horizon, computed using routed_size (fired size) instead
@@ -2813,6 +2854,7 @@ table:
     - fire vol pnl 5s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_5s for fill-based version.
+    formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_5s_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the 5 seconds horizon, computed using routed_size (fired size) instead
@@ -2825,6 +2867,7 @@ table:
     - fire unexplained pnl 5s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_5s for fill-based version.
+    formula: '(tv_change_buysell_5s * contract_size * routed_size_capped) - (delta_slippage_5s_fired_at + roll_slippage_5s_fired_at)'
   - name: delta_slippage_5s_fired_at
     type: FLOAT
     description: 'Delta slippage component at the 5 seconds horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -2836,6 +2879,7 @@ table:
     - fire delta pnl 5s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_5s for fill-based version.
+    formula: '((calculated_base_val_5s - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5s_fired_at
     type: FLOAT
     description: 'Roll slippage component at the 5 seconds horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -2847,11 +2891,13 @@ table:
     - fire roll pnl 5s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_5s for fill-based version.
+    formula: '((reference_roll_5s - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_10s
     type: FLOAT
     description: Estimated volatility path effect at the 10 seconds horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and 10 seconds after.
     synonyms: []
+    formula: '((calculated_base_val_10s - swing_mid_base_val) * ((delta_10s - raw_delta_mid_bv_10s) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_10s_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the 10 seconds horizon, measuring how much of the
@@ -2860,12 +2906,14 @@ table:
     synonyms:
     - vol slip 10s
     - vol slip 10s per unit
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_10s
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the 10 seconds horizon, measuring the total vol-driven
       PnL change from trade time to 10 seconds after. Equals vol_slippage_10s_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 10s
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_10s_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the 10 seconds horizon, measuring how much of
@@ -2874,12 +2922,14 @@ table:
     synonyms:
     - other slip 10s
     - other slip 10s per unit
+    formula: '(tv_change_buysell_10s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10s_per_unit + roll_slippage_10s_per_unit)'
   - name: other_slippage_10s
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the 10 seconds horizon, measuring the total other-driven
       PnL change from trade time to 10 seconds after. Equals other_slippage_10s_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip 10s
+    formula: '(tv_change_buysell_10s * contract_size * trade_volume) - (delta_slippage_10s + roll_slippage_10s)'
   - name: tv_10s
     type: FLOAT
     description: Theoretical value (fair value) at 10 seconds after the OTO swing trade, taken from the forward-looking theo
@@ -2950,12 +3000,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move 10s
+    formula: '(adjusted_tv_10s - swing_mid_tv)'
   - name: tv_change_buysell_10s
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at 10 seconds, representing the realized PnL per unit from the
       TV movement. Positive = profitable direction.
     synonyms:
     - pnl 10s
+    formula: '(adjusted_tv_10s - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_10s_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the 10 seconds horizon, measuring how much of the per-contract
@@ -2964,17 +3016,20 @@ table:
     synonyms:
     - roll slip 10s
     - roll slip 10s per unit
+    formula: '((reference_roll_10s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_10s
     type: FLOAT
     description: Roll slippage component (total, in currency) at the 10 seconds horizon, measuring the total roll-driven PnL
       change from trade time to 10 seconds after. Equals roll_slippage_10s_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 10s
+    formula: '((reference_roll_10s - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_10s
     type: FLOAT
     description: Adjusted theoretical value at 10 seconds after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_10s + delta_10s * (calculated_base_val_10s - (under_10s - roll_10s)) + 0.5 * gamma_10s * POW((calculated_base_val_10s - (under_10s - roll_10s)), 2)'
   - name: delta_slippage_10s_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the 10 seconds horizon, measuring how much of the per-contract
@@ -2983,12 +3038,14 @@ table:
     synonyms:
     - delta slip 10s
     - delta slip 10s per unit
+    formula: '((calculated_base_val_10s - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_10s
     type: FLOAT
     description: Delta slippage component (total, in currency) at the 10 seconds horizon, measuring the total delta-driven
       PnL change from trade time to 10 seconds after. Equals delta_slippage_10s_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 10s
+    formula: '((calculated_base_val_10s - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_10s_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the 10 seconds horizon, computed using routed_size (fired size) instead
@@ -3000,6 +3057,7 @@ table:
     - fire vol pnl 10s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_10s for fill-based version.
+    formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_10s_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the 10 seconds horizon, computed using routed_size (fired size) instead
@@ -3012,6 +3070,7 @@ table:
     - fire unexplained pnl 10s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_10s for fill-based version.
+    formula: '(tv_change_buysell_10s * contract_size * routed_size_capped) - (delta_slippage_10s_fired_at + roll_slippage_10s_fired_at)'
   - name: delta_slippage_10s_fired_at
     type: FLOAT
     description: 'Delta slippage component at the 10 seconds horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3023,6 +3082,7 @@ table:
     - fire delta pnl 10s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_10s for fill-based version.
+    formula: '((calculated_base_val_10s - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_10s_fired_at
     type: FLOAT
     description: 'Roll slippage component at the 10 seconds horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3034,11 +3094,13 @@ table:
     - fire roll pnl 10s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_10s for fill-based version.
+    formula: '((reference_roll_10s - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_30s
     type: FLOAT
     description: Estimated volatility path effect at the 30 seconds horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and 30 seconds after.
     synonyms: []
+    formula: '((calculated_base_val_30s - swing_mid_base_val) * ((delta_30s - raw_delta_mid_bv_30s) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_30s_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the 30 seconds horizon, measuring how much of the
@@ -3047,12 +3109,14 @@ table:
     synonyms:
     - vol slip 30s
     - vol slip 30s per unit
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_30s
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the 30 seconds horizon, measuring the total vol-driven
       PnL change from trade time to 30 seconds after. Equals vol_slippage_30s_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 30s
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_30s_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the 30 seconds horizon, measuring how much of
@@ -3061,12 +3125,14 @@ table:
     synonyms:
     - other slip 30s
     - other slip 30s per unit
+    formula: '(tv_change_buysell_30s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30s_per_unit + roll_slippage_30s_per_unit)'
   - name: other_slippage_30s
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the 30 seconds horizon, measuring the total other-driven
       PnL change from trade time to 30 seconds after. Equals other_slippage_30s_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip 30s
+    formula: '(tv_change_buysell_30s * contract_size * trade_volume) - (delta_slippage_30s + roll_slippage_30s)'
   - name: tv_30s
     type: FLOAT
     description: Theoretical value (fair value) at 30 seconds after the OTO swing trade, taken from the forward-looking theo
@@ -3137,12 +3203,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move 30s
+    formula: '(adjusted_tv_30s - swing_mid_tv)'
   - name: tv_change_buysell_30s
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at 30 seconds, representing the realized PnL per unit from the
       TV movement. Positive = profitable direction.
     synonyms:
     - pnl 30s
+    formula: '(adjusted_tv_30s - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_30s_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the 30 seconds horizon, measuring how much of the per-contract
@@ -3151,17 +3219,20 @@ table:
     synonyms:
     - roll slip 30s
     - roll slip 30s per unit
+    formula: '((reference_roll_30s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_30s
     type: FLOAT
     description: Roll slippage component (total, in currency) at the 30 seconds horizon, measuring the total roll-driven PnL
       change from trade time to 30 seconds after. Equals roll_slippage_30s_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 30s
+    formula: '((reference_roll_30s - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_30s
     type: FLOAT
     description: Adjusted theoretical value at 30 seconds after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_30s + delta_30s * (calculated_base_val_30s - (under_30s - roll_30s)) + 0.5 * gamma_30s * POW((calculated_base_val_30s - (under_30s - roll_30s)), 2)'
   - name: delta_slippage_30s_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the 30 seconds horizon, measuring how much of the per-contract
@@ -3170,12 +3241,14 @@ table:
     synonyms:
     - delta slip 30s
     - delta slip 30s per unit
+    formula: '((calculated_base_val_30s - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_30s
     type: FLOAT
     description: Delta slippage component (total, in currency) at the 30 seconds horizon, measuring the total delta-driven
       PnL change from trade time to 30 seconds after. Equals delta_slippage_30s_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 30s
+    formula: '((calculated_base_val_30s - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_30s_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the 30 seconds horizon, computed using routed_size (fired size) instead
@@ -3187,6 +3260,7 @@ table:
     - fire vol pnl 30s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_30s for fill-based version.
+    formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_30s_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the 30 seconds horizon, computed using routed_size (fired size) instead
@@ -3199,6 +3273,7 @@ table:
     - fire unexplained pnl 30s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_30s for fill-based version.
+    formula: '(tv_change_buysell_30s * contract_size * routed_size_capped) - (delta_slippage_30s_fired_at + roll_slippage_30s_fired_at)'
   - name: delta_slippage_30s_fired_at
     type: FLOAT
     description: 'Delta slippage component at the 30 seconds horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3210,6 +3285,7 @@ table:
     - fire delta pnl 30s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_30s for fill-based version.
+    formula: '((calculated_base_val_30s - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_30s_fired_at
     type: FLOAT
     description: 'Roll slippage component at the 30 seconds horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3221,11 +3297,13 @@ table:
     - fire roll pnl 30s
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_30s for fill-based version.
+    formula: '((reference_roll_30s - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_1m
     type: FLOAT
     description: Estimated volatility path effect at the 1 minute horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and 1 minute after.
     synonyms: []
+    formula: '((calculated_base_val_1m - swing_mid_base_val) * ((delta_1m - raw_delta_mid_bv_1m) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_1m_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the 1 minute horizon, measuring how much of the
@@ -3234,12 +3312,14 @@ table:
     synonyms:
     - vol slip 1m
     - vol slip 1m per unit
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1m
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the 1 minute horizon, measuring the total vol-driven
       PnL change from trade time to 1 minute after. Equals vol_slippage_1m_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 1m
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_1m_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the 1 minute horizon, measuring how much of
@@ -3248,12 +3328,14 @@ table:
     synonyms:
     - other slip 1m
     - other slip 1m per unit
+    formula: '(tv_change_buysell_1m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1m_per_unit + roll_slippage_1m_per_unit)'
   - name: other_slippage_1m
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the 1 minute horizon, measuring the total other-driven
       PnL change from trade time to 1 minute after. Equals other_slippage_1m_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip 1m
+    formula: '(tv_change_buysell_1m * contract_size * trade_volume) - (delta_slippage_1m + roll_slippage_1m)'
   - name: tv_1m
     type: FLOAT
     description: Theoretical value (fair value) at 1 minute after the OTO swing trade, taken from the forward-looking theo
@@ -3324,12 +3406,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move 1m
+    formula: '(adjusted_tv_1m - swing_mid_tv)'
   - name: tv_change_buysell_1m
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at 1 minute, representing the realized PnL per unit from the TV
       movement. Positive = profitable direction.
     synonyms:
     - pnl 1m
+    formula: '(adjusted_tv_1m - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_1m_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the 1 minute horizon, measuring how much of the per-contract
@@ -3338,17 +3422,20 @@ table:
     synonyms:
     - roll slip 1m
     - roll slip 1m per unit
+    formula: '((reference_roll_1m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1m
     type: FLOAT
     description: Roll slippage component (total, in currency) at the 1 minute horizon, measuring the total roll-driven PnL
       change from trade time to 1 minute after. Equals roll_slippage_1m_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 1m
+    formula: '((reference_roll_1m - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1m
     type: FLOAT
     description: Adjusted theoretical value at 1 minute after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_1m + delta_1m * (calculated_base_val_1m - (under_1m - roll_1m)) + 0.5 * gamma_1m * POW((calculated_base_val_1m - (under_1m - roll_1m)), 2)'
   - name: delta_slippage_1m_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the 1 minute horizon, measuring how much of the per-contract
@@ -3357,12 +3444,14 @@ table:
     synonyms:
     - delta slip 1m
     - delta slip 1m per unit
+    formula: '((calculated_base_val_1m - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1m
     type: FLOAT
     description: Delta slippage component (total, in currency) at the 1 minute horizon, measuring the total delta-driven PnL
       change from trade time to 1 minute after. Equals delta_slippage_1m_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 1m
+    formula: '((calculated_base_val_1m - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1m_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the 1 minute horizon, computed using routed_size (fired size) instead of
@@ -3374,6 +3463,7 @@ table:
     - fire vol pnl 1m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_1m for fill-based version.
+    formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_1m_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the 1 minute horizon, computed using routed_size (fired size) instead
@@ -3386,6 +3476,7 @@ table:
     - fire unexplained pnl 1m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_1m for fill-based version.
+    formula: '(tv_change_buysell_1m * contract_size * routed_size_capped) - (delta_slippage_1m_fired_at + roll_slippage_1m_fired_at)'
   - name: delta_slippage_1m_fired_at
     type: FLOAT
     description: 'Delta slippage component at the 1 minute horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3397,6 +3488,7 @@ table:
     - fire delta pnl 1m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_1m for fill-based version.
+    formula: '((calculated_base_val_1m - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1m_fired_at
     type: FLOAT
     description: 'Roll slippage component at the 1 minute horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3408,11 +3500,13 @@ table:
     - fire roll pnl 1m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_1m for fill-based version.
+    formula: '((reference_roll_1m - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_5m
     type: FLOAT
     description: Estimated volatility path effect at the 5 minutes horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and 5 minutes after.
     synonyms: []
+    formula: '((calculated_base_val_5m - swing_mid_base_val) * ((delta_5m - raw_delta_mid_bv_5m) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_5m_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the 5 minutes horizon, measuring how much of the
@@ -3421,12 +3515,14 @@ table:
     synonyms:
     - vol slip 5m
     - vol slip 5m per unit
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5m
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the 5 minutes horizon, measuring the total vol-driven
       PnL change from trade time to 5 minutes after. Equals vol_slippage_5m_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 5m
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_5m_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the 5 minutes horizon, measuring how much of
@@ -3435,12 +3531,14 @@ table:
     synonyms:
     - other slip 5m
     - other slip 5m per unit
+    formula: '(tv_change_buysell_5m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5m_per_unit + roll_slippage_5m_per_unit)'
   - name: other_slippage_5m
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the 5 minutes horizon, measuring the total other-driven
       PnL change from trade time to 5 minutes after. Equals other_slippage_5m_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip 5m
+    formula: '(tv_change_buysell_5m * contract_size * trade_volume) - (delta_slippage_5m + roll_slippage_5m)'
   - name: tv_5m
     type: FLOAT
     description: Theoretical value (fair value) at 5 minutes after the OTO swing trade, taken from the forward-looking theo
@@ -3511,12 +3609,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move 5m
+    formula: '(adjusted_tv_5m - swing_mid_tv)'
   - name: tv_change_buysell_5m
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at 5 minutes, representing the realized PnL per unit from the TV
       movement. Positive = profitable direction.
     synonyms:
     - pnl 5m
+    formula: '(adjusted_tv_5m - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_5m_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the 5 minutes horizon, measuring how much of the per-contract
@@ -3525,17 +3625,20 @@ table:
     synonyms:
     - roll slip 5m
     - roll slip 5m per unit
+    formula: '((reference_roll_5m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5m
     type: FLOAT
     description: Roll slippage component (total, in currency) at the 5 minutes horizon, measuring the total roll-driven PnL
       change from trade time to 5 minutes after. Equals roll_slippage_5m_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 5m
+    formula: '((reference_roll_5m - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_5m
     type: FLOAT
     description: Adjusted theoretical value at 5 minutes after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_5m + delta_5m * (calculated_base_val_5m - (under_5m - roll_5m)) + 0.5 * gamma_5m * POW((calculated_base_val_5m - (under_5m - roll_5m)), 2)'
   - name: delta_slippage_5m_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the 5 minutes horizon, measuring how much of the per-contract
@@ -3544,12 +3647,14 @@ table:
     synonyms:
     - delta slip 5m
     - delta slip 5m per unit
+    formula: '((calculated_base_val_5m - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_5m
     type: FLOAT
     description: Delta slippage component (total, in currency) at the 5 minutes horizon, measuring the total delta-driven
       PnL change from trade time to 5 minutes after. Equals delta_slippage_5m_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 5m
+    formula: '((calculated_base_val_5m - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5m_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the 5 minutes horizon, computed using routed_size (fired size) instead
@@ -3561,6 +3666,7 @@ table:
     - fire vol pnl 5m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_5m for fill-based version.
+    formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_5m_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the 5 minutes horizon, computed using routed_size (fired size) instead
@@ -3573,6 +3679,7 @@ table:
     - fire unexplained pnl 5m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_5m for fill-based version.
+    formula: '(tv_change_buysell_5m * contract_size * routed_size_capped) - (delta_slippage_5m_fired_at + roll_slippage_5m_fired_at)'
   - name: delta_slippage_5m_fired_at
     type: FLOAT
     description: 'Delta slippage component at the 5 minutes horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3584,6 +3691,7 @@ table:
     - fire delta pnl 5m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_5m for fill-based version.
+    formula: '((calculated_base_val_5m - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5m_fired_at
     type: FLOAT
     description: 'Roll slippage component at the 5 minutes horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3595,11 +3703,13 @@ table:
     - fire roll pnl 5m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_5m for fill-based version.
+    formula: '((reference_roll_5m - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_10m
     type: FLOAT
     description: Estimated volatility path effect at the 10 minutes horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and 10 minutes after.
     synonyms: []
+    formula: '((calculated_base_val_10m - swing_mid_base_val) * ((delta_10m - raw_delta_mid_bv_10m) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_10m_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the 10 minutes horizon, measuring how much of the
@@ -3608,12 +3718,14 @@ table:
     synonyms:
     - vol slip 10m
     - vol slip 10m per unit
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_10m
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the 10 minutes horizon, measuring the total vol-driven
       PnL change from trade time to 10 minutes after. Equals vol_slippage_10m_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 10m
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_10m_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the 10 minutes horizon, measuring how much of
@@ -3622,12 +3734,14 @@ table:
     synonyms:
     - other slip 10m
     - other slip 10m per unit
+    formula: '(tv_change_buysell_10m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10m_per_unit + roll_slippage_10m_per_unit)'
   - name: other_slippage_10m
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the 10 minutes horizon, measuring the total other-driven
       PnL change from trade time to 10 minutes after. Equals other_slippage_10m_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip 10m
+    formula: '(tv_change_buysell_10m * contract_size * trade_volume) - (delta_slippage_10m + roll_slippage_10m)'
   - name: tv_10m
     type: FLOAT
     description: Theoretical value (fair value) at 10 minutes after the OTO swing trade, taken from the forward-looking theo
@@ -3698,12 +3812,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move 10m
+    formula: '(adjusted_tv_10m - swing_mid_tv)'
   - name: tv_change_buysell_10m
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at 10 minutes, representing the realized PnL per unit from the
       TV movement. Positive = profitable direction.
     synonyms:
     - pnl 10m
+    formula: '(adjusted_tv_10m - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_10m_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the 10 minutes horizon, measuring how much of the per-contract
@@ -3712,17 +3828,20 @@ table:
     synonyms:
     - roll slip 10m
     - roll slip 10m per unit
+    formula: '((reference_roll_10m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_10m
     type: FLOAT
     description: Roll slippage component (total, in currency) at the 10 minutes horizon, measuring the total roll-driven PnL
       change from trade time to 10 minutes after. Equals roll_slippage_10m_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 10m
+    formula: '((reference_roll_10m - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_10m
     type: FLOAT
     description: Adjusted theoretical value at 10 minutes after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_10m + delta_10m * (calculated_base_val_10m - (under_10m - roll_10m)) + 0.5 * gamma_10m * POW((calculated_base_val_10m - (under_10m - roll_10m)), 2)'
   - name: delta_slippage_10m_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the 10 minutes horizon, measuring how much of the per-contract
@@ -3731,12 +3850,14 @@ table:
     synonyms:
     - delta slip 10m
     - delta slip 10m per unit
+    formula: '((calculated_base_val_10m - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_10m
     type: FLOAT
     description: Delta slippage component (total, in currency) at the 10 minutes horizon, measuring the total delta-driven
       PnL change from trade time to 10 minutes after. Equals delta_slippage_10m_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 10m
+    formula: '((calculated_base_val_10m - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_10m_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the 10 minutes horizon, computed using routed_size (fired size) instead
@@ -3748,6 +3869,7 @@ table:
     - fire vol pnl 10m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_10m for fill-based version.
+    formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_10m_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the 10 minutes horizon, computed using routed_size (fired size) instead
@@ -3760,6 +3882,7 @@ table:
     - fire unexplained pnl 10m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_10m for fill-based version.
+    formula: '(tv_change_buysell_10m * contract_size * routed_size_capped) - (delta_slippage_10m_fired_at + roll_slippage_10m_fired_at)'
   - name: delta_slippage_10m_fired_at
     type: FLOAT
     description: 'Delta slippage component at the 10 minutes horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3771,6 +3894,7 @@ table:
     - fire delta pnl 10m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_10m for fill-based version.
+    formula: '((calculated_base_val_10m - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_10m_fired_at
     type: FLOAT
     description: 'Roll slippage component at the 10 minutes horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3782,11 +3906,13 @@ table:
     - fire roll pnl 10m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_10m for fill-based version.
+    formula: '((reference_roll_10m - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_30m
     type: FLOAT
     description: Estimated volatility path effect at the 30 minutes horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and 30 minutes after.
     synonyms: []
+    formula: '((calculated_base_val_30m - swing_mid_base_val) * ((delta_30m - raw_delta_mid_bv_30m) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_30m_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the 30 minutes horizon, measuring how much of the
@@ -3795,12 +3921,14 @@ table:
     synonyms:
     - vol slip 30m
     - vol slip 30m per unit
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_30m
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the 30 minutes horizon, measuring the total vol-driven
       PnL change from trade time to 30 minutes after. Equals vol_slippage_30m_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 30m
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_30m_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the 30 minutes horizon, measuring how much of
@@ -3809,12 +3937,14 @@ table:
     synonyms:
     - other slip 30m
     - other slip 30m per unit
+    formula: '(tv_change_buysell_30m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30m_per_unit + roll_slippage_30m_per_unit)'
   - name: other_slippage_30m
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the 30 minutes horizon, measuring the total other-driven
       PnL change from trade time to 30 minutes after. Equals other_slippage_30m_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip 30m
+    formula: '(tv_change_buysell_30m * contract_size * trade_volume) - (delta_slippage_30m + roll_slippage_30m)'
   - name: tv_30m
     type: FLOAT
     description: Theoretical value (fair value) at 30 minutes after the OTO swing trade, taken from the forward-looking theo
@@ -3885,12 +4015,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move 30m
+    formula: '(adjusted_tv_30m - swing_mid_tv)'
   - name: tv_change_buysell_30m
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at 30 minutes, representing the realized PnL per unit from the
       TV movement. Positive = profitable direction.
     synonyms:
     - pnl 30m
+    formula: '(adjusted_tv_30m - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_30m_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the 30 minutes horizon, measuring how much of the per-contract
@@ -3899,17 +4031,20 @@ table:
     synonyms:
     - roll slip 30m
     - roll slip 30m per unit
+    formula: '((reference_roll_30m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_30m
     type: FLOAT
     description: Roll slippage component (total, in currency) at the 30 minutes horizon, measuring the total roll-driven PnL
       change from trade time to 30 minutes after. Equals roll_slippage_30m_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 30m
+    formula: '((reference_roll_30m - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_30m
     type: FLOAT
     description: Adjusted theoretical value at 30 minutes after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_30m + delta_30m * (calculated_base_val_30m - (under_30m - roll_30m)) + 0.5 * gamma_30m * POW((calculated_base_val_30m - (under_30m - roll_30m)), 2)'
   - name: delta_slippage_30m_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the 30 minutes horizon, measuring how much of the per-contract
@@ -3918,12 +4053,14 @@ table:
     synonyms:
     - delta slip 30m
     - delta slip 30m per unit
+    formula: '((calculated_base_val_30m - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_30m
     type: FLOAT
     description: Delta slippage component (total, in currency) at the 30 minutes horizon, measuring the total delta-driven
       PnL change from trade time to 30 minutes after. Equals delta_slippage_30m_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 30m
+    formula: '((calculated_base_val_30m - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_30m_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the 30 minutes horizon, computed using routed_size (fired size) instead
@@ -3935,6 +4072,7 @@ table:
     - fire vol pnl 30m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_30m for fill-based version.
+    formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_30m_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the 30 minutes horizon, computed using routed_size (fired size) instead
@@ -3947,6 +4085,7 @@ table:
     - fire unexplained pnl 30m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_30m for fill-based version.
+    formula: '(tv_change_buysell_30m * contract_size * routed_size_capped) - (delta_slippage_30m_fired_at + roll_slippage_30m_fired_at)'
   - name: delta_slippage_30m_fired_at
     type: FLOAT
     description: 'Delta slippage component at the 30 minutes horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3958,6 +4097,7 @@ table:
     - fire delta pnl 30m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_30m for fill-based version.
+    formula: '((calculated_base_val_30m - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_30m_fired_at
     type: FLOAT
     description: 'Roll slippage component at the 30 minutes horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -3969,11 +4109,13 @@ table:
     - fire roll pnl 30m
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_30m for fill-based version.
+    formula: '((reference_roll_30m - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_1h
     type: FLOAT
     description: Estimated volatility path effect at the 1 hour horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and 1 hour after.
     synonyms: []
+    formula: '((calculated_base_val_1h - swing_mid_base_val) * ((delta_1h - raw_delta_mid_bv_1h) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_1h_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the 1 hour horizon, measuring how much of the per-contract
@@ -3982,12 +4124,14 @@ table:
     synonyms:
     - vol slip 1h
     - vol slip 1h per unit
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1h
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the 1 hour horizon, measuring the total vol-driven
       PnL change from trade time to 1 hour after. Equals vol_slippage_1h_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 1h
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_1h_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the 1 hour horizon, measuring how much of the
@@ -3996,12 +4140,14 @@ table:
     synonyms:
     - other slip 1h
     - other slip 1h per unit
+    formula: '(tv_change_buysell_1h * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1h_per_unit + roll_slippage_1h_per_unit)'
   - name: other_slippage_1h
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the 1 hour horizon, measuring the total other-driven
       PnL change from trade time to 1 hour after. Equals other_slippage_1h_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip 1h
+    formula: '(tv_change_buysell_1h * contract_size * trade_volume) - (delta_slippage_1h + roll_slippage_1h)'
   - name: tv_1h
     type: FLOAT
     description: Theoretical value (fair value) at 1 hour after the OTO swing trade, taken from the forward-looking theo data
@@ -4072,12 +4218,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move 1h
+    formula: '(adjusted_tv_1h - swing_mid_tv)'
   - name: tv_change_buysell_1h
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at 1 hour, representing the realized PnL per unit from the TV movement.
       Positive = profitable direction.
     synonyms:
     - pnl 1h
+    formula: '(adjusted_tv_1h - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_1h_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the 1 hour horizon, measuring how much of the per-contract
@@ -4086,17 +4234,20 @@ table:
     synonyms:
     - roll slip 1h
     - roll slip 1h per unit
+    formula: '((reference_roll_1h - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1h
     type: FLOAT
     description: Roll slippage component (total, in currency) at the 1 hour horizon, measuring the total roll-driven PnL change
       from trade time to 1 hour after. Equals roll_slippage_1h_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 1h
+    formula: '((reference_roll_1h - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1h
     type: FLOAT
     description: Adjusted theoretical value at 1 hour after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_1h + delta_1h * (calculated_base_val_1h - (under_1h - roll_1h)) + 0.5 * gamma_1h * POW((calculated_base_val_1h - (under_1h - roll_1h)), 2)'
   - name: delta_slippage_1h_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the 1 hour horizon, measuring how much of the per-contract
@@ -4105,12 +4256,14 @@ table:
     synonyms:
     - delta slip 1h
     - delta slip 1h per unit
+    formula: '((calculated_base_val_1h - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1h
     type: FLOAT
     description: Delta slippage component (total, in currency) at the 1 hour horizon, measuring the total delta-driven PnL
       change from trade time to 1 hour after. Equals delta_slippage_1h_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 1h
+    formula: '((calculated_base_val_1h - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1h_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the 1 hour horizon, computed using routed_size (fired size) instead of
@@ -4122,6 +4275,7 @@ table:
     - fire vol pnl 1h
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_1h for fill-based version.
+    formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_1h_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the 1 hour horizon, computed using routed_size (fired size) instead
@@ -4134,6 +4288,7 @@ table:
     - fire unexplained pnl 1h
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_1h for fill-based version.
+    formula: '(tv_change_buysell_1h * contract_size * routed_size_capped) - (delta_slippage_1h_fired_at + roll_slippage_1h_fired_at)'
   - name: delta_slippage_1h_fired_at
     type: FLOAT
     description: 'Delta slippage component at the 1 hour horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -4145,6 +4300,7 @@ table:
     - fire delta pnl 1h
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_1h for fill-based version.
+    formula: '((calculated_base_val_1h - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1h_fired_at
     type: FLOAT
     description: 'Roll slippage component at the 1 hour horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -4156,11 +4312,13 @@ table:
     - fire roll pnl 1h
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_1h for fill-based version.
+    formula: '((reference_roll_1h - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_eod
     type: FLOAT
     description: Estimated volatility path effect at the end-of-day horizon, measuring the expected impact of implied volatility
       mean-reversion or trending on option value between trade time and end-of-day after.
     synonyms: []
+    formula: '((calculated_base_val_eod - swing_mid_base_val) * ((delta_eod - raw_delta_mid_bv_eod) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_eod_per_unit
     type: FLOAT
     description: Volatility slippage component per unit (per contract) at the end-of-day horizon, measuring how much of the
@@ -4169,12 +4327,14 @@ table:
     synonyms:
     - vol slip eod
     - vol slip eod per unit
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_eod
     type: FLOAT
     description: Volatility slippage component (total, in currency) at the end-of-day horizon, measuring the total vol-driven
       PnL change from trade time to end-of-day after. Equals vol_slippage_eod_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip eod
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_eod_per_unit
     type: FLOAT
     description: Residual/other slippage component per unit (per contract) at the end-of-day horizon, measuring how much of
@@ -4183,12 +4343,14 @@ table:
     synonyms:
     - other slip eod
     - other slip eod per unit
+    formula: '(tv_change_buysell_eod * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_eod_per_unit + roll_slippage_eod_per_unit)'
   - name: other_slippage_eod
     type: FLOAT
     description: Residual/other slippage component (total, in currency) at the end-of-day horizon, measuring the total other-driven
       PnL change from trade time to end-of-day after. Equals other_slippage_eod_per_unit * trade_volume * contract_size.
     synonyms:
     - other slip eod
+    formula: '(tv_change_buysell_eod * contract_size * trade_volume) - (delta_slippage_eod + roll_slippage_eod)'
   - name: tv_eod
     type: FLOAT
     description: Theoretical value (fair value) at end-of-day after the OTO swing trade, taken from the forward-looking theo
@@ -4259,12 +4421,14 @@ table:
       fair value moved. Positive means TV increased.
     synonyms:
     - tv move eod
+    formula: '(adjusted_tv_eod - swing_mid_tv)'
   - name: tv_change_buysell_eod
     type: FLOAT
     description: Directional TV change (buy/sell adjusted) at end-of-day, representing the realized PnL per unit from the
       TV movement. Positive = profitable direction.
     synonyms:
     - pnl eod
+    formula: '(adjusted_tv_eod - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_eod_per_unit
     type: FLOAT
     description: Roll slippage component per unit (per contract) at the end-of-day horizon, measuring how much of the per-contract
@@ -4273,17 +4437,20 @@ table:
     synonyms:
     - roll slip eod
     - roll slip eod per unit
+    formula: '((reference_roll_eod - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_eod
     type: FLOAT
     description: Roll slippage component (total, in currency) at the end-of-day horizon, measuring the total roll-driven PnL
       change from trade time to end-of-day after. Equals roll_slippage_eod_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip eod
+    formula: '((reference_roll_eod - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_eod
     type: FLOAT
     description: Adjusted theoretical value at end-of-day after the OTO swing trade, taken from the forward-looking theo data
       snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_eod + delta_eod * (calculated_base_val_eod - (under_eod - roll_eod)) + 0.5 * gamma_eod * POW((calculated_base_val_eod - (under_eod - roll_eod)), 2)'
   - name: delta_slippage_eod_per_unit
     type: FLOAT
     description: Delta slippage component per unit (per contract) at the end-of-day horizon, measuring how much of the per-contract
@@ -4292,12 +4459,14 @@ table:
     synonyms:
     - delta slip eod
     - delta slip eod per unit
+    formula: '((calculated_base_val_eod - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_eod
     type: FLOAT
     description: Delta slippage component (total, in currency) at the end-of-day horizon, measuring the total delta-driven
       PnL change from trade time to end-of-day after. Equals delta_slippage_eod_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip eod
+    formula: '((calculated_base_val_eod - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_eod_fired_at
     type: FLOAT
     description: 'Volatility slippage component at the end-of-day horizon, computed using routed_size (fired size) instead
@@ -4309,6 +4478,7 @@ table:
     - fire vol pnl eod
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_eod for fill-based version.
+    formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_eod_fired_at
     type: FLOAT
     description: 'Residual/other slippage component at the end-of-day horizon, computed using routed_size (fired size) instead
@@ -4321,6 +4491,7 @@ table:
     - fire unexplained pnl eod
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_eod for fill-based version.
+    formula: '(tv_change_buysell_eod * contract_size * routed_size_capped) - (delta_slippage_eod_fired_at + roll_slippage_eod_fired_at)'
   - name: delta_slippage_eod_fired_at
     type: FLOAT
     description: 'Delta slippage component at the end-of-day horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -4332,6 +4503,7 @@ table:
     - fire delta pnl eod
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_eod for fill-based version.
+    formula: '((calculated_base_val_eod - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_eod_fired_at
     type: FLOAT
     description: 'Roll slippage component at the end-of-day horizon, computed using routed_size (fired size) instead of trade_volume.
@@ -4343,11 +4515,13 @@ table:
     - fire roll pnl eod
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_eod for fill-based version.
+    formula: '((reference_roll_eod - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_1D
     type: STRING
     description: Estimated volatility path effect at the 1 day (next open) horizon, measuring the expected impact of implied
       volatility mean-reversion or trending on option value between trade time and 1 day (next open) after.
     synonyms: []
+    formula: '((calculated_base_val_1D - swing_mid_base_val) * ((delta_1D - raw_delta_mid_bv_1D) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_1D_per_unit
     type: STRING
     description: Volatility slippage component per unit (per contract) at the 1 day (next open) horizon, measuring how much
@@ -4356,12 +4530,14 @@ table:
     synonyms:
     - vol slip 1d
     - vol slip 1D per unit
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1D
     type: STRING
     description: Volatility slippage component (total, in currency) at the 1 day (next open) horizon, measuring the total
       vol-driven PnL change from trade time to 1 day (next open) after. Equals vol_slippage_1D_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 1d
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_1D_per_unit
     type: STRING
     description: Residual/other slippage component per unit (per contract) at the 1 day (next open) horizon, measuring how
@@ -4371,6 +4547,7 @@ table:
     synonyms:
     - other slip 1d
     - other slip 1D per unit
+    formula: '(tv_change_buysell_1D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1D_per_unit + roll_slippage_1D_per_unit)'
   - name: other_slippage_1D
     type: STRING
     description: Residual/other slippage component (total, in currency) at the 1 day (next open) horizon, measuring the total
@@ -4378,6 +4555,7 @@ table:
       * contract_size.
     synonyms:
     - other slip 1d
+    formula: '(tv_change_buysell_1D * contract_size * trade_volume) - (delta_slippage_1D + roll_slippage_1D)'
   - name: tv_1D
     type: STRING
     description: Theoretical value (fair value) at 1 day (next open) after the OTO swing trade, taken from the forward-looking
@@ -4452,12 +4630,14 @@ table:
       option's fair value moved. Positive means TV increased.
     synonyms:
     - tv move 1d
+    formula: '(adjusted_tv_1D - swing_mid_tv)'
   - name: tv_change_buysell_1D
     type: STRING
     description: Directional TV change (buy/sell adjusted) at 1 day (next open), representing the realized PnL per unit from
       the TV movement. Positive = profitable direction.
     synonyms:
     - pnl 1d
+    formula: '(adjusted_tv_1D - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_1D_per_unit
     type: STRING
     description: Roll slippage component per unit (per contract) at the 1 day (next open) horizon, measuring how much of the
@@ -4466,17 +4646,20 @@ table:
     synonyms:
     - roll slip 1d
     - roll slip 1D per unit
+    formula: '((reference_roll_1D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1D
     type: STRING
     description: Roll slippage component (total, in currency) at the 1 day (next open) horizon, measuring the total roll-driven
       PnL change from trade time to 1 day (next open) after. Equals roll_slippage_1D_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 1d
+    formula: '((reference_roll_1D - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_1D
     type: STRING
     description: Adjusted theoretical value at 1 day (next open) after the OTO swing trade, taken from the forward-looking
       theo data snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_1D + delta_1D * (calculated_base_val_1D - (under_1D - roll_1D)) + 0.5 * gamma_1D * POW((calculated_base_val_1D - (under_1D - roll_1D)), 2)'
   - name: delta_slippage_1D_per_unit
     type: STRING
     description: Delta slippage component per unit (per contract) at the 1 day (next open) horizon, measuring how much of
@@ -4485,12 +4668,14 @@ table:
     synonyms:
     - delta slip 1d
     - delta slip 1D per unit
+    formula: '((calculated_base_val_1D - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_1D
     type: STRING
     description: Delta slippage component (total, in currency) at the 1 day (next open) horizon, measuring the total delta-driven
       PnL change from trade time to 1 day (next open) after. Equals delta_slippage_1D_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 1d
+    formula: '((calculated_base_val_1D - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_1D_fired_at
     type: STRING
     description: 'Volatility slippage component at the 1 day (next open) horizon, computed using routed_size (fired size)
@@ -4502,6 +4687,7 @@ table:
     - fire vol pnl 1D
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_1D for fill-based version.
+    formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_1D_fired_at
     type: STRING
     description: 'Residual/other slippage component at the 1 day (next open) horizon, computed using routed_size (fired size)
@@ -4514,6 +4700,7 @@ table:
     - fire unexplained pnl 1D
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_1D for fill-based version.
+    formula: '(tv_change_buysell_1D * contract_size * routed_size_capped) - (delta_slippage_1D_fired_at + roll_slippage_1D_fired_at)'
   - name: delta_slippage_1D_fired_at
     type: STRING
     description: 'Delta slippage component at the 1 day (next open) horizon, computed using routed_size (fired size) instead
@@ -4525,6 +4712,7 @@ table:
     - fire delta pnl 1D
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_1D for fill-based version.
+    formula: '((calculated_base_val_1D - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_1D_fired_at
     type: STRING
     description: 'Roll slippage component at the 1 day (next open) horizon, computed using routed_size (fired size) instead
@@ -4536,11 +4724,13 @@ table:
     - fire roll pnl 1D
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_1D for fill-based version.
+    formula: '((reference_roll_1D - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: vol_path_estimate_5D
     type: STRING
     description: Estimated volatility path effect at the 5 days (T+5 open) horizon, measuring the expected impact of implied
       volatility mean-reversion or trending on option value between trade time and 5 days (T+5 open) after.
     synonyms: []
+    formula: '((calculated_base_val_5D - swing_mid_base_val) * ((delta_5D - raw_delta_mid_bv_5D) + (delta - raw_delta_mid_bv)) / 2)'
   - name: vol_slippage_5D_per_unit
     type: STRING
     description: Volatility slippage component per unit (per contract) at the 5 days (T+5 open) horizon, measuring how much
@@ -4549,12 +4739,14 @@ table:
     synonyms:
     - vol slip 5d
     - vol slip 5D per unit
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5D
     type: STRING
     description: Volatility slippage component (total, in currency) at the 5 days (T+5 open) horizon, measuring the total
       vol-driven PnL change from trade time to 5 days (T+5 open) after. Equals vol_slippage_5D_per_unit * trade_volume * contract_size.
     synonyms:
     - vol slip 5d
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * trade_volume * contract_size * buy_sell_multiplier'
   - name: other_slippage_5D_per_unit
     type: STRING
     description: Residual/other slippage component per unit (per contract) at the 5 days (T+5 open) horizon, measuring how
@@ -4564,6 +4756,7 @@ table:
     synonyms:
     - other slip 5d
     - other slip 5D per unit
+    formula: '(tv_change_buysell_5D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5D_per_unit + roll_slippage_5D_per_unit)'
   - name: other_slippage_5D
     type: STRING
     description: Residual/other slippage component (total, in currency) at the 5 days (T+5 open) horizon, measuring the total
@@ -4571,6 +4764,7 @@ table:
       * contract_size.
     synonyms:
     - other slip 5d
+    formula: '(tv_change_buysell_5D * contract_size * trade_volume) - (delta_slippage_5D + roll_slippage_5D)'
   - name: tv_5D
     type: STRING
     description: Theoretical value (fair value) at 5 days (T+5 open) after the OTO swing trade, taken from the forward-looking
@@ -4645,12 +4839,14 @@ table:
       option's fair value moved. Positive means TV increased.
     synonyms:
     - tv move 5d
+    formula: '(adjusted_tv_5D - swing_mid_tv)'
   - name: tv_change_buysell_5D
     type: STRING
     description: Directional TV change (buy/sell adjusted) at 5 days (T+5 open), representing the realized PnL per unit from
       the TV movement. Positive = profitable direction.
     synonyms:
     - pnl 5d
+    formula: '(adjusted_tv_5D - swing_mid_tv) * buy_sell_multiplier'
   - name: roll_slippage_5D_per_unit
     type: STRING
     description: Roll slippage component per unit (per contract) at the 5 days (T+5 open) horizon, measuring how much of the
@@ -4659,17 +4855,20 @@ table:
     synonyms:
     - roll slip 5d
     - roll slip 5D per unit
+    formula: '((reference_roll_5D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5D
     type: STRING
     description: Roll slippage component (total, in currency) at the 5 days (T+5 open) horizon, measuring the total roll-driven
       PnL change from trade time to 5 days (T+5 open) after. Equals roll_slippage_5D_per_unit * trade_volume * contract_size.
     synonyms:
     - roll slip 5d
+    formula: '((reference_roll_5D - reference_roll) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: adjusted_tv_5D
     type: STRING
     description: Adjusted theoretical value at 5 days (T+5 open) after the OTO swing trade, taken from the forward-looking
       theo data snapshot. Used to compute slippage and track how the option's characteristics evolved after the trade.
     synonyms: []
+    formula: 'tv_5D + delta_5D * (calculated_base_val_5D - (under_5D - roll_5D)) + 0.5 * gamma_5D * POW((calculated_base_val_5D - (under_5D - roll_5D)), 2)'
   - name: delta_slippage_5D_per_unit
     type: STRING
     description: Delta slippage component per unit (per contract) at the 5 days (T+5 open) horizon, measuring how much of
@@ -4678,12 +4877,14 @@ table:
     synonyms:
     - delta slip 5d
     - delta slip 5D per unit
+    formula: '((calculated_base_val_5D - swing_mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
   - name: delta_slippage_5D
     type: STRING
     description: Delta slippage component (total, in currency) at the 5 days (T+5 open) horizon, measuring the total delta-driven
       PnL change from trade time to 5 days (T+5 open) after. Equals delta_slippage_5D_per_unit * trade_volume * contract_size.
     synonyms:
     - delta slip 5d
+    formula: '((calculated_base_val_5D - swing_mid_base_val) * delta) * trade_volume * contract_size * buy_sell_multiplier'
   - name: vol_slippage_5D_fired_at
     type: STRING
     description: 'Volatility slippage component at the 5 days (T+5 open) horizon, computed using routed_size (fired size)
@@ -4695,6 +4896,7 @@ table:
     - fire vol pnl 5D
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with vol_slippage_5D for fill-based version.
+    formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: other_slippage_5D_fired_at
     type: STRING
     description: 'Residual/other slippage component at the 5 days (T+5 open) horizon, computed using routed_size (fired size)
@@ -4707,6 +4909,7 @@ table:
     - fire unexplained pnl 5D
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with other_slippage_5D for fill-based version.
+    formula: '(tv_change_buysell_5D * contract_size * routed_size_capped) - (delta_slippage_5D_fired_at + roll_slippage_5D_fired_at)'
   - name: delta_slippage_5D_fired_at
     type: STRING
     description: 'Delta slippage component at the 5 days (T+5 open) horizon, computed using routed_size (fired size) instead
@@ -4718,6 +4921,7 @@ table:
     - fire delta pnl 5D
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with delta_slippage_5D for fill-based version.
+    formula: '((calculated_base_val_5D - swing_mid_base_val) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: roll_slippage_5D_fired_at
     type: STRING
     description: 'Roll slippage component at the 5 days (T+5 open) horizon, computed using routed_size (fired size) instead
@@ -4729,6 +4933,7 @@ table:
     - fire roll pnl 5D
     source: kpi_otoswing_calculations.sql (KPI-Added, fired_at variant)
     business_rules: Uses routed_size, not trade_volume. Compare with roll_slippage_5D for fill-based version.
+    formula: '((reference_roll_5D - reference_roll) * delta) * routed_size_capped * contract_size * buy_sell_multiplier'
   - name: calculated_base_val_eod
     type: FLOAT
     description: Calculated base (underlying) value at the end-of-day forward snapshot.
@@ -4751,6 +4956,7 @@ table:
     - hedge ratio
     - option delta
     source: kpi_otoswing_normalized.sql
+    formula: 'ref_delta + (delta_adjusted_base_price - ref_base_price) * ref_gamma'
   - name: gamma
     type: FLOAT
     description: Option gamma at the time of the OTO swing trade, measuring the rate of change of delta with respect to the
@@ -5127,10 +5333,12 @@ table:
     description: Stock roll value at the time of the OTO swing trade, representing the roll cost associated with the underlying
       equity position.
     synonyms: []
+    formula: 'forward - under'
   - name: reference_roll
     type: FLOAT
     description: Reference roll value, the roll figure captured at the reference snapshot used for KPI computation baseline.
     synonyms: []
+    formula: 'CASE WHEN parent_is_combo = TRUE THEN ((forward - under) + roll) ELSE ((forward - under) + ref_roll) END'
   - name: is_expiry_trade
     type: BOOLEAN
     description: 'Boolean indicating whether this OTO swing trade occurred on the option''s expiry day. Expiry-day trades

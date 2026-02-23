@@ -8,106 +8,111 @@ table:
   columns:
     - name: kafka_message_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
+        internally for data pipeline monitoring and replay.
       category: time
     - name: record_written_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
+        data freshness and pipeline latency.
       category: time
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
       category: identifier
       filterable: true
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
       category: identifier
       filterable: true
     - name: algo
       type: STRING
-      description: ""
+      description: Name of the originating trading algorithm or strategy.
       category: dimension
       filterable: true
     - name: event_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Moment VT decided to trade (Swing) or processed event (MarketTrade).
       category: time
     - name: event_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of event timestamp. Moment VT decided to trade (Swing) or processed
+        event (MarketTrade).
       category: time
     - name: underlying_exe_exch
       type: INTEGER
-      description: ""
+      description: Exchange where the underlying trades.
       category: measure
       typical_aggregation: AVG
     - name: underlying_exe_exch_name
       type: STRING
-      description: ""
+      description: Exchange where the underlying trades (human-readable enum name).
       category: dimension
       filterable: true
     - name: is_spark
       type: BOOLEAN
-      description: ""
+      description: Denotes if VT is using a sparkOrder interface.
       category: dimension
       filterable: true
     - name: underlying_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the underlying instrument.
       category: identifier
       filterable: true
     - name: base_valuation_type
       type: INTEGER
-      description: ""
+      description: Numeric code for the base valuation method used by the pricing model.
       category: dimension
       filterable: true
     - name: base_valuation_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the base valuation type enum value.
       category: dimension
       filterable: true
     - name: message_trade_date
       type: DATE
-      description: ""
+      description: Trade date embedded within the original proto message.
       category: time
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true

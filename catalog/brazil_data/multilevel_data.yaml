@@ -8,32 +8,33 @@ table:
   columns:
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
     - name: algo
       type: STRING
-      description: ""
+      description: Name of the originating trading algorithm or strategy.
       category: dimension
       filterable: true
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: event_type
       type: INTEGER
-      description: ""
+      description: VT Event that triggered the swing.
       category: dimension
       filterable: true
     - name: market_event_type
@@ -58,15 +59,16 @@ table:
       typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: data_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
+        (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: data_order_identifier
       type: INTEGER
-      description: ""
+      description: Sequence number relative to current exchange message for deterministic ordering.
       category: measure
       typical_aggregation: AVG
     - name: volume_ahead_insert
@@ -91,22 +93,23 @@ table:
       typical_aggregation: AVG
     - name: mako_sequence_number
       type: INTEGER
-      description: ""
+      description: Instrument-level absolute sequence number.
       category: measure
       typical_aggregation: AVG
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: measure
       typical_aggregation: AVG
     - name: market_price_level

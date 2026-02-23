@@ -8,7 +8,7 @@ table:
   columns:
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: order_id
@@ -53,7 +53,7 @@ table:
       typical_aggregation: AVG
     - name: last_order_modification_timestamp
       type: INTEGER
-      description: ""
+      description: Timestamp recording when the last order modification occurred.
       category: time
     - name: reason
       type: INTEGER
@@ -62,49 +62,55 @@ table:
       typical_aggregation: AVG
     - name: reason_name
       type: STRING
-      description: ""
+      description: Human-readable name for the reason enum value.
       category: dimension
       filterable: true
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event.
       category: time
     - name: hw_nic_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the hw nic rx occurred.
       category: time
     - name: mako_ingress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp injected by the switch when the data packet arrives into Mako network.
       category: time
     - name: software_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the software occurred.
       category: time
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event.
       category: time
     - name: hw_nic_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the hw nic rx timestamp. Combine with hw_nic_rx_timestamp for full
+        nanosecond-resolution timing.
       category: time
     - name: mako_ingress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
+        data packet arrives into Mako network.
       category: time
     - name: software_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the software timestamp. Combine with software_timestamp for full
+        nanosecond-resolution timing.
       category: time
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
       category: dimension
       filterable: true
     - name: price
@@ -119,14 +125,15 @@ table:
       typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: data_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
+        (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: data_order_identifier
       type: INTEGER
-      description: ""
+      description: Sequence number relative to current exchange message for deterministic ordering.
       category: measure
       typical_aggregation: AVG

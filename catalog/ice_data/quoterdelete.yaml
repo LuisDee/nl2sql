@@ -8,187 +8,190 @@ table:
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
       category: identifier
       filterable: true
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
       category: identifier
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: algo
       type: STRING
-      description: ""
+      description: Name of the originating trading algorithm or strategy.
       category: dimension
       filterable: true
     - name: ref_curve_id
       type: INTEGER
-      description: ""
+      description: ID of the vol curve for this symbol.
       category: identifier
       filterable: true
     - name: ref_carry_id
       type: INTEGER
-      description: ""
+      description: Reference carry id from the last vol curve update (theoServer callback).
       category: identifier
       filterable: true
     - name: ref_tv
       type: FLOAT
-      description: ""
+      description: Theoretical value of instrument on last curve ID update.
       category: measure
       typical_aggregation: AVG
     - name: ref_delta
       type: FLOAT
-      description: ""
+      description: Delta of instrument on last vol curve update.
       category: measure
       typical_aggregation: AVG
     - name: ref_gamma
       type: FLOAT
-      description: ""
+      description: Gamma of instrument on last vol curve update.
       category: measure
       typical_aggregation: AVG
     - name: ref_base_price
       type: FLOAT
-      description: ""
+      description: Unadjusted raw baseval on last vol curve update.
       category: measure
       typical_aggregation: AVG
     - name: ref_roll
       type: FLOAT
-      description: ""
+      description: Roll value on last curve update.
       category: measure
       typical_aggregation: AVG
     - name: raw_bv_bid
       type: FLOAT
-      description: ""
+      description: Unadjusted base val bid price at time of swing.
       category: measure
       typical_aggregation: AVG
     - name: raw_bv_bid_size
       type: INTEGER
-      description: ""
+      description: Target size of raw base val bid price.
       category: measure
       typical_aggregation: SUM
     - name: raw_bv_ask
       type: FLOAT
-      description: ""
+      description: Unadjusted base val ask price at time of swing.
       category: measure
       typical_aggregation: AVG
     - name: raw_bv_ask_size
       type: INTEGER
-      description: ""
+      description: Target size of raw base val ask price.
       category: measure
       typical_aggregation: SUM
     - name: layered_base_bid
       type: FLOAT
-      description: ""
+      description: Transformation of base val bid incorporating open delta position.
       category: measure
       typical_aggregation: AVG
     - name: layered_base_bid_size
       type: INTEGER
-      description: ""
+      description: Max number of deltas willing to take on at layered base bid.
       category: measure
       typical_aggregation: SUM
     - name: layered_base_ask
       type: FLOAT
-      description: ""
+      description: Transformation of base val ask.
       category: measure
       typical_aggregation: AVG
     - name: layered_base_ask_size
       type: INTEGER
-      description: ""
+      description: Max number of deltas willing to take on at layered base ask.
       category: measure
       typical_aggregation: SUM
     - name: layered_base_adjustment
       type: FLOAT
-      description: ""
+      description: Adjustment to relevant raw baseval side.
       category: measure
       typical_aggregation: AVG
     - name: odr_adjustment
       type: FLOAT
-      description: ""
+      description: Adjustment to raw base val due to open delta retreat.
       category: measure
       typical_aggregation: AVG
     - name: inflight_deflection_tv_adjustment_bid
       type: FLOAT
-      description: ""
+      description: Estimated TV adjustment while waiting for fill confirmation (bid).
       category: measure
       typical_aggregation: AVG
     - name: inflight_deflection_tv_adjustment_ask
       type: FLOAT
-      description: ""
+      description: Estimated TV adjustment while waiting for fill confirmation (ask).
       category: measure
       typical_aggregation: AVG
     - name: internal_tv_adjustment_bid
       type: FLOAT
-      description: ""
+      description: Internal adjustment/deflection made by VT after hearing about a fill (bid).
       category: measure
       typical_aggregation: AVG
     - name: internal_tv_adjustment_ask
       type: FLOAT
-      description: ""
+      description: Internal adjustment/deflection made by VT after hearing about a fill (ask).
       category: measure
       typical_aggregation: AVG
     - name: nhr_adjustment_bid
       type: FLOAT
-      description: ""
+      description: Estimated adjustment to bid edge based on current position in local strikes.
       category: measure
       typical_aggregation: AVG
     - name: nhr_adjustment_ask
       type: FLOAT
-      description: ""
+      description: Estimated adjustment to ask edge based on current position in local strikes.
       category: measure
       typical_aggregation: AVG
     - name: base_edge_bid
       type: FLOAT
-      description: ""
+      description: Net edge of bid side (model edge + fees + NHR).
       category: measure
       typical_aggregation: SUM
     - name: base_edge_ask
       type: FLOAT
-      description: ""
+      description: Ask-side value of base edge.
       category: measure
       typical_aggregation: SUM
     - name: fees
       type: FLOAT
-      description: ""
+      description: Per-lot trading fees applicable to this instrument.
       category: measure
       typical_aggregation: SUM
     - name: roll
       type: FLOAT
-      description: ""
+      description: Roll value at time of swing/trade.
       category: measure
       typical_aggregation: AVG
     - name: bv_side
       type: STRING
-      description: ""
+      description: Which side bid/ask of the baseVal the VT is swinging off.
       category: dimension
       filterable: true
     - name: delta_adjusted_base_price
       type: FLOAT
-      description: ""
+      description: Raw baseval plus odr/layered base adjustments.
       category: measure
       typical_aggregation: AVG
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the VT saw at time of swing/market trade.
       category: measure
       typical_aggregation: AVG
     - name: base_sequence_number
@@ -198,29 +201,31 @@ table:
       typical_aggregation: AVG
     - name: option_sequence_number
       type: INTEGER
-      description: ""
+      description: Last received price tick for this option.
       category: measure
       typical_aggregation: AVG
     - name: base_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the base instrument.
       category: identifier
       filterable: true
     - name: hardware_nic_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Hardware timestamp of moment price packet hit the network card.
       category: time
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of hardware nic rx timestamp. Hardware timestamp of moment price
+        packet hit the network card.
       category: time
     - name: event_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Moment VT decided to trade (Swing) or processed event (MarketTrade).
       category: time
     - name: event_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of event timestamp. Moment VT decided to trade (Swing) or processed
+        event (MarketTrade).
       category: time
     - name: delete_side
       type: STRING
@@ -269,7 +274,7 @@ table:
       filterable: true
     - name: event_type
       type: STRING
-      description: ""
+      description: VT Event that triggered the swing.
       category: dimension
       filterable: true
     - name: latency_stats_prcx
@@ -309,56 +314,60 @@ table:
       typical_aggregation: AVG
     - name: is_book_resubmit
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the book resubmit condition is true.
       category: dimension
       filterable: true
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: measure
       typical_aggregation: AVG
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: dimension
       filterable: true
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
       category: dimension
       filterable: true
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
       category: dimension
       filterable: true
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
       category: dimension
       filterable: true
     - name: pid
       type: INTEGER
-      description: ""
+      description: Process ID of the data source that produced this record.
       category: measure
       typical_aggregation: AVG
     - name: hostname
       type: STRING
-      description: ""
+      description: Hostname of the data source that produced this record.
       category: dimension
       filterable: true
     - name: inflight_trade_volume
@@ -368,130 +377,131 @@ table:
       typical_aggregation: SUM
     - name: bv_update_sequence_number
       type: INTEGER
-      description: ""
+      description: Price tick of base val instrument that triggered most recent baseval change.
       category: measure
       typical_aggregation: AVG
     - name: bv_update_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 of base val instrument that triggered last baseval change.
       category: identifier
       filterable: true
     - name: underlying_sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number of the hedge instrument.
       category: measure
       typical_aggregation: AVG
     - name: underlying_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the underlying instrument.
       category: identifier
       filterable: true
     - name: mako_order_id
       type: INTEGER
-      description: ""
+      description: The Mako front-office id (OrderId in bookServer).
       category: identifier
       filterable: true
     - name: is_bv_invalid
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the base valuation was invalid at the time of this event.
       category: dimension
       filterable: true
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event.
       category: time
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event.
       category: time
     - name: underlying_exe_exch
       type: INTEGER
-      description: ""
+      description: Exchange where the underlying trades.
       category: measure
       typical_aggregation: AVG
     - name: underlying_exe_exch_name
       type: STRING
-      description: ""
+      description: Exchange where the underlying trades (human-readable enum name).
       category: dimension
       filterable: true
     - name: is_spark
       type: BOOLEAN
-      description: ""
+      description: Denotes if VT is using a sparkOrder interface.
       category: dimension
       filterable: true
     - name: ref_inst_carry_id
       type: INTEGER
-      description: ""
+      description: Carry Id of last theo update received by algo for this instrument.
       category: identifier
       filterable: true
     - name: ref_inst_curve_id
       type: INTEGER
-      description: ""
+      description: Curve Id of last theo update received by algo for this instrument.
       category: identifier
       filterable: true
     - name: is_ref_theo_invalid
       type: BOOLEAN
-      description: ""
+      description: If the reference theos were valid at the time of the event.
       category: dimension
       filterable: true
     - name: lb_enabled
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the layered base feature was enabled.
       category: dimension
       filterable: true
     - name: edge_model_type
       type: INTEGER
-      description: ""
+      description: Numeric code for the edge computation model type used by the VT.
       category: dimension
       filterable: true
     - name: edge_model_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the edge model type enum value.
       category: dimension
       filterable: true
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
     - name: bid_price_0
       type: FLOAT
-      description: ""
+      description: Bid-side unadjusted top-of-book price.
       category: measure
       typical_aggregation: AVG
     - name: ask_price_0
       type: FLOAT
-      description: ""
+      description: Ask-side unadjusted top-of-book price.
       category: measure
       typical_aggregation: AVG
     - name: ask_volume_0
       type: INTEGER
-      description: ""
+      description: Ask-side unadjusted top-of-book volume.
       category: measure
       typical_aggregation: SUM
     - name: bid_volume_0
       type: INTEGER
-      description: ""
+      description: Bid-side unadjusted top-of-book volume.
       category: measure
       typical_aggregation: SUM
     - name: latency_stats_bvio
@@ -511,17 +521,17 @@ table:
       typical_aggregation: AVG
     - name: ref_theoevent_stream_id
       type: INTEGER
-      description: ""
+      description: Reference theoevent stream id from the last vol curve update (theoServer callback).
       category: identifier
       filterable: true
     - name: ref_theoevent_event_id
       type: INTEGER
-      description: ""
+      description: Reference theoevent event id from the last vol curve update (theoServer callback).
       category: identifier
       filterable: true
     - name: is_spark_resubmit
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the spark resubmit condition is true.
       category: dimension
       filterable: true
     - name: last_trade_price
@@ -556,7 +566,7 @@ table:
       typical_aggregation: SUM
     - name: is_breached
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the breached condition is true.
       category: dimension
       filterable: true
     - name: num_of_breaches
@@ -571,9 +581,10 @@ table:
       typical_aggregation: AVG
     - name: requirement_check_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the requirement check occurred.
       category: time
     - name: requirement_check_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the requirement check timestamp. Combine with
+        requirement_check_timestamp for full nanosecond-resolution timing.
       category: time

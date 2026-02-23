@@ -8,32 +8,34 @@ table:
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
       category: identifier
       filterable: true
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
       category: identifier
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: rec_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the rec occurred.
       category: time
     - name: rec_date
       type: DATE
@@ -41,7 +43,7 @@ table:
       category: time
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: vol_region
@@ -71,11 +73,12 @@ table:
       filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
       category: dimension
       filterable: true
     - name: strike_minus_1000
@@ -815,26 +818,26 @@ table:
       typical_aggregation: AVG
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true

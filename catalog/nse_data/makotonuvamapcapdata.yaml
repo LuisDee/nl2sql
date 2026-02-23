@@ -8,7 +8,8 @@ table:
   columns:
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: exchange_code
@@ -23,7 +24,7 @@ table:
       filterable: true
     - name: message_trade_date
       type: DATE
-      description: ""
+      description: Trade date embedded within the original proto message.
       category: time
     - name: protocol_version
       type: STRING
@@ -37,7 +38,7 @@ table:
       filterable: true
     - name: mako_order_id
       type: INTEGER
-      description: ""
+      description: The Mako front-office id (OrderId in bookServer).
       category: identifier
       filterable: true
     - name: exchange_order_id
@@ -77,7 +78,7 @@ table:
       filterable: true
     - name: native_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the native type enum value.
       category: dimension
       filterable: true
     - name: native_type
@@ -92,43 +93,47 @@ table:
       filterable: true
     - name: mako_ingress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
+        data packet arrives into Mako network.
       category: time
     - name: mako_ingress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp injected by the switch when the data packet arrives into Mako network.
       category: time
     - name: mako_egress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the mako egress timestamp. Combine with mako_egress_timestamp for
+        full nanosecond-resolution timing.
       category: time
     - name: mako_egress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the mako egress occurred.
       category: time
     - name: gateway_received_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the gateway received occurred.
       category: time
     - name: gateway_received_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the gateway received timestamp. Combine with
+        gateway_received_timestamp for full nanosecond-resolution timing.
       category: time
     - name: matching_engine_received_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the matching engine received occurred.
       category: time
     - name: matching_engine_received_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the matching engine received timestamp. Combine with
+        matching_engine_received_timestamp for full nanosecond-resolution timing.
       category: time
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true

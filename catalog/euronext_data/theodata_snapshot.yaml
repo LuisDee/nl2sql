@@ -12,44 +12,50 @@ table:
       category: time
     - name: kafka_message_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
+        internally for data pipeline monitoring and replay.
       category: time
     - name: record_written_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
+        data freshness and pipeline latency.
       category: time
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
       category: identifier
       filterable: true
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
       category: identifier
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: partition_timestamp_local
       type: TIMESTAMP
-      description: ""
+      description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
+        pipeline.
       category: time
     - name: partition_number
       type: INTEGER
-      description: ""
+      description: Numeric partition identifier within the data pipeline. Used for data distribution and parallel
+        processing.
       category: measure
       typical_aggregation: AVG
     - name: event_date
@@ -59,31 +65,33 @@ table:
       filterable: true
     - name: theo_event_tx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the theo event tx occurred.
       category: time
     - name: theo_event_tx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the theo event tx timestamp. Combine with theo_event_tx_timestamp
+        for full nanosecond-resolution timing.
       category: time
     - name: when_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Theoreticals::when (resolution of seconds).
       category: time
     - name: when_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of when timestamp. Theoreticals::when (resolution of seconds).
       category: time
     - name: source_event_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Should not be used to discern between theo updates; use theoEventTxTimestamp instead.
       category: time
     - name: source_event_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of source event timestamp. Should not be used to discern between theo
+        updates; use theoEventTxTimestamp instead.
       category: time
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
       category: dimension
       filterable: true
     - name: inst_type
@@ -93,31 +101,35 @@ table:
       filterable: true
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: measure
       typical_aggregation: AVG
     - name: option_type
       type: STRING
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: dimension
       filterable: true
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
       category: dimension
       filterable: true
     - name: curve_id
@@ -137,7 +149,7 @@ table:
       filterable: true
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the VT saw at time of swing/market trade.
       category: measure
       typical_aggregation: AVG
     - name: tv_offset
@@ -202,7 +214,7 @@ table:
       typical_aggregation: AVG
     - name: roll
       type: FLOAT
-      description: ""
+      description: Roll value at time of swing/trade.
       category: measure
       typical_aggregation: AVG
     - name: forward
@@ -305,7 +317,8 @@ table:
       category: time
     - name: theo_compute_timestamp_start_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of theo compute timestamp start. Combine with
+        theo_compute_timestamp_start for full nanosecond-resolution timing.
       category: time
     - name: theo_compute_timestamp_stop
       type: TIMESTAMP
@@ -313,31 +326,32 @@ table:
       category: time
     - name: theo_compute_timestamp_stop_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of theo compute timestamp stop. Combine with
+        theo_compute_timestamp_stop for full nanosecond-resolution timing.
       category: time
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: theo_compute_type

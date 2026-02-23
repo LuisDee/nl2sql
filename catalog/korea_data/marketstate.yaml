@@ -8,17 +8,18 @@ table:
   columns:
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
     - name: market_state
@@ -28,11 +29,12 @@ table:
       typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: data_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
+        (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: sequence_number
       type: INTEGER
@@ -46,11 +48,11 @@ table:
       filterable: true
     - name: keyframe
       type: BOOLEAN
-      description: ""
+      description: If true, message is part of a keyframe/snapshot of current order book state.
       category: dimension
       filterable: true
     - name: data_order_identifier
       type: INTEGER
-      description: ""
+      description: Sequence number relative to current exchange message for deterministic ordering.
       category: measure
       typical_aggregation: AVG

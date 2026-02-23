@@ -8,27 +8,29 @@ table:
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
       category: identifier
       filterable: true
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
       category: identifier
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: mako_id
@@ -63,22 +65,22 @@ table:
       filterable: true
     - name: transaction_properties
       type: INTEGER
-      description: ""
+      description: A mask of TransactionProperty.
       category: measure
       typical_aggregation: AVG
     - name: tag_book
       type: INTEGER
-      description: ""
+      description: A mask of TransactionTag.
       category: measure
       typical_aggregation: AVG
     - name: tag_exchange
       type: INTEGER
-      description: ""
+      description: A mask of TransactionTagExchange.
       category: measure
       typical_aggregation: AVG
     - name: tag_user
       type: INTEGER
-      description: ""
+      description: A mask of TransactionTagUser.
       category: measure
       typical_aggregation: AVG
     - name: revision
@@ -103,7 +105,7 @@ table:
       filterable: true
     - name: user_id
       type: INTEGER
-      description: ""
+      description: Algo-internal id.
       category: identifier
       filterable: true
     - name: user_order_id
@@ -133,11 +135,12 @@ table:
       filterable: true
     - name: transaction_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the transaction occurred.
       category: time
     - name: transaction_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the transaction timestamp. Combine with transaction_timestamp for
+        full nanosecond-resolution timing.
       category: time
     - name: exchange_date
       type: DATE
@@ -146,11 +149,12 @@ table:
       filterable: true
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event.
       category: time
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event.
       category: time
     - name: exchange_info
       type: STRING
@@ -159,7 +163,7 @@ table:
       filterable: true
     - name: exchange_info_bits
       type: INTEGER
-      description: ""
+      description: A mask of TransactionExchangeInfo.
       category: measure
       typical_aggregation: AVG
     - name: exchange_qualifier
@@ -189,7 +193,7 @@ table:
       typical_aggregation: AVG
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the VT saw at time of swing/market trade.
       category: measure
       typical_aggregation: AVG
     - name: ectv
@@ -208,7 +212,7 @@ table:
       category: time
     - name: pos_currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
       category: measure
       typical_aggregation: AVG
     - name: pos_value_currency
@@ -223,11 +227,12 @@ table:
       typical_aggregation: AVG
     - name: mgmt_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the mgmt occurred.
       category: time
     - name: mgmt_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the mgmt timestamp. Combine with mgmt_timestamp for full
+        nanosecond-resolution timing.
       category: time
     - name: max_trade_id
       type: INTEGER
@@ -236,11 +241,12 @@ table:
       filterable: true
     - name: agg_pos_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the agg pos occurred.
       category: time
     - name: agg_pos_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the agg pos timestamp. Combine with agg_pos_timestamp for full
+        nanosecond-resolution timing.
       category: time
     - name: agg_pos_date
       type: DATE
@@ -268,11 +274,12 @@ table:
       filterable: true
     - name: revision_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the revision occurred.
       category: time
     - name: revision_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the revision timestamp. Combine with revision_timestamp for full
+        nanosecond-resolution timing.
       category: time
     - name: trade_id
       type: INTEGER
@@ -291,7 +298,7 @@ table:
       typical_aggregation: SUM
     - name: message_trade_date
       type: DATE
-      description: ""
+      description: Trade date embedded within the original proto message.
       category: time
     - name: value_date
       type: DATE
@@ -314,70 +321,75 @@ table:
       filterable: true
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: measure
       typical_aggregation: AVG
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: dimension
       filterable: true
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
       category: dimension
       filterable: true
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
       category: dimension
       filterable: true
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
       category: dimension
       filterable: true
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true

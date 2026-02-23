@@ -205,6 +205,7 @@ table:
     - fill date
     category: time
     filterable: true
+    source: 'PosData.proto::exchangeDate'
   - name: exchange_transaction_id
     type: STRING
     description: >
@@ -242,6 +243,7 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    source: 'PosData.proto::aggPosTimestamp'
   - name: agg_pos_timestamp_ns
     type: STRING
     description: >
@@ -251,6 +253,7 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    source: 'PosData.proto::aggPosTimestamp'
   - name: agg_pos_date
     type: STRING
     description: >
@@ -259,6 +262,7 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    source: 'PosData.proto::aggPosDate'
   - name: revision
     type: INTEGER
     description: >
@@ -286,6 +290,7 @@ table:
     synonyms:
     - amendment time
     category: time
+    source: 'PosData.proto::revisionTimestamp'
   - name: revision_timestamp_ns
     type: INTEGER
     description: >
@@ -294,6 +299,7 @@ table:
       ordering revisions.
     synonyms: []
     category: time
+    source: 'PosData.proto::revisionTimestamp'
   - name: traded_size
     type: INTEGER
     description: >
@@ -324,6 +330,7 @@ table:
     - contra
     category: dimension
     filterable: true
+    source: 'PosData.proto::counterparty'
   - name: revisor
     type: STRING
     description: >
@@ -337,6 +344,7 @@ table:
     example_values:
     - 'POS'
     comprehensive: true
+    source: 'PosData.proto::revisor'
   - name: transaction_id
     type: INTEGER
     description: >
@@ -393,6 +401,7 @@ table:
     example_values:
     - '242974'
     comprehensive: true
+    source: 'PosData.proto::positionId'
   - name: trade_id
     type: INTEGER
     description: >
@@ -419,6 +428,7 @@ table:
     - comment
     category: dimension
     filterable: true
+    source: 'PosData.proto::text'
   - name: mako_symbol
     type: STRING
     description: >
@@ -433,6 +443,7 @@ table:
     example_values:
     - 'AZA_SS'
     comprehensive: true
+    source: 'PosData.proto::makoSymbol'
   - name: underlying_instrument_hash
     type: STRING
     description: >
@@ -467,6 +478,7 @@ table:
     - underlying exchange name
     category: dimension
     filterable: true
+    source: 'PosData.proto::underlyingExeExchName'
   - name: combo_type_name
     type: STRING
     description: >
@@ -484,6 +496,7 @@ table:
     - STRANGLE
     category: dimension
     filterable: true
+    source: 'PosData.proto::comboTypeName'
   - name: executable_exchange
     type: INTEGER
     description: >
@@ -507,6 +520,7 @@ table:
     - ref leg
     category: measure
     typical_aggregation: AVG
+    source: 'PosData.proto::isRefComponent'
   - name: liquid
     type: INTEGER
     description: >
@@ -517,6 +531,7 @@ table:
     - liquidity flag
     category: measure
     typical_aggregation: AVG
+    source: 'PosData.proto::liquid'
   - name: ref_inst_type_name
     type: STRING
     description: >
@@ -527,6 +542,7 @@ table:
     - reference instrument type
     category: dimension
     filterable: true
+    source: 'PosData.proto::refInstTypeName'
   - name: ref_term
     type: STRING
     description: >
@@ -536,6 +552,7 @@ table:
     - reference term
     category: dimension
     filterable: true
+    source: 'PosData.proto::refTerm'
   - name: total_traded_size
     type: STRING
     description: >
@@ -548,6 +565,7 @@ table:
     - total contracts
     category: dimension
     filterable: true
+    source: 'PosData.proto::totalTradedSize'
   - name: underlying_symbol
     type: STRING
     description: >
@@ -562,6 +580,7 @@ table:
     example_values:
     - 'AZA_SS'
     comprehensive: true
+    source: 'PosData.proto::underlyingSymbol'
   - name: price
     type: FLOAT
     description: >
@@ -638,6 +657,7 @@ table:
     example_values:
     - 'true'
     comprehensive: true
+    source: 'PosData.proto::parentIsCombo'
   - name: is_parent
     type: BOOLEAN
     description: >
@@ -654,6 +674,7 @@ table:
     example_values:
     - 'true'
     comprehensive: true
+    source: 'PosData.proto::isParent'
   - name: is_auction
     type: BOOLEAN
     description: >
@@ -715,6 +736,7 @@ table:
     example_values:
     - 'f22c462cc6fc5e4b35b25b2f99f52a3aeb57ed37da60bc1af12340234279d450'
     comprehensive: true
+    source: 'PosData.proto::parentInstrumentHash'
   - name: parent_feed_code
     type: STRING
     description: >
@@ -727,6 +749,7 @@ table:
     example_values:
     - 'OMX:AZA_SS:MAR26:325P:1|OMX:AZA_SS:FEB26:335P:-1'
     comprehensive: true
+    source: 'PosData.proto::parentFeedCode'
   - name: no_legs
     type: INTEGER
     description: >
@@ -739,6 +762,7 @@ table:
     - number of legs
     category: measure
     typical_aggregation: AVG
+    source: 'PosData.proto::noLegs'
   - name: leg_index
     type: STRING
     description: >
@@ -750,6 +774,7 @@ table:
     - leg position
     category: dimension
     filterable: true
+    source: 'PosData.proto::legIndex'
   - name: leg_ratio
     type: STRING
     description: >
@@ -761,6 +786,7 @@ table:
     - leg multiplier
     category: dimension
     filterable: true
+    source: 'PosData.proto::legRatio'
   - name: strike
     type: STRING
     description: >
@@ -775,6 +801,7 @@ table:
     - strike level
     category: dimension
     filterable: true
+    source: 'PosData.proto::strike'
   - name: option_type
     type: STRING
     description: >
@@ -790,6 +817,7 @@ table:
     - P
     category: dimension
     filterable: true
+    source: 'PosData.proto::optionType'
   - name: currency_id
     type: INTEGER
     description: >
@@ -815,6 +843,7 @@ table:
     - parent spread type
     category: dimension
     filterable: true
+    source: 'PosData.proto::parentComboTypeName'
   - name: option_type_name
     type: STRING
     description: >
@@ -829,6 +858,7 @@ table:
     - Put
     category: dimension
     filterable: true
+    source: 'PosData.proto::optionTypeName'
   - name: underlying_inst_type_name
     type: STRING
     description: >
@@ -842,6 +872,7 @@ table:
     - INDEX
     category: dimension
     filterable: true
+    source: 'PosData.proto::underlyingInstTypeName'
   - name: inst_type_name
     type: STRING
     description: >
@@ -861,6 +892,7 @@ table:
       inst_type_name IN ('OPTION', 'COMBO').
     category: dimension
     filterable: true
+    source: 'PosData.proto::instTypeName'
   - name: term
     type: STRING
     description: >
@@ -878,6 +910,7 @@ table:
     example_values:
     - 'CALENDAR'
     comprehensive: true
+    source: 'PosData.proto::term'
   - name: expiry_timestamp
     type: STRING
     description: >
@@ -891,6 +924,7 @@ table:
     - expiry date
     category: dimension
     filterable: true
+    source: 'PosData.proto::expiryTimestamp'
   - name: is_bv_invalid
     type: STRING
     description: >
@@ -1021,6 +1055,7 @@ table:
     - smile id
     category: identifier
     filterable: true
+    source: 'PosData.proto::curveId'
   - name: carry_id
     type: STRING
     description: >
@@ -1032,6 +1067,7 @@ table:
     - carry curve
     category: identifier
     filterable: true
+    source: 'PosData.proto::carryId'
   - name: is_mdepth_snapshot
     type: BOOLEAN
     description: >

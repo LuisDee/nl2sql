@@ -8,33 +8,37 @@ table:
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
       category: identifier
       filterable: true
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
       category: identifier
       filterable: true
     - name: hardware_nic_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Hardware timestamp of moment price packet hit the network card.
       category: time
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of hardware nic rx timestamp. Hardware timestamp of moment price
+        packet hit the network card.
       category: time
     - name: software_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Software timestamp - time just before message decode.
       category: time
     - name: software_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of software rx timestamp. Software timestamp - time just before
+        message decode.
       category: time
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: option_underlying_type
@@ -69,7 +73,7 @@ table:
       filterable: true
     - name: update_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the update instrument.
       category: identifier
       filterable: true
     - name: update_sequence_number
@@ -79,19 +83,20 @@ table:
       typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: data_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
+        (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true

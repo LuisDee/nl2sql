@@ -8,12 +8,13 @@ table:
   columns:
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: message_trade_date
       type: DATE
-      description: ""
+      description: Trade date embedded within the original proto message.
       category: time
     - name: exchange_order_id
       type: INTEGER
@@ -57,35 +58,38 @@ table:
       filterable: true
     - name: rms_ingress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the rms ingress timestamp. Combine with rms_ingress_timestamp for
+        full nanosecond-resolution timing.
       category: time
     - name: rms_ingress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the rms ingress occurred.
       category: time
     - name: rms_egress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the rms egress timestamp. Combine with rms_egress_timestamp for
+        full nanosecond-resolution timing.
       category: time
     - name: rms_egress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the rms egress occurred.
       category: time
     - name: gateway_received_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the gateway received occurred.
       category: time
     - name: gateway_received_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the gateway received timestamp. Combine with
+        gateway_received_timestamp for full nanosecond-resolution timing.
       category: time
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true

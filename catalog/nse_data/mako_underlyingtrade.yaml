@@ -8,42 +8,43 @@ table:
   columns:
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: parent_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the parent instrument.
       category: identifier
       filterable: true
     - name: parent_is_combo
       type: BOOLEAN
-      description: ""
+      description: Parent instrument is combo from the instrument definition.
       category: dimension
       filterable: true
     - name: is_parent
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the parent condition is true.
       category: dimension
       filterable: true
     - name: leg_ratio
       type: FLOAT
-      description: ""
+      description: Combo leg ratio.
       category: measure
       typical_aggregation: AVG
     - name: no_legs
@@ -53,41 +54,42 @@ table:
       typical_aggregation: AVG
     - name: leg_index
       type: INTEGER
-      description: ""
+      description: Combo leg index.
       category: measure
       typical_aggregation: AVG
     - name: parent_combo_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the parent combo type enum value.
       category: dimension
       filterable: true
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
       category: dimension
       filterable: true
     - name: underlying_inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying inst type enum value.
       category: dimension
       filterable: true
     - name: combo_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the combo type enum value.
       category: dimension
       filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
       category: dimension
       filterable: true
     - name: trader_id
@@ -122,19 +124,21 @@ table:
       filterable: true
     - name: transaction_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the transaction occurred.
       category: time
     - name: transaction_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the transaction timestamp. Combine with transaction_timestamp for
+        full nanosecond-resolution timing.
       category: time
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event.
       category: time
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event.
       category: time
     - name: exchange_date
       type: DATE
@@ -153,11 +157,12 @@ table:
       filterable: true
     - name: agg_pos_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the agg pos occurred.
       category: time
     - name: agg_pos_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the agg pos timestamp. Combine with agg_pos_timestamp for full
+        nanosecond-resolution timing.
       category: time
     - name: agg_pos_date
       type: DATE
@@ -170,11 +175,12 @@ table:
       filterable: true
     - name: revision_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the revision occurred.
       category: time
     - name: revision_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the revision timestamp. Combine with revision_timestamp for full
+        nanosecond-resolution timing.
       category: time
     - name: traded_size
       type: INTEGER
@@ -193,7 +199,7 @@ table:
       typical_aggregation: AVG
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the VT saw at time of swing/market trade.
       category: measure
       typical_aggregation: AVG
     - name: counterparty
@@ -248,27 +254,29 @@ table:
       filterable: true
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: measure
       typical_aggregation: AVG
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: dimension
       filterable: true
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: contract_size
       type: FLOAT
-      description: ""
+      description: Number of units per contract lot. Streamed from TradableInstrument.contractSize proto field.
       category: measure
       typical_aggregation: AVG
     - name: underlying_exe_exch
       type: INTEGER
-      description: ""
+      description: Exchange where the underlying trades.
       category: measure
       typical_aggregation: AVG
     - name: liquid
@@ -278,7 +286,7 @@ table:
       typical_aggregation: AVG
     - name: parent_feed_code
       type: STRING
-      description: ""
+      description: Parent instrument feed code from the instrument definition.
       category: dimension
       filterable: true
     - name: total_traded_size

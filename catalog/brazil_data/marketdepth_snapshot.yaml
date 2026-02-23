@@ -12,49 +12,56 @@ table:
       category: time
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: kafka_message_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
+        internally for data pipeline monitoring and replay.
       category: time
     - name: record_written_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
+        data freshness and pipeline latency.
       category: time
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
       category: identifier
       filterable: true
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
       category: identifier
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: partition_timestamp_local
       type: TIMESTAMP
-      description: ""
+      description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
+        pipeline.
       category: time
     - name: partition_number
       type: INTEGER
-      description: ""
+      description: Numeric partition identifier within the data pipeline. Used for data distribution and parallel
+        processing.
       category: measure
       typical_aggregation: AVG
     - name: event_date
@@ -64,39 +71,43 @@ table:
       filterable: true
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event.
       category: time
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event.
       category: time
     - name: hw_nic_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the hw nic rx occurred.
       category: time
     - name: hw_nic_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the hw nic rx timestamp. Combine with hw_nic_rx_timestamp for full
+        nanosecond-resolution timing.
       category: time
     - name: mako_ingress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp injected by the switch when the data packet arrives into Mako network.
       category: time
     - name: mako_ingress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
+        data packet arrives into Mako network.
       category: time
     - name: software_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the software occurred.
       category: time
     - name: software_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the software timestamp. Combine with software_timestamp for full
+        nanosecond-resolution timing.
       category: time
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
       category: dimension
       filterable: true
     - name: inst_type
@@ -106,26 +117,29 @@ table:
       filterable: true
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: measure
       typical_aggregation: AVG
     - name: option_type
       type: STRING
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: dimension
       filterable: true
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
       category: dimension
       filterable: true
     - name: sequence_number
@@ -135,102 +149,102 @@ table:
       filterable: true
     - name: ask_price_0
       type: FLOAT
-      description: ""
+      description: Ask-side unadjusted top-of-book price.
       category: measure
       typical_aggregation: AVG
     - name: ask_price_1
       type: FLOAT
-      description: ""
+      description: Unadjusted ask-side price at level 1 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: ask_price_2
       type: FLOAT
-      description: ""
+      description: Unadjusted ask-side price at level 2 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: ask_price_3
       type: FLOAT
-      description: ""
+      description: Unadjusted ask-side price at level 3 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: ask_price_4
       type: FLOAT
-      description: ""
+      description: Unadjusted ask-side price at level 4 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: bid_price_0
       type: FLOAT
-      description: ""
+      description: Bid-side unadjusted top-of-book price.
       category: measure
       typical_aggregation: AVG
     - name: bid_price_1
       type: FLOAT
-      description: ""
+      description: Unadjusted bid-side price at level 1 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: bid_price_2
       type: FLOAT
-      description: ""
+      description: Unadjusted bid-side price at level 2 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: bid_price_3
       type: FLOAT
-      description: ""
+      description: Unadjusted bid-side price at level 3 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: bid_price_4
       type: FLOAT
-      description: ""
+      description: Unadjusted bid-side price at level 4 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: ask_volume_0
       type: INTEGER
-      description: ""
+      description: Ask-side unadjusted top-of-book volume.
       category: measure
       typical_aggregation: SUM
     - name: ask_volume_1
       type: INTEGER
-      description: ""
+      description: Unadjusted ask-side volume at level 1 of the order book.
       category: measure
       typical_aggregation: SUM
     - name: ask_volume_2
       type: INTEGER
-      description: ""
+      description: Unadjusted ask-side volume at level 2 of the order book.
       category: measure
       typical_aggregation: SUM
     - name: ask_volume_3
       type: INTEGER
-      description: ""
+      description: Unadjusted ask-side volume at level 3 of the order book.
       category: measure
       typical_aggregation: SUM
     - name: ask_volume_4
       type: INTEGER
-      description: ""
+      description: Unadjusted ask-side volume at level 4 of the order book.
       category: measure
       typical_aggregation: SUM
     - name: bid_volume_0
       type: INTEGER
-      description: ""
+      description: Bid-side unadjusted top-of-book volume.
       category: measure
       typical_aggregation: SUM
     - name: bid_volume_1
       type: INTEGER
-      description: ""
+      description: Unadjusted bid-side volume at level 1 of the order book.
       category: measure
       typical_aggregation: SUM
     - name: bid_volume_2
       type: INTEGER
-      description: ""
+      description: Unadjusted bid-side volume at level 2 of the order book.
       category: measure
       typical_aggregation: SUM
     - name: bid_volume_3
       type: INTEGER
-      description: ""
+      description: Unadjusted bid-side volume at level 3 of the order book.
       category: measure
       typical_aggregation: SUM
     - name: bid_volume_4
       type: INTEGER
-      description: ""
+      description: Unadjusted bid-side volume at level 4 of the order book.
       category: measure
       typical_aggregation: SUM
     - name: ask_orders_0
@@ -285,45 +299,46 @@ table:
       typical_aggregation: AVG
     - name: keyframe
       type: BOOLEAN
-      description: ""
+      description: If true, message is part of a keyframe/snapshot of current order book state.
       category: dimension
       filterable: true
     - name: data_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: data_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
+        (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
     - name: data_order_identifier
       type: INTEGER
-      description: ""
+      description: Sequence number relative to current exchange message for deterministic ordering.
       category: measure
       typical_aggregation: AVG
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: rec_ts

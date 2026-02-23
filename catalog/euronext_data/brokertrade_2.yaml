@@ -8,29 +8,35 @@ table:
   columns:
     - name: kafka_message_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
+        internally for data pipeline monitoring and replay.
       category: time
     - name: record_written_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
+        data freshness and pipeline latency.
       category: time
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
       category: identifier
       filterable: true
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
       category: identifier
       filterable: true
     - name: partition_timestamp_local
       type: TIMESTAMP
-      description: ""
+      description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
+        pipeline.
       category: time
     - name: partition_number
       type: INTEGER
-      description: ""
+      description: Numeric partition identifier within the data pipeline. Used for data distribution and parallel
+        processing.
       category: measure
       typical_aggregation: AVG
     - name: uuid
@@ -40,30 +46,31 @@ table:
       filterable: true
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
     - name: parent_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the parent instrument.
       category: identifier
       filterable: true
     - name: entry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the entry occurred.
       category: time
     - name: last_edit_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the last edit occurred.
       category: time
     - name: trade_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the trade occurred.
       category: time
     - name: revision
       type: INTEGER
@@ -87,7 +94,7 @@ table:
       filterable: true
     - name: contract_name
       type: STRING
-      description: ""
+      description: Human-readable name for the contract enum value.
       category: dimension
       filterable: true
     - name: source
@@ -102,42 +109,42 @@ table:
       filterable: true
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
     - name: month
       type: INTEGER
-      description: ""
+      description: Month of a year. Must be from 1 to 12.
       category: measure
       typical_aggregation: AVG
     - name: day
       type: INTEGER
-      description: ""
+      description: Day of a month. Must be from 1 to 31.
       category: measure
       typical_aggregation: AVG
     - name: year
       type: INTEGER
-      description: ""
+      description: Year of the date. Must be from 1 to 9999, or 0 for no year.
       category: measure
       typical_aggregation: AVG
     - name: tte
@@ -147,7 +154,7 @@ table:
       typical_aggregation: AVG
     - name: ref_price
       type: FLOAT
-      description: ""
+      description: Reference price from the last vol curve update (theoServer callback).
       category: measure
       typical_aggregation: AVG
     - name: carry_id
@@ -167,7 +174,7 @@ table:
       typical_aggregation: AVG
     - name: when_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Theoreticals::when (resolution of seconds).
       category: time
     - name: vega
       type: FLOAT
@@ -176,7 +183,7 @@ table:
       typical_aggregation: AVG
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the VT saw at time of swing/market trade.
       category: measure
       typical_aggregation: AVG
     - name: under
@@ -191,7 +198,7 @@ table:
       typical_aggregation: AVG
     - name: roll
       type: FLOAT
-      description: ""
+      description: Roll value at time of swing/trade.
       category: measure
       typical_aggregation: AVG
     - name: delta
@@ -246,37 +253,38 @@ table:
       typical_aggregation: AVG
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: measure
       typical_aggregation: AVG
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: parent_is_combo
       type: BOOLEAN
-      description: ""
+      description: Parent instrument is combo from the instrument definition.
       category: dimension
       filterable: true
     - name: leg_ratio
       type: FLOAT
-      description: ""
+      description: Combo leg ratio.
       category: measure
       typical_aggregation: AVG
     - name: leg_index
       type: INTEGER
-      description: ""
+      description: Combo leg index.
       category: measure
       typical_aggregation: AVG
     - name: underlying_inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying inst type enum value.
       category: dimension
       filterable: true
     - name: combo_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the combo type enum value.
       category: dimension
       filterable: true
     - name: underlying_symbol
@@ -296,17 +304,17 @@ table:
       typical_aggregation: AVG
     - name: is_parent
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the parent condition is true.
       category: dimension
       filterable: true
     - name: is_ref_component
       type: INTEGER
-      description: ""
+      description: Flag indicating whether the ref component condition is true. Stored as integer (0=false, 1=true).
       category: measure
       typical_aggregation: AVG
     - name: underlying_exe_exch
       type: INTEGER
-      description: ""
+      description: Exchange where the underlying trades.
       category: measure
       typical_aggregation: AVG
     - name: liquid
@@ -331,17 +339,17 @@ table:
       filterable: true
     - name: parent_feed_code
       type: STRING
-      description: ""
+      description: Parent instrument feed code from the instrument definition.
       category: dimension
       filterable: true
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
       category: dimension
       filterable: true
     - name: contract_size
       type: FLOAT
-      description: ""
+      description: Number of units per contract lot. Streamed from TradableInstrument.contractSize proto field.
       category: measure
       typical_aggregation: AVG
     - name: no_legs
@@ -351,27 +359,28 @@ table:
       typical_aggregation: AVG
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
       category: dimension
       filterable: true
     - name: underlying_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the underlying instrument.
       category: identifier
       filterable: true
     - name: parent_combo_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the parent combo type enum value.
       category: dimension
       filterable: true
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
     - name: total_traded_size
       type: FLOAT
@@ -385,21 +394,21 @@ table:
       typical_aggregation: AVG
     - name: ref_term
       type: STRING
-      description: ""
+      description: Reference term from the last vol curve update (theoServer callback).
       category: dimension
       filterable: true
     - name: ref_inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the ref inst type enum value.
       category: dimension
       filterable: true
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true

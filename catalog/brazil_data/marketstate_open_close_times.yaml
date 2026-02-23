@@ -8,12 +8,12 @@ table:
   columns:
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
     - name: instrument_type
@@ -23,9 +23,9 @@ table:
       filterable: true
     - name: open_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the open occurred.
       category: time
     - name: close_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the close occurred.
       category: time

@@ -8,54 +8,61 @@ table:
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
       category: identifier
       filterable: true
       source: kafka infrastructure
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
       category: identifier
       filterable: true
       source: kafka infrastructure
     - name: mako_ingress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp injected by the switch when the data packet arrives into Mako network. From
+        MarketDataExtended proto.
       category: time
       source: MarketDataExtended.makoIngressTimestamp (data/MarketDataExtended.proto)
     - name: mako_ingress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
+        data packet arrives into Mako network. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.makoIngressTimestamp_ns (data/MarketDataExtended.proto)
     - name: hardware_nic_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Hardware timestamp of moment price packet hit the network card. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.hardwareNicRxTimestamp (data/MarketDataExtended.proto)
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of hardware nic rx timestamp. Hardware timestamp of moment price
+        packet hit the network card. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.hardwareNicRxTimestamp_ns (data/MarketDataExtended.proto)
     - name: software_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Software timestamp - time just before message decode. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.softwareRxTimestamp (data/MarketDataExtended.proto)
     - name: software_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of software timestamp. Software timestamp - time just before message
+        decode. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.softwareRxTimestamp_ns (data/MarketDataExtended.proto)
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.exchangeTimestamp (data/MarketDataExtended.proto)
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.exchangeTimestamp_ns (data/MarketDataExtended.proto)
     - name: sequence_number
@@ -66,13 +73,13 @@ table:
       source: MarketDataExtended.sequenceNumber (data/MarketDataExtended.proto)
     - name: market_trade_id
       type: STRING
-      description: ""
+      description: Exchange-assigned identifier to link trade with private order feed. From MarketDataExtended proto.
       category: identifier
       filterable: true
       source: MarketDataExtended.marketTradeId (data/MarketDataExtended.proto)
     - name: message_trade_date
       type: DATE
-      description: ""
+      description: Trade date embedded within the original proto message.
       category: time
       source: derived (data-loader)
     - name: price
@@ -95,51 +102,53 @@ table:
       source: MarketDataExtended.side_name (data/MarketDataExtended.proto)
     - name: buyer_id
       type: STRING
-      description: ""
+      description: Exchange-assigned identifier for the buyer. From MarketDataExtended proto.
       category: identifier
       filterable: true
       source: MarketDataExtended.buyerId (data/MarketDataExtended.proto)
     - name: seller_id
       type: STRING
-      description: ""
+      description: Exchange-assigned identifier for the seller. From MarketDataExtended proto.
       category: identifier
       filterable: true
       source: MarketDataExtended.sellerId (data/MarketDataExtended.proto)
     - name: trade_exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamps of the actual trade message. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.tradeExchangeTimestamp (data/MarketDataExtended.proto)
     - name: trade_exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of trade exchange timestamp. Timestamps of the actual trade message.
+        From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.tradeExchangeTimestamp_ns (data/MarketDataExtended.proto)
     - name: trade_ingress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the trade ingress occurred.
       category: time
       source: MarketDataExtended.tradeIngressTimestamp (data/MarketDataExtended.proto)
     - name: trade_ingress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the trade ingress timestamp. Combine with trade_ingress_timestamp
+        for full nanosecond-resolution timing.
       category: time
       source: MarketDataExtended.tradeIngressTimestamp_ns (data/MarketDataExtended.proto)
     - name: event_type
       type: INTEGER
-      description: ""
+      description: VT Event that triggered the swing. From MarketDataExtended proto.
       category: dimension
       filterable: true
       source: MarketDataExtended.eventType (data/MarketDataExtended.proto)
     - name: event_type_name
       type: STRING
-      description: ""
+      description: VT Event that triggered the swing. From MarketDataExtended proto (human-readable enum name).
       category: dimension
       filterable: true
       source: MarketDataExtended.eventType_name (data/MarketDataExtended.proto)
     - name: entering_firm_id
       type: STRING
-      description: ""
+      description: Exchange-assigned identifier for the participant inserting the order. From MarketDataExtended proto.
       category: identifier
       filterable: true
       source: MarketDataExtended.enteringFirmId (data/MarketDataExtended.proto)
@@ -151,116 +160,122 @@ table:
       source: MarketDataExtended.orderId (data/MarketDataExtended.proto)
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 of Mako instrument. From MarketDataExtended proto.
       category: identifier
       filterable: true
       source: MarketDataExtended.instrumentHash (data/MarketDataExtended.proto)
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
       source: MarketDataExtended.pid (data/MarketDataExtended.proto)
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
       source: MarketDataExtended.hostname (data/MarketDataExtended.proto)
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
       source: MarketDataExtended.streamId (data/MarketDataExtended.proto)
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
       source: MarketDataExtended.eventId (data/MarketDataExtended.proto)
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
       source: MarketDataExtended.messageId (data/MarketDataExtended.proto)
     - name: aggressor_exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-reported time aggressor got to exchange for a trade. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.aggressorExchangeTimestamp (data/MarketDataExtended.proto)
     - name: aggressor_exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of aggressor exchange timestamp. Exchange-reported time aggressor got
+        to exchange for a trade. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.aggressorExchangeTimestamp_ns (data/MarketDataExtended.proto)
     - name: sent_exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-reported sending time of the market data packet. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.sentExchangeTimestamp (data/MarketDataExtended.proto)
     - name: sent_exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of sent exchange timestamp. Exchange-reported sending time of the
+        market data packet. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.sentExchangeTimestamp_ns (data/MarketDataExtended.proto)
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: measure
       typical_aggregation: AVG
       source: instrument enrichment (data-loader)
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
       source: instrument enrichment (data-loader)
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition. From MarketDataExtended proto.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
       source: kafka infrastructure
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
       source: kafka infrastructure

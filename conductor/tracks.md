@@ -200,7 +200,7 @@
 
 ---
 
-## [ ] Track: Metadata Extraction from Source Repos
+## [x] Track: Metadata Extraction from Source Repos
 - **ID:** 24_metadata_extraction
 - **Wave:** 17
 - **Complexity:** L

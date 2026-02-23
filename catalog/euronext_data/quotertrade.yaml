@@ -3,321 +3,1165 @@ table:
   dataset: "{dataset_prefix}euronext_data"
   fqn: '{project}.{dataset_prefix}euronext_data.quotertrade'
   layer: data
-  description: ""
+  description: Raw quoter activity with timestamps, levels, and sizes. NOT the same as kpi.quotertrade which has
+    performance metrics (edge, PnL, slippage). This table contains the full lifecycle of quoter fills including quote
+    management fields like residual_size, total_level_size, tv_bid/tv_ask, and last_update values. Use for analysing
+    quoting behaviour, fill rates, and quote staleness. Partitioned by trade_date.
   partition_field: trade_date
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay. Not typically needed for analytical queries but useful for debugging data ingestion issues.
+      source: "QuoterTrade.proto::kafka_partition"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay. Not typically needed for analytical queries but useful for debugging data ingestion ordering.
+      source: "QuoterTrade.proto::kafka_offset"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '1857'
+      - '1856'
+      - '1855'
     - name: symbol
       type: STRING
-      description: ""
+      description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
+        human-readable identifier used by traders when referring to instruments. Used for filtering and grouping across
+        all tables in the data and KPI layers.
+      source: "VtCommon.proto::symbol"
+      synonyms:
+      - ticker
+      - product
+      - instrument
+      - underlying symbol
+      category: dimension
+      filterable: true
+      example_values:
+      - 'SINCH_SS'
+      - 'SDVK'
+      - 'AZNS'
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako trading portfolio or book to which the quoter algo belongs. Used for filtering
+        quoter trade events by trading strategy. Traders commonly ask for quoter data filtered by portfolio to analyse
+        fill behaviour for a specific book.
+      source: "VtCommon.proto::portfolio"
+      synonyms:
+      - book
+      - trading book
+      category: dimension
+      filterable: true
+      example_values:
+      - 'WHITE'
     - name: trade_date
       type: DATE
-      description: ""
+      description: Business date of the trading session, used as the primary partition column for this table. Always
+        filter on trade_date for efficient queries. Represents the logical trading day which may span midnight for
+        overnight sessions.
+      source: "QuoterTrade.proto::tradeDate"
+      synonyms:
+      - date
+      - business date
+      - trading date
+      category: time
+      filterable: true
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
+        defining attributes (symbol, strike, expiry, type). Used as the primary join key across all data and KPI tables.
+        Every instrument has exactly one hash that is consistent across all systems.
+      source: "VtCommon.proto::instrumentHash"
+      synonyms:
+      - instrument id
+      - instrument key
+      category: identifier
+      filterable: true
+      example_values:
+      - 'e13a8cfda77f7f5dd0c52faf9615b1363bcd78dde04f24671760cb7900ca085a'
+      - 'dbb4c6bffea93f49a7e785c000be54f0148e62d3e774dadcebd36936fb72e759'
+      - '7ae811825bc42df8499c63ee3890188488ef03abdb6eae91ba23be48795b63fc'
     - name: algo
       type: STRING
-      description: ""
+      description: Name of the originating quoter algorithm that was quoting this instrument and received this fill.
+        Identifies which specific quoting algorithm within the portfolio was responsible. Used for performance
+        attribution by algorithm.
+      source: "VtCommon.proto::algo"
+      synonyms:
+      - strategy
+      - algo name
+      - trading algo
+      category: dimension
+      filterable: true
+      example_values:
+      - 'OST_Q'
     - name: ref_curve_id
       type: INTEGER
-      description: ""
+      description: Identifier of the volatility curve active at the time of the last theoServer callback before this
+        quoter fill. Used to trace which vol surface the quoter was referencing when it set its quote levels. Critical
+        for debugging edge calculations.
+      source: "VtCommon.proto::refCurveId"
+      synonyms:
+      - ref curve
+      - reference curve
+      category: identifier
+      filterable: true
+      example_values:
+      - '329875'
+      - '297969'
+      - '128249'
     - name: ref_carry_id
       type: INTEGER
-      description: ""
+      description: Identifier of the carry/dividend curve active at the time of the last theoServer callback before this
+        fill. Can represent either roll or short rate depending on configuration. Used for tracing rate assumptions in
+        edge calculations.
+      source: "VtCommon.proto::refCarryId"
+      synonyms:
+      - ref carry
+      - reference carry
+      category: identifier
+      filterable: true
+      example_values:
+      - '8618'
+      - '17096'
+      - '12101'
     - name: ref_tv
       type: FLOAT
-      description: ""
+      description: Theoretical value of the instrument on the last vol curve update (last theoServer callback),
+        calculated using refBasePrice. This is the reference fair value the quoter was using to set quote levels. Not
+        the live TV at time of fill -- see tv for that.
+      source: "VtCommon.proto::refTv"
+      synonyms:
+      - reference theo
+      - ref fair value
+      category: measure
+      typical_aggregation: AVG
     - name: ref_delta
       type: FLOAT
-      description: ""
+      description: Delta of the instrument on the last vol curve update (last theoServer callback). Used as the
+        reference hedge ratio for delta-gamma adjusting the theo to current underlying prices. Feeds into the quoter's
+        level and edge calculations.
+      source: "VtCommon.proto::refDelta"
+      synonyms:
+      - reference delta
+      category: measure
+      typical_aggregation: AVG
     - name: ref_gamma
       type: FLOAT
-      description: ""
+      description: Gamma of the instrument on the last vol curve update (last theoServer callback). Used alongside
+        ref_delta for second-order adjustment of the theoretical value to current underlying prices. Higher ref_gamma
+        means the delta approximation changes faster.
+      source: "VtCommon.proto::refGamma"
+      synonyms:
+      - reference gamma
+      category: measure
+      typical_aggregation: AVG
     - name: ref_base_price
       type: FLOAT
-      description: ""
+      description: Unadjusted raw base value (underlying price) on the last vol curve update (last theoServer callback).
+        The value corresponds to the relevant side dependent on trade direction. Used as the anchor point for
+        delta-gamma adjustment of the reference theo.
+      source: "VtCommon.proto::refBasePrice"
+      synonyms:
+      - ref underlying
+      - reference price
+      - ref base
+      category: measure
+      typical_aggregation: AVG
     - name: ref_roll
       type: FLOAT
-      description: ""
+      description: Roll/carry adjustment value on the last curve update, reflecting the cost of rolling a position
+        forward (dividends, interest, basis). Used in the edge calculation to properly account for carry costs when
+        comparing theo to quote levels.
+      source: "VtCommon.proto::refRoll"
+      synonyms:
+      - reference roll
+      category: measure
+      typical_aggregation: AVG
     - name: raw_bv_bid
       type: FLOAT
-      description: ""
+      description: Raw (unadjusted) base value bid price before any layered base, inflight deflection, or internal TV
+        adjustments. Represents the raw underlying bid that feeds into the quoter's pricing chain. Compare with
+        layered_base_bid to see the effect of adjustments.
+      source: "VtCommon.proto::rawBvBid"
+      synonyms:
+      - bv bid
+      - raw base bid
+      category: measure
+      typical_aggregation: AVG
     - name: raw_bv_bid_size
       type: INTEGER
-      description: ""
+      description: Size (in contracts/lots) available at the raw base value bid price. Indicates the depth of underlying
+        liquidity on the bid side before adjustments. Used for assessing whether sufficient underlying liquidity exists
+        for hedging quoter fills.
+      source: "VtCommon.proto::rawBvBidSize"
+      synonyms: []
+      category: measure
+      typical_aggregation: SUM
     - name: raw_bv_ask
       type: FLOAT
-      description: ""
+      description: Raw (unadjusted) base value ask price before any layered base, inflight deflection, or internal TV
+        adjustments. Represents the raw underlying ask that feeds into the quoter's pricing chain. Compare with
+        layered_base_ask to see the effect of adjustments.
+      source: "VtCommon.proto::rawBvAsk"
+      synonyms:
+      - bv ask
+      - raw base ask
+      category: measure
+      typical_aggregation: AVG
     - name: raw_bv_ask_size
       type: INTEGER
-      description: ""
+      description: Size (in contracts/lots) available at the raw base value ask price. Indicates the depth of underlying
+        liquidity on the ask side before adjustments. Used for assessing whether sufficient underlying liquidity exists
+        for hedging quoter fills.
+      source: "VtCommon.proto::rawBvAskSize"
+      synonyms: []
+      category: measure
+      typical_aggregation: SUM
     - name: layered_base_bid
       type: FLOAT
-      description: ""
+      description: Layered base bid price after applying all internal adjustments (ODR, inflight deflection, NHR). This
+        is the adjusted underlying bid used by the quoter for edge and level calculation. The difference from raw_bv_bid
+        shows the total impact of all adjustment layers.
+      source: "VtCommon.proto::layeredBaseBid"
+      synonyms:
+      - adjusted base bid
+      category: measure
+      typical_aggregation: AVG
     - name: layered_base_bid_size
       type: INTEGER
-      description: ""
+      description: Size (in contracts/lots) available at the layered base bid price after adjustments. Represents the
+        adjusted underlying bid depth that the quoter uses for its level and size calculations.
+      source: "VtCommon.proto::layeredBaseBidSize"
+      synonyms: []
+      category: measure
+      typical_aggregation: SUM
     - name: layered_base_ask
       type: FLOAT
-      description: ""
+      description: Layered base ask price after applying all internal adjustments (ODR, inflight deflection, NHR). This
+        is the adjusted underlying ask used by the quoter for edge and level calculation. The difference from raw_bv_ask
+        shows the total impact of all adjustment layers.
+      source: "VtCommon.proto::layeredBaseAsk"
+      synonyms:
+      - adjusted base ask
+      category: measure
+      typical_aggregation: AVG
     - name: layered_base_ask_size
       type: INTEGER
-      description: ""
+      description: Size (in contracts/lots) available at the layered base ask price after adjustments. Represents the
+        adjusted underlying ask depth that the quoter uses for its level and size calculations.
+      source: "VtCommon.proto::layeredBaseAskSize"
+      synonyms: []
+      category: measure
+      typical_aggregation: SUM
     - name: layered_base_adjustment
       type: FLOAT
-      description: ""
+      description: Total layered base adjustment applied to the raw base value. Represents the aggregate of multiple
+        pricing adjustments that shift the base value used in the quoter's edge and level calculations.
+      source: "VtCommon.proto::layeredBaseAdjustment"
+      synonyms:
+      - base adjustment
+      category: measure
+      typical_aggregation: AVG
     - name: odr_adjustment
       type: FLOAT
-      description: ""
+      description: Order-driven-repricing (ODR) adjustment applied to the base value. ODR adjusts the effective
+        underlying price based on recent order flow or market microstructure signals. Part of the layered adjustment
+        chain between raw_bv and the final TV used by the quoter.
+      source: "VtCommon.proto::odrAdjustment"
+      synonyms:
+      - odr
+      category: measure
+      typical_aggregation: AVG
     - name: inflight_deflection_tv_adjustment_bid
       type: FLOAT
-      description: ""
+      description: Inflight deflection adjustment applied to the theoretical value on the bid side. Accounts for the
+        estimated market impact of Mako's own orders that are currently in-flight (sent but not yet confirmed). Prevents
+        the quoter from setting levels that double-count edge from pending orders.
+      source: "VtCommon.proto::inflightDeflectionTvAdjustmentBid"
+      synonyms:
+      - inflight bid adjustment
+      category: measure
+      typical_aggregation: AVG
     - name: inflight_deflection_tv_adjustment_ask
       type: FLOAT
-      description: ""
+      description: Inflight deflection adjustment applied to the theoretical value on the ask side. Accounts for the
+        estimated market impact of Mako's own orders that are currently in-flight (sent but not yet confirmed). Prevents
+        the quoter from setting levels that double-count edge from pending orders.
+      source: "VtCommon.proto::inflightDeflectionTvAdjustmentAsk"
+      synonyms:
+      - inflight ask adjustment
+      category: measure
+      typical_aggregation: AVG
     - name: internal_tv_adjustment_bid
       type: FLOAT
-      description: ""
+      description: Internal theoretical value adjustment on the bid side, reflecting additional proprietary offsets
+        applied by the pricing infrastructure. These adjustments capture trader views, model corrections, or
+        microstructure effects not modeled in the base theo computation.
+      source: "VtCommon.proto::internalTvAdjustmentBid"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: internal_tv_adjustment_ask
       type: FLOAT
-      description: ""
+      description: Internal theoretical value adjustment on the ask side, reflecting additional proprietary offsets
+        applied by the pricing infrastructure. These adjustments capture trader views, model corrections, or
+        microstructure effects not modeled in the base theo computation.
+      source: "VtCommon.proto::internalTvAdjustmentAsk"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: nhr_adjustment_bid
       type: FLOAT
-      description: ""
+      description: Non-hedge-ratio (NHR) adjustment on the bid side. Captures adjustments related to hedging
+        inefficiencies or delta-neutral deviations. Part of the layered adjustment chain that modifies the effective
+        theo used by the quoter for setting bid levels.
+      source: "VtCommon.proto::nhrAdjustmentBid"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: nhr_adjustment_ask
       type: FLOAT
-      description: ""
+      description: Non-hedge-ratio (NHR) adjustment on the ask side. Captures adjustments related to hedging
+        inefficiencies or delta-neutral deviations. Part of the layered adjustment chain that modifies the effective
+        theo used by the quoter for setting ask levels.
+      source: "VtCommon.proto::nhrAdjustmentAsk"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: base_edge_bid
       type: FLOAT
-      description: ""
+      description: Base edge on the bid side at the time of the quoter fill, representing the raw difference between the
+        theoretical value and the market bid price before fees and other deductions. Positive base edge means the fill
+        price was favourable relative to our theo.
+      source: "VtCommon.proto::baseEdgeBid"
+      synonyms:
+      - bid edge
+      - bid-side edge
+      category: measure
+      typical_aggregation: SUM
     - name: base_edge_ask
       type: FLOAT
-      description: ""
+      description: Base edge on the ask side at the time of the quoter fill, representing the raw difference between the
+        market ask price and the theoretical value before fees and other deductions. Positive base edge means the fill
+        price was favourable relative to our theo.
+      source: "VtCommon.proto::baseEdgeAsk"
+      synonyms:
+      - ask edge
+      - ask-side edge
+      category: measure
+      typical_aggregation: SUM
     - name: fees
       type: FLOAT
-      description: ""
+      description: Total trading fees comprising exchange fees and clearing costs for this quoter fill. Deducted from
+        gross edge to determine net edge. Critical for accurate profitability analysis since fees can erode a
+        significant portion of the captured edge on quoter trades.
+      source: "VtCommon.proto::fees"
+      synonyms:
+      - exchange fees
+      - transaction costs
+      - trading costs
+      category: measure
+      typical_aggregation: SUM
     - name: roll
       type: FLOAT
-      description: ""
+      description: Roll/carry adjustment value reflecting the cost of rolling a position forward (dividends, interest,
+        basis). Used in slippage attribution to separate carry-related PnL from pure trading edge for this quoter fill.
+      source: "VtCommon.proto::roll"
+      synonyms:
+      - calendar roll
+      - roll value
+      - carry cost
+      category: measure
+      typical_aggregation: AVG
     - name: bv_side
       type: STRING
-      description: ""
+      description: Side of the base value update (bid or ask) that was relevant for this quoter fill. Indicates which
+        side of the underlying book the quoter was referencing when the fill occurred.
+      source: "VtCommon.proto::bvSide"
+      synonyms:
+      - base value side
+      category: dimension
+      filterable: true
+      example_values:
+      - 'BUYSELL_SELL'
+      - 'BUYSELL_BUY'
     - name: delta_adjusted_base_price
       type: FLOAT
-      description: ""
+      description: Equal to the raw base value (relevant side depending on trade direction) plus ODR and layered base
+        adjustments. This is the fully adjusted underlying price used to delta-gamma adjust the reference theo to
+        compute the live theoretical value at time of the quoter fill.
+      source: "VtCommon.proto::deltaAdjustedBasePrice"
+      synonyms:
+      - delta adjusted_base_price
+      - adjusted base price
+      category: measure
+      typical_aggregation: AVG
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the quoter saw at time of the fill. This is the delta/gamma-adjusted refTv
+        including all internal adjustments (inflight deflection, ODR, NHR), derived from the delta-adjusted base price.
+        The final fair value against which the fill price is compared for edge calculation. Also called theo or fair
+        value.
+      source: "VtCommon.proto::tv"
+      synonyms:
+      - theo
+      - theoretical value
+      - fair value
+      - machine price
+      - TV
+      category: measure
+      typical_aggregation: AVG
     - name: base_sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number of the base (underlying) instrument's market data event at the time of this quoter
+        fill. Used for correlating fills back to specific underlying price movements and ensuring correct event
+        ordering.
+      source: "VtCommon.proto::baseSequenceNumber"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: option_sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number of the option instrument's market data event associated with this quoter fill. Used
+        for correlating fills to specific option book changes and ensuring correct event ordering.
+      source: "VtCommon.proto::optionSequenceNumber"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: base_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier of the base (underlying) instrument used for pricing this quoter fill. Links
+        back to the underlying's market data and depth records. Different from instrument_hash which identifies the
+        option being quoted.
+      source: "VtCommon.proto::baseInstrumentHash"
+      synonyms:
+      - base hash
+      category: identifier
+      filterable: true
+      example_values:
+      - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+      - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
+      - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
     - name: hardware_nic_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Hardware NIC receive timestamp recording when the fill notification packet physically arrived at
+        Mako's network interface card. The earliest possible timestamp on Mako's side. Used for measuring
+        fill-to-process latency from wire to internal handling.
+      source: "VtCommon.proto::hardwareNicRxTimestamp"
+      synonyms:
+      - nic timestamp
+      - wire time
+      category: time
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the hardware NIC receive timestamp, providing sub-microsecond precision for
+        the exact moment the fill notification arrived at the network card. Combine with hardware_nic_rx_timestamp for
+        full nanosecond-precision timing.
+      source: "VtCommon.proto::hardwareNicRxTimestamp"
+      synonyms: []
+      category: time
     - name: event_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp of when the quoter fill event was processed by the VT. This is the moment Mako's system
+        processed the fill notification from the exchange. Used for timeline analysis of quoter fill handling and
+        position update latency.
+      source: "VtCommon.proto::eventTimestamp"
+      synonyms:
+      - event time
+      - fill time
+      category: time
     - name: event_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the event timestamp, providing sub-microsecond precision for when the quoter
+        fill was processed internally. Combine with event_timestamp for full nanosecond-precision timing.
+      source: "VtCommon.proto::eventTimestamp"
+      synonyms: []
+      category: time
     - name: is_deleting
       type: BOOLEAN
-      description: ""
+      description: Flag indicating whether there was a fast-delete in-flight for this instrument and side at the time of
+        the fill. When true, the quoter had already sent a cancel for this quote but the fill arrived before the cancel
+        was processed. Used for analysing fill-on-cancel scenarios and quote lifecycle timing.
+      source: "QuoterTrade.proto::isDeleting"
+      synonyms:
+      - cancel in flight
+      - deleting flag
+      category: dimension
+      filterable: true
+      example_values:
+      - 'false'
     - name: trade_price
       type: FLOAT
-      description: ""
+      description: Execution price at which this quoter fill occurred. The actual price at which the resting quote was
+        filled by an incoming aggressor order. Compare with tv to measure edge captured and with last_update_tv to
+        assess staleness.
+      source: "QuoterTrade.proto::tradePrice"
+      synonyms:
+      - fill price
+      - execution price
+      - price
+      category: measure
+      typical_aggregation: AVG
     - name: trade_size
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) filled in this quoter trade event. Represents the quantity that was
+        executed against our resting quote. May be a partial fill if the aggressor did not consume the entire resting
+        size.
+      source: "QuoterTrade.proto::tradeSize"
+      synonyms:
+      - fill size
+      - quantity
+      - lots
+      - volume
+      category: measure
+      typical_aggregation: SUM
     - name: residual_size
       type: INTEGER
-      description: ""
+      description: Number of lots of this quote still resting in the order book after this fill. If zero, the quote was
+        fully consumed. If non-zero, the quote remains active with reduced size. Used for analysing partial fill
+        patterns and remaining quote exposure after fills.
+      source: "QuoterTrade.proto::residualSize"
+      synonyms:
+      - remaining size
+      - leftover size
+      category: measure
+      typical_aggregation: SUM
     - name: trade_side
       type: STRING
-      description: ""
+      description: Side of the order book that was filled (buy or sell). Indicates whether our resting quote was on the
+        bid (buy) or ask (sell) side. Can be invalid if the side could not be determined. Used for directional analysis
+        of quoter fills and P&L attribution.
+      source: "QuoterTrade.proto::tradeSide"
+      synonyms:
+      - side
+      - buy sell
+      - direction
+      - fill side
+      category: dimension
+      filterable: true
+      example_values:
+      - 'BUYSELL_SELL'
     - name: total_level_size
       type: INTEGER
-      description: ""
+      description: Total number of lots resting on this price level after the fill, including both Mako's remaining
+        quote and other participants' orders. Used to assess our share of the price level (residual_size /
+        total_level_size) and overall level liquidity after the fill.
+      source: "QuoterTrade.proto::totalLevelSize"
+      synonyms:
+      - level size
+      - total resting size
+      category: measure
+      typical_aggregation: SUM
     - name: last_update_tv
       type: FLOAT
-      description: ""
+      description: Deprecated -- see last_update_tv_bid and last_update_tv_ask instead. Historical field that recorded
+        the theoretical value at the last quote update. Kept for backward compatibility but should not be used for new
+        analysis.
+      source: "QuoterTrade.proto::lastUpdateTv"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: last_update_bv_bid
       type: FLOAT
-      description: ""
+      description: The bid base value (underlying bid price) at the time the quoter last updated its quotes for this
+        instrument. Comparing this with the current raw_bv_bid reveals how much the underlying moved between the last
+        quote update and the fill, indicating quote staleness.
+      source: "QuoterTrade.proto::lastUpdateBvBid"
+      synonyms:
+      - last bv bid
+      category: measure
+      typical_aggregation: AVG
     - name: last_update_bv_ask
       type: FLOAT
-      description: ""
+      description: The ask base value (underlying ask price) at the time the quoter last updated its quotes for this
+        instrument. Comparing this with the current raw_bv_ask reveals how much the underlying moved between the last
+        quote update and the fill on the ask side.
+      source: "QuoterTrade.proto::lastUpdateBvAsk"
+      synonyms:
+      - last bv ask
+      category: measure
+      typical_aggregation: AVG
     - name: last_update_edge_bid
       type: FLOAT
-      description: ""
+      description: The bid-side minimum edge requirement at the time the quoter last updated its quotes for this
+        instrument. Comparing with the current edge reveals whether the edge threshold changed between the last quote
+        update and the fill. Used for analysing edge drift.
+      source: "QuoterTrade.proto::lastUpdateEdgeBid"
+      synonyms:
+      - last edge bid
+      category: measure
+      typical_aggregation: SUM
     - name: last_update_edge_ask
       type: FLOAT
-      description: ""
+      description: The ask-side minimum edge requirement at the time the quoter last updated its quotes for this
+        instrument. Comparing with the current edge reveals whether the edge threshold changed between the last quote
+        update and the fill on the ask side.
+      source: "QuoterTrade.proto::lastUpdateEdgeAsk"
+      synonyms:
+      - last edge ask
+      category: measure
+      typical_aggregation: SUM
     - name: last_update_timestamp
       type: TIMESTAMP
-      description: ""
+      description: The event timestamp when quotes for this instrument were last updated by the quoter algorithm. The
+        time elapsed between this timestamp and event_timestamp measures quote staleness — how long the quote was
+        resting unchanged before being filled. Longer durations suggest adverse selection risk.
+      source: "QuoterTrade.proto::lastUpdateTimestamp"
+      synonyms:
+      - last update time
+      - quote update time
+      category: time
     - name: last_update_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the last quote update timestamp, providing sub-microsecond precision for when
+        the quoter last refreshed its quotes. Combine with last_update_timestamp for full nanosecond-precision staleness
+        measurement.
+      source: "QuoterTrade.proto::lastUpdateTimestamp"
+      synonyms: []
+      category: time
     - name: tv_bid
       type: FLOAT
-      description: ""
+      description: The theoretical value on the bid side at the time of the fill, computed as the ref theo (from
+        theoServer) offset by internal deflection and then adjusted to the latest underlying bid price (baseVal bid)
+        using delta and gamma approximation. The fair value the quoter sees for its bid-side quoting.
+      source: "QuoterTrade.proto::tvBid"
+      synonyms:
+      - theo bid
+      - bid theo
+      category: measure
+      typical_aggregation: AVG
     - name: tv_ask
       type: FLOAT
-      description: ""
+      description: The theoretical value on the ask side at the time of the fill, computed as the ref theo (from
+        theoServer) offset by internal deflection and then adjusted to the latest underlying ask price (baseVal ask)
+        using delta and gamma approximation. The fair value the quoter sees for its ask-side quoting.
+      source: "QuoterTrade.proto::tvAsk"
+      synonyms:
+      - theo ask
+      - ask theo
+      category: measure
+      typical_aggregation: AVG
     - name: last_update_tv_bid
       type: FLOAT
-      description: ""
+      description: The bid-side theoretical value at the time the quoter last updated its quotes. Compare with tv_bid to
+        measure how much the theo changed between the last quote update and the fill. A large difference indicates the
+        quote was stale relative to current fair value.
+      source: "QuoterTrade.proto::lastUpdateTvBid"
+      synonyms:
+      - last theo bid
+      category: measure
+      typical_aggregation: AVG
     - name: last_update_tv_ask
       type: FLOAT
-      description: ""
+      description: The ask-side theoretical value at the time the quoter last updated its quotes. Compare with tv_ask to
+        measure how much the theo changed between the last quote update and the fill. A large difference indicates the
+        quote was stale relative to current fair value.
+      source: "QuoterTrade.proto::lastUpdateTvAsk"
+      synonyms:
+      - last theo ask
+      category: measure
+      typical_aggregation: AVG
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO
+        (spread/strategy), or other instrument class. Derived from the internal instrument type code. Use for filtering
+        queries to specific instrument categories.
+      source: "QuoterTrade.proto::instTypeName"
+      synonyms:
+      - instrument type
+      - product type
+      - security type
+      category: dimension
+      filterable: true
+      example_values:
+      - 'OPTION'
+      - 'COMBO'
+      - 'FUTURE'
     - name: strike
       type: FLOAT
-      description: ""
+      description: Option strike price (exercise price) at which the holder can buy (call) or sell (put) the underlying.
+        A key defining attribute of the option contract. Used for filtering to specific strikes and for moneyness
+        analysis relative to the underlying price.
+      source: "QuoterTrade.proto::strike"
+      synonyms:
+      - exercise price
+      - strike price
+      - K
+      category: measure
+      typical_aggregation: AVG
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly,
+        quarterly). Used for term structure analysis and grouping quoter fills by expiry bucket.
+      source: "QuoterTrade.proto::term"
+      synonyms:
+      - tenor
+      - expiry term
+      - maturity
+      - expiry cycle
+      category: dimension
+      filterable: true
+      example_values:
+      - 'May-2026'
+      - 'Mar-2026'
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Numeric code indicating whether the option is a call or put. Used as the raw integer representation
+        from the exchange or internal system. Prefer option_type_name for readability in queries.
+      source: "QuoterTrade.proto::optionType"
+      synonyms:
+      - call put
+      - C/P
+      category: dimension
+      filterable: true
+      example_values:
+      - '67'
+      - '80'
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
+        from the numeric option_type code. Use this column for filtering and grouping by option direction.
+      source: "QuoterTrade.proto::optionTypeName"
+      synonyms:
+      - call put name
+      - option direction
+      category: dimension
+      filterable: true
+      example_values:
+      - 'Call'
+      - 'Put'
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiration timestamp of the option contract, indicating the exact date and time at which the option
+        ceases to exist. Used for term structure analysis and expiry grouping of quoter fills.
+      source: "QuoterTrade.proto::expiryTimestamp"
+      synonyms:
+      - expiry
+      - expiration
+      - maturity date
+      category: time
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Internal Mako system symbol for the instrument, used as the canonical identifier within Mako's
+        trading infrastructure. May differ from the exchange symbol. Use for joining with internal position and risk
+        systems.
+      source: "QuoterTrade.proto::makoSymbol"
+      synonyms:
+      - internal symbol
+      category: dimension
+      filterable: true
+      example_values:
+      - 'SINCH_SS'
+      - 'SDVK'
+      - 'AZNS'
     - name: currency
       type: INTEGER
-      description: ""
+      description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
+        EUR=4, GBP=1, JPY=7. Used for multi-currency aggregation and filtering to specific currency zones.
+      source: "QuoterTrade.proto::currency"
+      synonyms:
+      - ccy
+      - currency code
+      category: dimension
+      filterable: true
+      example_values:
+      - '2'
+      - '4'
     - name: bv_update_sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number of the base value update event at the time of this quoter fill. Used for correlating
+        fills to specific underlying price updates and ensuring correct event ordering in analysis.
+      source: "VtCommon.proto::bvUpdateSequenceNumber"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: bv_update_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash of the instrument whose base value update was active at the time of this quoter fill. May
+        differ from instrument_hash if the underlying is a different instrument than the one being quoted.
+      source: "VtCommon.proto::bvUpdateInstrumentHash"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+      - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
+      - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
     - name: underlying_sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number of the underlying instrument's market data event associated with this quoter fill.
+        Used for correlating fills to specific underlying price movements and ensuring correct event ordering.
+      source: "VtCommon.proto::underlyingSequenceNumber"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier of the underlying instrument. Links this quoter fill to the underlying's
+        market data and depth records. Used for cross-referencing with the underlying's price state at the time of the
+        fill.
+      source: "VtCommon.proto::underlyingInstrumentHash"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+      - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
+      - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
     - name: pid
       type: INTEGER
-      description: ""
+      description: Process ID of the quoter application instance that handled this fill event. Used for debugging and
+        identifying which specific quoter process on which host was responsible.
+      source: "QuoterTrade.proto::pid"
+      synonyms:
+      - process id
+      category: dimension
+      filterable: true
     - name: hostname
       type: STRING
-      description: ""
+      description: Hostname of the server running the quoter application that handled this fill. Used for operational
+        debugging and identifying which physical or virtual machine was running the quoter process.
+      source: "QuoterTrade.proto::hostname"
+      synonyms:
+      - host
+      - server
+      category: dimension
+      filterable: true
     - name: mako_order_id
       type: INTEGER
-      description: ""
+      description: Mako-assigned internal order identifier (OrderId in BookServer) for the resting quote that was
+        filled. Used to trace the order through Mako's front-office systems and correlate with quote lifecycle events
+        (updates, deletes, other fills).
+      source: "QuoterTrade.proto::makoOrderId"
+      synonyms:
+      - order id
+      - quote id
+      category: identifier
+      filterable: true
+      example_values:
+      - '1078738257'
+      - '1076047425'
+      - '1076032570'
     - name: is_bv_invalid
       type: BOOLEAN
-      description: ""
+      description: Flag indicating whether the base value (underlying price) was invalid or stale at the time of the
+        quoter fill. When true, the edge calculation may be unreliable because the underlying price input was not
+        current. Used for data quality filtering.
+      source: "VtCommon.proto::isBvInvalid"
+      synonyms: []
+      category: dimension
+      filterable: true
+      example_values:
+      - 'false'
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp assigned by the exchange matching engine for this quoter fill. Represents the authoritative
+        exchange time when the resting quote was matched against an incoming order. Use for precise fill timing and
+        exchange-level latency analysis.
+      source: "QuoterTrade.proto::exchangeTimestamp"
+      synonyms:
+      - exchange time
+      - matching engine time
+      category: time
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the exchange timestamp, providing sub-microsecond precision for the exact
+        moment the exchange matched this quoter fill. Combine with exchange_timestamp for full nanosecond-precision fill
+        timing.
+      source: "QuoterTrade.proto::exchangeTimestamp"
+      synonyms: []
+      category: time
     - name: is_updating
       type: BOOLEAN
-      description: ""
+      description: Flag indicating whether there was a quote update or non-fast-delete in-flight at the time of the
+        fill. When true, the quoter had sent an update for this quote but the fill arrived before the update was
+        processed. Used for analysing fill-on-update scenarios and quote refresh timing.
+      source: "QuoterTrade.proto::isUpdating"
+      synonyms:
+      - update in flight
+      - updating flag
+      category: dimension
+      filterable: true
+      example_values:
+      - 'false'
     - name: underlying_exe_exch
       type: INTEGER
-      description: ""
+      description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
+        analysis to understand which exchange's underlying price was driving the quoter's pricing.
+      source: "VtCommon.proto::underlyingExeExch"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_exe_exch_name
       type: STRING
-      description: ""
+      description: Human-readable name of the exchange where the underlying instrument executes. Derived from the
+        numeric underlying_exe_exch code. Used for filtering and grouping by the underlying's execution venue.
+      source: "VtCommon.proto::underlyingExeExchName"
+      synonyms:
+      - underlying exchange
+      category: dimension
+      filterable: true
+      example_values:
+      - 'EXCH_CODE_SAX'
     - name: is_spark
       type: BOOLEAN
-      description: ""
+      description: Flag indicating whether this quoter event was processed via the Spark fast-path execution pipeline.
+        Spark is Mako's ultra-low-latency path that bypasses certain software layers for speed. Used for performance
+        comparison between Spark and standard processing paths.
+      source: "VtCommon.proto::isSpark"
+      synonyms:
+      - fast path
+      category: dimension
+      filterable: true
+      example_values:
+      - 'false'
     - name: ref_inst_carry_id
       type: INTEGER
-      description: ""
+      description: Reference instrument carry/dividend curve identifier, tracking the carry curve version used for this
+        specific instrument at the time of the quoter fill. May differ from ref_carry_id in multi-instrument scenarios.
+      source: "VtCommon.proto::refInstCarryId"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '8618'
+      - '17096'
+      - '12101'
     - name: ref_inst_curve_id
       type: INTEGER
-      description: ""
+      description: Reference instrument volatility curve identifier, tracking the vol curve version used for this
+        specific instrument at the time of the quoter fill. May differ from ref_curve_id in multi-instrument scenarios.
+      source: "VtCommon.proto::refInstCurveId"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '329875'
+      - '297969'
+      - '128249'
     - name: is_ref_theo_invalid
       type: BOOLEAN
-      description: ""
+      description: Flag indicating whether the reference theoretical value (ref_tv) was invalid or stale at the time of
+        the quoter fill. When true, the entire edge calculation chain is potentially unreliable. Used for data quality
+        filtering.
+      source: "VtCommon.proto::isRefTheoInvalid"
+      synonyms: []
+      category: dimension
+      filterable: true
+      example_values:
+      - 'false'
     - name: lb_enabled
       type: BOOLEAN
-      description: ""
+      description: Flag indicating whether lean-back mode was enabled for this instrument at the time of the quoter
+        fill. Lean-back mode adjusts the quoter's aggression, typically widening edge requirements or reducing quoted
+        size. Used for analysing the impact of lean-back on quoter fill behaviour.
+      source: "VtCommon.proto::lbEnabled"
+      synonyms:
+      - lean-back
+      - lean back mode
+      category: dimension
+      filterable: true
+      example_values:
+      - 'false'
     - name: edge_model_type
       type: INTEGER
-      description: ""
+      description: Numeric code identifying the edge model type used for this instrument during the quoter fill.
+        Different edge models may calculate edge differently based on instrument characteristics.
+      source: "VtCommon.proto::edgeModelType"
+      synonyms: []
+      category: dimension
+      filterable: true
+      example_values:
+      - '2'
+      - '0'
     - name: edge_model_type_name
       type: STRING
-      description: ""
+      description: Human-readable name of the edge model type used for this instrument during the quoter fill. Derived
+        from the numeric edge_model_type code. Used for filtering and grouping quoter performance by edge model.
+      source: "VtCommon.proto::edgeModelTypeName"
+      synonyms:
+      - edge model
+      category: dimension
+      filterable: true
+      example_values:
+      - 'EDGE_MODEL_PM'
+      - 'EDGE_MODEL_NULL'
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream identifier from the event streaming infrastructure, indicating which logical stream this
+        record originated from. Used for data provenance, replay, and pipeline debugging.
+      source: "QuoterTrade.proto::streamsource_stream_id"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '25833766950'
+      - '25833766945'
+      - '25833766919'
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Event identifier within the source stream, providing a unique monotonically increasing sequence
+        number for ordering events. Used for data provenance and ensuring correct event ordering.
+      source: "QuoterTrade.proto::streamsource_event_id"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '1771338364927765096'
+      - '1771322957438814514'
+      - '1771320414482869855'
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Message identifier within the source stream event, used when a single event contains multiple
+        messages. Provides the finest-grained provenance tracking for individual records.
+      source: "QuoterTrade.proto::streamsource_message_id"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '66330451509249'
+      - '63822861697025'
+      - '110614265462785'
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Process ID of the data source application that produced this record. Used for data provenance
+        tracking and debugging.
+      source: "QuoterTrade.proto::datasource_pid"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Hostname of the server running the data source application that produced this record. Used for data
+        provenance tracking and debugging.
+      source: "QuoterTrade.proto::datasource_hostname"
+      synonyms: []
+      category: dimension
+      filterable: true
+      example_values:
+      - 'omxps304'
+      - 'omxps305'
     - name: bid_price_0
       type: FLOAT
-      description: ""
+      description: Top-of-book bid price (best bid) at depth level 0 for this instrument at the time of the quoter fill.
+        The unadjusted bid price before the trade. Used for spread analysis and assessing the book state at fill time.
+      source: "VtCommon.proto::bid_price_0"
+      synonyms:
+      - bid 0
+      - best bid
+      category: measure
+      typical_aggregation: AVG
     - name: ask_price_0
       type: FLOAT
-      description: ""
+      description: Top-of-book ask price (best offer) at depth level 0 for this instrument at the time of the quoter
+        fill. The unadjusted ask price before the trade. Used for spread analysis and assessing the book state at fill
+        time.
+      source: "VtCommon.proto::ask_price_0"
+      synonyms:
+      - ask 0
+      - best ask
+      category: measure
+      typical_aggregation: AVG
     - name: ask_volume_0
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at the best ask (depth level 0) at the time of the quoter fill.
+        The unadjusted top-of-book ask volume before the trade. Used for assessing available ask-side liquidity at fill
+        time.
+      source: "VtCommon.proto::ask_volume_0"
+      synonyms:
+      - ask size 0
+      - best ask size
+      category: measure
+      typical_aggregation: SUM
     - name: bid_volume_0
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at the best bid (depth level 0) at the time of the quoter fill.
+        The unadjusted top-of-book bid volume before the trade. Used for assessing available bid-side liquidity at fill
+        time.
+      source: "VtCommon.proto::bid_volume_0"
+      synonyms:
+      - bid size 0
+      - best bid size
+      category: measure
+      typical_aggregation: SUM
     - name: ref_theoevent_stream_id
       type: INTEGER
-      description: ""
+      description: Stream identifier of the theo event that provided the reference theoretical values (ref_tv,
+        ref_delta, ref_gamma) used for this quoter fill's edge calculation. Used for tracing back to the exact theo
+        computation.
+      source: "QuoterTrade.proto::refTheoeventStreamId"
+      synonyms: []
+      category: identifier
+      filterable: true
     - name: ref_theoevent_event_id
       type: INTEGER
-      description: ""
+      description: Event identifier of the theo event that provided the reference theoretical values for this quoter
+        fill. Together with ref_theoevent_stream_id, uniquely identifies the exact theo snapshot used for edge
+        calculation.
+      source: "QuoterTrade.proto::refTheoeventEventId"
+      synonyms: []
+      category: identifier
+      filterable: true
     - name: last_trade_price
       type: FLOAT
-      description: ""
+      description: Last traded price for this instrument at the time of the quote update, added for KRX per-side quoting
+        limits (git commit 65e2117). Used in Korean exchange compliance where quoting limits are based on the last trade
+        price and per-side volume constraints.
+      source: "QuoterTrade.proto::lastTradePrice"
+      synonyms:
+      - last price
+      - ltp
+      category: measure
+      typical_aggregation: AVG
     - name: market_volume_bid
       type: INTEGER
-      description: ""
+      description: Total market volume resting on the bid side at the time of the quote update, added for KRX per-side
+        quoting limits (git commit 65e2117). Represents the aggregate bid-side depth across all participants. Used for
+        assessing overall bid-side liquidity and KRX compliance.
+      source: "QuoterTrade.proto::marketVolumeBid"
+      synonyms:
+      - total bid volume
+      - market bid size
+      category: measure
+      typical_aggregation: SUM
     - name: market_volume_ask
       type: INTEGER
-      description: ""
+      description: Total market volume resting on the ask side at the time of the quote update, added for KRX per-side
+        quoting limits (git commit 65e2117). Represents the aggregate ask-side depth across all participants. Used for
+        assessing overall ask-side liquidity and KRX compliance.
+      source: "QuoterTrade.proto::marketVolumeAsk"
+      synonyms:
+      - total ask volume
+      - market ask size
+      category: measure
+      typical_aggregation: SUM
     - name: our_volume_bid
       type: INTEGER
-      description: ""
+      description: Mako's own volume resting on the bid side at the time of the quote update, added for KRX per-side
+        quoting limits (git commit 65e2117). Represents our share of bid-side liquidity. Compare with market_volume_bid
+        to calculate Mako's market share on the bid.
+      source: "QuoterTrade.proto::ourVolumeBid"
+      synonyms:
+      - mako bid volume
+      - our bid size
+      category: measure
+      typical_aggregation: SUM
     - name: our_volume_ask
       type: INTEGER
-      description: ""
+      description: Mako's own volume resting on the ask side at the time of the quote update, added for KRX per-side
+        quoting limits (git commit 65e2117). Represents our share of ask-side liquidity. Compare with market_volume_ask
+        to calculate Mako's market share on the ask.
+      source: "QuoterTrade.proto::ourVolumeAsk"
+      synonyms:
+      - mako ask volume
+      - our ask size
+      category: measure
+      typical_aggregation: SUM

@@ -3,213 +3,749 @@ table:
   dataset: "{dataset_prefix}asx_data"
   fqn: '{project}.{dataset_prefix}asx_data.marketdepth'
   layer: data
-  description: ""
+  description: Order book depth snapshots with 5 levels of bid/ask prices, volumes, and order counts, plus implied
+    prices. Use for spread analysis, liquidity analysis, and book shape studies. Partitioned by trade_date.
   partition_field: trade_date
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay. Not typically needed for analytical queries but useful for debugging data ingestion issues.
+      source: "MarketDepth.proto::kafka_partition"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '5'
+      - '6'
+      - '3'
+      - '8'
+      - '7'
+      - '9'
+      - '4'
+      - '1'
+      - '0'
+      - '2'
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay. Not typically needed for analytical queries but useful for debugging data ingestion ordering.
+      source: "MarketDepth.proto::kafka_offset"
+      synonyms: []
+      category: identifier
+      filterable: true
     - name: event_date
       type: DATE
-      description: ""
+      description: Calendar date on which this market depth event occurred. May differ from trade_date in edge cases
+        around midnight or timezone boundaries. Generally use trade_date for partitioning and filtering.
+      source: "MarketDepth.proto::event_date"
+      synonyms: []
+      category: time
+      filterable: true
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp assigned by the exchange matching engine for this order book update. Represents the
+        authoritative exchange time when this book state change occurred. Use for precise timing of book state changes,
+        spread analysis, and latency measurement against Mako internal timestamps.
+      source: "MarketDepth.proto::exchangeTimestamp"
+      synonyms:
+      - exchange time
+      - matching engine time
+      category: time
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the exchange timestamp, providing sub-microsecond precision for the exact
+        moment the exchange matching engine processed this book update. Combine with exchange_timestamp for full
+        nanosecond-precision timing of book state changes.
+      source: "MarketDepth.proto::exchangeTimestamp"
+      synonyms: []
+      category: time
     - name: hw_nic_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Hardware NIC receive timestamp recording when the market data packet physically arrived at Mako's
+        network interface card. The earliest possible timestamp on Mako's side, used as the baseline for measuring
+        internal processing latency from wire to decision. Also called NIC timestamp or wire time.
+      source: "MarketDepth.proto::hwNicRxTimestamp"
+      synonyms:
+      - nic timestamp
+      - wire time
+      - hardware timestamp
+      category: time
     - name: hw_nic_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the hardware NIC receive timestamp, providing sub-microsecond precision for
+        the exact moment the market data packet arrived at the network card. Combine with hw_nic_rx_timestamp for full
+        nanosecond-precision wire-arrival timing.
+      source: "MarketDepth.proto::hwNicRxTimestamp"
+      synonyms: []
+      category: time
     - name: mako_ingress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when the market depth packet entered Mako's software processing pipeline after being
+        received by the NIC. Represents the earliest software-level timestamp and is used for measuring software decode
+        latency versus hardware arrival time.
+      source: "MarketDepth.proto::makoIngressTimestamp"
+      synonyms:
+      - ingress time
+      - software receive time
+      category: time
     - name: mako_ingress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the Mako ingress timestamp, providing sub-microsecond precision for the
+        moment the packet entered the software processing pipeline. Combine with mako_ingress_timestamp for full
+        nanosecond-precision ingress timing.
+      source: "MarketDepth.proto::makoIngressTimestamp"
+      synonyms: []
+      category: time
     - name: software_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recorded by the software layer after processing the market depth update. Represents when
+        Mako's internal systems finished decoding and processing the book update. The difference from
+        hw_nic_rx_timestamp measures total internal processing latency.
+      source: "MarketDepth.proto::softwareTimestamp"
+      synonyms:
+      - software time
+      - process time
+      category: time
     - name: software_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the software processing timestamp, providing sub-microsecond precision for
+        when the market depth update finished internal processing. Combine with software_timestamp for full
+        nanosecond-precision processing latency measurement.
+      source: "MarketDepth.proto::softwareTimestamp"
+      synonyms: []
+      category: time
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
+        defining attributes (symbol, strike, expiry, type). Used as the primary join key across all data and KPI tables.
+        Every instrument has exactly one hash that is consistent across all systems.
+      source: "MarketDepth.proto::instrumentHash"
+      synonyms:
+      - instrument id
+      - instrument key
+      category: identifier
+      filterable: true
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Monotonically increasing sequence number assigned to each market depth event for strict ordering.
+        Ensures correct reconstruction of book state when processing events in order. Use for detecting gaps or replayed
+        data in the market depth feed.
+      source: "MarketDepth.proto::sequenceNumber"
+      synonyms:
+      - seq num
+      - event sequence
+      category: identifier
+      filterable: true
     - name: ask_price_0
       type: FLOAT
-      description: ""
+      description: Top-of-book ask price at depth level 0 (best offer). Level 0 is the tightest ask price available on
+        the exchange, representing the lowest price at which a seller is willing to transact. Used for spread analysis,
+        liquidity assessment, and best-offer tracking.
+      source: "MarketDepth.proto::asks[0].price"
+      synonyms:
+      - ask 0
+      - best ask
+      - best offer
+      category: measure
+      typical_aggregation: AVG
     - name: ask_price_1
       type: FLOAT
-      description: ""
+      description: Ask price at depth level 1 (second-best offer). Shows the next available selling price behind the
+        top-of-book. Used for assessing order book depth and resilience — how much the ask moves after consuming level 0
+        liquidity.
+      source: "MarketDepth.proto::asks[1].price"
+      synonyms:
+      - ask 1
+      category: measure
+      typical_aggregation: AVG
     - name: ask_price_2
       type: FLOAT
-      description: ""
+      description: Ask price at depth level 2 (third-best offer). Represents the third tier of selling interest in the
+        order book. Used for book shape studies and assessing how far the ask side extends beyond top-of-book.
+      source: "MarketDepth.proto::asks[2].price"
+      synonyms:
+      - ask 2
+      category: measure
+      typical_aggregation: AVG
     - name: ask_price_3
       type: FLOAT
-      description: ""
+      description: Ask price at depth level 3 (fourth-best offer). Represents deeper selling interest in the order book.
+        Useful for understanding book depth and potential price impact of larger order executions.
+      source: "MarketDepth.proto::asks[3].price"
+      synonyms:
+      - ask 3
+      category: measure
+      typical_aggregation: AVG
     - name: ask_price_4
       type: FLOAT
-      description: ""
+      description: Ask price at depth level 4 (deepest visible offer). The furthest available ask price in the 5-level
+        snapshot. Used for full book shape analysis and worst-case price impact estimation for large orders.
+      source: "MarketDepth.proto::asks[4].price"
+      synonyms:
+      - ask 4
+      category: measure
+      typical_aggregation: AVG
     - name: bid_price_0
       type: FLOAT
-      description: ""
+      description: Top-of-book bid price at depth level 0 (best bid). Level 0 is the tightest bid price available on the
+        exchange, representing the highest price at which a buyer is willing to transact. Used for spread analysis,
+        liquidity assessment, and best-bid tracking.
+      source: "MarketDepth.proto::bids[0].price"
+      synonyms:
+      - bid 0
+      - best bid
+      category: measure
+      typical_aggregation: AVG
     - name: bid_price_1
       type: FLOAT
-      description: ""
+      description: Bid price at depth level 1 (second-best bid). Shows the next available buying price behind the
+        top-of-book. Used for assessing order book depth and resilience — how much the bid drops after consuming level 0
+        liquidity.
+      source: "MarketDepth.proto::bids[1].price"
+      synonyms:
+      - bid 1
+      category: measure
+      typical_aggregation: AVG
     - name: bid_price_2
       type: FLOAT
-      description: ""
+      description: Bid price at depth level 2 (third-best bid). Represents the third tier of buying interest in the
+        order book. Used for book shape studies and assessing how far the bid side extends beyond top-of-book.
+      source: "MarketDepth.proto::bids[2].price"
+      synonyms:
+      - bid 2
+      category: measure
+      typical_aggregation: AVG
     - name: bid_price_3
       type: FLOAT
-      description: ""
+      description: Bid price at depth level 3 (fourth-best bid). Represents deeper buying interest in the order book.
+        Useful for understanding book depth and potential price impact of larger sell orders.
+      source: "MarketDepth.proto::bids[3].price"
+      synonyms:
+      - bid 3
+      category: measure
+      typical_aggregation: AVG
     - name: bid_price_4
       type: FLOAT
-      description: ""
+      description: Bid price at depth level 4 (deepest visible bid). The furthest available bid price in the 5-level
+        snapshot. Used for full book shape analysis and worst-case price impact estimation for large sell orders.
+      source: "MarketDepth.proto::bids[4].price"
+      synonyms:
+      - bid 4
+      category: measure
+      typical_aggregation: AVG
     - name: ask_volume_0
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at the best ask (depth level 0). Higher volume at the tightest ask
+        level indicates stronger selling interest and resistance. Used for liquidity analysis and assessing how much
+        size is available at the best offer price.
+      source: "MarketDepth.proto::asks[0].volume"
+      synonyms:
+      - ask size 0
+      - best ask size
+      - offer size
+      category: measure
+      typical_aggregation: SUM
     - name: ask_volume_1
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at ask depth level 1. Shows the amount of selling liquidity at the
+        second-best price level. Higher volume at deeper levels suggests a well-supported order book with substantial
+        selling interest beyond top-of-book.
+      source: "MarketDepth.proto::asks[1].volume"
+      synonyms:
+      - ask size 1
+      category: measure
+      typical_aggregation: SUM
     - name: ask_volume_2
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at ask depth level 2. Represents the selling liquidity at the
+        third price tier. Used to assess total available liquidity if the first two levels were fully consumed.
+      source: "MarketDepth.proto::asks[2].volume"
+      synonyms:
+      - ask size 2
+      category: measure
+      typical_aggregation: SUM
     - name: ask_volume_3
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at ask depth level 3. Represents deeper selling liquidity in the
+        order book. Useful for large-order execution analysis and market impact modeling.
+      source: "MarketDepth.proto::asks[3].volume"
+      synonyms:
+      - ask size 3
+      category: measure
+      typical_aggregation: SUM
     - name: ask_volume_4
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at ask depth level 4 (deepest visible). The furthest visible
+        selling liquidity in the 5-level snapshot. Used for full book depth analysis and total available liquidity
+        estimation on the ask side.
+      source: "MarketDepth.proto::asks[4].volume"
+      synonyms:
+      - ask size 4
+      category: measure
+      typical_aggregation: SUM
     - name: bid_volume_0
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at the best bid (depth level 0). Higher volume at the tightest bid
+        level indicates stronger buying interest and support. Used for liquidity analysis and assessing how much size is
+        available at the best bid price.
+      source: "MarketDepth.proto::bids[0].volume"
+      synonyms:
+      - bid size 0
+      - best bid size
+      category: measure
+      typical_aggregation: SUM
     - name: bid_volume_1
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at bid depth level 1. Shows the amount of buying liquidity at the
+        second-best price level. Higher volume at deeper levels suggests a well-supported order book with substantial
+        buying interest beyond top-of-book.
+      source: "MarketDepth.proto::bids[1].volume"
+      synonyms:
+      - bid size 1
+      category: measure
+      typical_aggregation: SUM
     - name: bid_volume_2
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at bid depth level 2. Represents the buying liquidity at the third
+        price tier. Used to assess total available liquidity if the first two levels were fully consumed.
+      source: "MarketDepth.proto::bids[2].volume"
+      synonyms:
+      - bid size 2
+      category: measure
+      typical_aggregation: SUM
     - name: bid_volume_3
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at bid depth level 3. Represents deeper buying liquidity in the
+        order book. Useful for large-order execution analysis and market impact modeling.
+      source: "MarketDepth.proto::bids[3].volume"
+      synonyms:
+      - bid size 3
+      category: measure
+      typical_aggregation: SUM
     - name: bid_volume_4
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) resting at bid depth level 4 (deepest visible). The furthest visible
+        buying liquidity in the 5-level snapshot. Used for full book depth analysis and total available liquidity
+        estimation on the bid side.
+      source: "MarketDepth.proto::bids[4].volume"
+      synonyms:
+      - bid size 4
+      category: measure
+      typical_aggregation: SUM
     - name: ask_orders_0
       type: INTEGER
-      description: ""
+      description: Count of individual orders resting at the best ask (depth level 0). More orders at a level suggests
+        broader market participation from multiple sellers versus a single large resting order. Used for microstructure
+        analysis and distinguishing institutional from retail flow.
+      source: "MarketDepth.proto::asks[0].orders"
+      synonyms:
+      - ask order count 0
+      category: measure
+      typical_aggregation: AVG
     - name: ask_orders_1
       type: INTEGER
-      description: ""
+      description: Count of individual orders at ask depth level 1. More orders at this level suggests broader market
+        participation from multiple sellers. Compare with ask_volume_1 to calculate average order size, indicating
+        whether liquidity comes from many small or few large participants.
+      source: "MarketDepth.proto::asks[1].orders"
+      synonyms:
+      - ask order count 1
+      category: measure
+      typical_aggregation: AVG
     - name: ask_orders_2
       type: INTEGER
-      description: ""
+      description: Count of individual orders at ask depth level 2. Tracks the number of distinct sell orders resting at
+        the third price tier. Useful for assessing market fragmentation and participation breadth deeper in the order
+        book.
+      source: "MarketDepth.proto::asks[2].orders"
+      synonyms:
+      - ask order count 2
+      category: measure
+      typical_aggregation: AVG
     - name: ask_orders_3
       type: INTEGER
-      description: ""
+      description: Count of individual orders at ask depth level 3. Tracks the number of distinct sell orders at the
+        fourth price tier. Useful for deeper order book microstructure analysis and assessing far-from-touch
+        participation.
+      source: "MarketDepth.proto::asks[3].orders"
+      synonyms:
+      - ask order count 3
+      category: measure
+      typical_aggregation: AVG
     - name: ask_orders_4
       type: INTEGER
-      description: ""
+      description: Count of individual orders at ask depth level 4 (deepest visible). The furthest visible sell order
+        count in the 5-level snapshot. Useful for full book microstructure analysis and understanding the depth of
+        market participation.
+      source: "MarketDepth.proto::asks[4].orders"
+      synonyms:
+      - ask order count 4
+      category: measure
+      typical_aggregation: AVG
     - name: bid_orders_0
       type: INTEGER
-      description: ""
+      description: Count of individual orders resting at the best bid (depth level 0). More orders at a level suggests
+        broader market participation from multiple buyers versus a single large resting order. Used for microstructure
+        analysis and distinguishing institutional from retail flow.
+      source: "MarketDepth.proto::bids[0].orders"
+      synonyms:
+      - bid order count 0
+      category: measure
+      typical_aggregation: AVG
     - name: bid_orders_1
       type: INTEGER
-      description: ""
+      description: Count of individual orders at bid depth level 1. More orders at this level suggests broader market
+        participation from multiple buyers. Compare with bid_volume_1 to calculate average order size, indicating
+        whether liquidity comes from many small or few large participants.
+      source: "MarketDepth.proto::bids[1].orders"
+      synonyms:
+      - bid order count 1
+      category: measure
+      typical_aggregation: AVG
     - name: bid_orders_2
       type: INTEGER
-      description: ""
+      description: Count of individual orders at bid depth level 2. Tracks the number of distinct buy orders resting at
+        the third price tier. Useful for assessing market fragmentation and participation breadth deeper in the order
+        book.
+      source: "MarketDepth.proto::bids[2].orders"
+      synonyms:
+      - bid order count 2
+      category: measure
+      typical_aggregation: AVG
     - name: bid_orders_3
       type: INTEGER
-      description: ""
+      description: Count of individual orders at bid depth level 3. Tracks the number of distinct buy orders at the
+        fourth price tier. Useful for deeper order book microstructure analysis and assessing far-from-touch
+        participation.
+      source: "MarketDepth.proto::bids[3].orders"
+      synonyms:
+      - bid order count 3
+      category: measure
+      typical_aggregation: AVG
     - name: bid_orders_4
       type: INTEGER
-      description: ""
+      description: Count of individual orders at bid depth level 4 (deepest visible). The furthest visible buy order
+        count in the 5-level snapshot. Useful for full book microstructure analysis and understanding the depth of
+        market participation.
+      source: "MarketDepth.proto::bids[4].orders"
+      synonyms:
+      - bid order count 4
+      category: measure
+      typical_aggregation: AVG
     - name: implied_bid_price
       type: FLOAT
-      description: ""
+      description: Implied bid price derived from spread/strategy markets, showing synthetic buying liquidity created by
+        combination trades. Added via git commit d451f17. Represents prices at which the instrument can be bought
+        synthetically through strategies, even if no direct bid exists. Use for assessing total available liquidity
+        including implied depth.
+      source: "MarketDepth.proto::impliedBid.price"
+      synonyms:
+      - implied bid
+      - synthetic bid
+      category: measure
+      typical_aggregation: AVG
     - name: implied_bid_volume
       type: INTEGER
-      description: ""
+      description: Implied bid volume (contracts/lots) derived from spread/strategy markets, showing the synthetic
+        buying size available through combination trades. Added via git commit d451f17. Represents how much can be
+        bought synthetically at the implied bid price. Higher implied volume indicates more strategy-derived liquidity.
+      source: "MarketDepth.proto::impliedBid.volume"
+      synonyms:
+      - implied bid size
+      - synthetic bid size
+      category: measure
+      typical_aggregation: SUM
     - name: implied_bid_orders
       type: INTEGER
-      description: ""
+      description: Count of implied bid orders derived from spread/strategy markets, representing the number of
+        synthetic buying interest sources from combination trades. Added via git commit d451f17. Useful for
+        understanding whether implied liquidity comes from one or many strategy markets.
+      source: "MarketDepth.proto::impliedBid.orders"
+      synonyms:
+      - implied bid count
+      category: measure
+      typical_aggregation: AVG
     - name: implied_ask_price
       type: FLOAT
-      description: ""
+      description: Implied ask price derived from spread/strategy markets, showing synthetic selling liquidity created
+        by combination trades. Added via git commit d451f17. Represents prices at which the instrument can be sold
+        synthetically through strategies, even if no direct ask exists. Use for assessing total available liquidity
+        including implied depth.
+      source: "MarketDepth.proto::impliedAsk.price"
+      synonyms:
+      - implied ask
+      - implied offer
+      - synthetic ask
+      category: measure
+      typical_aggregation: AVG
     - name: implied_ask_volume
       type: INTEGER
-      description: ""
+      description: Implied ask volume (contracts/lots) derived from spread/strategy markets, showing the synthetic
+        selling size available through combination trades. Added via git commit d451f17. Represents how much can be sold
+        synthetically at the implied ask price. Higher implied volume indicates more strategy-derived liquidity.
+      source: "MarketDepth.proto::impliedAsk.volume"
+      synonyms:
+      - implied ask size
+      - synthetic ask size
+      category: measure
+      typical_aggregation: SUM
     - name: implied_ask_orders
       type: INTEGER
-      description: ""
+      description: Count of implied ask orders derived from spread/strategy markets, representing the number of
+        synthetic selling interest sources from combination trades. Added via git commit d451f17. Useful for
+        understanding whether implied selling liquidity comes from one or many strategy markets.
+      source: "MarketDepth.proto::impliedAsk.orders"
+      synonyms:
+      - implied ask count
+      category: measure
+      typical_aggregation: AVG
     - name: keyframe
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether this record is a complete orderbook snapshot (true) or an incremental
+        delta update (false). Filter to keyframe=true for point-in-time analysis to get the full book state at that
+        moment. Incremental updates (keyframe=false) only contain fields that changed since the last snapshot.
+      source: "MarketDepth.proto::keyframe"
+      synonyms:
+      - snapshot
+      - full snapshot
+      - is keyframe
+      category: dimension
+      filterable: true
+      example_values:
+      - 'True'
+      - 'False'
     - name: data_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recorded by the data pipeline when this market depth record was processed and stored.
+        Represents the internal processing time, distinct from the exchange timestamp which is the authoritative market
+        time. Use for pipeline latency measurement and data freshness monitoring.
+      source: "MarketDepth.proto::dataTimestamp"
+      synonyms:
+      - data time
+      - ingestion time
+      category: time
     - name: data_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the data pipeline processing timestamp, providing sub-microsecond precision
+        for when this record was processed internally. Combine with data_timestamp for full nanosecond-precision
+        pipeline latency measurement.
+      source: "MarketDepth.proto::dataTimestamp"
+      synonyms: []
+      category: time
     - name: data_order_identifier
       type: INTEGER
-      description: ""
+      description: Internal ordering identifier assigned by the data pipeline to maintain strict sequencing of market
+        depth records during ingestion and storage. Used for ensuring correct book state reconstruction when replaying
+        or reprocessing data.
+      source: "MarketDepth.proto::dataOrderIdentifier"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream identifier from the event streaming infrastructure, indicating which logical stream this
+        record originated from. Used for data provenance, replay, and pipeline debugging to trace records back to their
+        source stream.
+      source: "MarketDepth.proto::streamsource_stream_id"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Event identifier within the source stream, providing a unique monotonically increasing sequence
+        number for ordering events. Used for data provenance and ensuring correct event ordering during replay or
+        debugging.
+      source: "MarketDepth.proto::streamsource_event_id"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Message identifier within the source stream event, used when a single event contains multiple
+        messages. Provides the finest-grained provenance tracking for tracing individual records back through the data
+        pipeline.
+      source: "MarketDepth.proto::streamsource_message_id"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Process ID of the data source application that produced this record. Used for data provenance
+        tracking and debugging — identifies which specific market data handler process produced this book update on the
+        source host machine.
+      source: "MarketDepth.proto::datasource_pid"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Hostname of the server running the data source application that produced this record. Used for data
+        provenance tracking and debugging — identifies which physical or virtual machine hosted the market data handler
+        that generated this book snapshot.
+      source: "MarketDepth.proto::datasource_hostname"
+      synonyms: []
+      category: dimension
+      filterable: true
     - name: market_state
       type: INTEGER
-      description: ""
+      description: Numeric code indicating the current trading state of the market for this instrument at the time of
+        the depth snapshot. Common values include OPEN=20 (continuous trading), CLOSED=24 (market closed). Added via git
+        commit 15031b9. Use for filtering to only include data during active trading hours.
+      source: "MarketDepth.proto::marketState"
+      synonyms:
+      - trading state
+      - market status
+      category: measure
+      typical_aggregation: AVG
+      example_values:
+      - '20'
+      - '24'
     - name: strike
       type: FLOAT
-      description: ""
+      description: Option strike price (exercise price) at which the holder can buy (call) or sell (put) the underlying.
+        A key defining attribute of the option contract. Used for filtering to specific strikes and for moneyness
+        analysis relative to the underlying price. Also called exercise price or K.
+      source: "MarketDepth.proto::strike"
+      synonyms:
+      - exercise price
+      - strike price
+      - K
+      category: measure
+      typical_aggregation: AVG
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Numeric code indicating whether the option is a call or put. Used as the raw integer representation
+        from the exchange or internal system. Prefer option_type_name for readability in queries. Join with
+        option_type_name for human-readable filtering.
+      source: "MarketDepth.proto::optionType"
+      synonyms:
+      - call put
+      - C/P
+      category: dimension
+      filterable: true
+      example_values:
+      - '80'
+      - '67'
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
+        from the numeric option_type code. Use this column for filtering and grouping by option direction in analytical
+        queries.
+      source: "MarketDepth.proto::optionTypeName"
+      synonyms:
+      - call put name
+      - option direction
+      category: dimension
+      filterable: true
+      example_values:
+      - 'Call'
+      - 'Put'
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiration timestamp of the option contract, indicating the exact date and time at which the option
+        ceases to exist. After this point the option either exercises automatically (if in-the-money) or expires
+        worthless. Used for term structure analysis and expiry grouping.
+      source: "MarketDepth.proto::expiryTimestamp"
+      synonyms:
+      - expiry
+      - expiration
+      - maturity date
+      - expiration date
+      category: time
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Internal Mako system symbol for the instrument, used as the canonical identifier within Mako's
+        trading infrastructure. May differ from the exchange symbol. Use for joining with internal position and risk
+        systems.
+      source: "MarketDepth.proto::makoSymbol"
+      synonyms:
+      - internal symbol
+      - mako ticker
+      category: dimension
+      filterable: true
+      example_values:
+      - 'BETS'
     - name: currency
       type: INTEGER
-      description: ""
+      description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
+        EUR=4, GBP=1, JPY=7. Used for multi-currency aggregation and filtering to specific currency zones.
+      source: "MarketDepth.proto::currency"
+      synonyms:
+      - ccy
+      - currency code
+      category: dimension
+      filterable: true
+      example_values:
+      - '2'
+      - '4'
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO
+        (spread/strategy), or other instrument class. Derived from the internal instrument type code. Use for filtering
+        queries to specific instrument categories.
+      source: "MarketDepth.proto::instTypeName"
+      synonyms:
+      - instrument type
+      - product type
+      - security type
+      category: dimension
+      filterable: true
+      example_values:
+      - 'OPTION'
+      - 'COMBO'
+      - 'FUTURE'
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly,
+        quarterly). Used for term structure analysis and grouping instruments by expiry bucket. Traders commonly filter
+        by term to focus on specific expiry cycles.
+      source: "MarketDepth.proto::term"
+      synonyms:
+      - tenor
+      - expiry term
+      - maturity
+      - expiry cycle
+      category: dimension
+      filterable: true
+      example_values:
+      - 'Feb-2026'
+      - 'Mar-2026'
+      - 'May-2026'
+      - 'Apr-2026'
+      - 'Jun-2026'
+      - 'Dec-2026'
+      - 'Sep-2026'
     - name: trade_date
       type: DATE
-      description: ""
+      description: Business date of the trading session, used as the primary partition column for this table. Always
+        filter on trade_date for efficient queries. Represents the logical trading day which may span midnight for
+        overnight sessions.
+      source: "MarketDepth.proto::tradeDate"
+      synonyms:
+      - date
+      - business date
+      - trading date
+      category: time
+      filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
+        human-readable identifier used by traders when referring to instruments. Used for filtering and grouping across
+        all tables in the data and KPI layers.
+      source: "MarketDepth.proto::symbol"
+      synonyms:
+      - ticker
+      - product
+      - instrument
+      - underlying symbol
+      category: dimension
+      filterable: true
+      example_values:
+      - 'BETS'

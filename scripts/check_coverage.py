@@ -18,7 +18,12 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from table_registry import ALL_TABLES, filter_tables
+from table_registry import (
+    ALL_TABLES,
+    combined_tables,
+    filter_combined_tables,
+    filter_tables,
+)
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -186,6 +191,8 @@ def check_all_tables(
     thresholds: dict[str, int] | None = None,
     layer_filter: str | None = None,
     table_filter: str | None = None,
+    *,
+    all_markets: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Check coverage for all registered tables (or filtered subset).
 
@@ -194,11 +201,18 @@ def check_all_tables(
     if thresholds is None:
         thresholds = DEFAULT_THRESHOLDS
 
-    target = (
-        filter_tables(layer_filter, table_filter)
-        if (layer_filter or table_filter)
-        else ALL_TABLES
-    )
+    if all_markets:
+        target = (
+            filter_combined_tables(layer_filter, table_filter, include_markets=True)
+            if (layer_filter or table_filter)
+            else combined_tables()
+        )
+    else:
+        target = (
+            filter_tables(layer_filter, table_filter)
+            if (layer_filter or table_filter)
+            else ALL_TABLES
+        )
 
     results: dict[str, dict[str, Any]] = {}
     for layer, tables in target.items():
@@ -264,6 +278,9 @@ def main() -> int:
         help="Filter to layer/table (e.g. 'data/theodata') or just table name",
     )
     parser.add_argument("--json", action="store_true", help="Output as JSON")
+    parser.add_argument(
+        "--all-markets", action="store_true", help="Include all market directories"
+    )
     parser.add_argument("--min-category", type=int, default=95)
     parser.add_argument("--min-source", type=int, default=90)
     parser.add_argument("--min-formula", type=int, default=85)
@@ -286,7 +303,9 @@ def main() -> int:
         else:
             table_filter = args.table
 
-    results = check_all_tables(thresholds, layer_filter, table_filter)
+    results = check_all_tables(
+        thresholds, layer_filter, table_filter, all_markets=args.all_markets
+    )
 
     if args.json:
         print(json.dumps(results, indent=2))

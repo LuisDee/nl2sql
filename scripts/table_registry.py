@@ -364,6 +364,71 @@ def filter_tables(
     return result
 
 
+def combined_tables(
+    include_kpi: bool = True,
+    include_data: bool = True,
+    include_markets: bool = True,
+) -> dict[str, list[str]]:
+    """Return ALL tables as a unified dict (kpi + data + all markets).
+
+    The dict key is the catalog directory name (used as CATALOG_DIR/{key}/{table}.yaml).
+    This is the main entry point for enrichment scripts that need to process
+    all tables across all layers and markets.
+    """
+    result: dict[str, list[str]] = {}
+    if include_kpi and "kpi" in ALL_TABLES:
+        result["kpi"] = list(ALL_TABLES["kpi"])
+    if include_data and "data" in ALL_TABLES:
+        result["data"] = list(ALL_TABLES["data"])
+    if include_markets:
+        for market, tables in MARKET_TABLES.items():
+            if market == "omx_data":
+                continue  # OMX data tables are in catalog/data/, not catalog/omx_data/
+            result[market] = list(tables)
+    return result
+
+
+def filter_combined_tables(
+    layer: str | None = None,
+    table: str | None = None,
+    *,
+    include_markets: bool = False,
+) -> dict[str, list[str]]:
+    """Filter across both ALL_TABLES and MARKET_TABLES.
+
+    When include_markets=True, also includes non-OMX market directories.
+    The 'layer' parameter can be a traditional layer (kpi/data) or a market
+    directory name (arb_data, brazil_data, etc.).
+    """
+    base = (
+        combined_tables(include_markets=include_markets)
+        if include_markets
+        else dict(ALL_TABLES)
+    )
+
+    if layer and layer not in base:
+        valid = list(base.keys())
+        msg = f"Unknown layer/market '{layer}'. Valid: {valid}"
+        raise ValueError(msg)
+
+    result: dict[str, list[str]] = {}
+    for lyr, tables in base.items():
+        if layer and lyr != layer:
+            continue
+        if table:
+            filtered = [t for t in tables if t == table]
+            if filtered:
+                result[lyr] = filtered
+        else:
+            result[lyr] = list(tables)
+
+    if table and not result:
+        msg = f"Table '{table}' not found in any layer/market"
+        raise ValueError(msg)
+
+    return result
+
+
 def filter_market_tables(
     market: str | None = None, table: str | None = None
 ) -> dict[str, list[str]]:

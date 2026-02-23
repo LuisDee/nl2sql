@@ -28,7 +28,7 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_DIR = PROJECT_ROOT / "catalog"
 
-from table_registry import ALL_TABLES, filter_tables
+from table_registry import ALL_TABLES, filter_combined_tables, filter_tables
 
 # ---------------------------------------------------------------------------
 # Heuristic patterns
@@ -266,10 +266,15 @@ def main(
     dry_run: bool = False,
     layer: str | None = None,
     table: str | None = None,
+    *,
+    all_markets: bool = False,
 ) -> dict[str, dict]:
     """Run category assignment across table YAMLs."""
     all_stats: dict[str, dict] = {}
-    target_tables = filter_tables(layer, table) if (layer or table) else ALL_TABLES
+    if all_markets or (layer and layer not in ALL_TABLES):
+        target_tables = filter_combined_tables(layer, table, include_markets=True)
+    else:
+        target_tables = filter_tables(layer, table) if (layer or table) else ALL_TABLES
 
     for layer, tables in target_tables.items():
         for table_name in tables:
@@ -304,7 +309,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dry-run", action="store_true", help="Report changes without writing"
     )
-    parser.add_argument("--layer", help="Filter to one layer (kpi/data)")
+    parser.add_argument(
+        "--layer", help="Filter to one layer/market (kpi/data/arb_data/...)"
+    )
     parser.add_argument("--table", help="Filter to one table name")
+    parser.add_argument(
+        "--all-markets", action="store_true", help="Include all market directories"
+    )
     args = parser.parse_args()
-    main(dry_run=args.dry_run, layer=args.layer, table=args.table)
+    main(
+        dry_run=args.dry_run,
+        layer=args.layer,
+        table=args.table,
+        all_markets=args.all_markets,
+    )

@@ -3,141 +3,410 @@ table:
   dataset: "{dataset_prefix}korea_data"
   fqn: '{project}.{dataset_prefix}korea_data.marketdata'
   layer: data
-  description: ""
+  description: Market data feed snapshots containing trade and quote events from the exchange. Each row is a market data
+    event (trade, quote update, etc.) with exchange timestamps and instrument details. Partitioned by trade_date.
   partition_field: trade_date
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition the record was consumed from.
+      source: "kafka infrastructure"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '5'
+      - '3'
+      - '6'
+      - '7'
+      - '8'
+      - '9'
+      - '4'
+      - '1'
+      - '0'
+      - '2'
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record.
+      source: "kafka infrastructure"
+      synonyms: []
+      category: identifier
+      filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Exchange symbol or ticker for the instrument.
+      source: "kafka infrastructure"
+      synonyms:
+      - ticker
+      - product
+      - instrument
+      category: dimension
+      filterable: true
+      example_values:
+      - 'BETS'
     - name: trade_date
       type: DATE
-      description: ""
+      description: Business date of the trade, used for partitioning.
+      source: "kafka infrastructure"
+      synonyms:
+      - date
+      - business date
+      - trading date
+      category: time
+      filterable: true
     - name: event_date
       type: DATE
-      description: ""
+      description: Event date.
+      source: "derived (data-loader)"
+      synonyms: []
+      category: time
+      filterable: true
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp from the exchange matching engine.
+      source: "MarketEvent.exchangeTimestamp (data/OboMarketData.proto)"
+      synonyms:
+      - exchange time
+      category: time
     - name: hw_nic_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: 'Timestamp field: hw_nic_rx_timestamp.'
+      source: "MarketEvent.hardwareNicRxTimestamp (data/OboMarketData.proto)"
+      synonyms: []
+      category: time
     - name: mako_ingress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: 'Timestamp field: mako_ingress_timestamp.'
+      source: "MarketEvent.makoIngressTimestamp (data/OboMarketData.proto)"
+      synonyms: []
+      category: time
     - name: software_timestamp
       type: TIMESTAMP
-      description: ""
+      description: 'Timestamp field: software_timestamp.'
+      source: "MarketEvent.softwareRxTimestamp (data/OboMarketData.proto)"
+      synonyms: []
+      category: time
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: 'Timestamp field: exchange_timestamp_ns.'
+      source: "MarketEvent.exchangeTimestamp_ns (data/OboMarketData.proto)"
+      synonyms: []
+      category: time
     - name: hw_nic_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: 'Timestamp field: hw_nic_rx_timestamp_ns.'
+      source: "MarketEvent.hardwareNicRxTimestamp_ns (data/OboMarketData.proto)"
+      synonyms: []
+      category: time
     - name: mako_ingress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: 'Timestamp field: mako_ingress_timestamp_ns.'
+      source: "MarketEvent.makoIngressTimestamp_ns (data/OboMarketData.proto)"
+      synonyms: []
+      category: time
     - name: software_timestamp_ns
       type: INTEGER
-      description: ""
+      description: 'Timestamp field: software_timestamp_ns.'
+      source: "MarketEvent.softwareRxTimestamp_ns (data/OboMarketData.proto)"
+      synonyms: []
+      category: time
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique hash identifier for the instrument.
+      source: "MarketEvent.instrumentHash (data/OboMarketData.proto)"
+      synonyms:
+      - instrument id
+      - instrument key
+      category: identifier
+      filterable: true
     - name: event_type
       type: INTEGER
-      description: ""
+      description: Type of the event.
+      source: "MarketEvent.eventType (data/OboMarketData.proto)"
+      synonyms: []
+      category: dimension
+      filterable: true
+      example_values:
+      - '1'
+      - '7'
+      - '2'
+      - '5'
+      - '207'
+      - '3'
+      - '17'
+      - '4'
+      - '195'
+      - '212'
+      - '16'
+      - '205'
+      - '204'
+      - '202'
+      - '201'
+      - '203'
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number for ordering events.
+      source: "MarketEvent.sequenceNumber (data/OboMarketData.proto)"
+      synonyms:
+      - seq num
+      category: identifier
+      filterable: true
     - name: side
       type: INTEGER
-      description: ""
+      description: Side of the market data event (bid/ask/trade).
+      source: "kafka infrastructure"
+      synonyms:
+      - market side
+      category: measure
+      typical_aggregation: AVG
     - name: price
       type: FLOAT
-      description: ""
+      description: Trade execution price.
+      source: "kafka infrastructure"
+      synonyms:
+      - fill price
+      - execution price
+      category: measure
+      typical_aggregation: AVG
     - name: quantity
       type: INTEGER
-      description: ""
+      description: Quantity in the market data event.
+      source: "kafka infrastructure"
+      synonyms:
+      - size
+      - volume
+      category: measure
+      typical_aggregation: AVG
     - name: order_id
       type: INTEGER
-      description: ""
+      description: Exchange order identifier.
+      source: "MarketEvent.orderId (data/OboMarketData.proto)"
+      synonyms: []
+      category: identifier
+      filterable: true
     - name: order_position
       type: INTEGER
-      description: ""
+      description: Position of the order in the book.
+      source: "MarketEvent.orderPosition (data/OboMarketData.proto)"
+      synonyms:
+      - queue position
+      category: measure
+      typical_aggregation: AVG
     - name: market_state
       type: INTEGER
-      description: ""
+      description: Current market state (e.g. open, auction, closed).
+      source: "MarketEvent.marketState (data/OboMarketData.proto)"
+      synonyms:
+      - trading state
+      category: measure
+      typical_aggregation: AVG
     - name: keyframe
       type: BOOLEAN
-      description: ""
+      description: Whether this is a full snapshot (keyframe) or incremental update.
+      source: "kafka infrastructure"
+      synonyms:
+      - snapshot
+      category: dimension
+      filterable: true
+      example_values:
+      - 'false'
     - name: instrument_type
       type: STRING
-      description: ""
+      description: Type of instrument.
+      source: "MarketEvent.instrumentType_name (data/OboMarketData.proto)"
+      synonyms: []
+      category: dimension
+      filterable: true
+      example_values:
+      - 'STOCK'
+      - 'OPTION'
     - name: data_order_identifier
       type: INTEGER
-      description: ""
+      description: Data order identifier.
+      source: "MarketEvent.dataOrderIdentifier (data/OboMarketData.proto)"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
-      description: ""
+      description: 'Timestamp field: data_timestamp.'
+      source: "MarketEvent.dataTimestamp (data/OboMarketData.proto)"
+      synonyms: []
+      category: time
     - name: data_timestamp_ns
       type: INTEGER
-      description: ""
+      description: 'Timestamp field: data_timestamp_ns.'
+      source: "MarketEvent.dataTimestamp_ns (data/OboMarketData.proto)"
+      synonyms: []
+      category: time
     - name: is_snap
       type: BOOLEAN
-      description: ""
+      description: Whether this record is a snapshot.
+      source: "derived (data-loader)"
+      synonyms:
+      - snapshot
+      category: dimension
+      filterable: true
+      example_values:
+      - 'false'
     - name: strike
       type: FLOAT
-      description: ""
+      description: Option strike price.
+      source: "instrument enrichment (data-loader)"
+      synonyms:
+      - exercise price
+      - strike price
+      - K
+      category: measure
+      typical_aggregation: AVG
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (call/put).
+      source: "instrument enrichment (data-loader)"
+      synonyms:
+      - call put
+      - C/P
+      category: dimension
+      filterable: true
+      example_values:
+      - '80'
+      - '67'
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Option type name (Call or Put).
+      source: "instrument enrichment (data-loader)"
+      synonyms:
+      - call put name
+      category: dimension
+      filterable: true
+      example_values:
+      - 'OPTION_TYPE_PUT'
+      - 'OPTION_TYPE_CALL'
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiration timestamp of the option contract.
+      source: "instrument enrichment (data-loader)"
+      synonyms:
+      - expiry
+      - expiration
+      - maturity date
+      category: time
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Internal Mako system symbol for the instrument.
+      source: "instrument enrichment (data-loader)"
+      synonyms:
+      - internal symbol
+      category: dimension
+      filterable: true
+      example_values:
+      - 'BETS'
     - name: currency
       type: INTEGER
-      description: ""
+      description: Currency identifier for the instrument.
+      source: "instrument enrichment (data-loader)"
+      synonyms:
+      - ccy
+      category: dimension
+      filterable: true
+      example_values:
+      - '16'
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term or tenor label (e.g. monthly, weekly).
+      source: "instrument enrichment (data-loader)"
+      synonyms:
+      - tenor
+      - expiry term
+      - maturity
+      category: dimension
+      filterable: true
+      example_values:
+      - 'Feb-2026'
+      - 'Mar-2026'
+      - 'Apr-2026'
+      - 'May-2026'
+      - 'Jun-2026'
+      - 'Dec-2026'
+      - 'Sep-2026'
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Instrument type name (e.g. Option, Future, Spread).
+      source: "instrument enrichment (data-loader)"
+      synonyms:
+      - instrument type
+      - product type
+      category: dimension
+      filterable: true
+      example_values:
+      - 'OPTION'
+      - 'STOCK'
     - name: cancel_quantity
       type: INTEGER
-      description: ""
+      description: Cancel quantity.
+      source: "MarketEvent.cancelQuantity (data/OboMarketData.proto)"
+      synonyms: []
+      category: dimension
+      filterable: true
     - name: hidden_quantity
       type: INTEGER
-      description: ""
+      description: Hidden quantity.
+      source: "MarketEvent.hiddenQuantity (data/OboMarketData.proto)"
+      synonyms: []
+      category: dimension
+      filterable: true
     - name: fill_quantity
       type: INTEGER
-      description: ""
+      description: Fill quantity.
+      source: "MarketEvent.fillQuantity (data/OboMarketData.proto)"
+      synonyms: []
+      category: dimension
+      filterable: true
     - name: mako_sequence_number
       type: INTEGER
-      description: ""
+      description: Mako sequence number.
+      source: "MarketEvent.makoSequenceNumber (data/OboMarketData.proto)"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: 'Data provenance field: streamsource_stream_id.'
+      source: "MarketEvent.streamId (data/OboMarketData.proto)"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: 'Data provenance field: streamsource_event_id.'
+      source: "MarketEvent.eventId (data/OboMarketData.proto)"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: 'Data provenance field: streamsource_message_id.'
+      source: "MarketEvent.messageId (data/OboMarketData.proto)"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: 'Data provenance field: datasource_pid.'
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: 'Data provenance field: datasource_hostname.'
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"
+      synonyms: []
+      category: dimension
+      filterable: true

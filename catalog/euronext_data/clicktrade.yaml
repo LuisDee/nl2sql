@@ -3,204 +3,752 @@ table:
   dataset: "{dataset_prefix}euronext_data"
   fqn: '{project}.{dataset_prefix}euronext_data.clicktrade'
   layer: data
-  description: ""
+  description: Raw click trade execution details from the Mako position management system (PosData). Contains full
+    detail on manual click trade executions including position management fields, transaction bitmasks, and combo/leg
+    information. Use {kpi_dataset}.clicktrade for edge/slippage analysis. Partitioned by trade_date.
   partition_field: trade_date
   columns:
     - name: trade_date
       type: DATE
-      description: ""
+      description: Business date of the trading session, used as the primary partition column for this table. Always
+        filter on trade_date for efficient queries. Represents the logical trading day which may span midnight for
+        overnight sessions.
+      source: "PosData.proto::tradeDate"
+      synonyms:
+      - date
+      - business date
+      - trading date
+      category: time
+      filterable: true
     - name: symbol
       type: STRING
-      description: ""
+      description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
+        human-readable identifier used by traders when referring to instruments. Used for filtering and grouping across
+        all tables in the data and KPI layers.
+      source: "PosData.proto::symbol"
+      synonyms:
+      - ticker
+      - product
+      - instrument
+      - underlying symbol
+      category: dimension
+      filterable: true
+      example_values:
+      - 'AZA_SS'
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako trading portfolio or book to which this click trade belongs. Used for filtering
+        click trades by trading strategy. Traders commonly ask for click trade data filtered by portfolio.
+      source: "PosData.proto::portfolio"
+      synonyms:
+      - book
+      - trading book
+      category: dimension
+      filterable: true
+      example_values:
+      - 'WHITE'
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
+        defining attributes (symbol, strike, expiry, type). Used as the primary join key across all data and KPI tables.
+        Every instrument has exactly one hash that is consistent across all systems.
+      source: "PosData.proto::instrumentHash"
+      synonyms:
+      - instrument id
+      - instrument key
+      category: identifier
+      filterable: true
+      example_values:
+      - 'f22c462cc6fc5e4b35b25b2f99f52a3aeb57ed37da60bc1af12340234279d450'
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO
+        (spread/strategy), or other instrument class. Derived from the internal instrument type code. Use for filtering
+        queries to specific instrument categories.
+      source: "PosData.proto::instTypeName"
+      synonyms:
+      - instrument type
+      - product type
+      - security type
+      category: dimension
+      filterable: true
+      example_values:
+      - 'OPTION'
+      - 'COMBO'
+      - 'FUTURE'
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiration timestamp of the option contract as a string, indicating the date and time at which the
+        option ceases to exist. Note this is stored as STRING type in clicktrade (unlike TIMESTAMP in other tables).
+        Used for term structure analysis and expiry grouping.
+      source: "PosData.proto::expiryTimestamp"
+      synonyms:
+      - expiry
+      - expiration
+      - maturity date
+      category: dimension
+      filterable: true
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly,
+        quarterly). Used for term structure analysis and grouping instruments by expiry bucket.
+      source: "PosData.proto::term"
+      synonyms:
+      - tenor
+      - expiry term
+      - maturity
+      - expiry cycle
+      category: dimension
+      filterable: true
     - name: currency
       type: INTEGER
-      description: ""
+      description: Currency code identifying the denomination of the instrument. Unlike other data tables which use
+        numeric codes, clicktrade stores currency as a STRING. Common values map to USD=2, EUR=4, GBP=1, JPY=7 in other
+        tables. Used for multi-currency aggregation.
+      source: "PosData.proto::currency"
+      synonyms:
+      - ccy
+      - currency code
+      category: dimension
+      filterable: true
+      example_values:
+      - '2'
+      - '4'
     - name: trader_id
       type: STRING
-      description: ""
+      description: Identifier of the trader who manually executed this click trade. Unique per trader within the Mako
+        system. Used for attribution analysis, trader-level P&L breakdowns, and compliance tracking of manual trading
+        activity. Also called trader or user id.
+      source: "PosData.proto::traderId"
+      synonyms:
+      - trader
+      - user id
+      - trader name
+      category: identifier
+      filterable: true
+      example_values:
+      - 'OMDAM1'
     - name: mako_id
       type: STRING
-      description: ""
+      description: Mako system internal identifier for this click trade, assigned by the position management system.
+        Used for tracking the trade through Mako's internal systems and correlating with position updates, risk
+        calculations, and audit trails.
+      source: "PosData.proto::makoId"
+      synonyms:
+      - mako identifier
+      category: identifier
+      filterable: true
+      example_values:
+      - 'CCHATZIM'
     - name: algorithm
       type: STRING
-      description: ""
+      description: Name of the algorithm or strategy associated with this click trade. For manual click trades, this
+        typically identifies the click-trading interface or manual execution algorithm rather than an automated
+        strategy. Used for execution channel attribution.
+      source: "PosData.proto::algorithm"
+      synonyms:
+      - strategy
+      - algo name
+      - trading algo
+      category: dimension
+      filterable: true
+      example_values:
+      - 'COMBO_TAKEOUT'
     - name: channel
       type: STRING
-      description: ""
+      description: Trading channel through which this click trade was executed (e.g. electronic exchange, voice broker,
+        internal crossing). Identifies the execution venue category. Used for analysing execution quality and cost
+        differences across trading channels.
+      source: "PosData.proto::channel"
+      synonyms:
+      - execution channel
+      - trading channel
+      category: dimension
+      filterable: true
+      example_values:
+      - 'MANUAL'
     - name: inventory
       type: STRING
-      description: ""
+      description: Inventory or sub-account classification for this click trade. Determines which internal inventory
+        bucket receives the position. Used for segregating positions by purpose (hedging, proprietary, client) within a
+        portfolio.
+      source: "PosData.proto::inventory"
+      synonyms:
+      - sub-account
+      - inventory account
+      category: dimension
+      filterable: true
+      example_values:
+      - 'WHITE'
     - name: account
       type: STRING
-      description: ""
+      description: Trading account identifier for this click trade (e.g. BGC, MGN for broker-facilitated trades). Used
+        for reconciliation with external counterparties and for grouping trades by clearing account. Critical for broker
+        trade comparison analysis.
+      source: "PosData.proto::account"
+      synonyms:
+      - trading account
+      - broker account
+      - clearing account
+      category: dimension
+      filterable: true
+      example_values:
+      - 'MAIN'
     - name: transaction_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this click trade transaction occurred in the Mako position management system.
+        Represents the internal booking time of the trade. May differ from exchange_timestamp which is the
+        exchange-assigned time. Use for internal timeline analysis and position update tracking.
+      source: "PosData.proto::transactionTimestamp"
+      synonyms:
+      - transaction time
+      - booking time
+      category: time
     - name: transaction_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the transaction timestamp, providing sub-microsecond precision for when the
+        trade was booked in the position system. Combine with transaction_timestamp for full nanosecond-precision
+        timing.
+      source: "PosData.proto::transactionTimestamp"
+      synonyms: []
+      category: time
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp provided by the exchange for this click trade execution. Represents the authoritative
+        exchange time when the trade was matched. Use for precise trade timing and reconciliation with exchange trade
+        reports.
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms:
+      - exchange time
+      - matching engine time
+      category: time
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the exchange timestamp, providing sub-microsecond precision for the exact
+        moment the exchange matched this click trade.
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms: []
+      category: time
     - name: exchange_date
       type: DATE
-      description: ""
+      description: Date of the transaction at the exchange level. May differ from trade_date in cases of overnight
+        trading or timezone differences. Used for exchange-level reconciliation and regulatory reporting.
+      source: "PosData.proto::exchangeDate"
+      synonyms:
+      - exchange trading date
+      category: time
+      filterable: true
     - name: exchange_transaction_id
       type: STRING
-      description: ""
+      description: Transaction identifier assigned by the exchange for this click trade execution. Used for
+        exchange-level reconciliation, regulatory reporting, and correlating with exchange audit trails and trade
+        confirmations.
+      source: "PosData.proto::exchangeTransactionId"
+      synonyms:
+      - exchange trade id
+      category: identifier
+      filterable: true
+      example_values:
+      - '50354370:26249:1191'
     - name: exchange_order_id
       type: STRING
-      description: ""
+      description: Order identifier assigned by the exchange for the order that resulted in this click trade fill. Used
+        for exchange-level order tracking and correlating fills with the originating order lifecycle.
+      source: "PosData.proto::exchangeOrderId"
+      synonyms:
+      - exchange order
+      category: identifier
+      filterable: true
+      example_values:
+      - '334:OMDAM1'
     - name: agg_pos_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp of the aggregate position snapshot associated with this click trade, stored as STRING.
+        Records when the position aggregation was performed after this trade was booked. Used for position
+        reconciliation.
+      source: "PosData.proto::aggPosTimestamp"
+      synonyms: []
+      category: dimension
+      filterable: true
     - name: agg_pos_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the aggregate position timestamp, stored as STRING. Provides additional
+        precision for position aggregation timing.
+      source: "PosData.proto::aggPosTimestamp"
+      synonyms: []
+      category: dimension
+      filterable: true
     - name: agg_pos_date
       type: DATE
-      description: ""
+      description: Date of the aggregate position snapshot, stored as STRING. Records which position snapshot date this
+        click trade was included in. Used for position reconciliation across trading dates.
+      source: "PosData.proto::aggPosDate"
+      synonyms: []
+      category: dimension
+      filterable: true
     - name: revision
       type: INTEGER
-      description: ""
+      description: Revision number of this click trade record in the position management system. Increments when the
+        trade record is amended (e.g. price correction, size adjustment, counterparty update). Higher revision numbers
+        indicate more recent amendments. Use MAX(revision) to get the latest version.
+      source: "PosData.proto::revision"
+      synonyms:
+      - version
+      - amendment number
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: revision_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this revision of the click trade record was created. Records when the trade was last
+        amended in the position system. Compare with transaction_timestamp to identify post-trade amendments.
+      source: "PosData.proto::revisionTimestamp"
+      synonyms:
+      - amendment time
+      category: time
     - name: revision_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond component of the revision timestamp, providing sub-microsecond precision for when this
+        amendment was recorded.
+      source: "PosData.proto::revisionTimestamp"
+      synonyms: []
+      category: time
     - name: traded_size
       type: INTEGER
-      description: ""
+      description: Number of contracts (lots) traded in this click trade execution. Represents the actual filled
+        quantity for this specific trade event. May differ from size which can represent the current position size
+        rather than trade size depending on position_type.
+      source: "PosData.proto::tradedSize"
+      synonyms:
+      - fill size
+      - quantity
+      - lots
+      - trade quantity
+      category: measure
+      typical_aggregation: SUM
     - name: price
       type: FLOAT
-      description: ""
+      description: Execution price of this click trade as reported by the exchange. The price at which the order was
+        filled. Compare with tv to measure the edge captured on this manual trade. Also called fill price or execution
+        price.
+      source: "PosData.proto::price"
+      synonyms:
+      - fill price
+      - execution price
+      - trade price
+      category: measure
+      typical_aggregation: AVG
     - name: size
       type: INTEGER
-      description: ""
+      description: Position size or trade size stored as STRING. Interpretation depends on the position_type field --
+        for TRADE events this is the trade size, for POSITION events this represents the current position. Cast to
+        INTEGER for numerical analysis.
+      source: "PosData.proto::size"
+      synonyms:
+      - quantity
+      - lots
+      - position size
+      category: dimension
+      filterable: true
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value (fair value) of the option at the time of this click trade. Represents Mako's
+        estimate of the option's true worth. Compare with price to measure edge captured on the manual trade. Also
+        called theo, fair value, or machine price.
+      source: "PosData.proto::tv"
+      synonyms:
+      - theo
+      - theoretical value
+      - fair value
+      - machine price
+      - TV
+      category: measure
+      typical_aggregation: AVG
     - name: counterparty
       type: STRING
-      description: ""
+      description: Counterparty or market participant on the other side of this click trade. May be a broker name,
+        exchange member ID, or internal identifier depending on the execution channel. Used for counterparty analysis
+        and broker comparison.
+      source: "PosData.proto::counterparty"
+      synonyms:
+      - counter party
+      - other side
+      - broker
+      category: dimension
+      filterable: true
     - name: revisor
       type: STRING
-      description: ""
+      description: Identifier of the person or system that last revised this click trade record. Tracks accountability
+        for post-trade amendments. Used for audit trail and compliance purposes.
+      source: "PosData.proto::revisor"
+      synonyms:
+      - amender
+      category: dimension
+      filterable: true
+      example_values:
+      - 'POS'
     - name: transaction_id
       type: INTEGER
-      description: ""
+      description: Unique transaction identifier assigned by Mako's position management system for this click trade.
+        Used for internal tracking, reconciliation, and correlating with position updates and risk calculations.
+      source: "PosData.proto::transactionId"
+      synonyms:
+      - trade id
+      category: identifier
+      filterable: true
+      example_values:
+      - '1077703870'
     - name: order_id
       type: INTEGER
-      description: ""
+      description: Mako order identifier for the order that resulted in this click trade fill. Used for tracking the
+        order through Mako's front-office systems and correlating with order lifecycle events.
+      source: "PosData.proto::orderId"
+      synonyms:
+      - mako order id
+      category: identifier
+      filterable: true
+      example_values:
+      - '1077703867'
     - name: position_type
       type: INTEGER
-      description: ""
+      description: Numeric code indicating the type of position event. POSITION=80 (position snapshot), TRADE=84 (trade
+        execution), and other types for adjustments. Determines how to interpret the size and price fields. Filter to
+        TRADE (84) for actual trade executions.
+      source: "PosData.proto::positionType"
+      synonyms:
+      - event type
+      - pos type
+      category: dimension
+      filterable: true
+      example_values:
+      - '80'
+      - '84'
     - name: position_id
       type: INTEGER
-      description: ""
+      description: Unique position identifier linking this trade to its resulting position in the Mako system. Used for
+        tracking how individual trades affect portfolio positions and for position-level P&L attribution.
+      source: "PosData.proto::positionId"
+      synonyms:
+      - pos id
+      category: identifier
+      filterable: true
+      example_values:
+      - '242974'
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier of the volatility curve active at the time of this click trade. Used to trace which vol
+        surface was being used when the trade was executed and the TV was calculated. Critical for understanding pricing
+        context.
+      source: "PosData.proto::curveId"
+      synonyms:
+      - vol curve
+      - vol curve id
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: carry_id
       type: INTEGER
-      description: ""
+      description: Identifier of the carry/dividend curve active at the time of this click trade. Used for tracing rate
+        and dividend assumptions that fed into the TV calculation at trade time.
+      source: "PosData.proto::carryId"
+      synonyms:
+      - dividend curve
+      - carry curve id
+      category: identifier
+      filterable: true
+      example_values:
+      - '0'
     - name: trade_id
       type: INTEGER
-      description: ""
+      description: Unique trade identifier assigned by the position management system for this specific click trade
+        execution. Used as the primary key for identifying individual click trades across the system.
+      source: "PosData.proto::tradeId"
+      synonyms:
+      - fill id
+      - execution id
+      category: identifier
+      filterable: true
+      example_values:
+      - '1'
     - name: text
       type: STRING
-      description: ""
+      description: Free-text field associated with this click trade, typically containing trader notes, comments, or
+        execution instructions. May be empty for most trades. Used for searching trades by annotation and for compliance
+        review of manual trade rationale.
+      source: "PosData.proto::text"
+      synonyms:
+      - note
+      - comment
+      - trade note
+      category: dimension
+      filterable: true
     - name: strike
       type: FLOAT
-      description: ""
+      description: Option strike price stored as STRING in clicktrade (unlike FLOAT in other tables). The exercise price
+        at which the holder can buy (call) or sell (put) the underlying. Cast to FLOAT for numerical comparisons and
+        moneyness analysis.
+      source: "PosData.proto::strike"
+      synonyms:
+      - exercise price
+      - strike price
+      - K
+      category: dimension
+      filterable: true
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code stored as STRING in clicktrade (unlike INTEGER in other tables). Indicates whether
+        the option is a call or put. Prefer option_type_name for readability.
+      source: "PosData.proto::optionType"
+      synonyms:
+      - call put
+      - C/P
+      category: dimension
+      filterable: true
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type label indicating whether the instrument is a Call or Put option. Use for
+        filtering and grouping by option direction in analytical queries.
+      source: "PosData.proto::optionTypeName"
+      synonyms:
+      - call put name
+      - option direction
+      category: dimension
+      filterable: true
+      example_values:
+      - 'Call'
+      - 'Put'
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Internal Mako system symbol for the instrument, used as the canonical identifier within Mako's
+        trading infrastructure. May differ from the exchange symbol.
+      source: "PosData.proto::makoSymbol"
+      synonyms:
+      - internal symbol
+      category: dimension
+      filterable: true
+      example_values:
+      - 'AZA_SS'
     - name: contract_size
       type: FLOAT
-      description: ""
+      description: Contract multiplier (point value) for the instrument, stored as STRING. Defines how many units of the
+        underlying one contract represents. Used for notional value calculations (price * contract_size * quantity).
+        Cast to FLOAT for numerical analysis.
+      source: "PosData.proto::contractSize"
+      synonyms:
+      - multiplier
+      - point value
+      - contract multiplier
+      category: dimension
+      filterable: true
     - name: underlying_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier of the underlying instrument. Links this click trade to the underlying's
+        market data and depth records. Used for cross-referencing with the underlying's state at trade time.
+      source: "PosData.proto::underlyingInstrumentHash"
+      synonyms: []
+      category: identifier
+      filterable: true
+      example_values:
+      - 'ff161170e643c8c81187f5249c84ad3b09ba99a35f86975985dc90245f677a7d'
     - name: underlying_exe_exch
       type: INTEGER
-      description: ""
+      description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
+        analysis to understand which exchange's underlying was relevant for this click trade.
+      source: "PosData.proto::underlyingExeExch"
+      synonyms: []
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_exe_exch_name
       type: STRING
-      description: ""
+      description: Human-readable name of the exchange where the underlying instrument executes. Derived from the
+        numeric underlying_exe_exch code. Used for filtering by underlying execution venue.
+      source: "PosData.proto::underlyingExeExchName"
+      synonyms:
+      - underlying exchange
+      category: dimension
+      filterable: true
     - name: combo_type_name
       type: STRING
-      description: ""
+      description: Type of combo/spread strategy for this click trade (e.g. calendar spread, vertical spread, straddle,
+        strangle, butterfly). Identifies the strategy structure when trading multi-leg instruments. NULL or empty for
+        single-leg (outright) trades.
+      source: "PosData.proto::comboTypeName"
+      synonyms:
+      - spread type
+      - strategy type
+      category: dimension
+      filterable: true
+      example_values:
+      - 'COMBO_PARENT'
     - name: executable_exchange
       type: INTEGER
-      description: ""
+      description: Numeric exchange code identifying the exchange where this click trade order was executed. May differ
+        from the underlying's exchange (underlying_exe_exch). Indicates the specific venue where the option/combo order
+        was matched and filled.
+      source: "PosData.proto::executableExchange"
+      synonyms:
+      - execution exchange
+      - fill exchange
+      category: measure
+      typical_aggregation: AVG
     - name: is_parent
       type: BOOLEAN
-      description: ""
+      description: Flag indicating whether this row represents the parent (combo/strategy) level of a multi-leg trade.
+        When true, this is the aggregate record; individual legs will have separate rows with is_parent=false. Filter to
+        is_parent=true for strategy-level analysis, is_parent=false for leg-level detail.
+      source: "PosData.proto::isParent"
+      synonyms:
+      - combo level
+      - parent flag
+      category: dimension
+      filterable: true
+      example_values:
+      - 'true'
     - name: is_ref_component
       type: INTEGER
-      description: ""
+      description: Flag indicating whether this leg is the reference component of a combo trade. The reference component
+        is the primary leg used for pricing and risk calculations. Used for identifying the anchor leg in multi-leg
+        strategies.
+      source: "PosData.proto::isRefComponent"
+      synonyms:
+      - reference leg
+      category: measure
+      typical_aggregation: AVG
     - name: leg_index
       type: INTEGER
-      description: ""
+      description: Index of this leg within the combo/spread trade structure, stored as STRING. Identifies the position
+        of this leg in the multi-leg strategy (e.g. "0" for the first leg, "1" for the second). Used for ordering and
+        identifying specific legs.
+      source: "PosData.proto::legIndex"
+      synonyms:
+      - leg number
+      category: dimension
+      filterable: true
     - name: leg_ratio
       type: FLOAT
-      description: ""
+      description: Ratio of this leg within the combo trade, stored as STRING. Defines the quantity multiplier for this
+        leg relative to the strategy (e.g. "1" for 1:1, "2" for 2:1 ratio). Used for understanding strategy construction
+        and notional exposure per leg.
+      source: "PosData.proto::legRatio"
+      synonyms:
+      - ratio
+      - leg multiplier
+      category: dimension
+      filterable: true
     - name: liquid
       type: INTEGER
-      description: ""
+      description: Liquidity classification flag for this instrument at the time of the click trade. Indicates the
+        exchange's or Mako's assessment of the instrument's liquidity tier. Used for execution quality analysis and fee
+        tier determination.
+      source: "PosData.proto::liquid"
+      synonyms:
+      - liquidity flag
+      category: measure
+      typical_aggregation: AVG
     - name: no_legs
       type: INTEGER
-      description: ""
+      description: Number of legs in the combo/spread trade, stored as STRING. Indicates the complexity of the strategy
+        (e.g. "2" for a simple spread, "4" for a condor). Cast to INTEGER for numerical analysis. NULL or "0" for
+        single-leg (outright) trades.
+      source: "PosData.proto::noLegs"
+      synonyms:
+      - num legs
+      - leg count
+      - number of legs
+      category: dimension
+      filterable: true
     - name: parent_combo_type_name
       type: STRING
-      description: ""
+      description: Combo type name of the parent instrument when this row represents a leg within a larger strategy.
+        Identifies the strategy type at the parent level. NULL when this row is already the parent or is a single-leg
+        trade.
+      source: "PosData.proto::parentComboTypeName"
+      synonyms:
+      - parent strategy type
+      category: dimension
+      filterable: true
     - name: parent_feed_code
       type: STRING
-      description: ""
+      description: Exchange feed code of the parent combo instrument. Used for identifying the parent strategy's
+        exchange listing and correlating with market data feeds.
+      source: "PosData.proto::parentFeedCode"
+      synonyms:
+      - parent ticker
+      category: dimension
+      filterable: true
     - name: parent_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier of the parent combo instrument when this row represents an individual leg.
+        Used for grouping all legs of a multi-leg trade together and joining back to the parent-level record.
+      source: "PosData.proto::parentInstrumentHash"
+      synonyms:
+      - parent hash
+      category: identifier
+      filterable: true
+      example_values:
+      - 'f22c462cc6fc5e4b35b25b2f99f52a3aeb57ed37da60bc1af12340234279d450'
     - name: parent_is_combo
       type: BOOLEAN
-      description: ""
+      description: Flag indicating whether the parent instrument is a combo/spread. When true, this click trade is part
+        of a multi-leg strategy execution. When false, this is a single-leg outright trade. Used for filtering between
+        strategy and outright trades.
+      source: "PosData.proto::parentIsCombo"
+      synonyms:
+      - is combo
+      - is spread
+      category: dimension
+      filterable: true
+      example_values:
+      - 'true'
     - name: ref_inst_type_name
       type: STRING
-      description: ""
+      description: Instrument type name of the reference instrument in a combo trade. Identifies what type of instrument
+        serves as the pricing anchor for the strategy. Used for understanding the reference leg's characteristics.
+      source: "PosData.proto::refInstTypeName"
+      synonyms:
+      - reference instrument type
+      category: dimension
+      filterable: true
     - name: ref_term
       type: STRING
-      description: ""
+      description: Term/tenor of the reference instrument in a combo trade. Identifies the expiry cycle of the reference
+        leg. Used for understanding inter-term spread structures (e.g. calendar spreads).
+      source: "PosData.proto::refTerm"
+      synonyms:
+      - reference term
+      category: dimension
+      filterable: true
     - name: total_traded_size
       type: FLOAT
-      description: ""
+      description: Total size traded across all legs of a multi-leg trade, stored as STRING. Represents the aggregate
+        volume of the entire strategy execution. Cast to INTEGER for numerical analysis. For single-leg trades, equals
+        traded_size.
+      source: "PosData.proto::totalTradedSize"
+      synonyms:
+      - total lots
+      - total volume
+      category: dimension
+      filterable: true
     - name: underlying_inst_type_name
       type: STRING
-      description: ""
+      description: Instrument type name of the underlying instrument (e.g. FUTURE, EQUITY_INDEX). Identifies the asset
+        class of the underlying product. Used for filtering by underlying instrument type.
+      source: "PosData.proto::underlyingInstTypeName"
+      synonyms:
+      - underlying type
+      category: dimension
+      filterable: true
     - name: underlying_symbol
       type: STRING
-      description: ""
+      description: Exchange symbol of the underlying instrument. Identifies the specific underlying product (e.g. the
+        future or index) that this option is based on. Used for cross-referencing with underlying market data.
+      source: "PosData.proto::underlyingSymbol"
+      synonyms:
+      - underlying ticker
+      - underlying product
+      category: dimension
+      filterable: true
+      example_values:
+      - 'AZA_SS'

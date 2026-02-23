@@ -62,3 +62,10 @@ embeddings/
 # Git worktrees
 .worktrees/
 .autopsy/
+
+# AI tool configs
+.gemini/
+
+# Research scratch files
+kpi-findings
+proto-findings

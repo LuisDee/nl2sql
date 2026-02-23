@@ -34,7 +34,7 @@ table:
       filterable: true
     - name: client_id
       type: INTEGER
-      description: ""
+      description: Client identifier at the exchange.
       category: identifier
       filterable: true
     - name: instrument_hash
@@ -50,87 +50,87 @@ table:
       filterable: true
     - name: algorithm
       type: STRING
-      description: ""
+      description: Name of the Mako algorithm that generated this trade or event.
       category: dimension
       filterable: true
     - name: inventory
       type: STRING
-      description: ""
+      description: Inventory account associated with this trade or position.
       category: dimension
       filterable: true
     - name: account
       type: STRING
-      description: ""
+      description: Account identifier for this trade.
       category: dimension
       filterable: true
     - name: mako_id
       type: STRING
-      description: ""
+      description: Mako-internal unique identifier for this trade or order.
       category: identifier
       filterable: true
     - name: trader
       type: STRING
-      description: ""
+      description: Trader name or identifier responsible for this action.
       category: dimension
       filterable: true
     - name: session_group
       type: STRING
-      description: ""
+      description: Session group identifier for exchange connectivity.
       category: dimension
       filterable: true
     - name: session
       type: STRING
-      description: ""
+      description: Session identifier for exchange connectivity.
       category: dimension
       filterable: true
     - name: exchange_code
       type: INTEGER
-      description: ""
+      description: Exchange code (numeric).
       category: measure
       typical_aggregation: AVG
     - name: channel_identifier
       type: STRING
-      description: ""
+      description: Channel identifier (text).
       category: dimension
       filterable: true
     - name: market_data_id
       type: STRING
-      description: ""
+      description: Identifier for the market data.
       category: identifier
       filterable: true
     - name: message_type
       type: STRING
-      description: ""
+      description: Message type classification for the captured packet.
       category: dimension
       filterable: true
     - name: destination_host
       type: STRING
-      description: ""
+      description: Destination host (text).
       category: dimension
       filterable: true
     - name: source_host
       type: STRING
-      description: ""
+      description: Source host (text).
       category: dimension
       filterable: true
     - name: destination_port
       type: INTEGER
-      description: ""
+      description: Destination port of the captured network packet.
       category: measure
       typical_aggregation: AVG
     - name: source_port
       type: INTEGER
-      description: ""
+      description: Source port of the captured network packet.
       category: measure
       typical_aggregation: AVG
     - name: protocol_version
       type: STRING
-      description: ""
+      description: Protocol version (text).
       category: dimension
       filterable: true
     - name: client_order_id
       type: INTEGER
-      description: ""
+      description: Client-side order identifier sent to the exchange.
       category: identifier
       filterable: true
     - name: mako_order_id
@@ -145,7 +145,7 @@ table:
       filterable: true
     - name: linked_trans_id
       type: INTEGER
-      description: ""
+      description: Linked trans id (numeric).
       category: identifier
       filterable: true
     - name: reason_name
@@ -155,12 +155,12 @@ table:
       filterable: true
     - name: reason
       type: INTEGER
-      description: ""
+      description: Reason code for this order or event action.
       category: measure
       typical_aggregation: AVG
     - name: exch_info
       type: STRING
-      description: ""
+      description: Exch info (text).
       category: dimension
       filterable: true
     - name: gateway_timestamp

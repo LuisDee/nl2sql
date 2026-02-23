@@ -8,82 +8,87 @@ table:
   columns:
     - name: kafka_message_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
+        internally for data pipeline monitoring and replay.
     - name: record_written_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
+        data freshness and pipeline latency.
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
     - name: timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp of this event or record.
     - name: timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of timestamp. Combine with timestamp for full nanosecond-resolution
+        timing.
     - name: component
       type: STRING
-      description: ""
+      description: System component name that generated this event.
     - name: message_type
       type: STRING
-      description: ""
+      description: Message type classification for the captured packet.
     - name: hostname
       type: STRING
-      description: ""
+      description: Hostname of the data source that produced this record.
     - name: pid
       type: INTEGER
-      description: ""
+      description: Process ID of the data source that produced this record.
     - name: exchange_code
       type: STRING
-      description: ""
+      description: Exchange code (text).
     - name: message_trade_date
       type: DATE
-      description: ""
+      description: Trade date embedded within the original proto message.
     - name: message_identifier
       type: STRING
-      description: ""
+      description: Message identifier (text).
     - name: message_identifier_name
       type: STRING
-      description: ""
+      description: Human-readable name for the message identifier enum value.
     - name: message_description
       type: STRING
-      description: ""
+      description: Message description (text).
     - name: message_description_name
       type: STRING
-      description: ""
+      description: Human-readable name for the message description enum value.
     - name: order_identifier
       type: INTEGER
-      description: ""
+      description: Exchange or broker order identifier.
     - name: label
       type: STRING
-      description: ""
+      description: Label or tag identifying the type of this record.
     - name: int_value
       type: INTEGER
-      description: ""
+      description: Value of int.
     - name: float_value
       type: FLOAT
-      description: ""
+      description: Value of float.
     - name: string_value
       type: STRING
-      description: ""
+      description: Value of string.
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.

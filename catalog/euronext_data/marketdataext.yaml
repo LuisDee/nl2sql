@@ -67,7 +67,7 @@ table:
       source: MarketDataExtended.exchangeTimestamp_ns (data/MarketDataExtended.proto)
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number (numeric).
       category: identifier
       filterable: true
       source: MarketDataExtended.sequenceNumber (data/MarketDataExtended.proto)
@@ -84,19 +84,19 @@ table:
       source: derived (data-loader)
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
       category: measure
       typical_aggregation: AVG
       source: kafka infrastructure
     - name: size
       type: FLOAT
-      description: ""
+      description: Number of lots or contracts in the trade or order.
       category: measure
       typical_aggregation: AVG
       source: kafka infrastructure
     - name: buy_sell
       type: STRING
-      description: ""
+      description: Buy sell (text).
       category: dimension
       filterable: true
       source: MarketDataExtended.side_name (data/MarketDataExtended.proto)
@@ -154,7 +154,7 @@ table:
       source: MarketDataExtended.enteringFirmId (data/MarketDataExtended.proto)
     - name: order_id
       type: STRING
-      description: ""
+      description: Mako-internal order identifier linking fills to the parent order.
       category: identifier
       filterable: true
       source: MarketDataExtended.orderId (data/MarketDataExtended.proto)

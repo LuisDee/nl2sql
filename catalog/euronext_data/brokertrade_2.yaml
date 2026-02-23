@@ -41,7 +41,7 @@ table:
       typical_aggregation: AVG
     - name: uuid
       type: STRING
-      description: ""
+      description: Universally unique identifier for this record.
       category: dimension
       filterable: true
     - name: portfolio
@@ -74,22 +74,22 @@ table:
       category: time
     - name: revision
       type: INTEGER
-      description: ""
+      description: Revision number tracking modifications to this record.
       category: identifier
       filterable: true
     - name: counterparty
       type: STRING
-      description: ""
+      description: Counterparty identifier for this trade.
       category: dimension
       filterable: true
     - name: user
       type: STRING
-      description: ""
+      description: User identifier associated with this trade or action.
       category: dimension
       filterable: true
     - name: inventory
       type: STRING
-      description: ""
+      description: Inventory account associated with this trade or position.
       category: dimension
       filterable: true
     - name: contract_name
@@ -99,12 +99,12 @@ table:
       filterable: true
     - name: source
       type: STRING
-      description: ""
+      description: Source system or feed that originated this record.
       category: dimension
       filterable: true
     - name: broker
       type: STRING
-      description: ""
+      description: Broker identifier associated with this trade.
       category: dimension
       filterable: true
     - name: datasource_pid
@@ -149,7 +149,7 @@ table:
       typical_aggregation: AVG
     - name: tte
       type: FLOAT
-      description: ""
+      description: Time to expiry in years for the instrument.
       category: measure
       typical_aggregation: AVG
     - name: ref_price
@@ -159,17 +159,17 @@ table:
       typical_aggregation: AVG
     - name: carry_id
       type: INTEGER
-      description: ""
+      description: Identifier for the carry/interest rate curve used in theoretical calculations.
       category: identifier
       filterable: true
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
       category: identifier
       filterable: true
     - name: vol
       type: FLOAT
-      description: ""
+      description: Implied volatility of the instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
     - name: when_timestamp
@@ -178,7 +178,7 @@ table:
       category: time
     - name: vega
       type: FLOAT
-      description: ""
+      description: Option vega (sensitivity of option price to changes in implied volatility).
       category: measure
       typical_aggregation: AVG
     - name: tv
@@ -188,12 +188,12 @@ table:
       typical_aggregation: AVG
     - name: under
       type: FLOAT
-      description: ""
+      description: Price of the underlying instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
     - name: gamma
       type: FLOAT
-      description: ""
+      description: Option gamma (rate of change of delta with respect to underlying price).
       category: measure
       typical_aggregation: AVG
     - name: roll
@@ -203,52 +203,52 @@ table:
       typical_aggregation: AVG
     - name: delta
       type: FLOAT
-      description: ""
+      description: Option delta (rate of change of option price with respect to underlying price).
       category: measure
       typical_aggregation: AVG
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
       category: measure
       typical_aggregation: AVG
     - name: is_mako_or_market
       type: STRING
-      description: ""
+      description: Flag indicating whether this trade leg is from Mako or from the market.
       category: dimension
       filterable: true
     - name: account
       type: STRING
-      description: ""
+      description: Account identifier for this trade.
       category: dimension
       filterable: true
     - name: note
       type: STRING
-      description: ""
+      description: Free-text note or annotation attached to this record.
       category: dimension
       filterable: true
     - name: mako_inventory
       type: STRING
-      description: ""
+      description: Mako inventory (text).
       category: dimension
       filterable: true
     - name: mako_account
       type: STRING
-      description: ""
+      description: Mako account (text).
       category: dimension
       filterable: true
     - name: market_inventory
       type: STRING
-      description: ""
+      description: Market inventory (text).
       category: dimension
       filterable: true
     - name: market_account
       type: STRING
-      description: ""
+      description: Market account (text).
       category: dimension
       filterable: true
     - name: executable_exchange
       type: INTEGER
-      description: ""
+      description: Exchange on which this instrument is executable.
       category: measure
       typical_aggregation: AVG
     - name: strike
@@ -289,17 +289,17 @@ table:
       filterable: true
     - name: underlying_symbol
       type: STRING
-      description: ""
+      description: Underlying instrument symbol, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: market_or_mako_trade
       type: STRING
-      description: ""
+      description: Indicator distinguishing whether this is a market trade or a Mako trade.
       category: dimension
       filterable: true
     - name: count_calendar
       type: INTEGER
-      description: ""
+      description: Count calendar (numeric).
       category: measure
       typical_aggregation: AVG
     - name: is_parent
@@ -319,22 +319,22 @@ table:
       typical_aggregation: AVG
     - name: liquid
       type: INTEGER
-      description: ""
+      description: Liquidity indicator or classification for the instrument.
       category: measure
       typical_aggregation: AVG
     - name: company
       type: STRING
-      description: ""
+      description: Company or firm identifier for this trade.
       category: dimension
       filterable: true
     - name: brokerage_rate
       type: FLOAT
-      description: ""
+      description: Rate value for brokerage.
       category: measure
       typical_aggregation: AVG
     - name: fee_method
       type: STRING
-      description: ""
+      description: Fee method (text).
       category: dimension
       filterable: true
     - name: parent_feed_code
@@ -354,7 +354,7 @@ table:
       typical_aggregation: AVG
     - name: no_legs
       type: INTEGER
-      description: ""
+      description: Number of legs in a combo/spread instrument.
       category: measure
       typical_aggregation: AVG
     - name: inst_type_name
@@ -384,12 +384,12 @@ table:
       category: time
     - name: total_traded_size
       type: FLOAT
-      description: ""
+      description: Cumulative number of lots traded across all fills for this order.
       category: measure
       typical_aggregation: SUM
     - name: size
       type: INTEGER
-      description: ""
+      description: Number of lots or contracts in the trade or order.
       category: measure
       typical_aggregation: AVG
     - name: ref_term

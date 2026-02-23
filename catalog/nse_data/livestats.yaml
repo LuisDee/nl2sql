@@ -40,7 +40,7 @@ table:
       filterable: true
     - name: timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp of this event or record.
       category: time
     - name: timestamp_ns
       type: INTEGER
@@ -49,17 +49,17 @@ table:
       category: time
     - name: component
       type: STRING
-      description: ""
+      description: System component name that generated this event.
       category: dimension
       filterable: true
     - name: message_type
       type: STRING
-      description: ""
+      description: Message type classification for the captured packet.
       category: dimension
       filterable: true
     - name: exchange_code
       type: STRING
-      description: ""
+      description: Exchange code (text).
       category: dimension
       filterable: true
     - name: message_trade_date
@@ -68,7 +68,7 @@ table:
       category: time
     - name: message_identifier
       type: STRING
-      description: ""
+      description: Message identifier (text).
       category: dimension
       filterable: true
     - name: message_identifier_name
@@ -78,7 +78,7 @@ table:
       filterable: true
     - name: message_description
       type: STRING
-      description: ""
+      description: Message description (text).
       category: dimension
       filterable: true
     - name: message_description_name
@@ -88,27 +88,27 @@ table:
       filterable: true
     - name: order_identifier
       type: INTEGER
-      description: ""
+      description: Exchange or broker order identifier.
       category: measure
       typical_aggregation: AVG
     - name: label
       type: STRING
-      description: ""
+      description: Label or tag identifying the type of this record.
       category: dimension
       filterable: true
     - name: int_value
       type: INTEGER
-      description: ""
+      description: Value of int.
       category: measure
       typical_aggregation: AVG
     - name: float_value
       type: FLOAT
-      description: ""
+      description: Value of float.
       category: measure
       typical_aggregation: AVG
     - name: string_value
       type: STRING
-      description: ""
+      description: Value of string.
       category: dimension
       filterable: true
     - name: datasource_pid

@@ -246,7 +246,7 @@ table:
       source: OroSwingData.tv (data/OroSwingData.proto)
     - name: base_sequence_number
       type: INTEGER
-      description: ""
+      description: Base sequence number (numeric).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.NULL (data/OroSwingData.proto)

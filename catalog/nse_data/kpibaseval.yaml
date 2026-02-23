@@ -43,32 +43,32 @@ table:
       filterable: true
     - name: option_underlying_type
       type: INTEGER
-      description: ""
+      description: Type of the option underlying instrument.
       category: dimension
       filterable: true
     - name: option_term
       type: STRING
-      description: ""
+      description: Option term/maturity for base value calculation.
       category: dimension
       filterable: true
     - name: base_term
       type: STRING
-      description: ""
+      description: Base term for value calculation.
       category: dimension
       filterable: true
     - name: option_underlying
       type: FLOAT
-      description: ""
+      description: Underlying instrument value for option base value calculation.
       category: measure
       typical_aggregation: AVG
     - name: option_roll
       type: FLOAT
-      description: ""
+      description: Roll value for the option underlying.
       category: measure
       typical_aggregation: AVG
     - name: option_underlying_is_valid
       type: BOOLEAN
-      description: ""
+      description: Boolean indicating whether the option underlying value is valid.
       category: dimension
       filterable: true
     - name: update_instrument_hash
@@ -78,7 +78,7 @@ table:
       filterable: true
     - name: update_sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number of the triggering market data update.
       category: measure
       typical_aggregation: AVG
     - name: data_timestamp

@@ -30,7 +30,7 @@ table:
       filterable: true
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number (numeric).
       category: identifier
       filterable: true
     - name: exchange_timestamp
@@ -76,7 +76,7 @@ table:
       category: time
     - name: bv_data
       type: RECORD
-      description: ""
+      description: Bv data (field).
       category: dimension
       filterable: true
     - name: algo
@@ -86,7 +86,7 @@ table:
       filterable: true
     - name: latency_stats_bvio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the bvio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: instrument_hash

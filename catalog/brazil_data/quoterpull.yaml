@@ -50,12 +50,12 @@ table:
       filterable: true
     - name: trader
       type: STRING
-      description: ""
+      description: Trader name or identifier responsible for this action.
       category: dimension
       filterable: true
     - name: pcap_id
       type: STRING
-      description: ""
+      description: PCAP correlation identifier linking to raw network captures.
       category: identifier
       filterable: true
     - name: mako_order_id
@@ -65,12 +65,12 @@ table:
       filterable: true
     - name: bucket
       type: STRING
-      description: ""
+      description: Bucket or group identifier for the quoter event.
       category: dimension
       filterable: true
     - name: pull_restriction
       type: INTEGER
-      description: ""
+      description: Pull restriction level indicating the severity of quote withdrawal.
       category: measure
       typical_aggregation: AVG
     - name: exchange_timestamp
@@ -84,17 +84,17 @@ table:
       category: time
     - name: latency_stats_bkio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the bkio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_qmio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the qmio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_itio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the itio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: message_trade_date

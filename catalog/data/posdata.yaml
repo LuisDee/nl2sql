@@ -8,235 +8,247 @@ table:
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
     - name: mako_id
       type: STRING
-      description: ""
+      description: Mako-internal unique identifier for this trade or order.
     - name: trader_id
       type: STRING
-      description: ""
+      description: Identifier of the trader responsible for this trade.
     - name: algorithm
       type: STRING
-      description: ""
+      description: Name of the Mako algorithm that generated this trade or event.
     - name: routed_exchange
       type: INTEGER
-      description: ""
+      description: Exchange to which this order was routed for execution.
     - name: executable_exchange
       type: INTEGER
-      description: ""
+      description: Exchange on which this instrument is executable.
     - name: channel
       type: STRING
-      description: ""
+      description: Data channel or feed identifier for this event.
     - name: transaction_properties
       type: INTEGER
-      description: ""
+      description: A mask of TransactionProperty.
     - name: tag_book
       type: INTEGER
-      description: ""
+      description: A mask of TransactionTag.
     - name: tag_exchange
       type: INTEGER
-      description: ""
+      description: A mask of TransactionTagExchange.
     - name: tag_user
       type: INTEGER
-      description: ""
+      description: A mask of TransactionTagUser.
     - name: revision
       type: INTEGER
-      description: ""
+      description: Revision number tracking modifications to this record.
     - name: inventory
       type: STRING
-      description: ""
+      description: Inventory account associated with this trade or position.
     - name: account
       type: STRING
-      description: ""
+      description: Account identifier for this trade.
     - name: fill_id
       type: INTEGER
-      description: ""
+      description: Unique identifier for this fill (partial or full execution) within an order.
     - name: user_id
       type: INTEGER
-      description: ""
+      description: Algo-internal id.
     - name: user_order_id
       type: INTEGER
-      description: ""
+      description: User-submitted order identifier linking back to the order entry system.
     - name: transaction_id
       type: INTEGER
-      description: ""
+      description: Mako-internal transaction identifier for this event.
     - name: order_id
       type: INTEGER
-      description: ""
+      description: Mako-internal order identifier linking fills to the parent order.
     - name: exchange_transaction_id
       type: STRING
-      description: ""
+      description: Exchange-assigned transaction identifier for this event.
     - name: exchange_order_id
       type: STRING
-      description: ""
+      description: Exchange-assigned order identifier.
     - name: transaction_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the transaction occurred.
     - name: transaction_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the transaction timestamp. Combine with transaction_timestamp for
+        full nanosecond-resolution timing.
     - name: exchange_date
       type: DATE
-      description: ""
+      description: Date as reported by the exchange for this event.
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event.
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event.
     - name: exchange_info
       type: STRING
-      description: ""
+      description: Additional exchange-provided information for this event.
     - name: exchange_info_bits
       type: INTEGER
-      description: ""
+      description: A mask of TransactionExchangeInfo.
     - name: exchange_qualifier
       type: STRING
-      description: ""
+      description: Exchange qualifier code providing additional event context.
     - name: statistics
       type: STRING
-      description: ""
+      description: Statistical summary or classification data for this event.
     - name: position_type
       type: INTEGER
-      description: ""
+      description: Numeric code classifying the position event type (e.g. trade, adjustment, exercise).
     - name: position_id
       type: INTEGER
-      description: ""
+      description: Identifier for the position this event belongs to within the portfolio.
     - name: size
       type: INTEGER
-      description: ""
+      description: Number of lots or contracts in the trade or order.
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the VT saw at time of swing/market trade.
     - name: ectv
       type: FLOAT
-      description: ""
+      description: Exchange-cleared theoretical value used for settlement calculations.
     - name: settlement
       type: FLOAT
-      description: ""
+      description: Settlement price for the instrument.
     - name: settlement_date
       type: DATE
-      description: ""
+      description: Date on which settlement occurs for this trade.
     - name: pos_currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: pos_value_currency
       type: INTEGER
-      description: ""
+      description: Currency in which the position value is denominated.
     - name: cash_value
       type: FLOAT
-      description: ""
+      description: Cash value of this trade or position change.
     - name: mgmt_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the mgmt occurred.
     - name: mgmt_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the mgmt timestamp. Combine with mgmt_timestamp for full
+        nanosecond-resolution timing.
     - name: max_trade_id
       type: INTEGER
-      description: ""
+      description: Maximum trade ID in the batch, used for ordering and deduplication.
     - name: agg_pos_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the agg pos occurred.
     - name: agg_pos_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the agg pos timestamp. Combine with agg_pos_timestamp for full
+        nanosecond-resolution timing.
     - name: agg_pos_date
       type: DATE
-      description: ""
+      description: Aggregated position date for end-of-day processing.
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
     - name: deflection_scale
       type: FLOAT
-      description: ""
+      description: Scale factor for the deflection adjustment applied to pricing.
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
     - name: carry_id
       type: INTEGER
-      description: ""
+      description: Identifier for the carry/interest rate curve used in theoretical calculations.
     - name: revision_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the revision occurred.
     - name: revision_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the revision timestamp. Combine with revision_timestamp for full
+        nanosecond-resolution timing.
     - name: trade_id
       type: INTEGER
-      description: ""
+      description: Exchange-assigned trade identifier.
     - name: company_position
       type: INTEGER
-      description: ""
+      description: Net company-wide position for this instrument after this event.
     - name: traded_size
       type: INTEGER
-      description: ""
+      description: Number of lots traded in this transaction.
     - name: message_trade_date
       type: DATE
-      description: ""
+      description: Trade date embedded within the original proto message.
     - name: value_date
       type: DATE
-      description: ""
+      description: Value date for the trade, relevant for settlement calculations.
     - name: counterparty
       type: STRING
-      description: ""
+      description: Counterparty identifier for this trade.
     - name: text
       type: STRING
-      description: ""
+      description: Free-text field containing additional descriptive information about this event.
     - name: revisor
       type: STRING
-      description: ""
+      description: Identifier of the user or process that last revised this record.
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.

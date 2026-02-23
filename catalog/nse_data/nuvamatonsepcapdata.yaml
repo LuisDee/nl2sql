@@ -18,42 +18,42 @@ table:
       category: time
     - name: exchange_order_id
       type: INTEGER
-      description: ""
+      description: Exchange-assigned order identifier.
       category: identifier
       filterable: true
     - name: trader_id
       type: INTEGER
-      description: ""
+      description: Identifier of the trader responsible for this trade.
       category: identifier
       filterable: true
     - name: source_ip
       type: STRING
-      description: ""
+      description: Source IP address of the captured network packet.
       category: dimension
       filterable: true
     - name: source_port
       type: INTEGER
-      description: ""
+      description: Source port of the captured network packet.
       category: measure
       typical_aggregation: AVG
     - name: destination_ip
       type: STRING
-      description: ""
+      description: Destination IP address of the captured network packet.
       category: dimension
       filterable: true
     - name: destination_port
       type: INTEGER
-      description: ""
+      description: Destination port of the captured network packet.
       category: measure
       typical_aggregation: AVG
     - name: nnf_message_type
       type: INTEGER
-      description: ""
+      description: NNF (Nuvama Native Format) message type for NSE order tracking.
       category: dimension
       filterable: true
     - name: normalised_message_type
       type: STRING
-      description: ""
+      description: Normalised message type for cross-exchange comparison.
       category: dimension
       filterable: true
     - name: rms_ingress_timestamp_ns

@@ -8,175 +8,183 @@ table:
   columns:
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
     - name: parent_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the parent instrument.
     - name: parent_is_combo
       type: BOOLEAN
-      description: ""
+      description: Parent instrument is combo from the instrument definition.
     - name: is_parent
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the parent condition is true.
     - name: leg_ratio
       type: FLOAT
-      description: ""
+      description: Combo leg ratio.
     - name: no_legs
       type: INTEGER
-      description: ""
+      description: Number of legs in a combo/spread instrument.
     - name: leg_index
       type: INTEGER
-      description: ""
+      description: Combo leg index.
     - name: parent_combo_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the parent combo type enum value.
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
     - name: underlying_inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying inst type enum value.
     - name: combo_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the combo type enum value.
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: trader_id
       type: STRING
-      description: ""
+      description: Identifier of the trader responsible for this trade.
     - name: mako_id
       type: STRING
-      description: ""
+      description: Mako-internal unique identifier for this trade or order.
     - name: algorithm
       type: STRING
-      description: ""
+      description: Name of the Mako algorithm that generated this trade or event.
     - name: channel
       type: STRING
-      description: ""
+      description: Data channel or feed identifier for this event.
     - name: inventory
       type: STRING
-      description: ""
+      description: Inventory account associated with this trade or position.
     - name: account
       type: STRING
-      description: ""
+      description: Account identifier for this trade.
     - name: transaction_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the transaction occurred.
     - name: transaction_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the transaction timestamp. Combine with transaction_timestamp for
+        full nanosecond-resolution timing.
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event.
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event.
     - name: exchange_date
       type: DATE
-      description: ""
+      description: Date as reported by the exchange for this event.
     - name: exchange_transaction_id
       type: STRING
-      description: ""
+      description: Exchange-assigned transaction identifier for this event.
     - name: exchange_order_id
       type: STRING
-      description: ""
+      description: Exchange-assigned order identifier.
     - name: agg_pos_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the agg pos occurred.
     - name: agg_pos_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the agg pos timestamp. Combine with agg_pos_timestamp for full
+        nanosecond-resolution timing.
     - name: agg_pos_date
       type: DATE
-      description: ""
+      description: Aggregated position date for end-of-day processing.
     - name: revision
       type: INTEGER
-      description: ""
+      description: Revision number tracking modifications to this record.
     - name: revision_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the revision occurred.
     - name: revision_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the revision timestamp. Combine with revision_timestamp for full
+        nanosecond-resolution timing.
     - name: traded_size
       type: INTEGER
-      description: ""
+      description: Number of lots traded in this transaction.
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
     - name: size
       type: INTEGER
-      description: ""
+      description: Number of lots or contracts in the trade or order.
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the VT saw at time of swing/market trade.
     - name: counterparty
       type: STRING
-      description: ""
+      description: Counterparty identifier for this trade.
     - name: revisor
       type: STRING
-      description: ""
+      description: Identifier of the user or process that last revised this record.
     - name: transaction_id
       type: INTEGER
-      description: ""
+      description: Mako-internal transaction identifier for this event.
     - name: order_id
       type: INTEGER
-      description: ""
+      description: Mako-internal order identifier linking fills to the parent order.
     - name: position_type
       type: INTEGER
-      description: ""
+      description: Numeric code classifying the position event type (e.g. trade, adjustment, exercise).
     - name: position_id
       type: INTEGER
-      description: ""
+      description: Identifier for the position this event belongs to within the portfolio.
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
     - name: carry_id
       type: INTEGER
-      description: ""
+      description: Identifier for the carry/interest rate curve used in theoretical calculations.
     - name: trade_id
       type: INTEGER
-      description: ""
+      description: Exchange-assigned trade identifier.
     - name: text
       type: STRING
-      description: ""
+      description: Free-text field containing additional descriptive information about this event.
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
     - name: contract_size
       type: FLOAT
-      description: ""
+      description: Number of units per contract lot. Streamed from TradableInstrument.contractSize proto field.
     - name: underlying_exe_exch
       type: INTEGER
-      description: ""
+      description: Exchange where the underlying trades.
     - name: parent_feed_code
       type: STRING
-      description: ""
+      description: Parent instrument feed code from the instrument definition.
     - name: total_traded_size
       type: FLOAT
-      description: ""
+      description: Cumulative number of lots traded across all fills for this order.
     - name: liquid
       type: INTEGER
-      description: ""
+      description: Liquidity indicator or classification for the instrument.

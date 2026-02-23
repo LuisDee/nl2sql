@@ -22,42 +22,42 @@ table:
       category: time
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number (numeric).
       category: identifier
       filterable: true
     - name: channel_id
       type: INTEGER
-      description: ""
+      description: Channel identifier for the data feed or connection.
       category: identifier
       filterable: true
     - name: connection_kind
       type: INTEGER
-      description: ""
+      description: Type of connection (TCP, UDP, multicast, etc.).
       category: measure
       typical_aggregation: AVG
     - name: connection_feed
       type: INTEGER
-      description: ""
+      description: Feed identifier for the market data connection.
       category: measure
       typical_aggregation: AVG
     - name: host
       type: STRING
-      description: ""
+      description: Hostname of the network endpoint.
       category: dimension
       filterable: true
     - name: port
       type: INTEGER
-      description: ""
+      description: Port number of the network endpoint.
       category: measure
       typical_aggregation: AVG
     - name: spark_event_type
       type: STRING
-      description: ""
+      description: Spark algorithm event type classification.
       category: dimension
       filterable: true
     - name: native_event_type
       type: STRING
-      description: ""
+      description: Exchange-native event type code.
       category: dimension
       filterable: true
     - name: instrument_hash
@@ -79,7 +79,7 @@ table:
       filterable: true
     - name: order_identifier
       type: INTEGER
-      description: ""
+      description: Exchange or broker order identifier.
       category: measure
       typical_aggregation: AVG
     - name: broker_name

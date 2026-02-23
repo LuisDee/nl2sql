@@ -196,7 +196,7 @@ table:
       typical_aggregation: AVG
     - name: base_sequence_number
       type: INTEGER
-      description: ""
+      description: Base sequence number (numeric).
       category: measure
       typical_aggregation: AVG
     - name: base_instrument_hash
@@ -288,47 +288,47 @@ table:
       category: time
     - name: delete_side
       type: STRING
-      description: ""
+      description: Side (BID/ASK) of the quote that was deleted.
       category: dimension
       filterable: true
     - name: trigger_price
       type: FLOAT
-      description: ""
+      description: Price level that triggered the quote action.
       category: measure
       typical_aggregation: AVG
     - name: active_price
       type: FLOAT
-      description: ""
+      description: Current active price of the resting quote before the action.
       category: measure
       typical_aggregation: AVG
     - name: active_size
       type: INTEGER
-      description: ""
+      description: Current active size of the resting quote before the action.
       category: measure
       typical_aggregation: SUM
     - name: delete_type
       type: STRING
-      description: ""
+      description: Type classification of the quote deletion event.
       category: dimension
       filterable: true
     - name: trigger_type
       type: STRING
-      description: ""
+      description: Type of trigger that caused the quote action (price move, risk event, etc.).
       category: dimension
       filterable: true
     - name: batch_id
       type: INTEGER
-      description: ""
+      description: Batch identifier grouping related events together.
       category: identifier
       filterable: true
     - name: pcap_id
       type: STRING
-      description: ""
+      description: PCAP correlation identifier linking to raw network captures.
       category: identifier
       filterable: true
     - name: bucket
       type: STRING
-      description: ""
+      description: Bucket or group identifier for the quoter event.
       category: dimension
       filterable: true
     - name: event_type
@@ -338,37 +338,37 @@ table:
       filterable: true
     - name: latency_stats_prcx
       type: INTEGER
-      description: ""
+      description: Latency statistics for the prcx processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_prcs
       type: INTEGER
-      description: ""
+      description: Latency statistics for the prcs processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_vtio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the vtio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_bkio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the bkio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_qmio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the qmio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_itio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the itio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_itex
       type: INTEGER
-      description: ""
+      description: Latency statistics for the itex processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: is_book_resubmit
@@ -388,7 +388,7 @@ table:
       filterable: true
     - name: inflight_trade_volume
       type: INTEGER
-      description: ""
+      description: Volume of inflight trade.
       category: measure
       typical_aggregation: SUM
     - name: mako_order_id
@@ -506,17 +506,17 @@ table:
       typical_aggregation: SUM
     - name: latency_stats_bvio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the bvio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_delio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the delio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: latency_stats_lockio
       type: INTEGER
-      description: ""
+      description: Latency statistics for the lockio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
     - name: ref_theoevent_stream_id
@@ -536,32 +536,32 @@ table:
       filterable: true
     - name: last_trade_price
       type: FLOAT
-      description: ""
+      description: Price of last trade.
       category: measure
       typical_aggregation: AVG
     - name: price_level
       type: INTEGER
-      description: ""
+      description: Price level (numeric).
       category: measure
       typical_aggregation: AVG
     - name: total_market_volume
       type: INTEGER
-      description: ""
+      description: Volume of total market.
       category: measure
       typical_aggregation: SUM
     - name: total_our_volume
       type: INTEGER
-      description: ""
+      description: Volume of total our.
       category: measure
       typical_aggregation: SUM
     - name: delete_amend_threshold
       type: FLOAT
-      description: ""
+      description: Delete amend threshold (field).
       category: measure
       typical_aggregation: AVG
     - name: volume_reduced_so_far
       type: INTEGER
-      description: ""
+      description: Volume reduced so far (numeric).
       category: measure
       typical_aggregation: SUM
     - name: is_breached
@@ -571,12 +571,12 @@ table:
       filterable: true
     - name: num_of_breaches
       type: INTEGER
-      description: ""
+      description: Number of market-making compliance breaches so far today.
       category: measure
       typical_aggregation: AVG
     - name: max_breach_permitted
       type: INTEGER
-      description: ""
+      description: Maximum number of breaches permitted before penalty.
       category: measure
       typical_aggregation: AVG
     - name: requirement_check_timestamp

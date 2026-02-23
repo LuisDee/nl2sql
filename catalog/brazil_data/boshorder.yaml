@@ -19,12 +19,12 @@ table:
       category: time
     - name: algorithm
       type: STRING
-      description: ""
+      description: Name of the Mako algorithm that generated this trade or event.
       category: dimension
       filterable: true
     - name: bosh_order_id
       type: INTEGER
-      description: ""
+      description: Bosh order id (numeric).
       category: identifier
       filterable: true
     - name: instrument_hash
@@ -40,22 +40,22 @@ table:
       typical_aggregation: AVG
     - name: delta
       type: FLOAT
-      description: ""
+      description: Option delta (rate of change of option price with respect to underlying price).
       category: measure
       typical_aggregation: AVG
     - name: gamma
       type: FLOAT
-      description: ""
+      description: Option gamma (rate of change of delta with respect to underlying price).
       category: measure
       typical_aggregation: AVG
     - name: vega
       type: FLOAT
-      description: ""
+      description: Option vega (sensitivity of option price to changes in implied volatility).
       category: measure
       typical_aggregation: AVG
     - name: under
       type: FLOAT
-      description: ""
+      description: Price of the underlying instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
     - name: roll
@@ -65,7 +65,7 @@ table:
       typical_aggregation: AVG
     - name: vol
       type: FLOAT
-      description: ""
+      description: Implied volatility of the instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
     - name: when_timestamp
@@ -78,12 +78,12 @@ table:
       category: time
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
       category: identifier
       filterable: true
     - name: carry_id
       type: INTEGER
-      description: ""
+      description: Identifier for the carry/interest rate curve used in theoretical calculations.
       category: identifier
       filterable: true
     - name: currency
@@ -93,147 +93,147 @@ table:
       filterable: true
     - name: theta
       type: FLOAT
-      description: ""
+      description: Option theta (time decay, rate of change of option price with respect to time).
       category: measure
       typical_aggregation: AVG
     - name: rho
       type: FLOAT
-      description: ""
+      description: Option rho (sensitivity of option price to changes in interest rates).
       category: measure
       typical_aggregation: AVG
     - name: raw_gamma
       type: FLOAT
-      description: ""
+      description: Raw gamma (field).
       category: measure
       typical_aggregation: AVG
     - name: raw_delta
       type: FLOAT
-      description: ""
+      description: Raw delta (field).
       category: measure
       typical_aggregation: AVG
     - name: lvol
       type: FLOAT
-      description: ""
+      description: Log-transformed volatility value used in internal pricing calculations.
       category: measure
       typical_aggregation: AVG
     - name: norms
       type: FLOAT
-      description: ""
+      description: Normalized parameter values for the pricing model.
       category: measure
       typical_aggregation: AVG
     - name: tax_div_tv_diff
       type: FLOAT
-      description: ""
+      description: Tax div tv diff (field).
       category: measure
       typical_aggregation: AVG
     - name: tv_offset
       type: FLOAT
-      description: ""
+      description: Tv offset (field).
       category: measure
       typical_aggregation: AVG
     - name: tte
       type: FLOAT
-      description: ""
+      description: Time to expiry in years for the instrument.
       category: measure
       typical_aggregation: AVG
     - name: forward
       type: FLOAT
-      description: ""
+      description: Forward price of the underlying instrument used in theoretical calculations.
       category: measure
       typical_aggregation: AVG
     - name: short_rate
       type: FLOAT
-      description: ""
+      description: Rate value for short.
       category: measure
       typical_aggregation: AVG
     - name: greek_atm
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: atm.'
       category: measure
       typical_aggregation: AVG
     - name: greek_skew
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: skew.'
       category: measure
       typical_aggregation: AVG
     - name: greek_call_skew
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: call skew.'
       category: measure
       typical_aggregation: AVG
     - name: greek_put_k
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: put k.'
       category: measure
       typical_aggregation: AVG
     - name: greek_call_k
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: call k.'
       category: measure
       typical_aggregation: AVG
     - name: greek_put_a
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: put a.'
       category: measure
       typical_aggregation: AVG
     - name: greek_call_a
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: call a.'
       category: measure
       typical_aggregation: AVG
     - name: greek_put_b
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: put b.'
       category: measure
       typical_aggregation: AVG
     - name: greek_call_b
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: call b.'
       category: measure
       typical_aggregation: AVG
     - name: greek_datm
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: datm.'
       category: measure
       typical_aggregation: AVG
     - name: param_atm
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: atm.'
       category: measure
       typical_aggregation: AVG
     - name: param_skew
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: skew.'
       category: measure
       typical_aggregation: AVG
     - name: param_call_skew
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: call skew.'
       category: measure
       typical_aggregation: AVG
     - name: param_put_k
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: put k.'
       category: measure
       typical_aggregation: AVG
     - name: param_call_k
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: call k.'
       category: measure
       typical_aggregation: AVG
     - name: param_s_vol
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: s vol.'
       category: measure
       typical_aggregation: AVG
     - name: custom_greeks
       type: RECORD
-      description: ""
+      description: Custom greeks (field).
       category: dimension
       filterable: true
     - name: base_atm_size
       type: INTEGER
-      description: ""
+      description: Base ATM size parameter for order sizing.
       category: measure
       typical_aggregation: SUM
     - name: max_edge_loss
@@ -248,22 +248,22 @@ table:
       filterable: true
     - name: side
       type: STRING
-      description: ""
+      description: 'Side of the order or quote: BID (buy) or ASK (sell).'
       category: dimension
       filterable: true
     - name: atm_vega
       type: FLOAT
-      description: ""
+      description: At-the-money vega used for order sizing.
       category: measure
       typical_aggregation: AVG
     - name: max_size_multiplier
       type: FLOAT
-      description: ""
+      description: Maximum size multiplier for order scaling.
       category: measure
       typical_aggregation: SUM
     - name: order_option
       type: INTEGER
-      description: ""
+      description: Order option type or configuration.
       category: measure
       typical_aggregation: AVG
     - name: order_option_name
@@ -282,7 +282,7 @@ table:
       category: time
     - name: mako_id
       type: STRING
-      description: ""
+      description: Mako-internal unique identifier for this trade or order.
       category: identifier
       filterable: true
     - name: datasource_pid
@@ -312,7 +312,7 @@ table:
       filterable: true
     - name: resting_time_limit_nanos
       type: INTEGER
-      description: ""
+      description: Time limit in nanoseconds for how long the order may rest.
       category: measure
       typical_aggregation: AVG
     - name: edge_loss
@@ -322,7 +322,7 @@ table:
       typical_aggregation: AVG
     - name: mode
       type: INTEGER
-      description: ""
+      description: Operating mode of the algorithm or pricing model.
       category: measure
       typical_aggregation: AVG
     - name: mode_name

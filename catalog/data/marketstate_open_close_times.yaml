@@ -8,16 +8,16 @@ table:
   columns:
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
     - name: instrument_type
       type: STRING
-      description: ""
+      description: Type classification of the instrument for market state purposes.
     - name: open_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the open occurred.
     - name: close_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the close occurred.

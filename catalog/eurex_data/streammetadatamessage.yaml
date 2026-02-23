@@ -46,7 +46,7 @@ table:
       typical_aggregation: AVG
     - name: stream_id
       type: INTEGER
-      description: ""
+      description: Unique identifier for the data stream.
       category: identifier
       filterable: true
     - name: datasource_pid
@@ -66,12 +66,12 @@ table:
       filterable: true
     - name: metadata
       type: RECORD
-      description: ""
+      description: Nested metadata record containing stream identification and entity scope.
       category: dimension
       filterable: true
     - name: summary
       type: RECORD
-      description: ""
+      description: Nested summary record containing aggregated event statistics.
       category: dimension
       filterable: true
     - name: message_trade_date

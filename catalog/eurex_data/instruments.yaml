@@ -148,7 +148,7 @@ table:
       typical_aggregation: AVG
     - name: ratio
       type: FLOAT
-      description: ""
+      description: Leg ratio within a combo instrument, indicating relative weighting.
       category: measure
       typical_aggregation: AVG
     - name: instrument_hash
@@ -164,12 +164,12 @@ table:
       filterable: true
     - name: pricing_count
       type: INTEGER
-      description: ""
+      description: Number of pricing inputs available for this instrument.
       category: measure
       typical_aggregation: AVG
     - name: inst_type
       type: INTEGER
-      description: ""
+      description: Numeric instrument type code.
       category: dimension
       filterable: true
     - name: inst_type_name
@@ -205,7 +205,7 @@ table:
       filterable: true
     - name: revision
       type: INTEGER
-      description: ""
+      description: Revision number tracking modifications to this record.
       category: identifier
       filterable: true
     - name: contract_size
@@ -224,12 +224,12 @@ table:
       category: time
     - name: expiry_timezone
       type: STRING
-      description: ""
+      description: Timezone of the instrument expiry.
       category: dimension
       filterable: true
     - name: issue_date
       type: TIMESTAMP
-      description: ""
+      description: Issue date for bonds or newly listed instruments.
       category: time
     - name: bond_type
       type: INTEGER
@@ -268,12 +268,12 @@ table:
       filterable: true
     - name: coupon
       type: FLOAT
-      description: ""
+      description: Coupon rate for bond instruments.
       category: measure
       typical_aggregation: AVG
     - name: has_underlying
       type: BOOLEAN
-      description: ""
+      description: Boolean indicating whether this instrument has an underlying reference.
       category: dimension
       filterable: true
     - name: stock_type
@@ -288,7 +288,7 @@ table:
       filterable: true
     - name: payment_type
       type: INTEGER
-      description: ""
+      description: Payment type for the instrument (physical, cash settlement, etc.).
       category: dimension
       filterable: true
     - name: payment_type_name
@@ -319,7 +319,7 @@ table:
       filterable: true
     - name: exercise_type
       type: INTEGER
-      description: ""
+      description: Exercise type for options (European, American, etc.).
       category: dimension
       filterable: true
     - name: exercise_type_name
@@ -350,7 +350,7 @@ table:
       typical_aggregation: AVG
     - name: underlying_inst_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument inst type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_inst_type_name
@@ -360,7 +360,7 @@ table:
       filterable: true
     - name: underlying_listed
       type: INTEGER
-      description: ""
+      description: Underlying instrument listed, mirrored from the parent instrument definition.
       category: measure
       typical_aggregation: AVG
     - name: underlying_listed_name
@@ -370,12 +370,12 @@ table:
       filterable: true
     - name: underlying_pos_exch
       type: INTEGER
-      description: ""
+      description: Underlying instrument pos exch, mirrored from the parent instrument definition.
       category: measure
       typical_aggregation: AVG
     - name: underlying_currency
       type: INTEGER
-      description: ""
+      description: Underlying instrument currency, mirrored from the parent instrument definition.
       category: measure
       typical_aggregation: AVG
     - name: underlying_currency_name
@@ -385,17 +385,17 @@ table:
       filterable: true
     - name: underlying_revision
       type: INTEGER
-      description: ""
+      description: Underlying instrument revision, mirrored from the parent instrument definition.
       category: measure
       typical_aggregation: AVG
     - name: underlying_contract_size
       type: FLOAT
-      description: ""
+      description: Underlying instrument contract size, mirrored from the parent instrument definition.
       category: measure
       typical_aggregation: SUM
     - name: underlying_term
       type: STRING
-      description: ""
+      description: Underlying instrument term, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_expiry_timestamp
@@ -404,16 +404,16 @@ table:
       category: time
     - name: underlying_expiry_timezone
       type: STRING
-      description: ""
+      description: Underlying instrument expiry timezone, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_issue_date
       type: TIMESTAMP
-      description: ""
+      description: Underlying instrument issue date, mirrored from the parent instrument definition.
       category: time
     - name: underlying_bond_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument bond type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_bond_type_name
@@ -423,7 +423,7 @@ table:
       filterable: true
     - name: underlying_day_count_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument day count type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_day_count_type_name
@@ -433,7 +433,7 @@ table:
       filterable: true
     - name: underlying_coupon_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument coupon type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_coupon_type_name
@@ -443,22 +443,22 @@ table:
       filterable: true
     - name: underlying_coupon_freq_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument coupon freq type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_coupon
       type: FLOAT
-      description: ""
+      description: Underlying instrument coupon, mirrored from the parent instrument definition.
       category: measure
       typical_aggregation: AVG
     - name: underlying_has_underlying
       type: BOOLEAN
-      description: ""
+      description: Underlying instrument has underlying, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_stock_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument stock type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_stock_type_name
@@ -468,7 +468,7 @@ table:
       filterable: true
     - name: underlying_payment_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument payment type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_payment_type_name
@@ -478,7 +478,7 @@ table:
       filterable: true
     - name: underlying_cash_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument cash type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_cash_type_name
@@ -488,7 +488,7 @@ table:
       filterable: true
     - name: underlying_option_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument option type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_option_type_name
@@ -498,7 +498,7 @@ table:
       filterable: true
     - name: underlying_exercise_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument exercise type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_exercise_type_name
@@ -508,7 +508,7 @@ table:
       filterable: true
     - name: underlying_pos_currency
       type: INTEGER
-      description: ""
+      description: Underlying instrument pos currency, mirrored from the parent instrument definition.
       category: measure
       typical_aggregation: AVG
     - name: underlying_pos_currency_name
@@ -518,11 +518,11 @@ table:
       filterable: true
     - name: underlying_comm_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument comm type, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
     - name: underlying_strike
       type: FLOAT
-      description: ""
+      description: Underlying instrument strike, mirrored from the parent instrument definition.
       category: measure
       typical_aggregation: AVG

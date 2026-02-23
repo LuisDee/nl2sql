@@ -8,244 +8,253 @@ table:
   columns:
     - name: kafka_message_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
+        internally for data pipeline monitoring and replay.
     - name: record_written_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
+        data freshness and pipeline latency.
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
     - name: partition_timestamp_local
       type: TIMESTAMP
-      description: ""
+      description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
+        pipeline.
     - name: partition_number
       type: INTEGER
-      description: ""
+      description: Numeric partition identifier within the data pipeline. Used for data distribution and parallel
+        processing.
     - name: uuid
       type: STRING
-      description: ""
+      description: Universally unique identifier for this record.
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
     - name: parent_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the parent instrument.
     - name: entry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the entry occurred.
     - name: last_edit_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the last edit occurred.
     - name: trade_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the trade occurred.
     - name: revision
       type: INTEGER
-      description: ""
+      description: Revision number tracking modifications to this record.
     - name: counterparty
       type: STRING
-      description: ""
+      description: Counterparty identifier for this trade.
     - name: user
       type: STRING
-      description: ""
+      description: User identifier associated with this trade or action.
     - name: inventory
       type: STRING
-      description: ""
+      description: Inventory account associated with this trade or position.
     - name: contract_name
       type: STRING
-      description: ""
+      description: Human-readable name for the contract enum value.
     - name: source
       type: STRING
-      description: ""
+      description: Source system or feed that originated this record.
     - name: broker
       type: STRING
-      description: ""
+      description: Broker identifier associated with this trade.
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
     - name: month
       type: INTEGER
-      description: ""
+      description: Month of a year. Must be from 1 to 12.
     - name: day
       type: INTEGER
-      description: ""
+      description: Day of a month. Must be from 1 to 31.
     - name: year
       type: INTEGER
-      description: ""
+      description: Year of the date. Must be from 1 to 9999, or 0 for no year.
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
     - name: tte
       type: FLOAT
-      description: ""
+      description: Time to expiry in years for the instrument.
     - name: ref_price
       type: FLOAT
-      description: ""
+      description: Reference price from the last vol curve update (theoServer callback).
     - name: carry_id
       type: INTEGER
-      description: ""
+      description: Identifier for the carry/interest rate curve used in theoretical calculations.
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
     - name: vol
       type: FLOAT
-      description: ""
+      description: Implied volatility of the instrument at the time of this event.
     - name: when_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Theoreticals::when (resolution of seconds).
     - name: vega
       type: FLOAT
-      description: ""
+      description: Option vega (sensitivity of option price to changes in implied volatility).
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the VT saw at time of swing/market trade.
     - name: under
       type: FLOAT
-      description: ""
+      description: Price of the underlying instrument at the time of this event.
     - name: gamma
       type: FLOAT
-      description: ""
+      description: Option gamma (rate of change of delta with respect to underlying price).
     - name: roll
       type: FLOAT
-      description: ""
+      description: Roll value at time of swing/trade.
     - name: delta
       type: FLOAT
-      description: ""
+      description: Option delta (rate of change of option price with respect to underlying price).
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
     - name: is_mako_or_market
       type: STRING
-      description: ""
+      description: Flag indicating whether this trade leg is from Mako or from the market.
     - name: account
       type: STRING
-      description: ""
+      description: Account identifier for this trade.
     - name: note
       type: STRING
-      description: ""
+      description: Free-text note or annotation attached to this record.
     - name: mako_inventory
       type: STRING
-      description: ""
+      description: Mako inventory (text).
     - name: mako_account
       type: STRING
-      description: ""
+      description: Mako account (text).
     - name: market_inventory
       type: STRING
-      description: ""
+      description: Market inventory (text).
     - name: market_account
       type: STRING
-      description: ""
+      description: Market account (text).
     - name: executable_exchange
       type: INTEGER
-      description: ""
+      description: Exchange on which this instrument is executable.
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
     - name: parent_is_combo
       type: BOOLEAN
-      description: ""
+      description: Parent instrument is combo from the instrument definition.
     - name: leg_ratio
       type: FLOAT
-      description: ""
+      description: Combo leg ratio.
     - name: leg_index
       type: INTEGER
-      description: ""
+      description: Combo leg index.
     - name: underlying_inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying inst type enum value.
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
     - name: combo_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the combo type enum value.
     - name: underlying_symbol
       type: STRING
-      description: ""
+      description: Underlying instrument symbol, mirrored from the parent instrument definition.
     - name: market_or_mako_trade
       type: STRING
-      description: ""
+      description: Indicator distinguishing whether this is a market trade or a Mako trade.
     - name: count_calendar
       type: INTEGER
-      description: ""
+      description: Count calendar (numeric).
     - name: is_parent
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the parent condition is true.
     - name: is_ref_component
       type: INTEGER
-      description: ""
+      description: Flag indicating whether the ref component condition is true. Stored as integer (0=false, 1=true).
     - name: underlying_exe_exch
       type: INTEGER
-      description: ""
+      description: Exchange where the underlying trades.
     - name: liquid
       type: INTEGER
-      description: ""
+      description: Liquidity indicator or classification for the instrument.
     - name: company
       type: STRING
-      description: ""
+      description: Company or firm identifier for this trade.
     - name: brokerage_rate
       type: FLOAT
-      description: ""
+      description: Rate value for brokerage.
     - name: fee_method
       type: STRING
-      description: ""
+      description: Fee method (text).
     - name: parent_feed_code
       type: STRING
-      description: ""
+      description: Parent instrument feed code from the instrument definition.
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: contract_size
       type: FLOAT
-      description: ""
+      description: Number of units per contract lot. Streamed from TradableInstrument.contractSize proto field.
     - name: no_legs
       type: INTEGER
-      description: ""
+      description: Number of legs in a combo/spread instrument.
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
     - name: underlying_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the underlying instrument.
     - name: parent_combo_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the parent combo type enum value.
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
     - name: total_traded_size
       type: FLOAT
-      description: ""
+      description: Cumulative number of lots traded across all fills for this order.
     - name: size
       type: INTEGER
-      description: ""
+      description: Number of lots or contracts in the trade or order.
     - name: ref_term
       type: STRING
-      description: ""
+      description: Reference term from the last vol curve update (theoServer callback).
     - name: ref_inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the ref inst type enum value.

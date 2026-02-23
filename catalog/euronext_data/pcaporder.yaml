@@ -58,22 +58,22 @@ table:
       filterable: true
     - name: channel
       type: STRING
-      description: ""
+      description: Data channel or feed identifier for this event.
       category: dimension
       filterable: true
     - name: message_type
       type: STRING
-      description: ""
+      description: Message type classification for the captured packet.
       category: dimension
       filterable: true
     - name: exchange_order_id
       type: STRING
-      description: ""
+      description: Exchange-assigned order identifier.
       category: identifier
       filterable: true
     - name: payload
       type: STRING
-      description: ""
+      description: Raw message payload for debugging or replay purposes.
       category: dimension
       filterable: true
     - name: mako_order_id
@@ -83,42 +83,42 @@ table:
       filterable: true
     - name: exchange_code
       type: INTEGER
-      description: ""
+      description: Exchange code (numeric).
       category: measure
       typical_aggregation: AVG
     - name: source_ip
       type: STRING
-      description: ""
+      description: Source IP address of the captured network packet.
       category: dimension
       filterable: true
     - name: source_port
       type: INTEGER
-      description: ""
+      description: Source port of the captured network packet.
       category: measure
       typical_aggregation: AVG
     - name: destination_ip
       type: STRING
-      description: ""
+      description: Destination IP address of the captured network packet.
       category: dimension
       filterable: true
     - name: destination_port
       type: INTEGER
-      description: ""
+      description: Destination port of the captured network packet.
       category: measure
       typical_aggregation: AVG
     - name: native_type
       type: INTEGER
-      description: ""
+      description: Exchange-native message type code.
       category: dimension
       filterable: true
     - name: normalised_message_type
       type: STRING
-      description: ""
+      description: Normalised message type for cross-exchange comparison.
       category: dimension
       filterable: true
     - name: market_data_id
       type: STRING
-      description: ""
+      description: Identifier for the market data.
       category: identifier
       filterable: true
     - name: strike
@@ -166,12 +166,12 @@ table:
       filterable: true
     - name: protocol_version
       type: STRING
-      description: ""
+      description: Protocol version (text).
       category: dimension
       filterable: true
     - name: exchange_data
       type: RECORD
-      description: ""
+      description: Exchange data (field).
       category: dimension
       filterable: true
     - name: gateway_received_timestamp

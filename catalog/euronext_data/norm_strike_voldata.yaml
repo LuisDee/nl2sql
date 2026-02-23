@@ -39,7 +39,7 @@ table:
       category: time
     - name: rec_date
       type: DATE
-      description: ""
+      description: Recording date for the volatility surface snapshot.
       category: time
     - name: term
       type: STRING
@@ -48,27 +48,27 @@ table:
       filterable: true
     - name: vol_region
       type: STRING
-      description: ""
+      description: Volatility region or surface zone identifier.
       category: dimension
       filterable: true
     - name: tte
       type: FLOAT
-      description: ""
+      description: Time to expiry in years for the instrument.
       category: measure
       typical_aggregation: AVG
     - name: fwd
       type: FLOAT
-      description: ""
+      description: Forward price of the underlying instrument.
       category: measure
       typical_aggregation: AVG
     - name: under
       type: FLOAT
-      description: ""
+      description: Price of the underlying instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
       category: identifier
       filterable: true
     - name: expiry_timestamp
@@ -83,492 +83,492 @@ table:
       filterable: true
     - name: ivol_minus_1000
       type: FLOAT
-      description: ""
+      description: Implied volatility at -1000 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_1000
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -1000 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_900
       type: FLOAT
-      description: ""
+      description: Implied volatility at -900 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_900
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -900 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_800
       type: FLOAT
-      description: ""
+      description: Implied volatility at -800 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_800
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -800 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_700
       type: FLOAT
-      description: ""
+      description: Implied volatility at -700 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_700
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -700 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_600
       type: FLOAT
-      description: ""
+      description: Implied volatility at -600 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_600
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -600 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_500
       type: FLOAT
-      description: ""
+      description: Implied volatility at -500 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_500
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -500 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_450
       type: FLOAT
-      description: ""
+      description: Implied volatility at -450 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_450
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -450 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_400
       type: FLOAT
-      description: ""
+      description: Implied volatility at -400 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_400
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -400 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_350
       type: FLOAT
-      description: ""
+      description: Implied volatility at -350 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_350
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -350 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_300
       type: FLOAT
-      description: ""
+      description: Implied volatility at -300 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_300
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -300 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_275
       type: FLOAT
-      description: ""
+      description: Implied volatility at -275 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_275
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -275 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_250
       type: FLOAT
-      description: ""
+      description: Implied volatility at -250 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_250
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -250 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_225
       type: FLOAT
-      description: ""
+      description: Implied volatility at -225 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_225
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -225 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_200
       type: FLOAT
-      description: ""
+      description: Implied volatility at -200 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_200
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -200 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_175
       type: FLOAT
-      description: ""
+      description: Implied volatility at -175 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_175
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -175 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_150
       type: FLOAT
-      description: ""
+      description: Implied volatility at -150 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_150
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -150 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_125
       type: FLOAT
-      description: ""
+      description: Implied volatility at -125 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_125
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -125 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_100
       type: FLOAT
-      description: ""
+      description: Implied volatility at -100 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_100
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -100 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_075
       type: FLOAT
-      description: ""
+      description: Implied volatility at -075 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_075
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -075 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_050
       type: FLOAT
-      description: ""
+      description: Implied volatility at -050 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_050
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -050 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_040
       type: FLOAT
-      description: ""
+      description: Implied volatility at -040 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_040
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -040 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_030
       type: FLOAT
-      description: ""
+      description: Implied volatility at -030 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_030
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -030 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_020
       type: FLOAT
-      description: ""
+      description: Implied volatility at -020 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_020
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -020 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_minus_010
       type: FLOAT
-      description: ""
+      description: Implied volatility at -010 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_minus_010
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -010 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_atm_000
       type: FLOAT
-      description: ""
+      description: Implied volatility at ATM offset 000 on the normalized strike surface.
       category: measure
       typical_aggregation: AVG
     - name: svol_atm_000
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at ATM offset 000 on the normalized strike surface.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_010
       type: FLOAT
-      description: ""
+      description: Implied volatility at +010 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_010
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +010 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_020
       type: FLOAT
-      description: ""
+      description: Implied volatility at +020 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_020
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +020 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_030
       type: FLOAT
-      description: ""
+      description: Implied volatility at +030 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_030
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +030 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_040
       type: FLOAT
-      description: ""
+      description: Implied volatility at +040 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_040
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +040 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_050
       type: FLOAT
-      description: ""
+      description: Implied volatility at +050 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_050
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +050 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_075
       type: FLOAT
-      description: ""
+      description: Implied volatility at +075 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_075
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +075 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_100
       type: FLOAT
-      description: ""
+      description: Implied volatility at +100 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_100
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +100 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_125
       type: FLOAT
-      description: ""
+      description: Implied volatility at +125 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_125
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +125 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_150
       type: FLOAT
-      description: ""
+      description: Implied volatility at +150 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_150
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +150 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_175
       type: FLOAT
-      description: ""
+      description: Implied volatility at +175 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_175
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +175 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_200
       type: FLOAT
-      description: ""
+      description: Implied volatility at +200 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_200
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +200 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_225
       type: FLOAT
-      description: ""
+      description: Implied volatility at +225 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_225
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +225 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_250
       type: FLOAT
-      description: ""
+      description: Implied volatility at +250 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_250
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +250 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_275
       type: FLOAT
-      description: ""
+      description: Implied volatility at +275 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_275
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +275 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_300
       type: FLOAT
-      description: ""
+      description: Implied volatility at +300 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_300
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +300 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_350
       type: FLOAT
-      description: ""
+      description: Implied volatility at +350 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_350
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +350 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_400
       type: FLOAT
-      description: ""
+      description: Implied volatility at +400 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_400
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +400 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_450
       type: FLOAT
-      description: ""
+      description: Implied volatility at +450 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_450
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +450 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_500
       type: FLOAT
-      description: ""
+      description: Implied volatility at +500 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_500
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +500 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_600
       type: FLOAT
-      description: ""
+      description: Implied volatility at +600 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_600
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +600 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_700
       type: FLOAT
-      description: ""
+      description: Implied volatility at +700 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_700
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +700 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_800
       type: FLOAT
-      description: ""
+      description: Implied volatility at +800 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_800
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +800 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_900
       type: FLOAT
-      description: ""
+      description: Implied volatility at +900 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_900
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +900 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: ivol_plus_1000
       type: FLOAT
-      description: ""
+      description: Implied volatility at +1000 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: svol_plus_1000
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +1000 normalized strike offset from ATM.
       category: measure
       typical_aggregation: AVG
     - name: datasource_pid

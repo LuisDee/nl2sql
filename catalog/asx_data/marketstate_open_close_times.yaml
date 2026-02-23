@@ -18,7 +18,7 @@ table:
       filterable: true
     - name: instrument_type
       type: STRING
-      description: ""
+      description: Type classification of the instrument for market state purposes.
       category: dimension
       filterable: true
     - name: open_timestamp

@@ -8,502 +8,505 @@ table:
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
     - name: rec_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the rec occurred.
     - name: rec_date
       type: DATE
-      description: ""
+      description: Recording date for the volatility surface snapshot.
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
     - name: vol_region
       type: STRING
-      description: ""
+      description: Volatility region or surface zone identifier.
     - name: tte
       type: FLOAT
-      description: ""
+      description: Time to expiry in years for the instrument.
     - name: fwd
       type: FLOAT
-      description: ""
+      description: Forward price of the underlying instrument.
     - name: under
       type: FLOAT
-      description: ""
+      description: Price of the underlying instrument at the time of this event.
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
     - name: strike_minus_1000
       type: FLOAT
-      description: ""
+      description: Strike level at -1000 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_1000
       type: FLOAT
-      description: ""
+      description: Implied volatility at -1000 normalized strike offset from ATM.
     - name: svol_minus_1000
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -1000 normalized strike offset from ATM.
     - name: strike_minus_900
       type: FLOAT
-      description: ""
+      description: Strike level at -900 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_900
       type: FLOAT
-      description: ""
+      description: Implied volatility at -900 normalized strike offset from ATM.
     - name: svol_minus_900
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -900 normalized strike offset from ATM.
     - name: strike_minus_800
       type: FLOAT
-      description: ""
+      description: Strike level at -800 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_800
       type: FLOAT
-      description: ""
+      description: Implied volatility at -800 normalized strike offset from ATM.
     - name: svol_minus_800
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -800 normalized strike offset from ATM.
     - name: strike_minus_700
       type: FLOAT
-      description: ""
+      description: Strike level at -700 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_700
       type: FLOAT
-      description: ""
+      description: Implied volatility at -700 normalized strike offset from ATM.
     - name: svol_minus_700
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -700 normalized strike offset from ATM.
     - name: strike_minus_600
       type: FLOAT
-      description: ""
+      description: Strike level at -600 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_600
       type: FLOAT
-      description: ""
+      description: Implied volatility at -600 normalized strike offset from ATM.
     - name: svol_minus_600
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -600 normalized strike offset from ATM.
     - name: strike_minus_500
       type: FLOAT
-      description: ""
+      description: Strike level at -500 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_500
       type: FLOAT
-      description: ""
+      description: Implied volatility at -500 normalized strike offset from ATM.
     - name: svol_minus_500
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -500 normalized strike offset from ATM.
     - name: strike_minus_450
       type: FLOAT
-      description: ""
+      description: Strike level at -450 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_450
       type: FLOAT
-      description: ""
+      description: Implied volatility at -450 normalized strike offset from ATM.
     - name: svol_minus_450
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -450 normalized strike offset from ATM.
     - name: strike_minus_400
       type: FLOAT
-      description: ""
+      description: Strike level at -400 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_400
       type: FLOAT
-      description: ""
+      description: Implied volatility at -400 normalized strike offset from ATM.
     - name: svol_minus_400
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -400 normalized strike offset from ATM.
     - name: strike_minus_350
       type: FLOAT
-      description: ""
+      description: Strike level at -350 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_350
       type: FLOAT
-      description: ""
+      description: Implied volatility at -350 normalized strike offset from ATM.
     - name: svol_minus_350
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -350 normalized strike offset from ATM.
     - name: strike_minus_300
       type: FLOAT
-      description: ""
+      description: Strike level at -300 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_300
       type: FLOAT
-      description: ""
+      description: Implied volatility at -300 normalized strike offset from ATM.
     - name: svol_minus_300
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -300 normalized strike offset from ATM.
     - name: strike_minus_275
       type: FLOAT
-      description: ""
+      description: Strike level at -275 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_275
       type: FLOAT
-      description: ""
+      description: Implied volatility at -275 normalized strike offset from ATM.
     - name: svol_minus_275
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -275 normalized strike offset from ATM.
     - name: strike_minus_250
       type: FLOAT
-      description: ""
+      description: Strike level at -250 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_250
       type: FLOAT
-      description: ""
+      description: Implied volatility at -250 normalized strike offset from ATM.
     - name: svol_minus_250
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -250 normalized strike offset from ATM.
     - name: strike_minus_225
       type: FLOAT
-      description: ""
+      description: Strike level at -225 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_225
       type: FLOAT
-      description: ""
+      description: Implied volatility at -225 normalized strike offset from ATM.
     - name: svol_minus_225
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -225 normalized strike offset from ATM.
     - name: strike_minus_200
       type: FLOAT
-      description: ""
+      description: Strike level at -200 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_200
       type: FLOAT
-      description: ""
+      description: Implied volatility at -200 normalized strike offset from ATM.
     - name: svol_minus_200
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -200 normalized strike offset from ATM.
     - name: strike_minus_175
       type: FLOAT
-      description: ""
+      description: Strike level at -175 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_175
       type: FLOAT
-      description: ""
+      description: Implied volatility at -175 normalized strike offset from ATM.
     - name: svol_minus_175
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -175 normalized strike offset from ATM.
     - name: strike_minus_150
       type: FLOAT
-      description: ""
+      description: Strike level at -150 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_150
       type: FLOAT
-      description: ""
+      description: Implied volatility at -150 normalized strike offset from ATM.
     - name: svol_minus_150
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -150 normalized strike offset from ATM.
     - name: strike_minus_125
       type: FLOAT
-      description: ""
+      description: Strike level at -125 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_125
       type: FLOAT
-      description: ""
+      description: Implied volatility at -125 normalized strike offset from ATM.
     - name: svol_minus_125
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -125 normalized strike offset from ATM.
     - name: strike_minus_100
       type: FLOAT
-      description: ""
+      description: Strike level at -100 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_100
       type: FLOAT
-      description: ""
+      description: Implied volatility at -100 normalized strike offset from ATM.
     - name: svol_minus_100
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -100 normalized strike offset from ATM.
     - name: strike_minus_075
       type: FLOAT
-      description: ""
+      description: Strike level at -075 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_075
       type: FLOAT
-      description: ""
+      description: Implied volatility at -075 normalized strike offset from ATM.
     - name: svol_minus_075
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -075 normalized strike offset from ATM.
     - name: strike_minus_050
       type: FLOAT
-      description: ""
+      description: Strike level at -050 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_050
       type: FLOAT
-      description: ""
+      description: Implied volatility at -050 normalized strike offset from ATM.
     - name: svol_minus_050
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -050 normalized strike offset from ATM.
     - name: strike_minus_040
       type: FLOAT
-      description: ""
+      description: Strike level at -040 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_040
       type: FLOAT
-      description: ""
+      description: Implied volatility at -040 normalized strike offset from ATM.
     - name: svol_minus_040
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -040 normalized strike offset from ATM.
     - name: strike_minus_030
       type: FLOAT
-      description: ""
+      description: Strike level at -030 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_030
       type: FLOAT
-      description: ""
+      description: Implied volatility at -030 normalized strike offset from ATM.
     - name: svol_minus_030
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -030 normalized strike offset from ATM.
     - name: strike_minus_020
       type: FLOAT
-      description: ""
+      description: Strike level at -020 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_020
       type: FLOAT
-      description: ""
+      description: Implied volatility at -020 normalized strike offset from ATM.
     - name: svol_minus_020
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -020 normalized strike offset from ATM.
     - name: strike_minus_010
       type: FLOAT
-      description: ""
+      description: Strike level at -010 normalized offset from ATM on the volatility surface.
     - name: ivol_minus_010
       type: FLOAT
-      description: ""
+      description: Implied volatility at -010 normalized strike offset from ATM.
     - name: svol_minus_010
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at -010 normalized strike offset from ATM.
     - name: strike_atm_000
       type: FLOAT
-      description: ""
+      description: Strike level at ATM offset 000 on the normalized volatility surface.
     - name: ivol_atm_000
       type: FLOAT
-      description: ""
+      description: Implied volatility at ATM offset 000 on the normalized strike surface.
     - name: svol_atm_000
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at ATM offset 000 on the normalized strike surface.
     - name: strike_plus_010
       type: FLOAT
-      description: ""
+      description: Strike level at +010 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_010
       type: FLOAT
-      description: ""
+      description: Implied volatility at +010 normalized strike offset from ATM.
     - name: svol_plus_010
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +010 normalized strike offset from ATM.
     - name: strike_plus_020
       type: FLOAT
-      description: ""
+      description: Strike level at +020 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_020
       type: FLOAT
-      description: ""
+      description: Implied volatility at +020 normalized strike offset from ATM.
     - name: svol_plus_020
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +020 normalized strike offset from ATM.
     - name: strike_plus_030
       type: FLOAT
-      description: ""
+      description: Strike level at +030 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_030
       type: FLOAT
-      description: ""
+      description: Implied volatility at +030 normalized strike offset from ATM.
     - name: svol_plus_030
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +030 normalized strike offset from ATM.
     - name: strike_plus_040
       type: FLOAT
-      description: ""
+      description: Strike level at +040 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_040
       type: FLOAT
-      description: ""
+      description: Implied volatility at +040 normalized strike offset from ATM.
     - name: svol_plus_040
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +040 normalized strike offset from ATM.
     - name: strike_plus_050
       type: FLOAT
-      description: ""
+      description: Strike level at +050 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_050
       type: FLOAT
-      description: ""
+      description: Implied volatility at +050 normalized strike offset from ATM.
     - name: svol_plus_050
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +050 normalized strike offset from ATM.
     - name: strike_plus_075
       type: FLOAT
-      description: ""
+      description: Strike level at +075 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_075
       type: FLOAT
-      description: ""
+      description: Implied volatility at +075 normalized strike offset from ATM.
     - name: svol_plus_075
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +075 normalized strike offset from ATM.
     - name: strike_plus_100
       type: FLOAT
-      description: ""
+      description: Strike level at +100 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_100
       type: FLOAT
-      description: ""
+      description: Implied volatility at +100 normalized strike offset from ATM.
     - name: svol_plus_100
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +100 normalized strike offset from ATM.
     - name: strike_plus_125
       type: FLOAT
-      description: ""
+      description: Strike level at +125 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_125
       type: FLOAT
-      description: ""
+      description: Implied volatility at +125 normalized strike offset from ATM.
     - name: svol_plus_125
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +125 normalized strike offset from ATM.
     - name: strike_plus_150
       type: FLOAT
-      description: ""
+      description: Strike level at +150 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_150
       type: FLOAT
-      description: ""
+      description: Implied volatility at +150 normalized strike offset from ATM.
     - name: svol_plus_150
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +150 normalized strike offset from ATM.
     - name: strike_plus_175
       type: FLOAT
-      description: ""
+      description: Strike level at +175 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_175
       type: FLOAT
-      description: ""
+      description: Implied volatility at +175 normalized strike offset from ATM.
     - name: svol_plus_175
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +175 normalized strike offset from ATM.
     - name: strike_plus_200
       type: FLOAT
-      description: ""
+      description: Strike level at +200 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_200
       type: FLOAT
-      description: ""
+      description: Implied volatility at +200 normalized strike offset from ATM.
     - name: svol_plus_200
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +200 normalized strike offset from ATM.
     - name: strike_plus_225
       type: FLOAT
-      description: ""
+      description: Strike level at +225 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_225
       type: FLOAT
-      description: ""
+      description: Implied volatility at +225 normalized strike offset from ATM.
     - name: svol_plus_225
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +225 normalized strike offset from ATM.
     - name: strike_plus_250
       type: FLOAT
-      description: ""
+      description: Strike level at +250 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_250
       type: FLOAT
-      description: ""
+      description: Implied volatility at +250 normalized strike offset from ATM.
     - name: svol_plus_250
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +250 normalized strike offset from ATM.
     - name: strike_plus_275
       type: FLOAT
-      description: ""
+      description: Strike level at +275 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_275
       type: FLOAT
-      description: ""
+      description: Implied volatility at +275 normalized strike offset from ATM.
     - name: svol_plus_275
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +275 normalized strike offset from ATM.
     - name: strike_plus_300
       type: FLOAT
-      description: ""
+      description: Strike level at +300 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_300
       type: FLOAT
-      description: ""
+      description: Implied volatility at +300 normalized strike offset from ATM.
     - name: svol_plus_300
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +300 normalized strike offset from ATM.
     - name: strike_plus_350
       type: FLOAT
-      description: ""
+      description: Strike level at +350 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_350
       type: FLOAT
-      description: ""
+      description: Implied volatility at +350 normalized strike offset from ATM.
     - name: svol_plus_350
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +350 normalized strike offset from ATM.
     - name: strike_plus_400
       type: FLOAT
-      description: ""
+      description: Strike level at +400 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_400
       type: FLOAT
-      description: ""
+      description: Implied volatility at +400 normalized strike offset from ATM.
     - name: svol_plus_400
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +400 normalized strike offset from ATM.
     - name: strike_plus_450
       type: FLOAT
-      description: ""
+      description: Strike level at +450 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_450
       type: FLOAT
-      description: ""
+      description: Implied volatility at +450 normalized strike offset from ATM.
     - name: svol_plus_450
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +450 normalized strike offset from ATM.
     - name: strike_plus_500
       type: FLOAT
-      description: ""
+      description: Strike level at +500 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_500
       type: FLOAT
-      description: ""
+      description: Implied volatility at +500 normalized strike offset from ATM.
     - name: svol_plus_500
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +500 normalized strike offset from ATM.
     - name: strike_plus_600
       type: FLOAT
-      description: ""
+      description: Strike level at +600 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_600
       type: FLOAT
-      description: ""
+      description: Implied volatility at +600 normalized strike offset from ATM.
     - name: svol_plus_600
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +600 normalized strike offset from ATM.
     - name: strike_plus_700
       type: FLOAT
-      description: ""
+      description: Strike level at +700 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_700
       type: FLOAT
-      description: ""
+      description: Implied volatility at +700 normalized strike offset from ATM.
     - name: svol_plus_700
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +700 normalized strike offset from ATM.
     - name: strike_plus_800
       type: FLOAT
-      description: ""
+      description: Strike level at +800 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_800
       type: FLOAT
-      description: ""
+      description: Implied volatility at +800 normalized strike offset from ATM.
     - name: svol_plus_800
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +800 normalized strike offset from ATM.
     - name: strike_plus_900
       type: FLOAT
-      description: ""
+      description: Strike level at +900 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_900
       type: FLOAT
-      description: ""
+      description: Implied volatility at +900 normalized strike offset from ATM.
     - name: svol_plus_900
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +900 normalized strike offset from ATM.
     - name: strike_plus_1000
       type: FLOAT
-      description: ""
+      description: Strike level at +1000 normalized offset from ATM on the volatility surface.
     - name: ivol_plus_1000
       type: FLOAT
-      description: ""
+      description: Implied volatility at +1000 normalized strike offset from ATM.
     - name: svol_plus_1000
       type: FLOAT
-      description: ""
+      description: Smoothed volatility at +1000 normalized strike offset from ATM.
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.

@@ -22,7 +22,12 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from table_registry import ALL_TABLES, filter_combined_tables, filter_tables
+from table_registry import (
+    ALL_TABLES,
+    MARKET_TABLES,
+    filter_combined_tables,
+    filter_tables,
+)
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -438,6 +443,322 @@ _PATTERN_DESCRIPTIONS: list[tuple[str, str]] = [
     ),
     ("pid", "Process ID of the data source that produced this record."),
     ("hostname", "Hostname of the data source that produced this record."),
+    # PositionEvent / trade management fields
+    ("mako_id", "Mako-internal unique identifier for this trade or order."),
+    ("algorithm", "Name of the Mako algorithm that generated this trade or event."),
+    ("order_id", "Mako-internal order identifier linking fills to the parent order."),
+    (
+        "fill_id",
+        "Unique identifier for this fill (partial or full execution) within an order.",
+    ),
+    ("transaction_id", "Mako-internal transaction identifier for this event."),
+    (
+        "exchange_transaction_id",
+        "Exchange-assigned transaction identifier for this event.",
+    ),
+    (
+        "position_type",
+        "Numeric code classifying the position event type (e.g. trade, adjustment, exercise).",
+    ),
+    (
+        "position_id",
+        "Identifier for the position this event belongs to within the portfolio.",
+    ),
+    ("traded_size", "Number of lots traded in this transaction."),
+    (
+        "total_traded_size",
+        "Cumulative number of lots traded across all fills for this order.",
+    ),
+    (
+        "company_position",
+        "Net company-wide position for this instrument after this event.",
+    ),
+    ("settlement", "Settlement price for the instrument."),
+    ("settlement_date", "Date on which settlement occurs for this trade."),
+    ("value_date", "Value date for the trade, relevant for settlement calculations."),
+    ("cash_value", "Cash value of this trade or position change."),
+    ("pos_value_currency", "Currency in which the position value is denominated."),
+    ("agg_pos_date", "Aggregated position date for end-of-day processing."),
+    (
+        "max_trade_id",
+        "Maximum trade ID in the batch, used for ordering and deduplication.",
+    ),
+    ("ectv", "Exchange-cleared theoretical value used for settlement calculations."),
+    ("routed_exchange", "Exchange to which this order was routed for execution."),
+    ("executable_exchange", "Exchange on which this instrument is executable."),
+    ("channel", "Data channel or feed identifier for this event."),
+    ("trade_id", "Exchange-assigned trade identifier."),
+    ("exchange_date", "Date as reported by the exchange for this event."),
+    (
+        "event_date",
+        "Date of the event, may differ from trade_date for overnight sessions.",
+    ),
+    # Common trading fields
+    ("price", "Price of the trade or order."),
+    ("size", "Number of lots or contracts in the trade or order."),
+    ("counterparty", "Counterparty identifier for this trade."),
+    ("broker", "Broker identifier associated with this trade."),
+    ("inventory", "Inventory account associated with this trade or position."),
+    ("account", "Account identifier for this trade."),
+    ("source", "Source system or feed that originated this record."),
+    ("trader_id", "Identifier of the trader responsible for this trade."),
+    (
+        "user_order_id",
+        "User-submitted order identifier linking back to the order entry system.",
+    ),
+    ("exchange_info", "Additional exchange-provided information for this event."),
+    (
+        "exchange_qualifier",
+        "Exchange qualifier code providing additional event context.",
+    ),
+    ("statistics", "Statistical summary or classification data for this event."),
+    (
+        "text",
+        "Free-text field containing additional descriptive information about this event.",
+    ),
+    ("revisor", "Identifier of the user or process that last revised this record."),
+    ("revision", "Revision number tracking modifications to this record."),
+    # Greeks and pricing
+    ("vol", "Implied volatility of the instrument at the time of this event."),
+    (
+        "delta",
+        "Option delta (rate of change of option price with respect to underlying price).",
+    ),
+    (
+        "gamma",
+        "Option gamma (rate of change of delta with respect to underlying price).",
+    ),
+    (
+        "vega",
+        "Option vega (sensitivity of option price to changes in implied volatility).",
+    ),
+    (
+        "theta",
+        "Option theta (time decay, rate of change of option price with respect to time).",
+    ),
+    ("rho", "Option rho (sensitivity of option price to changes in interest rates)."),
+    ("under", "Price of the underlying instrument at the time of this event."),
+    ("tte", "Time to expiry in years for the instrument."),
+    ("fwd", "Forward price of the underlying instrument."),
+    (
+        "curve_id",
+        "Identifier for the volatility/pricing curve used in theoretical calculations.",
+    ),
+    (
+        "carry_id",
+        "Identifier for the carry/interest rate curve used in theoretical calculations.",
+    ),
+    ("liquid", "Liquidity indicator or classification for the instrument."),
+    (
+        "deflection_scale",
+        "Scale factor for the deflection adjustment applied to pricing.",
+    ),
+    # Instrument fields
+    ("no_legs", "Number of legs in a combo/spread instrument."),
+    ("ratio", "Leg ratio within a combo instrument, indicating relative weighting."),
+    ("inst_type", "Numeric instrument type code."),
+    ("exercise_type", "Exercise type for options (European, American, etc.)."),
+    ("expiry_timezone", "Timezone of the instrument expiry."),
+    ("issue_date", "Issue date for bonds or newly listed instruments."),
+    ("coupon", "Coupon rate for bond instruments."),
+    (
+        "has_underlying",
+        "Boolean indicating whether this instrument has an underlying reference.",
+    ),
+    (
+        "payment_type",
+        "Payment type for the instrument (physical, cash settlement, etc.).",
+    ),
+    ("pricing_count", "Number of pricing inputs available for this instrument."),
+    # Quoter fields
+    ("delete_side", "Side (BID/ASK) of the quote that was deleted."),
+    ("delete_type", "Type classification of the quote deletion event."),
+    (
+        "trigger_type",
+        "Type of trigger that caused the quote action (price move, risk event, etc.).",
+    ),
+    ("trigger_price", "Price level that triggered the quote action."),
+    ("active_price", "Current active price of the resting quote before the action."),
+    ("active_size", "Current active size of the resting quote before the action."),
+    ("update_type", "Type classification of the quote update event."),
+    (
+        "pull_restriction",
+        "Pull restriction level indicating the severity of quote withdrawal.",
+    ),
+    ("bucket", "Bucket or group identifier for the quoter event."),
+    ("max_placable", "Maximum placeable volume for the quoter at this level."),
+    ("currently_placed", "Volume currently placed by the quoter at this level."),
+    ("want_to_place", "Volume the quoter algorithm wants to place."),
+    ("refill_pct_rate", "Refill percentage rate for quote replenishment."),
+    ("max_edge_loss", "Maximum edge loss threshold for the BOSH order."),
+    ("edge_loss", "Realized edge loss on this order."),
+    ("edge_units", "Edge measurement units for this order."),
+    ("atm_vega", "At-the-money vega used for order sizing."),
+    ("base_atm_size", "Base ATM size parameter for order sizing."),
+    ("max_size_multiplier", "Maximum size multiplier for order scaling."),
+    ("order_option", "Order option type or configuration."),
+    (
+        "resting_time_limit_nanos",
+        "Time limit in nanoseconds for how long the order may rest.",
+    ),
+    ("side", "Side of the order or quote: BID (buy) or ASK (sell)."),
+    ("action", "Action type for order lifecycle events (new, modify, cancel, fill)."),
+    ("cancel_reason", "Reason code for order cancellation."),
+    ("residual_volume", "Remaining unfilled volume on the order."),
+    # PCAP / Network fields
+    ("source_ip", "Source IP address of the captured network packet."),
+    ("source_port", "Source port of the captured network packet."),
+    ("destination_ip", "Destination IP address of the captured network packet."),
+    ("destination_port", "Destination port of the captured network packet."),
+    ("message_type", "Message type classification for the captured packet."),
+    (
+        "normalised_message_type",
+        "Normalised message type for cross-exchange comparison.",
+    ),
+    ("native_type", "Exchange-native message type code."),
+    ("channel_id", "Channel identifier for the data feed or connection."),
+    ("connection_kind", "Type of connection (TCP, UDP, multicast, etc.)."),
+    ("connection_feed", "Feed identifier for the market data connection."),
+    ("host", "Hostname of the network endpoint."),
+    ("port", "Port number of the network endpoint."),
+    ("spark_event_type", "Spark algorithm event type classification."),
+    ("native_event_type", "Exchange-native event type code."),
+    ("broker_name", "Name of the broker for this event."),
+    ("order_identifier", "Exchange or broker order identifier."),
+    ("exchange_order_id", "Exchange-assigned order identifier."),
+    ("mako_order_id", "Mako-internal order identifier for PCAP correlation."),
+    ("pcap_id", "PCAP correlation identifier linking to raw network captures."),
+    ("batch_id", "Batch identifier grouping related events together."),
+    ("dealer_id", "Dealer identifier at the exchange."),
+    # Market state fields
+    (
+        "market_state",
+        "Numeric code representing the current market state (pre-open, open, auction, halt, close, etc.).",
+    ),
+    (
+        "instrument_type",
+        "Type classification of the instrument for market state purposes.",
+    ),
+    (
+        "data_order_identifier",
+        "Data ordering identifier for sequencing market state updates.",
+    ),
+    (
+        "keyframe",
+        "Boolean indicating whether this event is a keyframe (full state snapshot vs. incremental).",
+    ),
+    ("open_timestamp", "Timestamp when the market opened for trading on this date."),
+    ("close_timestamp", "Timestamp when the market closed for trading on this date."),
+    # Vol surface fields
+    ("rec_date", "Recording date for the volatility surface snapshot."),
+    ("vol_region", "Volatility region or surface zone identifier."),
+    # Latency stats fields
+    (
+        "is_breached",
+        "Boolean indicating whether market-making compliance was breached.",
+    ),
+    ("num_of_breaches", "Number of market-making compliance breaches so far today."),
+    ("max_breach_permitted", "Maximum number of breaches permitted before penalty."),
+    (
+        "requirement_check_timestamp",
+        "Timestamp of the last market-making requirement check.",
+    ),
+    # Stream metadata
+    ("stream_id", "Unique identifier for the data stream."),
+    ("event_type", "Type classification of the streaming event."),
+    # Brazil-specific
+    (
+        "is_market_maker_instrument",
+        "Boolean indicating whether this instrument is designated for market-making.",
+    ),
+    ("level", "Price level index in the order book."),
+    ("market_price_level", "Market price at this order book level."),
+    ("volume_ahead_insert", "Volume ahead of our order at insertion time."),
+    ("volume_ahead_tob", "Volume ahead of our order relative to top-of-book."),
+    ("volume_behind_tob", "Volume behind our order relative to top-of-book."),
+    ("our_pos", "Our queue position at this price level in the order book."),
+    ("order_book_side", "Side of the order book (BID/ASK) for this position."),
+    (
+        "market_event_type",
+        "Type classification of the market event that triggered this update.",
+    ),
+    ("delta_bucket", "Delta bucket classification for this instrument."),
+    ("reason", "Reason code for this order or event action."),
+    ("reason_name", "Human-readable name for the reason code."),
+    ("client_id", "Client identifier at the exchange."),
+    ("session_group", "Session group identifier for exchange connectivity."),
+    ("session", "Session identifier for exchange connectivity."),
+    ("client_order_id", "Client-side order identifier sent to the exchange."),
+    ("exch_order_id", "Exchange-assigned order identifier."),
+    ("exch_fill_id", "Exchange-assigned fill identifier."),
+    ("trans_id", "Transaction identifier at the exchange."),
+    ("order_side", "Side of the order (BUY/SELL)."),
+    ("order_type", "Type of order (limit, market, etc.)."),
+    ("total_volume", "Total volume of the order."),
+    ("resid_volume", "Residual (remaining unfilled) volume of the order."),
+    ("result_code", "Result code from the exchange for this order transaction."),
+    ("result_info", "Additional result information from the exchange."),
+    ("result_tag", "Result tag or classification from the exchange."),
+    ("leg_head_type", "Leg head type for combo order fills."),
+    ("trade_time", "Exchange trade time for this fill."),
+    ("worst_price", "Worst acceptable price for this BOSH order."),
+    ("largest_size", "Largest fill size seen for this BOSH order."),
+    # NSE-specific
+    (
+        "option_underlying",
+        "Underlying instrument value for option base value calculation.",
+    ),
+    ("option_roll", "Roll value for the option underlying."),
+    (
+        "option_underlying_is_valid",
+        "Boolean indicating whether the option underlying value is valid.",
+    ),
+    ("option_term", "Option term/maturity for base value calculation."),
+    ("base_term", "Base term for value calculation."),
+    ("option_underlying_type", "Type of the option underlying instrument."),
+    (
+        "update_instrument_hash",
+        "Instrument hash of the market data update that triggered this value.",
+    ),
+    ("update_sequence_number", "Sequence number of the triggering market data update."),
+    (
+        "nnf_message_type",
+        "NNF (Nuvama Native Format) message type for NSE order tracking.",
+    ),
+    ("trader_id", "Trader identifier at the exchange."),
+    # Single-word columns that the catch-all won't cover (no underscore)
+    (
+        "forward",
+        "Forward price of the underlying instrument used in theoretical calculations.",
+    ),
+    ("timestamp", "Timestamp of this event or record."),
+    ("label", "Label or tag identifying the type of this record."),
+    ("component", "System component name that generated this event."),
+    ("uuid", "Universally unique identifier for this record."),
+    ("user", "User identifier associated with this trade or action."),
+    ("company", "Company or firm identifier for this trade."),
+    ("note", "Free-text note or annotation attached to this record."),
+    ("trader", "Trader name or identifier responsible for this action."),
+    ("payload", "Raw message payload for debugging or replay purposes."),
+    ("quantity", "Quantity of the trade or order in number of lots."),
+    ("summary", "Nested summary record containing aggregated event statistics."),
+    (
+        "metadata",
+        "Nested metadata record containing stream identification and entity scope.",
+    ),
+    (
+        "sequence_number",
+        "Monotonically increasing sequence number for ordering events.",
+    ),
+    (
+        "is_snap",
+        "Boolean indicating whether this event is a snapshot (full state) or incremental update.",
+    ),
+    ("data_timestamp", "Timestamp from the data feed for this event."),
+    ("lvol", "Log-transformed volatility value used in internal pricing calculations."),
+    ("norms", "Normalized parameter values for the pricing model."),
+    ("mode", "Operating mode of the algorithm or pricing model."),
+    ("volume", "Volume (number of lots) for this fill or order event."),
     # VtCommon shared fields with better descriptions
     (
         "is_spark",
@@ -492,6 +813,116 @@ def generate_tier3_description(col_name: str, col_type: str) -> str | None:
     for pattern_name, desc in _PATTERN_DESCRIPTIONS:
         if col_name == pattern_name:
             return desc
+
+    # Vol surface strike bucket patterns: strike_minus_N, strike_plus_N, strike_atm_N
+    strike_match = re.match(r"^strike_(minus|plus|atm)_(\d+)$", col_name)
+    if strike_match:
+        direction = strike_match.group(1)
+        offset = strike_match.group(2)
+        if direction == "atm":
+            return f"Strike level at ATM offset {offset} on the normalized volatility surface."
+        sign = "-" if direction == "minus" else "+"
+        return f"Strike level at {sign}{offset} normalized offset from ATM on the volatility surface."
+
+    # Implied vol surface: ivol_minus_N, ivol_plus_N, ivol_atm_N
+    ivol_match = re.match(r"^ivol_(minus|plus|atm)_(\d+)$", col_name)
+    if ivol_match:
+        direction = ivol_match.group(1)
+        offset = ivol_match.group(2)
+        if direction == "atm":
+            return f"Implied volatility at ATM offset {offset} on the normalized strike surface."
+        sign = "-" if direction == "minus" else "+"
+        return (
+            f"Implied volatility at {sign}{offset} normalized strike offset from ATM."
+        )
+
+    # Smoothed vol surface: svol_minus_N, svol_plus_N, svol_atm_N
+    svol_match = re.match(r"^svol_(minus|plus|atm)_(\d+)$", col_name)
+    if svol_match:
+        direction = svol_match.group(1)
+        offset = svol_match.group(2)
+        if direction == "atm":
+            return f"Smoothed volatility at ATM offset {offset} on the normalized strike surface."
+        sign = "-" if direction == "minus" else "+"
+        return (
+            f"Smoothed volatility at {sign}{offset} normalized strike offset from ATM."
+        )
+
+    # Underlying_* fields (instrument reference, not VtCommon ref_*)
+    if col_name.startswith("underlying_") and not col_name.startswith(
+        "underlying_exe_exch"
+    ):
+        rest = col_name[11:].replace("_", " ")
+        return f"Underlying instrument {rest}, mirrored from the parent instrument definition."
+
+    # Latency stat fields: latency_stats_*
+    latency_match = re.match(r"^latency_stats?_(\w+)$", col_name)
+    if latency_match:
+        component = latency_match.group(1).replace("_", " ")
+        return f"Latency statistics for the {component} processing stage (nanoseconds)."
+
+    # Gateway/matching engine timestamps
+    gw_match = re.match(
+        r"^(gateway|matching_engine|rms|adapter|internal_server)_(received|ingress|egress|rx|tx)_timestamp(_ns)?$",
+        col_name,
+    )
+    if gw_match:
+        component = gw_match.group(1).replace("_", " ")
+        direction = gw_match.group(2)
+        ns = " (nanosecond component)" if gw_match.group(3) else ""
+        return f"Timestamp when the message was {direction}d at the {component}{ns}."
+
+    # Ingress/egress software/hardware timestamps
+    ie_match = re.match(
+        r"^(ingress|egress)_(software|hardware)_timestamp(_ns)?$", col_name
+    )
+    if ie_match:
+        direction = ie_match.group(1)
+        layer = ie_match.group(2)
+        ns = " (nanosecond component)" if ie_match.group(3) else ""
+        return f"Timestamp at {layer} {direction} point{ns}."
+
+    # Custom greek fields
+    custom_greek_match = re.match(r"^custom_greek_(\d+)$", col_name)
+    if custom_greek_match:
+        num = custom_greek_match.group(1)
+        return f"Custom Greek value #{num}, a user-defined sensitivity metric."
+
+    # theo_* fields (from TheoData)
+    if col_name.startswith("theo_") and col_name not in ("theo_compute_type",):
+        rest = col_name[5:].replace("_", " ")
+        return f"Theoretical pricing parameter: {rest}."
+
+    # param_* fields (vol surface parameters)
+    if col_name.startswith("param_"):
+        rest = col_name[6:].replace("_", " ")
+        return f"Volatility surface parameter: {rest}."
+
+    # greek_* fields (vol surface greeks)
+    if col_name.startswith("greek_"):
+        rest = col_name[6:].replace("_", " ")
+        return f"Volatility surface Greek parameter: {rest}."
+
+    # snap_ts / rec_ts for snapshot tables
+    if col_name == "snap_ts":
+        return "Timestamp when this point-in-time snapshot was captured."
+    if col_name == "rec_ts":
+        return "Timestamp when this record was received or recorded."
+
+    # bid_orders_N / ask_orders_N
+    orders_match = re.match(r"^(bid|ask)_orders_(\d+)$", col_name)
+    if orders_match:
+        side = orders_match.group(1)
+        level = orders_match.group(2)
+        return f"Number of {side}-side orders at level {level} of the order book."
+
+    # *_exchange fields
+    if col_name.endswith("_exchange") and col_name not in (
+        "routed_exchange",
+        "executable_exchange",
+    ):
+        base = col_name[:-9].replace("_", " ")
+        return f"Exchange identifier for the {base}."
 
     # Suffix/prefix patterns
     if col_name.endswith("_timestamp_ns"):
@@ -611,6 +1042,111 @@ def generate_tier3_description(col_name: str, col_type: str) -> str | None:
     if "pnl" in col_name:
         words = _snake_to_words(col_name)
         return f"PnL metric: {words}."
+
+    # new_price_* / new_size_* / raw_price_* / delete_trigger_price_*
+    new_match = re.match(r"^(new|raw|delete_trigger)_(price|size)_(bid|ask)$", col_name)
+    if new_match:
+        prefix = new_match.group(1).replace("_", " ")
+        metric = new_match.group(2)
+        side = new_match.group(3)
+        return (
+            f"{prefix.capitalize()} {metric} for the {side} side of the quote update."
+        )
+
+    # change_bid / change_ask
+    if col_name in ("change_bid", "change_ask"):
+        side = col_name.split("_")[1]
+        return f"Boolean flag indicating whether the {side} side was changed in this update."
+
+    # market_or_mako_trade / is_mako_or_market
+    if col_name == "market_or_mako_trade":
+        return (
+            "Indicator distinguishing whether this is a market trade or a Mako trade."
+        )
+    if col_name == "is_mako_or_market":
+        return "Flag indicating whether this trade leg is from Mako or from the market."
+
+    # *_id fields (generic)
+    if col_name.endswith("_id") and col_type == "STRING":
+        base = col_name[:-3].replace("_", " ")
+        return f"Identifier for the {base}."
+
+    # *_type fields (generic)
+    if col_name.endswith("_type") and col_name not in (
+        "position_type",
+        "inst_type",
+        "exercise_type",
+        "payment_type",
+        "order_type",
+        "delete_type",
+        "trigger_type",
+        "update_type",
+    ):
+        base = col_name[:-5].replace("_", " ")
+        return f"Type classification for the {base}."
+
+    # *_count fields
+    if col_name.endswith("_count"):
+        base = col_name[:-6].replace("_", " ")
+        return f"Count of {base}."
+
+    # *_rate fields
+    if col_name.endswith("_rate"):
+        base = col_name[:-5].replace("_", " ")
+        return f"Rate value for {base}."
+
+    # *_date fields
+    if col_name.endswith("_date") and col_name not in (
+        "trade_date",
+        "rec_date",
+        "event_date",
+        "exchange_date",
+        "agg_pos_date",
+        "issue_date",
+        "settlement_date",
+        "value_date",
+    ):
+        base = col_name[:-5].replace("_", " ")
+        return f"Date of {base}."
+
+    # *_value fields
+    if col_name.endswith("_value") and col_name not in ("cash_value",):
+        base = col_name[:-6].replace("_", " ")
+        return f"Value of {base}."
+
+    # *_size fields
+    if col_name.endswith("_size") and not re.match(r"^(bid|ask|depth)", col_name):
+        base = col_name[:-5].replace("_", " ")
+        return f"Size (quantity) of {base}."
+
+    # *_price fields
+    if col_name.endswith("_price") and not re.match(
+        r"^(bid|ask|depth|new|raw|delete_trigger)", col_name
+    ):
+        base = col_name[:-6].replace("_", " ")
+        return f"Price of {base}."
+
+    # *_volume fields
+    if col_name.endswith("_volume") and not re.match(
+        r"^(bid|ask|depth|implied)", col_name
+    ):
+        base = col_name[:-7].replace("_", " ")
+        return f"Volume of {base}."
+
+    # Catch-all: generate from snake_case name + type
+    if "_" in col_name:
+        words = _snake_to_words(col_name)
+        type_hint = {
+            "STRING": "text",
+            "INTEGER": "numeric",
+            "INT64": "numeric",
+            "FLOAT64": "numeric value",
+            "BOOLEAN": "flag",
+            "BOOL": "flag",
+            "TIMESTAMP": "timestamp",
+            "DATE": "date",
+        }.get(col_type, "field")
+        return f"{words.capitalize()} ({type_hint})."
 
     return None
 
@@ -1190,6 +1726,18 @@ def main(
         target_tables = filter_combined_tables(layer, table, include_markets=True)
     else:
         target_tables = filter_tables(layer, table) if (layer or table) else ALL_TABLES
+
+    # Also include OMX data-layer tables (catalog/data/) not in the core ALL_TABLES.
+    # These are in MARKET_TABLES["omx_data"] but combined_tables() skips omx_data
+    # because they live under catalog/data/, not catalog/omx_data/.
+    if all_markets and "data" in target_tables:
+        omx_extra = MARKET_TABLES.get("omx_data", [])
+        core_data = set(ALL_TABLES.get("data", []))
+        extra = [t for t in omx_extra if t not in core_data]
+        if table:
+            extra = [t for t in extra if t == table]
+        if extra:
+            target_tables["data"] = list(set(target_tables["data"]) | set(extra))
 
     all_stats: dict[str, dict] = {}
     grand_total_desc = 0

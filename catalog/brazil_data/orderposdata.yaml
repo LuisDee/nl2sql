@@ -13,42 +13,42 @@ table:
       filterable: true
     - name: order_id
       type: INTEGER
-      description: ""
+      description: Mako-internal order identifier linking fills to the parent order.
       category: identifier
       filterable: true
     - name: prev_order_id
       type: INTEGER
-      description: ""
+      description: Prev order id (numeric).
       category: identifier
       filterable: true
     - name: order_book_side
       type: INTEGER
-      description: ""
+      description: Side of the order book (BID/ASK) for this position.
       category: dimension
       filterable: true
     - name: level
       type: INTEGER
-      description: ""
+      description: Price level index in the order book.
       category: measure
       typical_aggregation: AVG
     - name: position_this_level
       type: INTEGER
-      description: ""
+      description: Position this level (numeric).
       category: measure
       typical_aggregation: AVG
     - name: quantity_this_level_ahead
       type: INTEGER
-      description: ""
+      description: Quantity this level ahead (numeric).
       category: measure
       typical_aggregation: AVG
     - name: quantity_this_level_behind
       type: INTEGER
-      description: ""
+      description: Quantity this level behind (numeric).
       category: measure
       typical_aggregation: AVG
     - name: quantity_ahead_all
       type: INTEGER
-      description: ""
+      description: Quantity ahead all (numeric).
       category: measure
       typical_aggregation: AVG
     - name: last_order_modification_timestamp
@@ -57,7 +57,7 @@ table:
       category: time
     - name: reason
       type: INTEGER
-      description: ""
+      description: Reason code for this order or event action.
       category: measure
       typical_aggregation: AVG
     - name: reason_name
@@ -115,12 +115,12 @@ table:
       filterable: true
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
       category: measure
       typical_aggregation: AVG
     - name: quantity
       type: INTEGER
-      description: ""
+      description: Quantity of the trade or order in number of lots.
       category: measure
       typical_aggregation: AVG
     - name: data_timestamp

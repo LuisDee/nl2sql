@@ -8,7 +8,7 @@ table:
   columns:
     - name: snap_ts
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this point-in-time snapshot was captured.
       category: time
     - name: instrument_hash
       type: STRING
@@ -66,7 +66,7 @@ table:
       typical_aggregation: AVG
     - name: event_date
       type: DATE
-      description: ""
+      description: Date of the event, may differ from trade_date for overnight sessions.
       category: time
       filterable: true
     - name: exchange_timestamp
@@ -112,7 +112,7 @@ table:
       filterable: true
     - name: inst_type
       type: STRING
-      description: ""
+      description: Numeric instrument type code.
       category: dimension
       filterable: true
     - name: term
@@ -144,7 +144,7 @@ table:
       filterable: true
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number (numeric).
       category: identifier
       filterable: true
     - name: ask_price_0
@@ -249,52 +249,52 @@ table:
       typical_aggregation: SUM
     - name: ask_orders_0
       type: INTEGER
-      description: ""
+      description: Number of ask-side orders at level 0 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: ask_orders_1
       type: INTEGER
-      description: ""
+      description: Number of ask-side orders at level 1 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: ask_orders_2
       type: INTEGER
-      description: ""
+      description: Number of ask-side orders at level 2 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: ask_orders_3
       type: INTEGER
-      description: ""
+      description: Number of ask-side orders at level 3 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: ask_orders_4
       type: INTEGER
-      description: ""
+      description: Number of ask-side orders at level 4 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: bid_orders_0
       type: INTEGER
-      description: ""
+      description: Number of bid-side orders at level 0 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: bid_orders_1
       type: INTEGER
-      description: ""
+      description: Number of bid-side orders at level 1 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: bid_orders_2
       type: INTEGER
-      description: ""
+      description: Number of bid-side orders at level 2 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: bid_orders_3
       type: INTEGER
-      description: ""
+      description: Number of bid-side orders at level 3 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: bid_orders_4
       type: INTEGER
-      description: ""
+      description: Number of bid-side orders at level 4 of the order book.
       category: measure
       typical_aggregation: AVG
     - name: keyframe
@@ -343,40 +343,40 @@ table:
       filterable: true
     - name: rec_ts
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this record was received or recorded.
       category: time
     - name: market_state
       type: INTEGER
-      description: ""
+      description: Numeric code representing the current market state (pre-open, open, auction, halt, close, etc.).
       category: measure
       typical_aggregation: AVG
     - name: implied_bid_price
       type: FLOAT
-      description: ""
+      description: Price of implied bid.
       category: measure
       typical_aggregation: AVG
     - name: implied_bid_volume
       type: INTEGER
-      description: ""
+      description: Implied bid volume (numeric).
       category: measure
       typical_aggregation: SUM
     - name: implied_bid_orders
       type: INTEGER
-      description: ""
+      description: Implied bid orders (numeric).
       category: measure
       typical_aggregation: AVG
     - name: implied_ask_price
       type: FLOAT
-      description: ""
+      description: Price of implied ask.
       category: measure
       typical_aggregation: AVG
     - name: implied_ask_volume
       type: INTEGER
-      description: ""
+      description: Implied ask volume (numeric).
       category: measure
       typical_aggregation: SUM
     - name: implied_ask_orders
       type: INTEGER
-      description: ""
+      description: Implied ask orders (numeric).
       category: measure
       typical_aggregation: AVG

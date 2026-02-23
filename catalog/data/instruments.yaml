@@ -8,313 +8,318 @@ table:
   columns:
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the algo belongs.
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
     - name: partition_timestamp_local
       type: TIMESTAMP
-      description: ""
+      description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
+        pipeline.
     - name: parent_instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the parent instrument.
     - name: parent_no_legs
       type: INTEGER
-      description: ""
+      description: Parent instrument no legs from the instrument definition.
     - name: parent_settle_type
       type: INTEGER
-      description: ""
+      description: Parent instrument settle type from the instrument definition.
     - name: parent_settle_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the parent settle type enum value.
     - name: parent_composition
       type: STRING
-      description: ""
+      description: Parent instrument composition from the instrument definition.
     - name: parent_feed_code
       type: STRING
-      description: ""
+      description: Parent instrument feed code from the instrument definition.
     - name: parent_exchange_native
       type: STRING
-      description: ""
+      description: Parent instrument exchange native from the instrument definition.
     - name: parent_mako_symbol
       type: STRING
-      description: ""
+      description: Parent instrument mako symbol from the instrument definition.
     - name: parent_isin
       type: STRING
-      description: ""
+      description: Parent instrument isin from the instrument definition.
     - name: parent_sedol
       type: STRING
-      description: ""
+      description: Parent instrument sedol from the instrument definition.
     - name: parent_cusip
       type: STRING
-      description: ""
+      description: Parent instrument cusip from the instrument definition.
     - name: parent_bloomberg
       type: STRING
-      description: ""
+      description: Parent instrument bloomberg from the instrument definition.
     - name: parent_reuters
       type: STRING
-      description: ""
+      description: Parent instrument reuters from the instrument definition.
     - name: parent_raw_proto
       type: BYTES
-      description: ""
+      description: Parent instrument raw proto from the instrument definition.
     - name: parent_is_combo
       type: BOOLEAN
-      description: ""
+      description: Parent instrument is combo from the instrument definition.
     - name: parent_combo_type
       type: INTEGER
-      description: ""
+      description: Parent instrument combo type from the instrument definition.
     - name: parent_combo_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the parent combo type enum value.
     - name: parent_listed
       type: INTEGER
-      description: ""
+      description: Parent instrument listed from the instrument definition.
     - name: parent_listed_name
       type: STRING
-      description: ""
+      description: Human-readable name for the parent listed enum value.
     - name: parent_pos_exchange
       type: INTEGER
-      description: ""
+      description: Parent instrument pos exchange from the instrument definition.
     - name: parent_currency
       type: INTEGER
-      description: ""
+      description: Parent instrument currency from the instrument definition.
     - name: parent_currency_name
       type: STRING
-      description: ""
+      description: Human-readable name for the parent currency enum value.
     - name: parent_contract_size
       type: FLOAT
-      description: ""
+      description: Parent instrument contract size from the instrument definition.
     - name: leg_index
       type: INTEGER
-      description: ""
+      description: Combo leg index.
     - name: ratio
       type: FLOAT
-      description: ""
+      description: Leg ratio within a combo instrument, indicating relative weighting.
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
     - name: underlying_hash
       type: STRING
-      description: ""
+      description: SHA256 hash identifier for the underlying.
     - name: pricing_count
       type: INTEGER
-      description: ""
+      description: Number of pricing inputs available for this instrument.
     - name: inst_type
       type: INTEGER
-      description: ""
+      description: Numeric instrument type code.
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
     - name: listed
       type: INTEGER
-      description: ""
+      description: Enum appears as a char in composition.
     - name: listed_name
       type: STRING
-      description: ""
+      description: Enum appears as a char in composition (human-readable enum name).
     - name: pos_exch
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: currency_name
       type: STRING
-      description: ""
+      description: Enum appears as an int in composition (human-readable enum name).
     - name: revision
       type: INTEGER
-      description: ""
+      description: Revision number tracking modifications to this record.
     - name: contract_size
       type: FLOAT
-      description: ""
+      description: Number of units per contract lot. Streamed from TradableInstrument.contractSize proto field.
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
     - name: expiry_timezone
       type: STRING
-      description: ""
+      description: Timezone of the instrument expiry.
     - name: issue_date
       type: TIMESTAMP
-      description: ""
+      description: Issue date for bonds or newly listed instruments.
     - name: bond_type
       type: INTEGER
-      description: ""
+      description: Enum appears as a char in composition.
     - name: bond_type_name
       type: STRING
-      description: ""
+      description: Enum appears as a char in composition (human-readable enum name).
     - name: day_count_type
       type: INTEGER
-      description: ""
+      description: Enum appears as a char in composition.
     - name: day_count_type_name
       type: STRING
-      description: ""
+      description: Enum appears as a char in composition (human-readable enum name).
     - name: coupon_type
       type: INTEGER
-      description: ""
+      description: Enum appears as a char in composition.
     - name: coupon_type_name
       type: STRING
-      description: ""
+      description: Enum appears as a char in composition (human-readable enum name).
     - name: coupon_freq_type
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: coupon
       type: FLOAT
-      description: ""
+      description: Coupon rate for bond instruments.
     - name: has_underlying
       type: BOOLEAN
-      description: ""
+      description: Boolean indicating whether this instrument has an underlying reference.
     - name: stock_type
       type: INTEGER
-      description: ""
+      description: Enum appears as a char in composition.
     - name: stock_type_name
       type: STRING
-      description: ""
+      description: Enum appears as a char in composition (human-readable enum name).
     - name: payment_type
       type: INTEGER
-      description: ""
+      description: Payment type for the instrument (physical, cash settlement, etc.).
     - name: payment_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the payment type enum value.
     - name: cash_type
       type: INTEGER
-      description: ""
+      description: Enum appears as a char in composition.
     - name: cash_type_name
       type: STRING
-      description: ""
+      description: Enum appears as a char in composition (human-readable enum name).
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
     - name: exercise_type
       type: INTEGER
-      description: ""
+      description: Exercise type for options (European, American, etc.).
     - name: exercise_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the exercise type enum value.
     - name: pos_currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: pos_currency_name
       type: STRING
-      description: ""
+      description: Enum appears as an int in composition (human-readable enum name).
     - name: comm_type
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: underlying_inst_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument inst type, mirrored from the parent instrument definition.
     - name: underlying_inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying inst type enum value.
     - name: underlying_listed
       type: INTEGER
-      description: ""
+      description: Underlying instrument listed, mirrored from the parent instrument definition.
     - name: underlying_listed_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying listed enum value.
     - name: underlying_pos_exch
       type: INTEGER
-      description: ""
+      description: Underlying instrument pos exch, mirrored from the parent instrument definition.
     - name: underlying_currency
       type: INTEGER
-      description: ""
+      description: Underlying instrument currency, mirrored from the parent instrument definition.
     - name: underlying_currency_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying currency enum value.
     - name: underlying_revision
       type: INTEGER
-      description: ""
+      description: Underlying instrument revision, mirrored from the parent instrument definition.
     - name: underlying_contract_size
       type: FLOAT
-      description: ""
+      description: Underlying instrument contract size, mirrored from the parent instrument definition.
     - name: underlying_term
       type: STRING
-      description: ""
+      description: Underlying instrument term, mirrored from the parent instrument definition.
     - name: underlying_expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the underlying expiry occurred.
     - name: underlying_expiry_timezone
       type: STRING
-      description: ""
+      description: Underlying instrument expiry timezone, mirrored from the parent instrument definition.
     - name: underlying_issue_date
       type: TIMESTAMP
-      description: ""
+      description: Underlying instrument issue date, mirrored from the parent instrument definition.
     - name: underlying_bond_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument bond type, mirrored from the parent instrument definition.
     - name: underlying_bond_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying bond type enum value.
     - name: underlying_day_count_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument day count type, mirrored from the parent instrument definition.
     - name: underlying_day_count_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying day count type enum value.
     - name: underlying_coupon_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument coupon type, mirrored from the parent instrument definition.
     - name: underlying_coupon_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying coupon type enum value.
     - name: underlying_coupon_freq_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument coupon freq type, mirrored from the parent instrument definition.
     - name: underlying_coupon
       type: FLOAT
-      description: ""
+      description: Underlying instrument coupon, mirrored from the parent instrument definition.
     - name: underlying_has_underlying
       type: BOOLEAN
-      description: ""
+      description: Underlying instrument has underlying, mirrored from the parent instrument definition.
     - name: underlying_stock_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument stock type, mirrored from the parent instrument definition.
     - name: underlying_stock_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying stock type enum value.
     - name: underlying_payment_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument payment type, mirrored from the parent instrument definition.
     - name: underlying_payment_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying payment type enum value.
     - name: underlying_cash_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument cash type, mirrored from the parent instrument definition.
     - name: underlying_cash_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying cash type enum value.
     - name: underlying_option_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument option type, mirrored from the parent instrument definition.
     - name: underlying_option_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying option type enum value.
     - name: underlying_exercise_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument exercise type, mirrored from the parent instrument definition.
     - name: underlying_exercise_type_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying exercise type enum value.
     - name: underlying_pos_currency
       type: INTEGER
-      description: ""
+      description: Underlying instrument pos currency, mirrored from the parent instrument definition.
     - name: underlying_pos_currency_name
       type: STRING
-      description: ""
+      description: Human-readable name for the underlying pos currency enum value.
     - name: underlying_comm_type
       type: INTEGER
-      description: ""
+      description: Underlying instrument comm type, mirrored from the parent instrument definition.
     - name: underlying_strike
       type: FLOAT
-      description: ""
+      description: Underlying instrument strike, mirrored from the parent instrument definition.

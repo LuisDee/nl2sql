@@ -8,235 +8,316 @@ table:
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
+      source: kafka infrastructure
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
+      source: kafka infrastructure
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
+      source: kafka infrastructure
     - name: portfolio
       type: STRING
-      description: ""
+      description: Name of the Mako portfolio to which the trading algorithm belongs.
+      source: kafka infrastructure
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
+      source: kafka infrastructure
     - name: mako_id
       type: STRING
-      description: ""
+      description: Mako-internal unique identifier for this trade or order.
+      source: "data/PosData.proto::makoId"
     - name: trader_id
       type: STRING
-      description: ""
+      description: Identifier of the trader responsible for this trade.
+      source: "data/PosData.proto::traderId"
     - name: algorithm
       type: STRING
-      description: ""
+      description: Name of the Mako algorithm that generated this trade or event.
+      source: kafka infrastructure
     - name: routed_exchange
       type: INTEGER
-      description: ""
+      description: Exchange to which this order was routed for execution.
+      source: "data/PosData.proto::routedExchange"
     - name: executable_exchange
       type: INTEGER
-      description: ""
+      description: Exchange on which this instrument is executable.
+      source: "data/PosData.proto::executableExchange"
     - name: channel
       type: STRING
-      description: ""
+      description: Data channel or feed identifier for this event.
+      source: kafka infrastructure
     - name: transaction_properties
       type: INTEGER
-      description: ""
+      description: A mask of TransactionProperty. From PositionEvent proto.
+      source: "data/PosData.proto::transactionProperties"
     - name: tag_book
       type: INTEGER
-      description: ""
+      description: A mask of TransactionTag. From PositionEvent proto.
+      source: "data/PosData.proto::tagBook"
     - name: tag_exchange
       type: INTEGER
-      description: ""
+      description: A mask of TransactionTagExchange. From PositionEvent proto.
+      source: "data/PosData.proto::tagExchange"
     - name: tag_user
       type: INTEGER
-      description: ""
+      description: A mask of TransactionTagUser. From PositionEvent proto.
+      source: "data/PosData.proto::tagUser"
     - name: revision
       type: INTEGER
-      description: ""
+      description: Revision number tracking modifications to this record.
+      source: kafka infrastructure
     - name: inventory
       type: STRING
-      description: ""
+      description: Inventory account associated with this trade or position.
+      source: kafka infrastructure
     - name: account
       type: STRING
-      description: ""
+      description: Account identifier for this trade.
+      source: kafka infrastructure
     - name: fill_id
       type: INTEGER
-      description: ""
+      description: Unique identifier for this fill (partial or full execution) within an order.
+      source: "data/PosData.proto::fillId"
     - name: user_id
       type: INTEGER
-      description: ""
+      description: Algo-internal id. From PositionEvent proto.
+      source: "data/PosData.proto::userId"
     - name: user_order_id
       type: INTEGER
-      description: ""
+      description: User-submitted order identifier linking back to the order entry system.
+      source: "data/PosData.proto::userOrderId"
     - name: transaction_id
       type: INTEGER
-      description: ""
+      description: Mako-internal transaction identifier for this event.
+      source: "data/PosData.proto::transactionId"
     - name: order_id
       type: INTEGER
-      description: ""
+      description: Mako-internal order identifier linking fills to the parent order.
+      source: "data/PosData.proto::orderId"
     - name: exchange_transaction_id
       type: STRING
-      description: ""
+      description: Exchange-assigned transaction identifier for this event.
+      source: "data/PosData.proto::exchangeTransactionId"
     - name: exchange_order_id
       type: STRING
-      description: ""
+      description: Exchange-assigned order identifier.
+      source: "data/PosData.proto::exchangeOrderId"
     - name: transaction_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the transaction occurred.
+      source: "data/PosData.proto::transactionTimestamp"
     - name: transaction_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the transaction timestamp. Combine with transaction_timestamp for
+        full nanosecond-resolution timing.
+      source: "data/PosData.proto::transactionTimestamp"
     - name: exchange_date
       type: DATE
-      description: ""
+      description: Date as reported by the exchange for this event.
+      source: derived (data-loader)
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event. From PositionEvent proto.
+      source: "data/PosData.proto::exchangeTimestamp"
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event. From PositionEvent proto.
+      source: "data/PosData.proto::exchangeTimestamp"
     - name: exchange_info
       type: STRING
-      description: ""
+      description: Additional exchange-provided information for this event.
+      source: "data/PosData.proto::exchangeInfo"
     - name: exchange_info_bits
       type: INTEGER
-      description: ""
+      description: A mask of TransactionExchangeInfo. From PositionEvent proto.
+      source: "data/PosData.proto::exchangeInfoBits"
     - name: exchange_qualifier
       type: STRING
-      description: ""
+      description: Exchange qualifier code providing additional event context.
+      source: "data/PosData.proto::exchangeQualifier"
     - name: statistics
       type: STRING
-      description: ""
+      description: Statistical summary or classification data for this event.
+      source: kafka infrastructure
     - name: position_type
       type: INTEGER
-      description: ""
+      description: Numeric code classifying the position event type (e.g. trade, adjustment, exercise).
+      source: "data/PosData.proto::positionType"
     - name: position_id
       type: INTEGER
-      description: ""
+      description: Identifier for the position this event belongs to within the portfolio.
+      source: "data/PosData.proto::positionId"
     - name: size
       type: INTEGER
-      description: ""
+      description: Number of lots or contracts in the trade or order.
+      source: kafka infrastructure
     - name: tv
       type: FLOAT
-      description: ""
+      description: Theoretical value the VT computed for this instrument at the time of the event.
+      source: kafka infrastructure
     - name: ectv
       type: FLOAT
-      description: ""
+      description: Exchange-cleared theoretical value used for settlement calculations.
+      source: kafka infrastructure
     - name: settlement
       type: FLOAT
-      description: ""
+      description: Settlement price for the instrument.
+      source: kafka infrastructure
     - name: settlement_date
       type: DATE
-      description: ""
+      description: Date on which settlement occurs for this trade.
+      source: derived (data-loader)
     - name: pos_currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition. From PositionEvent proto.
+      source: "data/PosData.proto::currency"
     - name: pos_value_currency
       type: INTEGER
-      description: ""
+      description: Currency in which the position value is denominated.
+      source: "data/PosData.proto::valueCurrency"
     - name: cash_value
       type: FLOAT
-      description: ""
+      description: Cash value of this trade or position change.
+      source: "data/PosData.proto::cashValue"
     - name: mgmt_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the mgmt occurred.
+      source: "data/PosData.proto::mgmtTimestamp"
     - name: mgmt_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the mgmt timestamp. Combine with mgmt_timestamp for full
+        nanosecond-resolution timing.
+      source: "data/PosData.proto::mgmtTimestamp"
     - name: max_trade_id
       type: INTEGER
-      description: ""
+      description: Maximum trade ID in the batch, used for ordering and deduplication.
+      source: "data/PosData.proto::maxTradeId"
     - name: agg_pos_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the agg pos occurred.
+      source: "data/PosData.proto::aggPosTimestamp"
     - name: agg_pos_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the agg pos timestamp. Combine with agg_pos_timestamp for full
+        nanosecond-resolution timing.
+      source: "data/PosData.proto::aggPosTimestamp"
     - name: agg_pos_date
       type: DATE
-      description: ""
+      description: Aggregated position date for end-of-day processing.
+      source: derived (data-loader)
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
+      source: kafka infrastructure
     - name: deflection_scale
       type: FLOAT
-      description: ""
+      description: Scale factor for the deflection adjustment applied to pricing.
+      source: "data/PosData.proto::deflectionScale"
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
+      source: "data/PosData.proto::curveId"
     - name: carry_id
       type: INTEGER
-      description: ""
+      description: Identifier for the carry/interest rate curve used in theoretical calculations.
+      source: "data/PosData.proto::carryId"
     - name: revision_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the revision occurred.
+      source: "data/PosData.proto::revisionTimestamp"
     - name: revision_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the revision timestamp. Combine with revision_timestamp for full
+        nanosecond-resolution timing.
+      source: "data/PosData.proto::revisionTimestamp"
     - name: trade_id
       type: INTEGER
-      description: ""
+      description: Exchange-assigned trade identifier.
+      source: "data/PosData.proto::tradeId"
     - name: company_position
       type: INTEGER
-      description: ""
+      description: Net company-wide position for this instrument after this event.
+      source: "data/PosData.proto::companyPosition"
     - name: traded_size
       type: INTEGER
-      description: ""
+      description: Number of lots traded in this transaction.
+      source: "data/PosData.proto::tradedSize"
     - name: message_trade_date
       type: DATE
-      description: ""
+      description: Trade date embedded within the original proto message.
+      source: derived (data-loader)
     - name: value_date
       type: DATE
-      description: ""
+      description: Value date for the trade, relevant for settlement calculations.
+      source: derived (data-loader)
     - name: counterparty
       type: STRING
-      description: ""
+      description: Counterparty identifier for this trade.
+      source: kafka infrastructure
     - name: text
       type: STRING
-      description: ""
+      description: Free-text field containing additional descriptive information about this event.
+      source: kafka infrastructure
     - name: revisor
       type: STRING
-      description: ""
+      description: Identifier of the user or process that last revised this record.
+      source: kafka infrastructure
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: SHA256 of Mako instrument. From PositionEvent proto.
+      source: "data/PosData.proto::instrumentHash"
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition. From PositionEvent proto.
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
+      source: "data/PosData.proto::streamId"
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
+      source: "data/PosData.proto::eventId"
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
+      source: "data/PosData.proto::messageId"
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
+      source: "data/PosData.proto::pid"
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.
+      source: "data/PosData.proto::hostname"

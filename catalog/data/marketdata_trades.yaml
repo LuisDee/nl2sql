@@ -8,139 +8,151 @@ table:
   columns:
     - name: kafka_partition
       type: INTEGER
-      description: ""
+      description: Kafka partition number from which this record was consumed. Used internally for data pipeline
+        tracking and replay.
     - name: kafka_offset
       type: INTEGER
-      description: ""
+      description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
+        pipeline replay.
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
     - name: event_date
       type: DATE
-      description: ""
+      description: Date of the event, may differ from trade_date for overnight sessions.
     - name: exchange_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Exchange-provided nano-second timestamp of the event.
     - name: hw_nic_rx_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the hw nic rx occurred.
     - name: mako_ingress_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp injected by the switch when the data packet arrives into Mako network.
     - name: software_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Timestamp recording when the software occurred.
     - name: exchange_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
+        event.
     - name: hw_nic_rx_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the hw nic rx timestamp. Combine with hw_nic_rx_timestamp for full
+        nanosecond-resolution timing.
     - name: mako_ingress_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
+        data packet arrives into Mako network.
     - name: software_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of the software timestamp. Combine with software_timestamp for full
+        nanosecond-resolution timing.
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
     - name: event_type
       type: INTEGER
-      description: ""
+      description: VT Event that triggered the swing.
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number (numeric).
     - name: side
       type: INTEGER
-      description: ""
+      description: 'Side of the order or quote: BID (buy) or ASK (sell).'
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
     - name: quantity
       type: INTEGER
-      description: ""
+      description: Quantity of the trade or order in number of lots.
     - name: order_id
       type: INTEGER
-      description: ""
+      description: Mako-internal order identifier linking fills to the parent order.
     - name: order_position
       type: INTEGER
-      description: ""
+      description: The position of the order in the order book.
     - name: market_state
       type: INTEGER
-      description: ""
+      description: Numeric code representing the current market state (pre-open, open, auction, halt, close, etc.).
     - name: keyframe
       type: BOOLEAN
-      description: ""
+      description: If true, message is part of a keyframe/snapshot of current order book state.
     - name: instrument_type
       type: STRING
-      description: ""
+      description: Type classification of the instrument for market state purposes.
     - name: data_order_identifier
       type: INTEGER
-      description: ""
+      description: Sequence number relative to current exchange message for deterministic ordering.
     - name: data_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
     - name: data_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
+        (hardwareNicRxTimestamp or makoIngressTimestamp).
     - name: is_snap
       type: BOOLEAN
-      description: ""
+      description: Boolean flag indicating whether the snap condition is true.
     - name: strike
       type: FLOAT
-      description: ""
+      description: Strike price for options, enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type
       type: INTEGER
-      description: ""
+      description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
+        instruments.
     - name: option_type_name
       type: STRING
-      description: ""
+      description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
     - name: expiry_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Expiry timestamp for the instrument, enriched from the instruments reference table.
     - name: mako_symbol
       type: STRING
-      description: ""
+      description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
+        join.
     - name: currency
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: term
       type: STRING
-      description: ""
+      description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
     - name: inst_type_name
       type: STRING
-      description: ""
+      description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
+        reference table.
     - name: pos_exch
       type: INTEGER
-      description: ""
+      description: Enum appears as an int in composition.
     - name: cancel_quantity
       type: INTEGER
-      description: ""
+      description: On TradeSummary events only.
     - name: hidden_quantity
       type: INTEGER
-      description: ""
+      description: On TradeSummary events only.
     - name: fill_quantity
       type: INTEGER
-      description: ""
+      description: On TradeSummary events only.
     - name: mako_sequence_number
       type: INTEGER
-      description: ""
+      description: Instrument-level absolute sequence number.
     - name: streamsource_stream_id
       type: INTEGER
-      description: ""
+      description: Stream source stream id identifier from the data streaming infrastructure.
     - name: streamsource_event_id
       type: INTEGER
-      description: ""
+      description: Stream source event id identifier from the data streaming infrastructure.
     - name: streamsource_message_id
       type: INTEGER
-      description: ""
+      description: Stream source message id identifier from the data streaming infrastructure.
     - name: datasource_pid
       type: INTEGER
-      description: ""
+      description: Data source pid identifier from the data pipeline infrastructure.
     - name: datasource_hostname
       type: STRING
-      description: ""
+      description: Data source hostname identifier from the data pipeline infrastructure.

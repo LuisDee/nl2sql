@@ -35,7 +35,7 @@ table:
       filterable: true
     - name: inst_type
       type: STRING
-      description: ""
+      description: Numeric instrument type code.
       category: dimension
       filterable: true
     - name: instrument_hash
@@ -201,7 +201,7 @@ table:
       typical_aggregation: AVG
     - name: base_sequence_number
       type: INTEGER
-      description: ""
+      description: Base sequence number (numeric).
       category: measure
       typical_aggregation: AVG
     - name: base_instrument_hash
@@ -349,42 +349,42 @@ table:
       filterable: true
     - name: bosh_order_id
       type: INTEGER
-      description: ""
+      description: Bosh order id (numeric).
       category: identifier
       filterable: true
     - name: action
       type: STRING
-      description: ""
+      description: Action type for order lifecycle events (new, modify, cancel, fill).
       category: dimension
       filterable: true
     - name: instrument_order_price
       type: FLOAT
-      description: ""
+      description: Price of instrument order.
       category: measure
       typical_aggregation: AVG
     - name: size
       type: INTEGER
-      description: ""
+      description: Number of lots or contracts in the trade or order.
       category: measure
       typical_aggregation: AVG
     - name: residual_volume
       type: INTEGER
-      description: ""
+      description: Remaining unfilled volume on the order.
       category: measure
       typical_aggregation: SUM
     - name: pcap_id
       type: STRING
-      description: ""
+      description: PCAP correlation identifier linking to raw network captures.
       category: identifier
       filterable: true
     - name: worst_price
       type: FLOAT
-      description: ""
+      description: Worst acceptable price for this BOSH order.
       category: measure
       typical_aggregation: AVG
     - name: largest_size
       type: INTEGER
-      description: ""
+      description: Largest fill size seen for this BOSH order.
       category: measure
       typical_aggregation: SUM
     - name: strike
@@ -432,7 +432,7 @@ table:
       filterable: true
     - name: instrument_order_size
       type: INTEGER
-      description: ""
+      description: Size (quantity) of instrument order.
       category: measure
       typical_aggregation: SUM
     - name: ref_theoevent_stream_id
@@ -447,7 +447,7 @@ table:
       filterable: true
     - name: cancel_reason
       type: INTEGER
-      description: ""
+      description: Reason code for order cancellation.
       category: measure
       typical_aggregation: AVG
     - name: cancel_reason_name

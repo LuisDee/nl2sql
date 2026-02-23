@@ -8,31 +8,33 @@ table:
   columns:
     - name: trade_date
       type: DATE
-      description: ""
+      description: Trading session date used as the partition column. Always filter on this field for efficient queries.
     - name: instrument_hash
       type: STRING
-      description: ""
+      description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
+        defining attributes. Used as the primary join key across all data and KPI tables.
     - name: symbol
       type: STRING
-      description: ""
+      description: Mako symbol identifier for the traded instrument.
     - name: market_state
       type: INTEGER
-      description: ""
+      description: Numeric code representing the current market state (pre-open, open, auction, halt, close, etc.).
     - name: data_timestamp
       type: TIMESTAMP
-      description: ""
+      description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
     - name: data_timestamp_ns
       type: INTEGER
-      description: ""
+      description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
+        (hardwareNicRxTimestamp or makoIngressTimestamp).
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number (numeric).
     - name: instrument_type
       type: STRING
-      description: ""
+      description: Type classification of the instrument for market state purposes.
     - name: keyframe
       type: BOOLEAN
-      description: ""
+      description: If true, message is part of a keyframe/snapshot of current order book state.
     - name: data_order_identifier
       type: INTEGER
-      description: ""
+      description: Sequence number relative to current exchange message for deterministic ordering.

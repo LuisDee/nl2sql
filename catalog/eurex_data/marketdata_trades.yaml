@@ -30,7 +30,7 @@ table:
       filterable: true
     - name: event_date
       type: DATE
-      description: ""
+      description: Date of the event, may differ from trade_date for overnight sessions.
       category: time
       filterable: true
     - name: exchange_timestamp
@@ -82,27 +82,27 @@ table:
       filterable: true
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number (numeric).
       category: identifier
       filterable: true
     - name: side
       type: INTEGER
-      description: ""
+      description: 'Side of the order or quote: BID (buy) or ASK (sell).'
       category: measure
       typical_aggregation: AVG
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
       category: measure
       typical_aggregation: AVG
     - name: quantity
       type: INTEGER
-      description: ""
+      description: Quantity of the trade or order in number of lots.
       category: measure
       typical_aggregation: AVG
     - name: order_id
       type: INTEGER
-      description: ""
+      description: Mako-internal order identifier linking fills to the parent order.
       category: identifier
       filterable: true
     - name: order_position
@@ -112,7 +112,7 @@ table:
       typical_aggregation: AVG
     - name: market_state
       type: INTEGER
-      description: ""
+      description: Numeric code representing the current market state (pre-open, open, auction, halt, close, etc.).
       category: measure
       typical_aggregation: AVG
     - name: keyframe
@@ -122,7 +122,7 @@ table:
       filterable: true
     - name: instrument_type
       type: STRING
-      description: ""
+      description: Type classification of the instrument for market state purposes.
       category: dimension
       filterable: true
     - name: data_order_identifier

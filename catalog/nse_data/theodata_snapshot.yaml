@@ -8,7 +8,7 @@ table:
   columns:
     - name: snap_ts
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this point-in-time snapshot was captured.
       category: time
     - name: portfolio
       type: STRING
@@ -66,11 +66,11 @@ table:
       typical_aggregation: AVG
     - name: rec_ts
       type: TIMESTAMP
-      description: ""
+      description: Timestamp when this record was received or recorded.
       category: time
     - name: event_date
       type: DATE
-      description: ""
+      description: Date of the event, may differ from trade_date for overnight sessions.
       category: time
       filterable: true
     - name: theo_event_tx_timestamp
@@ -101,7 +101,7 @@ table:
       category: time
     - name: theo_compute_timestamp_start
       type: TIMESTAMP
-      description: ""
+      description: 'Theoretical pricing parameter: compute timestamp start.'
       category: time
     - name: theo_compute_timestamp_start_ns
       type: INTEGER
@@ -110,7 +110,7 @@ table:
       category: time
     - name: theo_compute_timestamp_stop
       type: TIMESTAMP
-      description: ""
+      description: 'Theoretical pricing parameter: compute timestamp stop.'
       category: time
     - name: theo_compute_timestamp_stop_ns
       type: INTEGER
@@ -119,22 +119,22 @@ table:
       category: time
     - name: theo_compute_type
       type: STRING
-      description: ""
+      description: Type classification for the theo compute.
       category: dimension
       filterable: true
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
       category: identifier
       filterable: true
     - name: carry_id
       type: INTEGER
-      description: ""
+      description: Identifier for the carry/interest rate curve used in theoretical calculations.
       category: identifier
       filterable: true
     - name: stream_id
       type: INTEGER
-      description: ""
+      description: Unique identifier for the data stream.
       category: identifier
       filterable: true
     - name: tv
@@ -144,62 +144,62 @@ table:
       typical_aggregation: AVG
     - name: tv_offset
       type: FLOAT
-      description: ""
+      description: Tv offset (field).
       category: measure
       typical_aggregation: AVG
     - name: delta
       type: FLOAT
-      description: ""
+      description: Option delta (rate of change of option price with respect to underlying price).
       category: measure
       typical_aggregation: AVG
     - name: gamma
       type: FLOAT
-      description: ""
+      description: Option gamma (rate of change of delta with respect to underlying price).
       category: measure
       typical_aggregation: AVG
     - name: vega
       type: FLOAT
-      description: ""
+      description: Option vega (sensitivity of option price to changes in implied volatility).
       category: measure
       typical_aggregation: AVG
     - name: theta
       type: FLOAT
-      description: ""
+      description: Option theta (time decay, rate of change of option price with respect to time).
       category: measure
       typical_aggregation: AVG
     - name: rho
       type: FLOAT
-      description: ""
+      description: Option rho (sensitivity of option price to changes in interest rates).
       category: measure
       typical_aggregation: AVG
     - name: tte
       type: FLOAT
-      description: ""
+      description: Time to expiry in years for the instrument.
       category: measure
       typical_aggregation: AVG
     - name: raw_delta
       type: FLOAT
-      description: ""
+      description: Raw delta (field).
       category: measure
       typical_aggregation: AVG
     - name: raw_gamma
       type: FLOAT
-      description: ""
+      description: Raw gamma (field).
       category: measure
       typical_aggregation: AVG
     - name: vol
       type: FLOAT
-      description: ""
+      description: Implied volatility of the instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
     - name: norm_strike
       type: FLOAT
-      description: ""
+      description: Norm strike (field).
       category: measure
       typical_aggregation: AVG
     - name: under
       type: FLOAT
-      description: ""
+      description: Price of the underlying instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
     - name: roll
@@ -209,92 +209,92 @@ table:
       typical_aggregation: AVG
     - name: forward
       type: FLOAT
-      description: ""
+      description: Forward price of the underlying instrument used in theoretical calculations.
       category: measure
       typical_aggregation: AVG
     - name: short_rate
       type: FLOAT
-      description: ""
+      description: Rate value for short.
       category: measure
       typical_aggregation: AVG
     - name: greek_atm
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: atm.'
       category: measure
       typical_aggregation: AVG
     - name: greek_skew
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: skew.'
       category: measure
       typical_aggregation: AVG
     - name: greek_call_skew
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: call skew.'
       category: measure
       typical_aggregation: AVG
     - name: greek_put_k
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: put k.'
       category: measure
       typical_aggregation: AVG
     - name: greek_call_k
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: call k.'
       category: measure
       typical_aggregation: AVG
     - name: greek_put_a
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: put a.'
       category: measure
       typical_aggregation: AVG
     - name: greek_call_a
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: call a.'
       category: measure
       typical_aggregation: AVG
     - name: greek_put_b
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: put b.'
       category: measure
       typical_aggregation: AVG
     - name: greek_call_b
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: call b.'
       category: measure
       typical_aggregation: AVG
     - name: greek_datm
       type: FLOAT
-      description: ""
+      description: 'Volatility surface Greek parameter: datm.'
       category: measure
       typical_aggregation: AVG
     - name: param_atm
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: atm.'
       category: measure
       typical_aggregation: AVG
     - name: param_skew
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: skew.'
       category: measure
       typical_aggregation: AVG
     - name: param_call_skew
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: call skew.'
       category: measure
       typical_aggregation: AVG
     - name: param_put_k
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: put k.'
       category: measure
       typical_aggregation: AVG
     - name: param_call_k
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: call k.'
       category: measure
       typical_aggregation: AVG
     - name: param_s_vol
       type: FLOAT
-      description: ""
+      description: 'Volatility surface parameter: s vol.'
       category: measure
       typical_aggregation: AVG
     - name: datasource_pid
@@ -329,7 +329,7 @@ table:
       filterable: true
     - name: inst_type
       type: STRING
-      description: ""
+      description: Numeric instrument type code.
       category: dimension
       filterable: true
     - name: term
@@ -361,6 +361,6 @@ table:
       filterable: true
     - name: offset_id
       type: INTEGER
-      description: ""
+      description: Offset id (numeric).
       category: identifier
       filterable: true

@@ -24,7 +24,7 @@ table:
       filterable: true
     - name: market_state
       type: INTEGER
-      description: ""
+      description: Numeric code representing the current market state (pre-open, open, auction, halt, close, etc.).
       category: measure
       typical_aggregation: AVG
     - name: data_timestamp
@@ -38,12 +38,12 @@ table:
       category: time
     - name: sequence_number
       type: INTEGER
-      description: ""
+      description: Sequence number (numeric).
       category: identifier
       filterable: true
     - name: instrument_type
       type: STRING
-      description: ""
+      description: Type classification of the instrument for market state purposes.
       category: dimension
       filterable: true
     - name: keyframe

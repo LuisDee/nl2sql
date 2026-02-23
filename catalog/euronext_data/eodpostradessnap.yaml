@@ -35,32 +35,32 @@ table:
       filterable: true
     - name: mako_id
       type: STRING
-      description: ""
+      description: Mako-internal unique identifier for this trade or order.
       category: identifier
       filterable: true
     - name: trader_id
       type: STRING
-      description: ""
+      description: Identifier of the trader responsible for this trade.
       category: identifier
       filterable: true
     - name: algorithm
       type: STRING
-      description: ""
+      description: Name of the Mako algorithm that generated this trade or event.
       category: dimension
       filterable: true
     - name: routed_exchange
       type: INTEGER
-      description: ""
+      description: Exchange to which this order was routed for execution.
       category: measure
       typical_aggregation: AVG
     - name: executable_exchange
       type: INTEGER
-      description: ""
+      description: Exchange on which this instrument is executable.
       category: measure
       typical_aggregation: AVG
     - name: channel
       type: STRING
-      description: ""
+      description: Data channel or feed identifier for this event.
       category: dimension
       filterable: true
     - name: transaction_properties
@@ -85,22 +85,22 @@ table:
       typical_aggregation: AVG
     - name: revision
       type: INTEGER
-      description: ""
+      description: Revision number tracking modifications to this record.
       category: identifier
       filterable: true
     - name: inventory
       type: STRING
-      description: ""
+      description: Inventory account associated with this trade or position.
       category: dimension
       filterable: true
     - name: account
       type: STRING
-      description: ""
+      description: Account identifier for this trade.
       category: dimension
       filterable: true
     - name: fill_id
       type: INTEGER
-      description: ""
+      description: Unique identifier for this fill (partial or full execution) within an order.
       category: identifier
       filterable: true
     - name: user_id
@@ -110,27 +110,27 @@ table:
       filterable: true
     - name: user_order_id
       type: INTEGER
-      description: ""
+      description: User-submitted order identifier linking back to the order entry system.
       category: identifier
       filterable: true
     - name: transaction_id
       type: INTEGER
-      description: ""
+      description: Mako-internal transaction identifier for this event.
       category: identifier
       filterable: true
     - name: order_id
       type: INTEGER
-      description: ""
+      description: Mako-internal order identifier linking fills to the parent order.
       category: identifier
       filterable: true
     - name: exchange_transaction_id
       type: STRING
-      description: ""
+      description: Exchange-assigned transaction identifier for this event.
       category: identifier
       filterable: true
     - name: exchange_order_id
       type: STRING
-      description: ""
+      description: Exchange-assigned order identifier.
       category: identifier
       filterable: true
     - name: transaction_timestamp
@@ -144,7 +144,7 @@ table:
       category: time
     - name: exchange_date
       type: DATE
-      description: ""
+      description: Date as reported by the exchange for this event.
       category: time
       filterable: true
     - name: exchange_timestamp
@@ -158,7 +158,7 @@ table:
       category: time
     - name: exchange_info
       type: STRING
-      description: ""
+      description: Additional exchange-provided information for this event.
       category: dimension
       filterable: true
     - name: exchange_info_bits
@@ -168,27 +168,27 @@ table:
       typical_aggregation: AVG
     - name: exchange_qualifier
       type: STRING
-      description: ""
+      description: Exchange qualifier code providing additional event context.
       category: dimension
       filterable: true
     - name: statistics
       type: STRING
-      description: ""
+      description: Statistical summary or classification data for this event.
       category: dimension
       filterable: true
     - name: position_type
       type: INTEGER
-      description: ""
+      description: Numeric code classifying the position event type (e.g. trade, adjustment, exercise).
       category: dimension
       filterable: true
     - name: position_id
       type: INTEGER
-      description: ""
+      description: Identifier for the position this event belongs to within the portfolio.
       category: identifier
       filterable: true
     - name: size
       type: INTEGER
-      description: ""
+      description: Number of lots or contracts in the trade or order.
       category: measure
       typical_aggregation: AVG
     - name: tv
@@ -198,17 +198,17 @@ table:
       typical_aggregation: AVG
     - name: ectv
       type: FLOAT
-      description: ""
+      description: Exchange-cleared theoretical value used for settlement calculations.
       category: measure
       typical_aggregation: AVG
     - name: settlement
       type: FLOAT
-      description: ""
+      description: Settlement price for the instrument.
       category: measure
       typical_aggregation: AVG
     - name: settlement_date
       type: DATE
-      description: ""
+      description: Date on which settlement occurs for this trade.
       category: time
     - name: pos_currency
       type: INTEGER
@@ -217,12 +217,12 @@ table:
       typical_aggregation: AVG
     - name: pos_value_currency
       type: INTEGER
-      description: ""
+      description: Currency in which the position value is denominated.
       category: measure
       typical_aggregation: AVG
     - name: cash_value
       type: FLOAT
-      description: ""
+      description: Cash value of this trade or position change.
       category: measure
       typical_aggregation: AVG
     - name: mgmt_timestamp
@@ -236,7 +236,7 @@ table:
       category: time
     - name: max_trade_id
       type: INTEGER
-      description: ""
+      description: Maximum trade ID in the batch, used for ordering and deduplication.
       category: identifier
       filterable: true
     - name: agg_pos_timestamp
@@ -250,26 +250,26 @@ table:
       category: time
     - name: agg_pos_date
       type: DATE
-      description: ""
+      description: Aggregated position date for end-of-day processing.
       category: time
     - name: price
       type: FLOAT
-      description: ""
+      description: Price of the trade or order.
       category: measure
       typical_aggregation: AVG
     - name: deflection_scale
       type: FLOAT
-      description: ""
+      description: Scale factor for the deflection adjustment applied to pricing.
       category: measure
       typical_aggregation: AVG
     - name: curve_id
       type: INTEGER
-      description: ""
+      description: Identifier for the volatility/pricing curve used in theoretical calculations.
       category: identifier
       filterable: true
     - name: carry_id
       type: INTEGER
-      description: ""
+      description: Identifier for the carry/interest rate curve used in theoretical calculations.
       category: identifier
       filterable: true
     - name: revision_timestamp
@@ -283,17 +283,17 @@ table:
       category: time
     - name: trade_id
       type: INTEGER
-      description: ""
+      description: Exchange-assigned trade identifier.
       category: identifier
       filterable: true
     - name: company_position
       type: INTEGER
-      description: ""
+      description: Net company-wide position for this instrument after this event.
       category: measure
       typical_aggregation: AVG
     - name: traded_size
       type: INTEGER
-      description: ""
+      description: Number of lots traded in this transaction.
       category: measure
       typical_aggregation: SUM
     - name: message_trade_date
@@ -302,21 +302,21 @@ table:
       category: time
     - name: value_date
       type: DATE
-      description: ""
+      description: Value date for the trade, relevant for settlement calculations.
       category: time
     - name: counterparty
       type: STRING
-      description: ""
+      description: Counterparty identifier for this trade.
       category: dimension
       filterable: true
     - name: text
       type: STRING
-      description: ""
+      description: Free-text field containing additional descriptive information about this event.
       category: dimension
       filterable: true
     - name: revisor
       type: STRING
-      description: ""
+      description: Identifier of the user or process that last revised this record.
       category: dimension
       filterable: true
     - name: instrument_hash

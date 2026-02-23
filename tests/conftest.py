@@ -16,9 +16,7 @@ _TEST_ENV = {
     "LITELLM_MODEL_COMPLEX": "openai/gemini-3-pro-preview",
     "GCP_PROJECT": "cloud-data-n-base-d4b3",
     "BQ_LOCATION": "europe-west2",
-    "KPI_DATASET": "nl2sql_omx_kpi",
-    "DATA_DATASET": "nl2sql_omx_data",
-    "METADATA_DATASET": "nl2sql_metadata",
+    "DATASET_PREFIX": "nl2sql_",
     "ADK_SUPPRESS_GEMINI_LITELLM_WARNINGS": "true",
 }
 

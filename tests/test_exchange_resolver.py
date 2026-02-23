@@ -30,8 +30,6 @@ class TestLoadExchangeRegistry:
         registry = load_exchange_registry()
         for name, info in registry["exchanges"].items():
             assert "aliases" in info, f"{name} missing aliases"
-            assert "kpi_dataset" in info, f"{name} missing kpi_dataset"
-            assert "data_dataset" in info, f"{name} missing data_dataset"
 
     def test_canonical_name_in_aliases(self):
         """Each exchange's canonical name should appear in its own aliases."""
@@ -47,11 +45,12 @@ class TestLoadExchangeRegistry:
                     f"Alias '{alias}' for {name} not lowercase"
                 )
 
-    def test_dataset_naming_convention(self):
+    def test_no_dataset_keys_in_registry(self):
+        """Dataset names are computed at runtime, not stored in YAML."""
         registry = load_exchange_registry()
         for name, info in registry["exchanges"].items():
-            assert info["kpi_dataset"] == f"nl2sql_{name}_kpi"
-            assert info["data_dataset"] == f"nl2sql_{name}_data"
+            assert "kpi_dataset" not in info, f"{name} should not have kpi_dataset"
+            assert "data_dataset" not in info, f"{name} should not have data_dataset"
 
     def test_file_not_found_raises(self, tmp_path):
         clear_exchange_cache()

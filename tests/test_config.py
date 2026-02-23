@@ -44,6 +44,66 @@ class TestSettings:
         assert s.gcp_project == "cloud-data-n-base-d4b3"
 
 
+class TestDatasetPrefix:
+    """Test dataset_prefix computation logic."""
+
+    def test_dataset_prefix_default(self, monkeypatch):
+        """With default prefix 'nl2sql_', datasets compute to nl2sql_omx_*."""
+        monkeypatch.delenv("KPI_DATASET", raising=False)
+        monkeypatch.delenv("DATA_DATASET", raising=False)
+        monkeypatch.delenv("METADATA_DATASET", raising=False)
+        s = Settings()
+        assert s.dataset_prefix == "nl2sql_"
+        assert s.kpi_dataset == "nl2sql_omx_kpi"
+        assert s.data_dataset == "nl2sql_omx_data"
+        assert s.metadata_dataset == "nl2sql_metadata"
+
+    def test_dataset_prefix_empty(self, monkeypatch):
+        """With empty prefix, datasets compute to omx_kpi, omx_data, metadata."""
+        monkeypatch.setenv("DATASET_PREFIX", "")
+        monkeypatch.delenv("KPI_DATASET", raising=False)
+        monkeypatch.delenv("DATA_DATASET", raising=False)
+        monkeypatch.delenv("METADATA_DATASET", raising=False)
+        s = Settings()
+        assert s.kpi_dataset == "omx_kpi"
+        assert s.data_dataset == "omx_data"
+        assert s.metadata_dataset == "metadata"
+
+    def test_explicit_override_takes_precedence(self, monkeypatch):
+        """Explicit KPI_DATASET env var overrides prefix computation."""
+        monkeypatch.setenv("DATASET_PREFIX", "")
+        monkeypatch.setenv("KPI_DATASET", "custom_kpi")
+        monkeypatch.delenv("DATA_DATASET", raising=False)
+        monkeypatch.delenv("METADATA_DATASET", raising=False)
+        s = Settings()
+        assert s.kpi_dataset == "custom_kpi"
+        assert s.data_dataset == "omx_data"
+        assert s.metadata_dataset == "metadata"
+
+    def test_custom_prefix(self, monkeypatch):
+        """A custom prefix applies to all computed datasets."""
+        monkeypatch.setenv("DATASET_PREFIX", "test_")
+        monkeypatch.delenv("KPI_DATASET", raising=False)
+        monkeypatch.delenv("DATA_DATASET", raising=False)
+        monkeypatch.delenv("METADATA_DATASET", raising=False)
+        s = Settings()
+        assert s.kpi_dataset == "test_omx_kpi"
+        assert s.data_dataset == "test_omx_data"
+        assert s.metadata_dataset == "test_metadata"
+
+    def test_default_exchange_override(self, monkeypatch):
+        """Changing default_exchange changes computed dataset names."""
+        monkeypatch.setenv("DEFAULT_EXCHANGE", "brazil")
+        monkeypatch.delenv("KPI_DATASET", raising=False)
+        monkeypatch.delenv("DATA_DATASET", raising=False)
+        monkeypatch.delenv("METADATA_DATASET", raising=False)
+        s = Settings()
+        assert s.kpi_dataset == "nl2sql_brazil_kpi"
+        assert s.data_dataset == "nl2sql_brazil_data"
+        # metadata doesn't include exchange
+        assert s.metadata_dataset == "nl2sql_metadata"
+
+
 class TestEnvExample:
     """Verify .env.example exists and covers all Settings fields."""
 
@@ -64,6 +124,8 @@ class TestEnvExample:
         content = self.ENV_EXAMPLE.read_text()
         for field in [
             "GCP_PROJECT",
+            "DATASET_PREFIX",
+            "DEFAULT_EXCHANGE",
             "KPI_DATASET",
             "DATA_DATASET",
             "METADATA_DATASET",

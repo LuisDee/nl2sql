@@ -30,13 +30,11 @@ def _build_alias_map() -> dict[str, str]:
 
 def _make_result(exchange: str, status: str = "resolved") -> dict[str, Any]:
     """Build a standard result dict for a resolved exchange."""
-    registry = load_exchange_registry()
-    info = registry["exchanges"][exchange]
     return {
         "status": status,
         "exchange": exchange,
-        "kpi_dataset": info["kpi_dataset"],
-        "data_dataset": info["data_dataset"],
+        "kpi_dataset": f"{settings.dataset_prefix}{exchange}_kpi",
+        "data_dataset": f"{settings.dataset_prefix}{exchange}_data",
     }
 
 
@@ -91,13 +89,12 @@ def _symbol_lookup(identifier: str) -> dict[str, Any] | None:
     for exchange in sorted(exchanges):
         if exchange not in registry["exchanges"]:
             continue
-        info = registry["exchanges"][exchange]
         portfolios = [r["portfolio"] for r in rows if r["exchange"] == exchange]
         matches.append(
             {
                 "exchange": exchange,
-                "kpi_dataset": info["kpi_dataset"],
-                "data_dataset": info["data_dataset"],
+                "kpi_dataset": f"{settings.dataset_prefix}{exchange}_kpi",
+                "data_dataset": f"{settings.dataset_prefix}{exchange}_data",
                 "portfolios": portfolios,
             }
         )

@@ -6,8 +6,9 @@ Usage:
 """
 
 from pathlib import Path
+from typing import Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Resolve .env path relative to this file (nl2sql_agent/.env), not CWD.
@@ -49,18 +50,37 @@ class Settings(BaseSettings):
         default="europe-west2",
         description="BigQuery dataset location (London)",
     )
+    dataset_prefix: str = Field(
+        default="nl2sql_",
+        description="Prefix for all BQ dataset names. Set to '' for prod.",
+    )
+    default_exchange: str = Field(
+        default="omx",
+        description="Default exchange code for dataset name computation.",
+    )
     kpi_dataset: str = Field(
-        default="nl2sql_omx_kpi",
-        description="BigQuery dataset for KPI gold-layer tables",
+        default="",
+        description="BigQuery dataset for KPI gold-layer tables. Auto-computed from prefix if empty.",
     )
     data_dataset: str = Field(
-        default="nl2sql_omx_data",
-        description="BigQuery dataset for raw silver-layer data tables",
+        default="",
+        description="BigQuery dataset for raw silver-layer data tables. Auto-computed from prefix if empty.",
     )
     metadata_dataset: str = Field(
-        default="nl2sql_metadata",
-        description="BigQuery dataset for embeddings and query memory",
+        default="",
+        description="BigQuery dataset for embeddings and query memory. Auto-computed from prefix if empty.",
     )
+
+    @model_validator(mode="after")
+    def _compute_dataset_defaults(self) -> Self:
+        """Compute dataset names from prefix + exchange when not explicitly set."""
+        if not self.kpi_dataset:
+            self.kpi_dataset = f"{self.dataset_prefix}{self.default_exchange}_kpi"
+        if not self.data_dataset:
+            self.data_dataset = f"{self.dataset_prefix}{self.default_exchange}_data"
+        if not self.metadata_dataset:
+            self.metadata_dataset = f"{self.dataset_prefix}metadata"
+        return self
 
     # --- Vertex AI (embeddings only) ---
     vertex_ai_connection: str = Field(

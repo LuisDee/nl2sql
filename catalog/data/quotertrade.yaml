@@ -32,6 +32,7 @@ table:
     source: "QuoterTrade.proto::kafka_partition"
     synonyms: []
     category: identifier
+    filterable: true
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
@@ -39,6 +40,7 @@ table:
     source: "QuoterTrade.proto::kafka_offset"
     synonyms: []
     category: identifier
+    filterable: true
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -51,6 +53,7 @@ table:
     - instrument
     - underlying symbol
     category: dimension
+    filterable: true
   - name: portfolio
     type: STRING
     description: Name of the Mako trading portfolio or book to which the quoter algo belongs. Used for filtering quoter
@@ -62,6 +65,7 @@ table:
     - trading book
     - strategy
     category: dimension
+    filterable: true
   - name: trade_date
     type: DATE
     description: Business date of the trading session, used as the primary partition column for this table. Always
@@ -73,6 +77,7 @@ table:
     - business date
     - trading date
     category: time
+    filterable: true
   - name: instrument_hash
     type: STRING
     description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
@@ -83,6 +88,7 @@ table:
     - instrument id
     - instrument key
     category: identifier
+    filterable: true
   - name: algo
     type: STRING
     description: Name of the originating quoter algorithm that was quoting this instrument and received this fill.
@@ -94,6 +100,7 @@ table:
     - algo name
     - trading algo
     category: dimension
+    filterable: true
   - name: ref_curve_id
     type: INTEGER
     description: Identifier of the volatility curve active at the time of the last theoServer callback before this
@@ -104,6 +111,7 @@ table:
     - ref curve
     - reference curve
     category: identifier
+    filterable: true
   - name: ref_carry_id
     type: INTEGER
     description: Identifier of the carry/dividend curve active at the time of the last theoServer callback before this
@@ -114,6 +122,7 @@ table:
     - ref carry
     - reference carry
     category: identifier
+    filterable: true
   - name: ref_tv
     type: FLOAT
     description: Theoretical value of the instrument on the last vol curve update (last theoServer callback), calculated
@@ -124,6 +133,7 @@ table:
     - reference theo
     - ref fair value
     category: measure
+    typical_aggregation: AVG
   - name: ref_delta
     type: FLOAT
     description: Delta of the instrument on the last vol curve update (last theoServer callback). Used as the reference
@@ -133,6 +143,7 @@ table:
     synonyms:
     - reference delta
     category: measure
+    typical_aggregation: AVG
   - name: ref_gamma
     type: FLOAT
     description: Gamma of the instrument on the last vol curve update (last theoServer callback). Used alongside ref_delta
@@ -142,6 +153,7 @@ table:
     synonyms:
     - reference gamma
     category: measure
+    typical_aggregation: AVG
   - name: ref_base_price
     type: FLOAT
     description: Unadjusted raw base value (underlying price) on the last vol curve update (last theoServer callback).
@@ -153,6 +165,7 @@ table:
     - reference price
     - ref base
     category: measure
+    typical_aggregation: AVG
   - name: ref_roll
     type: FLOAT
     description: Roll/carry adjustment value on the last curve update, reflecting the cost of rolling a position forward
@@ -162,6 +175,7 @@ table:
     synonyms:
     - reference roll
     category: measure
+    typical_aggregation: AVG
   - name: raw_bv_bid
     type: FLOAT
     description: Raw (unadjusted) base value bid price before any layered base, inflight deflection, or internal TV
@@ -172,6 +186,7 @@ table:
     - bv bid
     - raw base bid
     category: measure
+    typical_aggregation: AVG
   - name: raw_bv_bid_size
     type: INTEGER
     description: Size (in contracts/lots) available at the raw base value bid price. Indicates the depth of underlying
@@ -180,6 +195,7 @@ table:
     source: "VtCommon.proto::rawBvBidSize"
     synonyms: []
     category: measure
+    typical_aggregation: SUM
   - name: raw_bv_ask
     type: FLOAT
     description: Raw (unadjusted) base value ask price before any layered base, inflight deflection, or internal TV
@@ -190,6 +206,7 @@ table:
     - bv ask
     - raw base ask
     category: measure
+    typical_aggregation: AVG
   - name: raw_bv_ask_size
     type: INTEGER
     description: Size (in contracts/lots) available at the raw base value ask price. Indicates the depth of underlying
@@ -198,6 +215,7 @@ table:
     source: "VtCommon.proto::rawBvAskSize"
     synonyms: []
     category: measure
+    typical_aggregation: SUM
   - name: layered_base_bid
     type: FLOAT
     description: Layered base bid price after applying all internal adjustments (ODR, inflight deflection, NHR). This
@@ -207,6 +225,7 @@ table:
     synonyms:
     - adjusted base bid
     category: measure
+    typical_aggregation: AVG
   - name: layered_base_bid_size
     type: INTEGER
     description: Size (in contracts/lots) available at the layered base bid price after adjustments. Represents the
@@ -214,6 +233,7 @@ table:
     source: "VtCommon.proto::layeredBaseBidSize"
     synonyms: []
     category: measure
+    typical_aggregation: SUM
   - name: layered_base_ask
     type: FLOAT
     description: Layered base ask price after applying all internal adjustments (ODR, inflight deflection, NHR). This
@@ -223,6 +243,7 @@ table:
     synonyms:
     - adjusted base ask
     category: measure
+    typical_aggregation: AVG
   - name: layered_base_ask_size
     type: INTEGER
     description: Size (in contracts/lots) available at the layered base ask price after adjustments. Represents the
@@ -230,6 +251,7 @@ table:
     source: "VtCommon.proto::layeredBaseAskSize"
     synonyms: []
     category: measure
+    typical_aggregation: SUM
   - name: layered_base_adjustment
     type: FLOAT
     description: Total layered base adjustment applied to the raw base value. Represents the aggregate of multiple
@@ -238,6 +260,7 @@ table:
     synonyms:
     - base adjustment
     category: measure
+    typical_aggregation: AVG
   - name: odr_adjustment
     type: FLOAT
     description: Order-driven-repricing (ODR) adjustment applied to the base value. ODR adjusts the effective underlying
@@ -247,6 +270,7 @@ table:
     synonyms:
     - odr
     category: measure
+    typical_aggregation: AVG
   - name: inflight_deflection_tv_adjustment_bid
     type: FLOAT
     description: Inflight deflection adjustment applied to the theoretical value on the bid side. Accounts for the
@@ -256,6 +280,7 @@ table:
     synonyms:
     - inflight bid adjustment
     category: measure
+    typical_aggregation: AVG
   - name: inflight_deflection_tv_adjustment_ask
     type: FLOAT
     description: Inflight deflection adjustment applied to the theoretical value on the ask side. Accounts for the
@@ -265,6 +290,7 @@ table:
     synonyms:
     - inflight ask adjustment
     category: measure
+    typical_aggregation: AVG
   - name: internal_tv_adjustment_bid
     type: FLOAT
     description: Internal theoretical value adjustment on the bid side, reflecting additional proprietary offsets applied
@@ -273,6 +299,7 @@ table:
     source: "VtCommon.proto::internalTvAdjustmentBid"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: internal_tv_adjustment_ask
     type: FLOAT
     description: Internal theoretical value adjustment on the ask side, reflecting additional proprietary offsets applied
@@ -281,6 +308,7 @@ table:
     source: "VtCommon.proto::internalTvAdjustmentAsk"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: nhr_adjustment_bid
     type: FLOAT
     description: Non-hedge-ratio (NHR) adjustment on the bid side. Captures adjustments related to hedging inefficiencies
@@ -289,6 +317,7 @@ table:
     source: "VtCommon.proto::nhrAdjustmentBid"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: nhr_adjustment_ask
     type: FLOAT
     description: Non-hedge-ratio (NHR) adjustment on the ask side. Captures adjustments related to hedging inefficiencies
@@ -297,6 +326,7 @@ table:
     source: "VtCommon.proto::nhrAdjustmentAsk"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: base_edge_bid
     type: FLOAT
     description: Base edge on the bid side at the time of the quoter fill, representing the raw difference between the
@@ -307,6 +337,7 @@ table:
     - bid edge
     - bid-side edge
     category: measure
+    typical_aggregation: SUM
   - name: base_edge_ask
     type: FLOAT
     description: Base edge on the ask side at the time of the quoter fill, representing the raw difference between the
@@ -317,6 +348,7 @@ table:
     - ask edge
     - ask-side edge
     category: measure
+    typical_aggregation: SUM
   - name: fees
     type: FLOAT
     description: Total trading fees comprising exchange fees and clearing costs for this quoter fill. Deducted from
@@ -328,6 +360,7 @@ table:
     - transaction costs
     - trading costs
     category: measure
+    typical_aggregation: SUM
   - name: roll
     type: FLOAT
     description: Roll/carry adjustment value reflecting the cost of rolling a position forward (dividends, interest,
@@ -338,6 +371,7 @@ table:
     - roll value
     - carry cost
     category: measure
+    typical_aggregation: AVG
   - name: bv_side
     type: STRING
     description: Side of the base value update (bid or ask) that was relevant for this quoter fill. Indicates which side
@@ -346,6 +380,7 @@ table:
     synonyms:
     - base value side
     category: dimension
+    filterable: true
   - name: delta_adjusted_base_price
     type: FLOAT
     description: Equal to the raw base value (relevant side depending on trade direction) plus ODR and layered base
@@ -356,6 +391,7 @@ table:
     - delta adjusted_base_price
     - adjusted base price
     category: measure
+    typical_aggregation: AVG
   - name: tv
     type: FLOAT
     description: Theoretical value the quoter saw at time of the fill. This is the delta/gamma-adjusted refTv including
@@ -369,6 +405,7 @@ table:
     - machine price
     - TV
     category: measure
+    typical_aggregation: AVG
   - name: base_sequence_number
     type: INTEGER
     description: Sequence number of the base (underlying) instrument's market data event at the time of this quoter fill.
@@ -376,6 +413,7 @@ table:
     source: "VtCommon.proto::baseSequenceNumber"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: option_sequence_number
     type: INTEGER
     description: Sequence number of the option instrument's market data event associated with this quoter fill. Used for
@@ -383,6 +421,7 @@ table:
     source: "VtCommon.proto::optionSequenceNumber"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: base_instrument_hash
     type: STRING
     description: SHA256 hash identifier of the base (underlying) instrument used for pricing this quoter fill. Links
@@ -392,6 +431,7 @@ table:
     synonyms:
     - base hash
     category: identifier
+    filterable: true
   - name: hardware_nic_rx_timestamp
     type: TIMESTAMP
     description: Hardware NIC receive timestamp recording when the fill notification packet physically arrived at Mako's
@@ -437,6 +477,7 @@ table:
     - cancel in flight
     - deleting flag
     category: dimension
+    filterable: true
   - name: trade_price
     type: FLOAT
     description: Execution price at which this quoter fill occurred. The actual price at which the resting quote was
@@ -448,6 +489,7 @@ table:
     - execution price
     - price
     category: measure
+    typical_aggregation: AVG
   - name: trade_size
     type: INTEGER
     description: Number of contracts (lots) filled in this quoter trade event. Represents the quantity that was executed
@@ -459,6 +501,7 @@ table:
     - lots
     - volume
     category: measure
+    typical_aggregation: SUM
   - name: residual_size
     type: INTEGER
     description: Number of lots of this quote still resting in the order book after this fill. If zero, the quote was
@@ -469,6 +512,7 @@ table:
     - remaining size
     - leftover size
     category: measure
+    typical_aggregation: SUM
   - name: trade_side
     type: STRING
     description: Side of the order book that was filled (buy or sell). Indicates whether our resting quote was on the
@@ -481,6 +525,7 @@ table:
     - direction
     - fill side
     category: dimension
+    filterable: true
   - name: total_level_size
     type: INTEGER
     description: Total number of lots resting on this price level after the fill, including both Mako's remaining
@@ -491,6 +536,7 @@ table:
     - level size
     - total resting size
     category: measure
+    typical_aggregation: SUM
   - name: last_update_tv
     type: FLOAT
     description: Deprecated -- see last_update_tv_bid and last_update_tv_ask instead. Historical field that recorded
@@ -499,6 +545,7 @@ table:
     source: "QuoterTrade.proto::lastUpdateTv"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: last_update_bv_bid
     type: FLOAT
     description: The bid base value (underlying bid price) at the time the quoter last updated its quotes for this
@@ -508,6 +555,7 @@ table:
     synonyms:
     - last bv bid
     category: measure
+    typical_aggregation: AVG
   - name: last_update_bv_ask
     type: FLOAT
     description: The ask base value (underlying ask price) at the time the quoter last updated its quotes for this
@@ -517,6 +565,7 @@ table:
     synonyms:
     - last bv ask
     category: measure
+    typical_aggregation: AVG
   - name: last_update_edge_bid
     type: FLOAT
     description: The bid-side minimum edge requirement at the time the quoter last updated its quotes for this
@@ -526,6 +575,7 @@ table:
     synonyms:
     - last edge bid
     category: measure
+    typical_aggregation: SUM
   - name: last_update_edge_ask
     type: FLOAT
     description: The ask-side minimum edge requirement at the time the quoter last updated its quotes for this
@@ -535,6 +585,7 @@ table:
     synonyms:
     - last edge ask
     category: measure
+    typical_aggregation: SUM
   - name: last_update_timestamp
     type: TIMESTAMP
     description: The event timestamp when quotes for this instrument were last updated by the quoter algorithm.
@@ -563,6 +614,7 @@ table:
     - theo bid
     - bid theo
     category: measure
+    typical_aggregation: AVG
   - name: tv_ask
     type: FLOAT
     description: The theoretical value on the ask side at the time of the fill, computed as the ref theo (from
@@ -573,6 +625,7 @@ table:
     - theo ask
     - ask theo
     category: measure
+    typical_aggregation: AVG
   - name: last_update_tv_bid
     type: FLOAT
     description: The bid-side theoretical value at the time the quoter last updated its quotes. Compare with tv_bid
@@ -582,6 +635,7 @@ table:
     synonyms:
     - last theo bid
     category: measure
+    typical_aggregation: AVG
   - name: last_update_tv_ask
     type: FLOAT
     description: The ask-side theoretical value at the time the quoter last updated its quotes. Compare with tv_ask
@@ -591,6 +645,7 @@ table:
     synonyms:
     - last theo ask
     category: measure
+    typical_aggregation: AVG
   - name: strike
     type: FLOAT
     description: Option strike price (exercise price) at which the holder can buy (call) or sell (put) the underlying.
@@ -602,6 +657,7 @@ table:
     - strike price
     - K
     category: measure
+    typical_aggregation: AVG
   - name: option_type
     type: INTEGER
     description: Numeric code indicating whether the option is a call or put. Used as the raw integer representation
@@ -611,6 +667,7 @@ table:
     - call put
     - C/P
     category: dimension
+    filterable: true
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
@@ -623,6 +680,7 @@ table:
     - call put name
     - option direction
     category: dimension
+    filterable: true
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract, indicating the exact date and time at which the option
@@ -641,6 +699,7 @@ table:
     synonyms:
     - internal symbol
     category: dimension
+    filterable: true
   - name: currency
     type: INTEGER
     description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
@@ -653,6 +712,7 @@ table:
     - ccy
     - currency code
     category: dimension
+    filterable: true
   - name: term
     type: STRING
     description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly, quarterly).
@@ -664,6 +724,7 @@ table:
     - maturity
     - expiry cycle
     category: dimension
+    filterable: true
   - name: inst_type_name
     type: STRING
     description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
@@ -679,6 +740,7 @@ table:
     - product type
     - security type
     category: dimension
+    filterable: true
   - name: bv_update_sequence_number
     type: INTEGER
     description: Sequence number of the base value update event at the time of this quoter fill. Used for correlating
@@ -686,6 +748,7 @@ table:
     source: "VtCommon.proto::bvUpdateSequenceNumber"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: bv_update_instrument_hash
     type: STRING
     description: SHA256 hash of the instrument whose base value update was active at the time of this quoter fill.
@@ -693,6 +756,7 @@ table:
     source: "VtCommon.proto::bvUpdateInstrumentHash"
     synonyms: []
     category: identifier
+    filterable: true
   - name: underlying_sequence_number
     type: INTEGER
     description: Sequence number of the underlying instrument's market data event associated with this quoter fill.
@@ -700,6 +764,7 @@ table:
     source: "VtCommon.proto::underlyingSequenceNumber"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: underlying_instrument_hash
     type: STRING
     description: SHA256 hash identifier of the underlying instrument. Links this quoter fill to the underlying's
@@ -708,6 +773,7 @@ table:
     source: "VtCommon.proto::underlyingInstrumentHash"
     synonyms: []
     category: identifier
+    filterable: true
   - name: pid
     type: STRING
     description: Process ID of the quoter application instance that handled this fill event. Used for debugging and
@@ -716,6 +782,7 @@ table:
     synonyms:
     - process id
     category: dimension
+    filterable: true
   - name: hostname
     type: STRING
     description: Hostname of the server running the quoter application that handled this fill. Used for operational
@@ -725,6 +792,7 @@ table:
     - host
     - server
     category: dimension
+    filterable: true
   - name: mako_order_id
     type: INTEGER
     description: Mako-assigned internal order identifier (OrderId in BookServer) for the resting quote that was filled.
@@ -735,6 +803,7 @@ table:
     - order id
     - quote id
     category: identifier
+    filterable: true
   - name: is_bv_invalid
     type: BOOLEAN
     description: Flag indicating whether the base value (underlying price) was invalid or stale at the time of the
@@ -743,6 +812,7 @@ table:
     source: "VtCommon.proto::isBvInvalid"
     synonyms: []
     category: dimension
+    filterable: true
   - name: exchange_timestamp
     type: TIMESTAMP
     description: Timestamp assigned by the exchange matching engine for this quoter fill. Represents the authoritative
@@ -771,6 +841,7 @@ table:
     - update in flight
     - updating flag
     category: dimension
+    filterable: true
   - name: underlying_exe_exch
     type: INTEGER
     description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
@@ -778,6 +849,7 @@ table:
     source: "VtCommon.proto::underlyingExeExch"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: underlying_exe_exch_name
     type: STRING
     description: Human-readable name of the exchange where the underlying instrument executes. Derived from the numeric
@@ -786,6 +858,7 @@ table:
     synonyms:
     - underlying exchange
     category: dimension
+    filterable: true
   - name: is_spark
     type: BOOLEAN
     description: Flag indicating whether this quoter event was processed via the Spark fast-path execution pipeline.
@@ -795,6 +868,7 @@ table:
     synonyms:
     - fast path
     category: dimension
+    filterable: true
   - name: ref_inst_carry_id
     type: INTEGER
     description: Reference instrument carry/dividend curve identifier, tracking the carry curve version used for this
@@ -802,6 +876,7 @@ table:
     source: "VtCommon.proto::refInstCarryId"
     synonyms: []
     category: identifier
+    filterable: true
   - name: ref_inst_curve_id
     type: INTEGER
     description: Reference instrument volatility curve identifier, tracking the vol curve version used for this specific
@@ -809,6 +884,7 @@ table:
     source: "VtCommon.proto::refInstCurveId"
     synonyms: []
     category: identifier
+    filterable: true
   - name: is_ref_theo_invalid
     type: BOOLEAN
     description: Flag indicating whether the reference theoretical value (ref_tv) was invalid or stale at the time of
@@ -817,6 +893,7 @@ table:
     source: "VtCommon.proto::isRefTheoInvalid"
     synonyms: []
     category: dimension
+    filterable: true
   - name: lb_enabled
     type: BOOLEAN
     description: Flag indicating whether lean-back mode was enabled for this instrument at the time of the quoter fill.
@@ -827,6 +904,7 @@ table:
     - lean-back
     - lean back mode
     category: dimension
+    filterable: true
   - name: edge_model_type
     type: INTEGER
     description: Numeric code identifying the edge model type used for this instrument during the quoter fill. Different
@@ -834,6 +912,7 @@ table:
     source: "VtCommon.proto::edgeModelType"
     synonyms: []
     category: dimension
+    filterable: true
   - name: edge_model_type_name
     type: STRING
     description: Human-readable name of the edge model type used for this instrument during the quoter fill. Derived
@@ -842,6 +921,7 @@ table:
     synonyms:
     - edge model
     category: dimension
+    filterable: true
   - name: streamsource_stream_id
     type: INTEGER
     description: Stream identifier from the event streaming infrastructure, indicating which logical stream this record
@@ -849,6 +929,7 @@ table:
     source: "QuoterTrade.proto::streamsource_stream_id"
     synonyms: []
     category: identifier
+    filterable: true
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
@@ -856,6 +937,7 @@ table:
     source: "QuoterTrade.proto::streamsource_event_id"
     synonyms: []
     category: identifier
+    filterable: true
   - name: streamsource_message_id
     type: INTEGER
     description: Message identifier within the source stream event, used when a single event contains multiple messages.
@@ -863,6 +945,7 @@ table:
     source: "QuoterTrade.proto::streamsource_message_id"
     synonyms: []
     category: identifier
+    filterable: true
   - name: datasource_pid
     type: INTEGER
     description: Process ID of the data source application that produced this record. Used for data provenance tracking
@@ -870,6 +953,7 @@ table:
     source: "QuoterTrade.proto::datasource_pid"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: datasource_hostname
     type: STRING
     description: Hostname of the server running the data source application that produced this record. Used for data
@@ -877,6 +961,7 @@ table:
     source: "QuoterTrade.proto::datasource_hostname"
     synonyms: []
     category: dimension
+    filterable: true
   - name: bid_price_0
     type: FLOAT
     description: Top-of-book bid price (best bid) at depth level 0 for this instrument at the time of the quoter fill.
@@ -886,6 +971,7 @@ table:
     - bid 0
     - best bid
     category: measure
+    typical_aggregation: AVG
   - name: ask_price_0
     type: FLOAT
     description: Top-of-book ask price (best offer) at depth level 0 for this instrument at the time of the quoter fill.
@@ -895,6 +981,7 @@ table:
     - ask 0
     - best ask
     category: measure
+    typical_aggregation: AVG
   - name: ask_volume_0
     type: INTEGER
     description: Number of contracts (lots) resting at the best ask (depth level 0) at the time of the quoter fill.
@@ -905,6 +992,7 @@ table:
     - ask size 0
     - best ask size
     category: measure
+    typical_aggregation: SUM
   - name: bid_volume_0
     type: INTEGER
     description: Number of contracts (lots) resting at the best bid (depth level 0) at the time of the quoter fill.
@@ -915,6 +1003,7 @@ table:
     - bid size 0
     - best bid size
     category: measure
+    typical_aggregation: SUM
   - name: ref_theoevent_stream_id
     type: STRING
     description: Stream identifier of the theo event that provided the reference theoretical values (ref_tv, ref_delta,
@@ -922,6 +1011,7 @@ table:
     source: "QuoterTrade.proto::refTheoeventStreamId"
     synonyms: []
     category: identifier
+    filterable: true
   - name: ref_theoevent_event_id
     type: STRING
     description: Event identifier of the theo event that provided the reference theoretical values for this quoter fill.
@@ -929,6 +1019,7 @@ table:
     source: "QuoterTrade.proto::refTheoeventEventId"
     synonyms: []
     category: identifier
+    filterable: true
   - name: last_trade_price
     type: FLOAT
     description: Last traded price for this instrument at the time of the quote update, added for KRX per-side quoting
@@ -939,6 +1030,7 @@ table:
     - last price
     - ltp
     category: measure
+    typical_aggregation: AVG
   - name: market_volume_bid
     type: INTEGER
     description: Total market volume resting on the bid side at the time of the quote update, added for KRX per-side
@@ -949,6 +1041,7 @@ table:
     - total bid volume
     - market bid size
     category: measure
+    typical_aggregation: SUM
   - name: market_volume_ask
     type: INTEGER
     description: Total market volume resting on the ask side at the time of the quote update, added for KRX per-side
@@ -959,6 +1052,7 @@ table:
     - total ask volume
     - market ask size
     category: measure
+    typical_aggregation: SUM
   - name: our_volume_bid
     type: INTEGER
     description: Mako's own volume resting on the bid side at the time of the quote update, added for KRX per-side
@@ -969,6 +1063,7 @@ table:
     - mako bid volume
     - our bid size
     category: measure
+    typical_aggregation: SUM
   - name: our_volume_ask
     type: INTEGER
     description: Mako's own volume resting on the ask side at the time of the quote update, added for KRX per-side
@@ -979,3 +1074,4 @@ table:
     - mako ask volume
     - our ask size
     category: measure
+    typical_aggregation: SUM

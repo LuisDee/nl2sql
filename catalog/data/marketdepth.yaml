@@ -25,6 +25,7 @@ table:
     source: "MarketDepth.proto::kafka_partition"
     synonyms: []
     category: identifier
+    filterable: true
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
@@ -32,6 +33,7 @@ table:
     source: "MarketDepth.proto::kafka_offset"
     synonyms: []
     category: identifier
+    filterable: true
   - name: event_date
     type: DATE
     description: Calendar date on which this market depth event occurred. May differ from trade_date in edge cases
@@ -39,6 +41,7 @@ table:
     source: "MarketDepth.proto::event_date"
     synonyms: []
     category: time
+    filterable: true
   - name: exchange_timestamp
     type: TIMESTAMP
     description: Timestamp assigned by the exchange matching engine for this order book update. Represents the
@@ -122,6 +125,7 @@ table:
     - instrument id
     - instrument key
     category: identifier
+    filterable: true
   - name: sequence_number
     type: INTEGER
     description: Monotonically increasing sequence number assigned to each market depth event for strict ordering.
@@ -132,6 +136,7 @@ table:
     - seq num
     - event sequence
     category: identifier
+    filterable: true
   - name: ask_price_0
     type: FLOAT
     description: Top-of-book ask price at depth level 0 (best offer). Level 0 is the tightest ask price available
@@ -143,6 +148,7 @@ table:
     - best ask
     - best offer
     category: measure
+    typical_aggregation: AVG
   - name: ask_price_1
     type: FLOAT
     description: Ask price at depth level 1 (second-best offer). Shows the next available selling price behind the
@@ -152,6 +158,7 @@ table:
     synonyms:
     - ask 1
     category: measure
+    typical_aggregation: AVG
   - name: ask_price_2
     type: FLOAT
     description: Ask price at depth level 2 (third-best offer). Represents the third tier of selling interest in the
@@ -160,6 +167,7 @@ table:
     synonyms:
     - ask 2
     category: measure
+    typical_aggregation: AVG
   - name: ask_price_3
     type: FLOAT
     description: Ask price at depth level 3 (fourth-best offer). Represents deeper selling interest in the order book.
@@ -168,6 +176,7 @@ table:
     synonyms:
     - ask 3
     category: measure
+    typical_aggregation: AVG
   - name: ask_price_4
     type: FLOAT
     description: Ask price at depth level 4 (deepest visible offer). The furthest available ask price in the 5-level
@@ -176,6 +185,7 @@ table:
     synonyms:
     - ask 4
     category: measure
+    typical_aggregation: AVG
   - name: bid_price_0
     type: FLOAT
     description: Top-of-book bid price at depth level 0 (best bid). Level 0 is the tightest bid price available
@@ -186,6 +196,7 @@ table:
     - bid 0
     - best bid
     category: measure
+    typical_aggregation: AVG
   - name: bid_price_1
     type: FLOAT
     description: Bid price at depth level 1 (second-best bid). Shows the next available buying price behind the
@@ -195,6 +206,7 @@ table:
     synonyms:
     - bid 1
     category: measure
+    typical_aggregation: AVG
   - name: bid_price_2
     type: FLOAT
     description: Bid price at depth level 2 (third-best bid). Represents the third tier of buying interest in the
@@ -203,6 +215,7 @@ table:
     synonyms:
     - bid 2
     category: measure
+    typical_aggregation: AVG
   - name: bid_price_3
     type: FLOAT
     description: Bid price at depth level 3 (fourth-best bid). Represents deeper buying interest in the order book.
@@ -211,6 +224,7 @@ table:
     synonyms:
     - bid 3
     category: measure
+    typical_aggregation: AVG
   - name: bid_price_4
     type: FLOAT
     description: Bid price at depth level 4 (deepest visible bid). The furthest available bid price in the 5-level
@@ -219,6 +233,7 @@ table:
     synonyms:
     - bid 4
     category: measure
+    typical_aggregation: AVG
   - name: ask_volume_0
     type: INTEGER
     description: Number of contracts (lots) resting at the best ask (depth level 0). Higher volume at the tightest
@@ -230,6 +245,7 @@ table:
     - best ask size
     - offer size
     category: measure
+    typical_aggregation: SUM
   - name: ask_volume_1
     type: INTEGER
     description: Number of contracts (lots) resting at ask depth level 1. Shows the amount of selling liquidity at
@@ -239,6 +255,7 @@ table:
     synonyms:
     - ask size 1
     category: measure
+    typical_aggregation: SUM
   - name: ask_volume_2
     type: INTEGER
     description: Number of contracts (lots) resting at ask depth level 2. Represents the selling liquidity at the
@@ -247,6 +264,7 @@ table:
     synonyms:
     - ask size 2
     category: measure
+    typical_aggregation: SUM
   - name: ask_volume_3
     type: INTEGER
     description: Number of contracts (lots) resting at ask depth level 3. Represents deeper selling liquidity in the
@@ -255,6 +273,7 @@ table:
     synonyms:
     - ask size 3
     category: measure
+    typical_aggregation: SUM
   - name: ask_volume_4
     type: INTEGER
     description: Number of contracts (lots) resting at ask depth level 4 (deepest visible). The furthest visible
@@ -264,6 +283,7 @@ table:
     synonyms:
     - ask size 4
     category: measure
+    typical_aggregation: SUM
   - name: bid_volume_0
     type: INTEGER
     description: Number of contracts (lots) resting at the best bid (depth level 0). Higher volume at the tightest
@@ -274,6 +294,7 @@ table:
     - bid size 0
     - best bid size
     category: measure
+    typical_aggregation: SUM
   - name: bid_volume_1
     type: INTEGER
     description: Number of contracts (lots) resting at bid depth level 1. Shows the amount of buying liquidity at
@@ -283,6 +304,7 @@ table:
     synonyms:
     - bid size 1
     category: measure
+    typical_aggregation: SUM
   - name: bid_volume_2
     type: INTEGER
     description: Number of contracts (lots) resting at bid depth level 2. Represents the buying liquidity at the
@@ -291,6 +313,7 @@ table:
     synonyms:
     - bid size 2
     category: measure
+    typical_aggregation: SUM
   - name: bid_volume_3
     type: INTEGER
     description: Number of contracts (lots) resting at bid depth level 3. Represents deeper buying liquidity in the
@@ -299,6 +322,7 @@ table:
     synonyms:
     - bid size 3
     category: measure
+    typical_aggregation: SUM
   - name: bid_volume_4
     type: INTEGER
     description: Number of contracts (lots) resting at bid depth level 4 (deepest visible). The furthest visible
@@ -308,6 +332,7 @@ table:
     synonyms:
     - bid size 4
     category: measure
+    typical_aggregation: SUM
   - name: ask_orders_0
     type: INTEGER
     description: Count of individual orders resting at the best ask (depth level 0). More orders at a level suggests
@@ -317,6 +342,7 @@ table:
     synonyms:
     - ask order count 0
     category: measure
+    typical_aggregation: AVG
   - name: ask_orders_1
     type: INTEGER
     description: Count of individual orders at ask depth level 1. More orders at this level suggests broader market
@@ -326,6 +352,7 @@ table:
     synonyms:
     - ask order count 1
     category: measure
+    typical_aggregation: AVG
   - name: ask_orders_2
     type: INTEGER
     description: Count of individual orders at ask depth level 2. Tracks the number of distinct sell orders resting
@@ -335,6 +362,7 @@ table:
     synonyms:
     - ask order count 2
     category: measure
+    typical_aggregation: AVG
   - name: ask_orders_3
     type: INTEGER
     description: Count of individual orders at ask depth level 3. Tracks the number of distinct sell orders at the
@@ -343,6 +371,7 @@ table:
     synonyms:
     - ask order count 3
     category: measure
+    typical_aggregation: AVG
   - name: ask_orders_4
     type: INTEGER
     description: Count of individual orders at ask depth level 4 (deepest visible). The furthest visible sell order
@@ -352,6 +381,7 @@ table:
     synonyms:
     - ask order count 4
     category: measure
+    typical_aggregation: AVG
   - name: bid_orders_0
     type: INTEGER
     description: Count of individual orders resting at the best bid (depth level 0). More orders at a level suggests
@@ -361,6 +391,7 @@ table:
     synonyms:
     - bid order count 0
     category: measure
+    typical_aggregation: AVG
   - name: bid_orders_1
     type: INTEGER
     description: Count of individual orders at bid depth level 1. More orders at this level suggests broader market
@@ -370,6 +401,7 @@ table:
     synonyms:
     - bid order count 1
     category: measure
+    typical_aggregation: AVG
   - name: bid_orders_2
     type: INTEGER
     description: Count of individual orders at bid depth level 2. Tracks the number of distinct buy orders resting
@@ -379,6 +411,7 @@ table:
     synonyms:
     - bid order count 2
     category: measure
+    typical_aggregation: AVG
   - name: bid_orders_3
     type: INTEGER
     description: Count of individual orders at bid depth level 3. Tracks the number of distinct buy orders at the
@@ -387,6 +420,7 @@ table:
     synonyms:
     - bid order count 3
     category: measure
+    typical_aggregation: AVG
   - name: bid_orders_4
     type: INTEGER
     description: Count of individual orders at bid depth level 4 (deepest visible). The furthest visible buy order
@@ -396,6 +430,7 @@ table:
     synonyms:
     - bid order count 4
     category: measure
+    typical_aggregation: AVG
   - name: implied_bid_price
     type: FLOAT
     description: Implied bid price derived from spread/strategy markets, showing synthetic buying liquidity created
@@ -407,6 +442,7 @@ table:
     - implied bid
     - synthetic bid
     category: measure
+    typical_aggregation: AVG
   - name: implied_bid_volume
     type: INTEGER
     description: Implied bid volume (contracts/lots) derived from spread/strategy markets, showing the synthetic
@@ -417,6 +453,7 @@ table:
     - implied bid size
     - synthetic bid size
     category: measure
+    typical_aggregation: SUM
   - name: implied_bid_orders
     type: INTEGER
     description: Count of implied bid orders derived from spread/strategy markets, representing the number of synthetic
@@ -426,6 +463,7 @@ table:
     synonyms:
     - implied bid count
     category: measure
+    typical_aggregation: AVG
   - name: implied_ask_price
     type: FLOAT
     description: Implied ask price derived from spread/strategy markets, showing synthetic selling liquidity created
@@ -438,6 +476,7 @@ table:
     - implied offer
     - synthetic ask
     category: measure
+    typical_aggregation: AVG
   - name: implied_ask_volume
     type: INTEGER
     description: Implied ask volume (contracts/lots) derived from spread/strategy markets, showing the synthetic
@@ -448,6 +487,7 @@ table:
     - implied ask size
     - synthetic ask size
     category: measure
+    typical_aggregation: SUM
   - name: implied_ask_orders
     type: INTEGER
     description: Count of implied ask orders derived from spread/strategy markets, representing the number of synthetic
@@ -457,6 +497,7 @@ table:
     synonyms:
     - implied ask count
     category: measure
+    typical_aggregation: AVG
   - name: keyframe
     type: BOOLEAN
     description: Boolean flag indicating whether this record is a complete orderbook snapshot (true) or an incremental
@@ -471,6 +512,7 @@ table:
     - full snapshot
     - is keyframe
     category: dimension
+    filterable: true
   - name: data_timestamp
     type: TIMESTAMP
     description: Timestamp recorded by the data pipeline when this market depth record was processed and stored.
@@ -497,6 +539,7 @@ table:
     source: "MarketDepth.proto::dataOrderIdentifier"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: streamsource_stream_id
     type: INTEGER
     description: Stream identifier from the event streaming infrastructure, indicating which logical stream this record
@@ -505,6 +548,7 @@ table:
     source: "MarketDepth.proto::streamsource_stream_id"
     synonyms: []
     category: identifier
+    filterable: true
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
@@ -512,6 +556,7 @@ table:
     source: "MarketDepth.proto::streamsource_event_id"
     synonyms: []
     category: identifier
+    filterable: true
   - name: streamsource_message_id
     type: INTEGER
     description: Message identifier within the source stream event, used when a single event contains multiple messages.
@@ -519,6 +564,7 @@ table:
     source: "MarketDepth.proto::streamsource_message_id"
     synonyms: []
     category: identifier
+    filterable: true
   - name: datasource_pid
     type: INTEGER
     description: Process ID of the data source application that produced this record. Used for data provenance tracking
@@ -527,6 +573,7 @@ table:
     source: "MarketDepth.proto::datasource_pid"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: datasource_hostname
     type: STRING
     description: Hostname of the server running the data source application that produced this record. Used for data
@@ -535,6 +582,7 @@ table:
     source: "MarketDepth.proto::datasource_hostname"
     synonyms: []
     category: dimension
+    filterable: true
   - name: market_state
     type: INTEGER
     description: Numeric code indicating the current trading state of the market for this instrument at the time of
@@ -548,6 +596,7 @@ table:
     - trading state
     - market status
     category: measure
+    typical_aggregation: AVG
   - name: strike
     type: FLOAT
     description: Option strike price (exercise price) at which the holder can buy (call) or sell (put) the underlying.
@@ -559,6 +608,7 @@ table:
     - strike price
     - K
     category: measure
+    typical_aggregation: AVG
   - name: option_type
     type: INTEGER
     description: Numeric code indicating whether the option is a call or put. Used as the raw integer representation
@@ -569,6 +619,7 @@ table:
     - call put
     - C/P
     category: dimension
+    filterable: true
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
@@ -582,6 +633,7 @@ table:
     - call put name
     - option direction
     category: dimension
+    filterable: true
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract, indicating the exact date and time at which the option
@@ -603,6 +655,7 @@ table:
     - internal symbol
     - mako ticker
     category: dimension
+    filterable: true
   - name: currency
     type: INTEGER
     description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
@@ -615,6 +668,7 @@ table:
     - ccy
     - currency code
     category: dimension
+    filterable: true
   - name: inst_type_name
     type: STRING
     description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
@@ -630,6 +684,7 @@ table:
     - product type
     - security type
     category: dimension
+    filterable: true
   - name: term
     type: STRING
     description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly, quarterly).
@@ -642,6 +697,7 @@ table:
     - maturity
     - expiry cycle
     category: dimension
+    filterable: true
   - name: trade_date
     type: DATE
     description: Business date of the trading session, used as the primary partition column for this table. Always
@@ -653,6 +709,7 @@ table:
     - business date
     - trading date
     category: time
+    filterable: true
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -665,3 +722,4 @@ table:
     - instrument
     - underlying symbol
     category: dimension
+    filterable: true

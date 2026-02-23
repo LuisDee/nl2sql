@@ -31,6 +31,7 @@ table:
     - business date
     - trading date
     category: time
+    filterable: true
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -43,6 +44,7 @@ table:
     - instrument
     - underlying symbol
     category: dimension
+    filterable: true
   - name: portfolio
     type: STRING
     description: Name of the Mako trading portfolio or book to which this click trade belongs. Used for filtering
@@ -53,6 +55,7 @@ table:
     - trading book
     - strategy
     category: dimension
+    filterable: true
   - name: instrument_hash
     type: STRING
     description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
@@ -63,6 +66,7 @@ table:
     - instrument id
     - instrument key
     category: identifier
+    filterable: true
   - name: inst_type_name
     type: STRING
     description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
@@ -78,6 +82,7 @@ table:
     - product type
     - security type
     category: dimension
+    filterable: true
   - name: expiry_timestamp
     type: STRING
     description: Expiration timestamp of the option contract as a string, indicating the date and time at which the option
@@ -89,6 +94,7 @@ table:
     - expiration
     - maturity date
     category: dimension
+    filterable: true
   - name: term
     type: STRING
     description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly, quarterly).
@@ -100,6 +106,7 @@ table:
     - maturity
     - expiry cycle
     category: dimension
+    filterable: true
   - name: currency
     type: STRING
     description: Currency code identifying the denomination of the instrument. Unlike other data tables which use numeric
@@ -113,6 +120,7 @@ table:
     - ccy
     - currency code
     category: dimension
+    filterable: true
   - name: trader_id
     type: STRING
     description: Identifier of the trader who manually executed this click trade. Unique per trader within the Mako
@@ -124,6 +132,7 @@ table:
     - user id
     - trader name
     category: identifier
+    filterable: true
   - name: mako_id
     type: STRING
     description: Mako system internal identifier for this click trade, assigned by the position management system.
@@ -133,6 +142,7 @@ table:
     synonyms:
     - mako identifier
     category: identifier
+    filterable: true
   - name: algorithm
     type: STRING
     description: Name of the algorithm or strategy associated with this click trade. For manual click trades, this
@@ -144,6 +154,7 @@ table:
     - algo name
     - trading algo
     category: dimension
+    filterable: true
   - name: channel
     type: STRING
     description: Trading channel through which this click trade was executed (e.g. electronic exchange, voice broker,
@@ -154,6 +165,7 @@ table:
     - execution channel
     - trading channel
     category: dimension
+    filterable: true
   - name: inventory
     type: STRING
     description: Inventory or sub-account classification for this click trade. Determines which internal inventory
@@ -164,6 +176,7 @@ table:
     - sub-account
     - inventory account
     category: dimension
+    filterable: true
   - name: account
     type: STRING
     description: Trading account identifier for this click trade (e.g. BGC, MGN for broker-facilitated trades). Used
@@ -175,6 +188,7 @@ table:
     - broker account
     - clearing account
     category: dimension
+    filterable: true
   - name: transaction_timestamp
     type: TIMESTAMP
     description: Timestamp when this click trade transaction occurred in the Mako position management system. Represents
@@ -216,6 +230,7 @@ table:
     synonyms:
     - exchange trading date
     category: time
+    filterable: true
   - name: exchange_transaction_id
     type: STRING
     description: Transaction identifier assigned by the exchange for this click trade execution. Used for exchange-level
@@ -224,6 +239,7 @@ table:
     synonyms:
     - exchange trade id
     category: identifier
+    filterable: true
   - name: exchange_order_id
     type: STRING
     description: Order identifier assigned by the exchange for the order that resulted in this click trade fill. Used
@@ -232,6 +248,7 @@ table:
     synonyms:
     - exchange order
     category: identifier
+    filterable: true
   - name: agg_pos_timestamp
     type: STRING
     description: Timestamp of the aggregate position snapshot associated with this click trade, stored as STRING. Records
@@ -239,6 +256,7 @@ table:
     source: "PosData.proto::aggPosTimestamp"
     synonyms: []
     category: dimension
+    filterable: true
   - name: agg_pos_timestamp_ns
     type: STRING
     description: Nanosecond component of the aggregate position timestamp, stored as STRING. Provides additional
@@ -246,6 +264,7 @@ table:
     source: "PosData.proto::aggPosTimestamp"
     synonyms: []
     category: dimension
+    filterable: true
   - name: agg_pos_date
     type: STRING
     description: Date of the aggregate position snapshot, stored as STRING. Records which position snapshot date this
@@ -253,6 +272,7 @@ table:
     source: "PosData.proto::aggPosDate"
     synonyms: []
     category: dimension
+    filterable: true
   - name: revision
     type: INTEGER
     description: Revision number of this click trade record in the position management system. Increments when the trade
@@ -263,6 +283,7 @@ table:
     - version
     - amendment number
     category: identifier
+    filterable: true
   - name: revision_timestamp
     type: TIMESTAMP
     description: Timestamp when this revision of the click trade record was created. Records when the trade was last
@@ -290,6 +311,7 @@ table:
     - lots
     - trade quantity
     category: measure
+    typical_aggregation: SUM
   - name: price
     type: FLOAT
     description: Execution price of this click trade as reported by the exchange. The price at which the order was filled.
@@ -300,6 +322,7 @@ table:
     - execution price
     - trade price
     category: measure
+    typical_aggregation: AVG
   - name: size
     type: STRING
     description: Position size or trade size stored as STRING. Interpretation depends on the position_type field -- for
@@ -311,6 +334,7 @@ table:
     - lots
     - position size
     category: dimension
+    filterable: true
   - name: tv
     type: FLOAT
     description: Theoretical value (fair value) of the option at the time of this click trade. Represents Mako's
@@ -324,6 +348,7 @@ table:
     - machine price
     - TV
     category: measure
+    typical_aggregation: AVG
   - name: counterparty
     type: STRING
     description: Counterparty or market participant on the other side of this click trade. May be a broker name, exchange
@@ -335,6 +360,7 @@ table:
     - other side
     - broker
     category: dimension
+    filterable: true
   - name: revisor
     type: STRING
     description: Identifier of the person or system that last revised this click trade record. Tracks accountability
@@ -343,6 +369,7 @@ table:
     synonyms:
     - amender
     category: dimension
+    filterable: true
   - name: transaction_id
     type: INTEGER
     description: Unique transaction identifier assigned by Mako's position management system for this click trade.
@@ -351,6 +378,7 @@ table:
     synonyms:
     - trade id
     category: identifier
+    filterable: true
   - name: order_id
     type: INTEGER
     description: Mako order identifier for the order that resulted in this click trade fill. Used for tracking the
@@ -359,6 +387,7 @@ table:
     synonyms:
     - mako order id
     category: identifier
+    filterable: true
   - name: position_type
     type: INTEGER
     description: Numeric code indicating the type of position event. POSITION=80 (position snapshot), TRADE=84 (trade
@@ -372,6 +401,7 @@ table:
     - event type
     - pos type
     category: dimension
+    filterable: true
   - name: position_id
     type: INTEGER
     description: Unique position identifier linking this trade to its resulting position in the Mako system. Used for
@@ -380,6 +410,7 @@ table:
     synonyms:
     - pos id
     category: identifier
+    filterable: true
   - name: curve_id
     type: INTEGER
     description: Identifier of the volatility curve active at the time of this click trade. Used to trace which vol
@@ -390,6 +421,7 @@ table:
     - vol curve
     - vol curve id
     category: identifier
+    filterable: true
   - name: carry_id
     type: INTEGER
     description: Identifier of the carry/dividend curve active at the time of this click trade. Used for tracing rate
@@ -399,6 +431,7 @@ table:
     - dividend curve
     - carry curve id
     category: identifier
+    filterable: true
   - name: trade_id
     type: INTEGER
     description: Unique trade identifier assigned by the position management system for this specific click trade
@@ -408,6 +441,7 @@ table:
     - fill id
     - execution id
     category: identifier
+    filterable: true
   - name: text
     type: STRING
     description: Free-text field associated with this click trade, typically containing trader notes, comments, or
@@ -419,6 +453,7 @@ table:
     - comment
     - trade note
     category: dimension
+    filterable: true
   - name: strike
     type: STRING
     description: Option strike price stored as STRING in clicktrade (unlike FLOAT in other tables). The exercise price
@@ -430,6 +465,7 @@ table:
     - strike price
     - K
     category: dimension
+    filterable: true
   - name: option_type
     type: STRING
     description: Option type code stored as STRING in clicktrade (unlike INTEGER in other tables). Indicates whether the
@@ -439,6 +475,7 @@ table:
     - call put
     - C/P
     category: dimension
+    filterable: true
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Use for
@@ -451,6 +488,7 @@ table:
     - call put name
     - option direction
     category: dimension
+    filterable: true
   - name: mako_symbol
     type: STRING
     description: Internal Mako system symbol for the instrument, used as the canonical identifier within Mako's trading
@@ -459,6 +497,7 @@ table:
     synonyms:
     - internal symbol
     category: dimension
+    filterable: true
   - name: contract_size
     type: STRING
     description: Contract multiplier (point value) for the instrument, stored as STRING. Defines how many units of the
@@ -470,6 +509,7 @@ table:
     - point value
     - contract multiplier
     category: dimension
+    filterable: true
   - name: underlying_instrument_hash
     type: STRING
     description: SHA256 hash identifier of the underlying instrument. Links this click trade to the underlying's market
@@ -477,6 +517,7 @@ table:
     source: "PosData.proto::underlyingInstrumentHash"
     synonyms: []
     category: identifier
+    filterable: true
   - name: underlying_exe_exch
     type: INTEGER
     description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
@@ -484,6 +525,7 @@ table:
     source: "PosData.proto::underlyingExeExch"
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: underlying_exe_exch_name
     type: STRING
     description: Human-readable name of the exchange where the underlying instrument executes. Derived from the numeric
@@ -492,6 +534,7 @@ table:
     synonyms:
     - underlying exchange
     category: dimension
+    filterable: true
   - name: combo_type_name
     type: STRING
     description: Type of combo/spread strategy for this click trade (e.g. calendar spread, vertical spread, straddle,
@@ -502,6 +545,7 @@ table:
     - spread type
     - strategy type
     category: dimension
+    filterable: true
   - name: executable_exchange
     type: INTEGER
     description: Numeric exchange code identifying the exchange where this click trade order was executed. May differ
@@ -512,6 +556,7 @@ table:
     - execution exchange
     - fill exchange
     category: measure
+    typical_aggregation: AVG
   - name: is_parent
     type: BOOLEAN
     description: Flag indicating whether this row represents the parent (combo/strategy) level of a multi-leg trade.
@@ -522,6 +567,7 @@ table:
     - combo level
     - parent flag
     category: dimension
+    filterable: true
   - name: is_ref_component
     type: INTEGER
     description: Flag indicating whether this leg is the reference component of a combo trade. The reference component
@@ -531,6 +577,7 @@ table:
     synonyms:
     - reference leg
     category: measure
+    typical_aggregation: AVG
   - name: leg_index
     type: STRING
     description: Index of this leg within the combo/spread trade structure, stored as STRING. Identifies the position
@@ -540,6 +587,7 @@ table:
     synonyms:
     - leg number
     category: dimension
+    filterable: true
   - name: leg_ratio
     type: STRING
     description: Ratio of this leg within the combo trade, stored as STRING. Defines the quantity multiplier for this
@@ -550,6 +598,7 @@ table:
     - ratio
     - leg multiplier
     category: dimension
+    filterable: true
   - name: liquid
     type: INTEGER
     description: Liquidity classification flag for this instrument at the time of the click trade. Indicates the
@@ -559,6 +608,7 @@ table:
     synonyms:
     - liquidity flag
     category: measure
+    typical_aggregation: AVG
   - name: no_legs
     type: STRING
     description: Number of legs in the combo/spread trade, stored as STRING. Indicates the complexity of the strategy
@@ -570,6 +620,7 @@ table:
     - leg count
     - number of legs
     category: dimension
+    filterable: true
   - name: parent_combo_type_name
     type: STRING
     description: Combo type name of the parent instrument when this row represents a leg within a larger strategy.
@@ -579,6 +630,7 @@ table:
     synonyms:
     - parent strategy type
     category: dimension
+    filterable: true
   - name: parent_feed_code
     type: STRING
     description: Exchange feed code of the parent combo instrument. Used for identifying the parent strategy's exchange
@@ -587,6 +639,7 @@ table:
     synonyms:
     - parent ticker
     category: dimension
+    filterable: true
   - name: parent_instrument_hash
     type: STRING
     description: SHA256 hash identifier of the parent combo instrument when this row represents an individual leg.
@@ -595,6 +648,7 @@ table:
     synonyms:
     - parent hash
     category: identifier
+    filterable: true
   - name: parent_is_combo
     type: BOOLEAN
     description: Flag indicating whether the parent instrument is a combo/spread. When true, this click trade is part
@@ -605,6 +659,7 @@ table:
     - is combo
     - is spread
     category: dimension
+    filterable: true
   - name: ref_inst_type_name
     type: STRING
     description: Instrument type name of the reference instrument in a combo trade. Identifies what type of instrument
@@ -613,6 +668,7 @@ table:
     synonyms:
     - reference instrument type
     category: dimension
+    filterable: true
   - name: ref_term
     type: STRING
     description: Term/tenor of the reference instrument in a combo trade. Identifies the expiry cycle of the reference
@@ -621,6 +677,7 @@ table:
     synonyms:
     - reference term
     category: dimension
+    filterable: true
   - name: total_traded_size
     type: STRING
     description: Total size traded across all legs of a multi-leg trade, stored as STRING. Represents the aggregate
@@ -631,6 +688,7 @@ table:
     - total lots
     - total volume
     category: dimension
+    filterable: true
   - name: underlying_inst_type_name
     type: STRING
     description: Instrument type name of the underlying instrument (e.g. FUTURE, EQUITY_INDEX). Identifies the asset
@@ -639,6 +697,7 @@ table:
     synonyms:
     - underlying type
     category: dimension
+    filterable: true
   - name: underlying_symbol
     type: STRING
     description: Exchange symbol of the underlying instrument. Identifies the specific underlying product (e.g. the
@@ -648,3 +707,4 @@ table:
     - underlying ticker
     - underlying product
     category: dimension
+    filterable: true

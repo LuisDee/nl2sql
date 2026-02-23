@@ -23,11 +23,13 @@ table:
     description: Kafka partition the record was consumed from.
     synonyms: []
     category: identifier
+    filterable: true
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record.
     synonyms: []
     category: identifier
+    filterable: true
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the instrument.
@@ -36,6 +38,7 @@ table:
     - product
     - instrument
     category: dimension
+    filterable: true
   - name: trade_date
     type: DATE
     description: Business date of the trade, used for partitioning.
@@ -44,11 +47,13 @@ table:
     - business date
     - trading date
     category: time
+    filterable: true
   - name: event_date
     type: DATE
     description: Event date.
     synonyms: []
     category: time
+    filterable: true
   - name: exchange_timestamp
     type: TIMESTAMP
     description: Timestamp from the exchange matching engine.
@@ -97,23 +102,27 @@ table:
     - instrument id
     - instrument key
     category: identifier
+    filterable: true
   - name: event_type
     type: INTEGER
     description: Type of the event.
     synonyms: []
     category: dimension
+    filterable: true
   - name: sequence_number
     type: INTEGER
     description: Sequence number for ordering events.
     synonyms:
     - seq num
     category: identifier
+    filterable: true
   - name: side
     type: INTEGER
     description: Side of the market data event (bid/ask/trade).
     synonyms:
     - market side
     category: measure
+    typical_aggregation: AVG
   - name: price
     type: FLOAT
     description: Trade execution price.
@@ -121,6 +130,7 @@ table:
     - fill price
     - execution price
     category: measure
+    typical_aggregation: AVG
   - name: quantity
     type: INTEGER
     description: Quantity in the market data event.
@@ -128,39 +138,46 @@ table:
     - size
     - volume
     category: measure
+    typical_aggregation: AVG
   - name: order_id
     type: INTEGER
     description: Exchange order identifier.
     synonyms: []
     category: identifier
+    filterable: true
   - name: order_position
     type: INTEGER
     description: Position of the order in the book.
     synonyms:
     - queue position
     category: measure
+    typical_aggregation: AVG
   - name: market_state
     type: INTEGER
     description: Current market state (e.g. open, auction, closed).
     synonyms:
     - trading state
     category: measure
+    typical_aggregation: AVG
   - name: keyframe
     type: BOOLEAN
     description: Whether this is a full snapshot (keyframe) or incremental update.
     synonyms:
     - snapshot
     category: dimension
+    filterable: true
   - name: instrument_type
     type: STRING
     description: Type of instrument.
     synonyms: []
     category: dimension
+    filterable: true
   - name: data_order_identifier
     type: INTEGER
     description: Data order identifier.
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: data_timestamp
     type: TIMESTAMP
     description: 'Timestamp field: data_timestamp.'
@@ -177,6 +194,7 @@ table:
     synonyms:
     - snapshot
     category: dimension
+    filterable: true
   - name: strike
     type: FLOAT
     description: Option strike price.
@@ -185,6 +203,7 @@ table:
     - strike price
     - K
     category: measure
+    typical_aggregation: AVG
   - name: option_type
     type: INTEGER
     description: Option type code (call/put).
@@ -192,12 +211,14 @@ table:
     - call put
     - C/P
     category: dimension
+    filterable: true
   - name: option_type_name
     type: STRING
     description: Option type name (Call or Put).
     synonyms:
     - call put name
     category: dimension
+    filterable: true
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract.
@@ -212,12 +233,14 @@ table:
     synonyms:
     - internal symbol
     category: dimension
+    filterable: true
   - name: currency
     type: INTEGER
     description: Currency identifier for the instrument.
     synonyms:
     - ccy
     category: dimension
+    filterable: true
   - name: term
     type: STRING
     description: Expiry term or tenor label (e.g. monthly, weekly).
@@ -226,6 +249,7 @@ table:
     - expiry term
     - maturity
     category: dimension
+    filterable: true
   - name: inst_type_name
     type: STRING
     description: Instrument type name (e.g. Option, Future, Spread).
@@ -233,48 +257,58 @@ table:
     - instrument type
     - product type
     category: dimension
+    filterable: true
   - name: cancel_quantity
     type: STRING
     description: Cancel quantity.
     synonyms: []
     category: dimension
+    filterable: true
   - name: hidden_quantity
     type: STRING
     description: Hidden quantity.
     synonyms: []
     category: dimension
+    filterable: true
   - name: fill_quantity
     type: STRING
     description: Fill quantity.
     synonyms: []
     category: dimension
+    filterable: true
   - name: mako_sequence_number
     type: INTEGER
     description: Mako sequence number.
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: streamsource_stream_id
     type: INTEGER
     description: 'Data provenance field: streamsource_stream_id.'
     synonyms: []
     category: identifier
+    filterable: true
   - name: streamsource_event_id
     type: INTEGER
     description: 'Data provenance field: streamsource_event_id.'
     synonyms: []
     category: identifier
+    filterable: true
   - name: streamsource_message_id
     type: INTEGER
     description: 'Data provenance field: streamsource_message_id.'
     synonyms: []
     category: identifier
+    filterable: true
   - name: datasource_pid
     type: INTEGER
     description: 'Data provenance field: datasource_pid.'
     synonyms: []
     category: measure
+    typical_aggregation: AVG
   - name: datasource_hostname
     type: STRING
     description: 'Data provenance field: datasource_hostname.'
     synonyms: []
     category: dimension
+    filterable: true

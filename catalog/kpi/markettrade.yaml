@@ -405,17 +405,17 @@ table:
     type: INTEGER
     description: >-
       NOT IMPLEMENTED — always 0. This field was intended to flag whether a trade was executed by Mako
-      (reported by the exchange Virtual Trader) versus an external party, but the VT flag is not yet
-      populated. DO NOT filter on this column — it will exclude all rows. All trades in the KPI tables
-      are Mako trades by definition (the pipeline only ingests Mako executions).
+      versus an external party, but the VT flag is not yet populated. DO NOT filter on this column —
+      it will exclude all rows. markettrade contains ALL exchange trades (Mako and non-Mako). To get
+      only Mako trades, use the specific sub-tables: quotertrade, brokertrade, clicktrade, otoswing.
     synonyms:
     - our trade
     - mako execution
     example_values:
     - 0
     business_rules: >-
-      WARNING: Do NOT filter on is_mako_trade. It is always 0 (not implemented). All rows in KPI
-      markettrade are Mako trades — no filter needed.
+      WARNING: Do NOT filter on is_mako_trade — always 0 (not implemented). markettrade contains ALL
+      exchange trades. For Mako-only trades, query quotertrade/brokertrade/clicktrade/otoswing.
     category: measure
     typical_aggregation: AVG
     source: MarketTrade.isMakoTrade (data/MarketTrade.proto)

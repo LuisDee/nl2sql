@@ -11,48 +11,65 @@ table:
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: instrument_hash
       type: STRING
       description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: market_state
       type: INTEGER
       description: Numeric code representing the current market state (pre-open, open, auction, halt, close, etc.).
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.marketState (data/OboMarketData.proto)"
+      synonyms: ["trading state"]
     - name: data_timestamp
       type: TIMESTAMP
       description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp (data/OboMarketData.proto)"
+      synonyms: ["data time", "ingestion time"]
     - name: data_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
         (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp_ns (data/OboMarketData.proto)"
     - name: sequence_number
       type: INTEGER
       description: Sequence number (numeric).
       category: identifier
       filterable: true
+      source: "MarketEvent.sequenceNumber (data/OboMarketData.proto)"
+      synonyms: ["seq num"]
     - name: instrument_type
       type: STRING
       description: Type classification of the instrument for market state purposes.
       category: dimension
       filterable: true
+      source: "MarketEvent.instrumentType_name (data/OboMarketData.proto)"
     - name: keyframe
       type: BOOLEAN
       description: If true, message is part of a keyframe/snapshot of current order book state.
       category: dimension
       filterable: true
+      source: "kafka infrastructure"
+      synonyms: ["snapshot"]
     - name: data_order_identifier
       type: INTEGER
       description: Sequence number relative to current exchange message for deterministic ordering.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.dataOrderIdentifier (data/OboMarketData.proto)"

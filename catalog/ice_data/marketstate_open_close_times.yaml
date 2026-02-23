@@ -11,16 +11,21 @@ table:
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: instrument_type
       type: STRING
       description: Type classification of the instrument for market state purposes.
       category: dimension
       filterable: true
+      source: "MarketEvent.instrumentType_name (data/OboMarketData.proto)"
     - name: open_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the open occurred.

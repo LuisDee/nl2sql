@@ -26,36 +26,42 @@ table:
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: portfolio
       type: STRING
       description: Name of the Mako portfolio to which the trading algorithm belongs.
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["book", "trading book"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
       source: kafka infrastructure
+      synonyms: ["date", "business date", "trading date"]
     - name: mako_id
       type: STRING
       description: Mako-internal unique identifier for this trade or order.
       category: identifier
       filterable: true
       source: PositionEvent.makoId (data/PosData.proto)
+      synonyms: ["mako identifier"]
     - name: trader_id
       type: STRING
       description: Identifier of the trader responsible for this trade.
       category: identifier
       filterable: true
       source: PositionEvent.traderId (data/PosData.proto)
+      synonyms: ["trader", "user id", "trader name"]
     - name: algorithm
       type: STRING
       description: Name of the Mako algorithm that generated this trade or event.
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["strategy", "algo name", "trading algo"]
     - name: routed_exchange
       type: INTEGER
       description: Exchange to which this order was routed for execution.
@@ -68,12 +74,14 @@ table:
       category: measure
       typical_aggregation: AVG
       source: PositionEvent.executableExchange (data/PosData.proto)
+      synonyms: ["execution exchange", "fill exchange"]
     - name: channel
       type: STRING
       description: Data channel or feed identifier for this event.
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["execution channel", "trading channel"]
     - name: transaction_properties
       type: INTEGER
       description: A mask of TransactionProperty. From PositionEvent proto.
@@ -104,18 +112,21 @@ table:
       category: identifier
       filterable: true
       source: kafka infrastructure
+      synonyms: ["version", "amendment number"]
     - name: inventory
       type: STRING
       description: Inventory account associated with this trade or position.
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["sub-account", "inventory account"]
     - name: account
       type: STRING
       description: Account identifier for this trade.
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["trading account", "broker account", "clearing account"]
     - name: fill_id
       type: INTEGER
       description: Unique identifier for this fill (partial or full execution) within an order.
@@ -140,29 +151,34 @@ table:
       category: identifier
       filterable: true
       source: PositionEvent.transactionId (data/PosData.proto)
+      synonyms: ["trade id"]
     - name: order_id
       type: INTEGER
       description: Mako-internal order identifier linking fills to the parent order.
       category: identifier
       filterable: true
       source: PositionEvent.orderId (data/PosData.proto)
+      synonyms: ["mako order id"]
     - name: exchange_transaction_id
       type: STRING
       description: Exchange-assigned transaction identifier for this event.
       category: identifier
       filterable: true
       source: PositionEvent.exchangeTransactionId (data/PosData.proto)
+      synonyms: ["exchange trade id"]
     - name: exchange_order_id
       type: STRING
       description: Exchange-assigned order identifier.
       category: identifier
       filterable: true
       source: PositionEvent.exchangeOrderId (data/PosData.proto)
+      synonyms: ["exchange order"]
     - name: transaction_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the transaction occurred.
       category: time
       source: PositionEvent.transactionTimestamp (data/PosData.proto)
+      synonyms: ["transaction time", "booking time"]
     - name: transaction_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of the transaction timestamp. Combine with transaction_timestamp for
@@ -175,17 +191,20 @@ table:
       category: time
       filterable: true
       source: derived (data-loader)
+      synonyms: ["exchange trading date"]
     - name: exchange_timestamp
       type: TIMESTAMP
       description: Exchange-provided nano-second timestamp of the event. From PositionEvent proto.
       category: time
       source: PositionEvent.exchangeTimestamp (data/PosData.proto)
+      synonyms: ["exchange time", "matching engine time"]
     - name: exchange_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
         event. From PositionEvent proto.
       category: time
       source: PositionEvent.exchangeTimestamp_ns (data/PosData.proto)
+      synonyms: ["exchange time ns"]
     - name: exchange_info
       type: STRING
       description: Additional exchange-provided information for this event.
@@ -216,24 +235,28 @@ table:
       category: dimension
       filterable: true
       source: PositionEvent.positionType (data/PosData.proto)
+      synonyms: ["event type", "pos type"]
     - name: position_id
       type: INTEGER
       description: Identifier for the position this event belongs to within the portfolio.
       category: identifier
       filterable: true
       source: PositionEvent.positionId (data/PosData.proto)
+      synonyms: ["pos id"]
     - name: size
       type: INTEGER
       description: Number of lots or contracts in the trade or order.
       category: measure
       typical_aggregation: AVG
       source: kafka infrastructure
+      synonyms: ["quantity", "lots", "position size"]
     - name: tv
       type: FLOAT
       description: Theoretical value the VT computed for this instrument at the time of the event.
       category: measure
       typical_aggregation: AVG
       source: kafka infrastructure
+      synonyms: ["theo", "theoretical value", "fair value", "machine price", "TV"]
     - name: ectv
       type: FLOAT
       description: Exchange-cleared theoretical value used for settlement calculations.
@@ -308,6 +331,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: kafka infrastructure
+      synonyms: ["fill price", "execution price", "trade price"]
     - name: deflection_scale
       type: FLOAT
       description: Scale factor for the deflection adjustment applied to pricing.
@@ -320,17 +344,20 @@ table:
       category: identifier
       filterable: true
       source: PositionEvent.curveId (data/PosData.proto)
+      synonyms: ["vol curve", "vol curve id"]
     - name: carry_id
       type: INTEGER
       description: Identifier for the carry/interest rate curve used in theoretical calculations.
       category: identifier
       filterable: true
       source: PositionEvent.carryId (data/PosData.proto)
+      synonyms: ["dividend curve", "carry curve id"]
     - name: revision_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the revision occurred.
       category: time
       source: PositionEvent.revisionTimestamp (data/PosData.proto)
+      synonyms: ["amendment time"]
     - name: revision_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of the revision timestamp. Combine with revision_timestamp for full
@@ -343,6 +370,7 @@ table:
       category: identifier
       filterable: true
       source: PositionEvent.tradeId (data/PosData.proto)
+      synonyms: ["fill id", "execution id"]
     - name: company_position
       type: INTEGER
       description: Net company-wide position for this instrument after this event.
@@ -355,6 +383,7 @@ table:
       category: measure
       typical_aggregation: SUM
       source: PositionEvent.tradedSize (data/PosData.proto)
+      synonyms: ["fill size", "quantity", "lots", "trade quantity"]
     - name: message_trade_date
       type: DATE
       description: Trade date embedded within the original proto message.
@@ -371,24 +400,28 @@ table:
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["counter party", "other side", "broker"]
     - name: text
       type: STRING
       description: Free-text field containing additional descriptive information about this event.
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["note", "comment", "trade note"]
     - name: revisor
       type: STRING
       description: Identifier of the user or process that last revised this record.
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["amender"]
     - name: instrument_hash
       type: STRING
       description: SHA256 of Mako instrument. From PositionEvent proto.
       category: identifier
       filterable: true
       source: PositionEvent.instrumentHash (data/PosData.proto)
+      synonyms: ["instrument id", "instrument key"]
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
@@ -426,6 +459,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: instrument enrichment (data-loader)
+      synonyms: ["exercise price", "strike price", "K"]
     - name: option_type
       type: INTEGER
       description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
@@ -433,17 +467,20 @@ table:
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["call put", "C/P"]
     - name: option_type_name
       type: STRING
       description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["call put name", "option direction"]
     - name: expiry_timestamp
       type: TIMESTAMP
       description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
       source: instrument enrichment (data-loader)
+      synonyms: ["expiry", "expiration", "maturity date"]
     - name: mako_symbol
       type: STRING
       description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
@@ -451,12 +488,14 @@ table:
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["internal symbol"]
     - name: currency
       type: INTEGER
       description: Enum appears as an int in composition. From PositionEvent proto.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["ccy", "currency code"]
     - name: inst_type_name
       type: STRING
       description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
@@ -464,9 +503,11 @@ table:
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["instrument type", "product type", "security type"]
     - name: term
       type: STRING
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]

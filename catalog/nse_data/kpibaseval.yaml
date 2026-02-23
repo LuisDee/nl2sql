@@ -12,21 +12,27 @@ table:
         tracking and replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: kafka_offset
       type: INTEGER
       description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
         pipeline replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: hardware_nic_rx_timestamp
       type: TIMESTAMP
       description: Hardware timestamp of moment price packet hit the network card.
       category: time
+      source: "VtCommon.proto::hardwareNicRxTimestamp"
+      synonyms: ["nic timestamp", "wire time"]
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of hardware nic rx timestamp. Hardware timestamp of moment price
         packet hit the network card.
       category: time
+      source: "VtCommon.proto::hardwareNicRxTimestamp"
+      synonyms: ["nic ns", "hw ns"]
     - name: software_rx_timestamp
       type: TIMESTAMP
       description: Software timestamp - time just before message decode.
@@ -41,6 +47,8 @@ table:
       description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
+      source: "PosData.proto::portfolio"
+      synonyms: ["book", "trading book"]
     - name: option_underlying_type
       type: INTEGER
       description: Type of the option underlying instrument.
@@ -85,18 +93,25 @@ table:
       type: TIMESTAMP
       description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp (data/OboMarketData.proto)"
+      synonyms: ["data time", "ingestion time"]
     - name: data_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
         (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp_ns (data/OboMarketData.proto)"
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]

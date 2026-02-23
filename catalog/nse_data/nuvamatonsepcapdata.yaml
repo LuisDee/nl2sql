@@ -12,20 +12,27 @@ table:
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: message_trade_date
       type: DATE
       description: Trade date embedded within the original proto message.
       category: time
+      source: "derived (data-loader)"
     - name: exchange_order_id
       type: INTEGER
       description: Exchange-assigned order identifier.
       category: identifier
       filterable: true
+      source: "PosData.proto::exchangeOrderId"
+      synonyms: ["exchange order"]
     - name: trader_id
       type: INTEGER
       description: Identifier of the trader responsible for this trade.
       category: identifier
       filterable: true
+      source: "PosData.proto::traderId"
+      synonyms: ["trader", "user id", "trader name"]
     - name: source_ip
       type: STRING
       description: Source IP address of the captured network packet.
@@ -88,8 +95,12 @@ table:
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]

@@ -26,6 +26,7 @@ table:
       category: dimension
       filterable: true
       source: OroSwingData.symbol (data/OroSwingData.proto)
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: portfolio
       type: STRING
       description: Name of the Mako portfolio to which the algo belongs. From VtCommon proto (shared across trade
@@ -33,36 +34,42 @@ table:
       category: dimension
       filterable: true
       source: OroSwingData.portfolio (data/OroSwingData.proto)
+      synonyms: ["book", "trading book"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
       source: kafka infrastructure
+      synonyms: ["date", "business date", "trading date"]
     - name: instrument_hash
       type: STRING
       description: SHA256 of Mako instrument. From VtCommon proto (shared across trade tables).
       category: identifier
       filterable: true
       source: OroSwingData.instrumentHash (data/OroSwingData.proto)
+      synonyms: ["instrument id", "instrument key"]
     - name: algo
       type: STRING
       description: Name of the originating algo. From VtCommon proto (shared across trade tables).
       category: dimension
       filterable: true
       source: OroSwingData.algo (data/OroSwingData.proto)
+      synonyms: ["strategy", "algo name", "trading algo"]
     - name: ref_curve_id
       type: INTEGER
       description: ID of the vol curve for this symbol. From VtCommon proto (shared across trade tables).
       category: identifier
       filterable: true
       source: OroSwingData.refCurveId (data/OroSwingData.proto)
+      synonyms: ["ref curve", "reference curve"]
     - name: ref_carry_id
       type: INTEGER
       description: ID from rates infra. From VtCommon proto (shared across trade tables).
       category: identifier
       filterable: true
       source: OroSwingData.refCarryId (data/OroSwingData.proto)
+      synonyms: ["ref carry", "reference carry"]
     - name: ref_tv
       type: FLOAT
       description: Theoretical value of instrument on last curve ID update. From VtCommon proto (shared across trade
@@ -70,54 +77,63 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.refTv (data/OroSwingData.proto)
+      synonyms: ["reference theo", "ref fair value"]
     - name: ref_delta
       type: FLOAT
       description: Delta of instrument on last vol curve update. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.refDelta (data/OroSwingData.proto)
+      synonyms: ["reference delta"]
     - name: ref_gamma
       type: FLOAT
       description: Gamma of instrument on last vol curve update. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.refGamma (data/OroSwingData.proto)
+      synonyms: ["reference gamma"]
     - name: ref_base_price
       type: FLOAT
       description: Unadjusted raw baseval on last vol curve update. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.refBasePrice (data/OroSwingData.proto)
+      synonyms: ["ref underlying", "reference price", "ref base"]
     - name: ref_roll
       type: FLOAT
       description: Roll value on last curve update. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.refRoll (data/OroSwingData.proto)
+      synonyms: ["reference roll"]
     - name: raw_bv_bid
       type: FLOAT
       description: Unadjusted base val bid price at time of swing. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.rawBvBid (data/OroSwingData.proto)
+      synonyms: ["bv bid", "raw base bid"]
     - name: raw_bv_bid_size
       type: INTEGER
       description: Target size of raw base val bid price. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.rawBvBidSize (data/OroSwingData.proto)
+      synonyms: ["bv bid size", "base bid size"]
     - name: raw_bv_ask
       type: FLOAT
       description: Unadjusted base val ask price at time of swing. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.rawBvAsk (data/OroSwingData.proto)
+      synonyms: ["bv ask", "raw base ask"]
     - name: raw_bv_ask_size
       type: INTEGER
       description: Target size of raw base val ask price. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.rawBvAskSize (data/OroSwingData.proto)
+      synonyms: ["bv ask size", "base ask size"]
     - name: layered_base_bid
       type: FLOAT
       description: Transformation of base val bid incorporating open delta position. From VtCommon proto (shared across
@@ -125,6 +141,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.layeredBaseBid (data/OroSwingData.proto)
+      synonyms: ["adjusted base bid"]
     - name: layered_base_bid_size
       type: INTEGER
       description: Max number of deltas willing to take on at layered base bid. From VtCommon proto (shared across trade
@@ -132,12 +149,14 @@ table:
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.layeredBaseBidSize (data/OroSwingData.proto)
+      synonyms: ["adjusted bid size"]
     - name: layered_base_ask
       type: FLOAT
       description: Transformation of base val ask. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.layeredBaseAsk (data/OroSwingData.proto)
+      synonyms: ["adjusted base ask"]
     - name: layered_base_ask_size
       type: INTEGER
       description: Max number of deltas willing to take on at layered base ask. From VtCommon proto (shared across trade
@@ -145,12 +164,14 @@ table:
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.layeredBaseAskSize (data/OroSwingData.proto)
+      synonyms: ["adjusted ask size"]
     - name: layered_base_adjustment
       type: FLOAT
       description: Adjustment to relevant raw baseval side. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.layeredBaseAdjustment (data/OroSwingData.proto)
+      synonyms: ["base adjustment"]
     - name: odr_adjustment
       type: FLOAT
       description: Adjustment to raw base val due to open delta retreat. From VtCommon proto (shared across trade
@@ -158,6 +179,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.odrAdjustment (data/OroSwingData.proto)
+      synonyms: ["odr"]
     - name: inflight_deflection_tv_adjustment_bid
       type: FLOAT
       description: Estimated TV adjustment while waiting for fill confirmation (bid). From VtCommon proto (shared across
@@ -165,6 +187,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.inflightDeflectionTvAdjustmentBid (data/OroSwingData.proto)
+      synonyms: ["inflight bid adjustment"]
     - name: inflight_deflection_tv_adjustment_ask
       type: FLOAT
       description: Estimated TV adjustment while waiting for fill confirmation (ask). From VtCommon proto (shared across
@@ -172,6 +195,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.inflightDeflectionTvAdjustmentAsk (data/OroSwingData.proto)
+      synonyms: ["inflight ask adjustment"]
     - name: internal_tv_adjustment_bid
       type: FLOAT
       description: Internal adjustment/deflection made by VT after hearing about a fill (bid). From VtCommon proto
@@ -179,6 +203,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.internalTvAdjustmentBid (data/OroSwingData.proto)
+      synonyms: ["internal adj bid"]
     - name: internal_tv_adjustment_ask
       type: FLOAT
       description: Internal adjustment/deflection made by VT after hearing about a fill (ask). From VtCommon proto
@@ -186,6 +211,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.internalTvAdjustmentAsk (data/OroSwingData.proto)
+      synonyms: ["internal adj ask"]
     - name: nhr_adjustment_bid
       type: FLOAT
       description: Estimated adjustment to bid edge based on current position in local strikes. From VtCommon proto
@@ -193,6 +219,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.nhrAdjustmentBid (data/OroSwingData.proto)
+      synonyms: ["nhr bid", "nhr adj bid"]
     - name: nhr_adjustment_ask
       type: FLOAT
       description: Estimated adjustment to ask edge based on current position in local strikes. From VtCommon proto
@@ -200,30 +227,35 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.nhrAdjustmentAsk (data/OroSwingData.proto)
+      synonyms: ["nhr ask", "nhr adj ask"]
     - name: base_edge_bid
       type: FLOAT
       description: Net edge of bid side (model edge + fees + NHR). From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.baseEdgeBid (data/OroSwingData.proto)
+      synonyms: ["bid edge", "bid-side edge"]
     - name: base_edge_ask
       type: FLOAT
       description: Net edge of ask side. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.baseEdgeAsk (data/OroSwingData.proto)
+      synonyms: ["ask edge", "ask-side edge"]
     - name: fees
       type: FLOAT
       description: Per-lot fees. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.fees (data/OroSwingData.proto)
+      synonyms: ["exchange fees", "transaction costs", "trading costs"]
     - name: roll
       type: FLOAT
       description: Roll value at time of swing/trade. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.roll (data/OroSwingData.proto)
+      synonyms: ["calendar roll", "roll value", "carry cost"]
     - name: bv_side
       type: STRING
       description: Which side bid/ask of the baseVal the VT is swinging off. From VtCommon proto (shared across trade
@@ -231,12 +263,14 @@ table:
       category: dimension
       filterable: true
       source: OroSwingData.bvSide_name (data/OroSwingData.proto)
+      synonyms: ["base value side"]
     - name: delta_adjusted_base_price
       type: FLOAT
       description: Raw baseval plus odr/layered base adjustments. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.deltaAdjustedBasePrice (data/OroSwingData.proto)
+      synonyms: ["delta adjusted_base_price", "adjusted base price"]
     - name: tv
       type: FLOAT
       description: Theoretical value the VT saw at time of swing/market trade. From VtCommon proto (shared across trade
@@ -244,102 +278,119 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.tv (data/OroSwingData.proto)
+      synonyms: ["theo", "theoretical value", "fair value", "machine price", "TV"]
     - name: base_sequence_number
       type: INTEGER
       description: Base sequence number (numeric).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.NULL (data/OroSwingData.proto)
+      synonyms: ["base seq"]
     - name: option_sequence_number
       type: INTEGER
       description: Last received price tick for this option. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.optionSequenceNumber (data/OroSwingData.proto)
+      synonyms: ["option seq"]
     - name: base_instrument_hash
       type: STRING
       description: SHA256 hash identifier for the base instrument.
       category: identifier
       filterable: true
       source: OroSwingData.NULL (data/OroSwingData.proto)
+      synonyms: ["base hash"]
     - name: hardware_nic_rx_timestamp
       type: TIMESTAMP
       description: Hardware timestamp of moment price packet hit the network card. From VtCommon proto (shared across
         trade tables).
       category: time
       source: OroSwingData.hardwareNicRxTimestamp (data/OroSwingData.proto)
+      synonyms: ["nic timestamp", "wire time"]
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of hardware nic rx timestamp. Hardware timestamp of moment price
         packet hit the network card. From VtCommon proto (shared across trade tables).
       category: time
       source: OroSwingData.hardwareNicRxTimestamp_ns (data/OroSwingData.proto)
+      synonyms: ["nic ns", "hw ns"]
     - name: event_timestamp
       type: TIMESTAMP
       description: Moment VT decided to trade (Swing) or processed event (MarketTrade). From VtCommon proto (shared
         across trade tables).
       category: time
       source: OroSwingData.eventTimestamp (data/OroSwingData.proto)
+      synonyms: ["event time", "process time"]
     - name: event_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of event timestamp. Moment VT decided to trade (Swing) or processed
         event (MarketTrade). From VtCommon proto (shared across trade tables).
       category: time
       source: OroSwingData.eventTimestamp_ns (data/OroSwingData.proto)
+      synonyms: ["event time ns"]
     - name: event_type
       type: STRING
       description: VT Event that triggered the swing. From OroSwingData proto.
       category: dimension
       filterable: true
       source: OroSwingData.eventType (data/OroSwingData.proto)
+      synonyms: ["vt event type", "trigger event"]
     - name: market_price
       type: FLOAT
       description: Top-of-book market price on opposite side at time of swing. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.marketPrice (data/OroSwingData.proto)
+      synonyms: ["mkt price", "market level"]
     - name: market_size
       type: INTEGER
       description: Top-of-book market volume on opposite side at time of swing. From OroSwingData proto.
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.marketSize (data/OroSwingData.proto)
+      synonyms: ["mkt size", "available size"]
     - name: routed_price
       type: FLOAT
       description: Trade price sent in our order message to exchange. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.routedPrice (data/OroSwingData.proto)
+      synonyms: ["intended price", "target price"]
     - name: routed_size
       type: FLOAT
       description: Trade size sent in our order message to exchange. From OroSwingData proto.
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.routedSize (data/OroSwingData.proto)
+      synonyms: ["intended size", "target size"]
     - name: routed_buy_sell
       type: STRING
       description: Direction of our trade order. 0=buy, 1=sell. From OroSwingData proto.
       category: dimension
       filterable: true
       source: OroSwingData.routedBuySell_name (data/OroSwingData.proto)
+      synonyms: ["routed side", "swing direction", "order side"]
     - name: avg_trade_price
       type: FLOAT
       description: Average price of constituent fills. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.avgTradePrice (data/OroSwingData.proto)
+      synonyms: ["avg fill price", "average execution price", "vwap"]
     - name: swing_edge
       type: FLOAT
       description: Edge that we swung for. From OroSwingData proto.
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.swingEdge (data/OroSwingData.proto)
+      synonyms: ["swing profit", "swing pnl", "expected edge"]
     - name: trade_volume
       type: INTEGER
       description: Trade volume filled. 0 if swung and missed. From OroSwingData proto.
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.tradeVolume (data/OroSwingData.proto)
+      synonyms: ["fill volume", "executed volume", "filled lots"]
     - name: user_id
       type: INTEGER
       description: Algo-internal id. From OroSwingData proto.
@@ -352,60 +403,70 @@ table:
       category: identifier
       filterable: true
       source: OroSwingData.makoOrderId (data/OroSwingData.proto)
+      synonyms: ["order id", "quote id"]
     - name: exch_order_id
       type: STRING
       description: Exchange-assigned ID of our order. From OroSwingData proto.
       category: identifier
       filterable: true
       source: OroSwingData.exchOrderId (data/OroSwingData.proto)
+      synonyms: ["exchange order id"]
     - name: exch_trans_id
       type: STRING
       description: Exchange-assigned id of the transaction. From OroSwingData proto.
       category: identifier
       filterable: true
       source: OroSwingData.exchTransId (data/OroSwingData.proto)
+      synonyms: ["exchange transaction id"]
     - name: latency_stats_prcx
       type: INTEGER
       description: Time spent awaiting software decode of price packet. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.latencyStatsPRCX (data/OroSwingData.proto)
+      synonyms: ["prcx latency", "decode wait time"]
     - name: latency_stats_prcs
       type: INTEGER
       description: Time spent in price feed decoder. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.latencyStatsPRCS (data/OroSwingData.proto)
+      synonyms: ["prcs latency", "decoder time"]
     - name: latency_stats_vtio
       type: INTEGER
       description: Time spent by the VT to initiate the swing. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.latencyStatsVTIO (data/OroSwingData.proto)
+      synonyms: ["vtio latency", "vt decision time"]
     - name: latency_stats_bkio
       type: INTEGER
       description: Time in DMA layer. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.latencyStatsBKIO (data/OroSwingData.proto)
+      synonyms: ["bkio latency", "dma latency"]
     - name: latency_stats_qmio
       type: INTEGER
       description: Time throttled within QM. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.latencyStatsQMIO (data/OroSwingData.proto)
+      synonyms: ["qmio latency", "throttle time", "qm throttle"]
     - name: latency_stats_itio
       type: INTEGER
       description: Time taken by order interface to form message and send order. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.latencyStatsITIO (data/OroSwingData.proto)
+      synonyms: ["itio latency", "order send time"]
     - name: latency_stats_itex
       type: INTEGER
       description: Meaning differs between exchanges. From OroSwingData proto.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.latencyStatsITEX (data/OroSwingData.proto)
+      synonyms: ["itex latency", "exchange latency"]
     - name: strike
       type: FLOAT
       description: Strike price for options, enriched from the instruments reference table. NULL for non-option
@@ -413,6 +474,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: instrument enrichment (data-loader)
+      synonyms: ["exercise price", "strike price", "K"]
     - name: option_type
       type: INTEGER
       description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
@@ -420,17 +482,20 @@ table:
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["call put", "C/P"]
     - name: option_type_name
       type: STRING
       description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["call put name", "option direction"]
     - name: expiry_timestamp
       type: TIMESTAMP
       description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
       source: instrument enrichment (data-loader)
+      synonyms: ["expiry", "expiration", "maturity date"]
     - name: mako_symbol
       type: STRING
       description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
@@ -438,18 +503,21 @@ table:
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["internal symbol"]
     - name: currency
       type: INTEGER
       description: Enum appears as an int in composition. From OroSwingData proto.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["ccy", "currency code"]
     - name: term
       type: STRING
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]
     - name: inst_type_name
       type: STRING
       description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
@@ -457,6 +525,7 @@ table:
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["instrument type", "product type", "security type"]
     - name: bv_update_sequence_number
       type: INTEGER
       description: Price tick of base val instrument that triggered most recent baseval change. From VtCommon proto
@@ -483,18 +552,21 @@ table:
       category: identifier
       filterable: true
       source: OroSwingData.underlyingInstrumentHash (data/OroSwingData.proto)
+      synonyms: ["underlying hash", "underlying id"]
     - name: pid
       type: INTEGER
       description: Process ID of the data source that produced this record.
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.NULL (data/OroSwingData.proto)
+      synonyms: ["process id"]
     - name: hostname
       type: STRING
       description: Hostname of the data source that produced this record.
       category: dimension
       filterable: true
       source: OroSwingData.NULL (data/OroSwingData.proto)
+      synonyms: ["host", "server"]
     - name: order_type
       type: STRING
       description: The order type of the swing, ie IOC or GFD. From OroSwingData proto.
@@ -514,24 +586,28 @@ table:
       category: dimension
       filterable: true
       source: OroSwingData.IsBvInvalid (data/OroSwingData.proto)
+      synonyms: ["bad base value", "invalid bv"]
     - name: exchange_timestamp
       type: TIMESTAMP
       description: Exchange-provided nano-second timestamp of the event. From VtCommon proto (shared across trade
         tables).
       category: time
       source: OroSwingData.exchangeTimestamp (data/OroSwingData.proto)
+      synonyms: ["exchange time", "matching engine time"]
     - name: exchange_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
         event. From VtCommon proto (shared across trade tables).
       category: time
       source: OroSwingData.exchangeTimestamp_ns (data/OroSwingData.proto)
+      synonyms: ["exchange time ns"]
     - name: underlying_exe_exch
       type: INTEGER
       description: Exchange where the underlying trades. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.underlyingExeExch (data/OroSwingData.proto)
+      synonyms: ["underlying exchange id"]
     - name: underlying_exe_exch_name
       type: STRING
       description: Exchange where the underlying trades. From VtCommon proto (shared across trade tables)
@@ -539,12 +615,14 @@ table:
       category: dimension
       filterable: true
       source: OroSwingData.underlyingExeExch_name (data/OroSwingData.proto)
+      synonyms: ["underlying exchange"]
     - name: is_spark
       type: BOOLEAN
       description: Denotes if VT is using a sparkOrder interface. From VtCommon proto (shared across trade tables).
       category: dimension
       filterable: true
       source: OroSwingData.isSpark (data/OroSwingData.proto)
+      synonyms: ["fast path"]
     - name: ref_inst_carry_id
       type: INTEGER
       description: Carry Id of last theo update received by algo for this instrument. From VtCommon proto (shared across
@@ -566,24 +644,28 @@ table:
       category: dimension
       filterable: true
       source: OroSwingData.isRefTheoInvalid (data/OroSwingData.proto)
+      synonyms: ["invalid theo", "bad theo"]
     - name: lb_enabled
       type: BOOLEAN
       description: Boolean flag indicating whether the layered base feature was enabled.
       category: dimension
       filterable: true
       source: OroSwingData.lbEnabled (data/OroSwingData.proto)
+      synonyms: ["lean-back", "lean back mode"]
     - name: edge_model_type
       type: INTEGER
       description: Numeric code for the edge computation model type used by the VT.
       category: dimension
       filterable: true
       source: OroSwingData.edgeModelType (data/OroSwingData.proto)
+      synonyms: ["model type", "edge model"]
     - name: edge_model_type_name
       type: STRING
       description: Human-readable name for the edge model type enum value.
       category: dimension
       filterable: true
       source: OroSwingData.edgeModelType_name (data/OroSwingData.proto)
+      synonyms: ["edge model"]
     - name: streamsource_stream_id
       type: INTEGER
       description: Stream source stream id identifier from the data streaming infrastructure.
@@ -620,24 +702,28 @@ table:
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.bid_price_0 (data/OroSwingData.proto)
+      synonyms: ["bid 0", "best bid"]
     - name: ask_price_0
       type: FLOAT
       description: Ask-side unadjusted top-of-book price. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: AVG
       source: OroSwingData.ask_price_0 (data/OroSwingData.proto)
+      synonyms: ["ask 0", "best ask", "best offer"]
     - name: ask_volume_0
       type: INTEGER
       description: Ask-side unadjusted top-of-book volume. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.ask_volume_0 (data/OroSwingData.proto)
+      synonyms: ["ask size 0", "best ask size", "offer size"]
     - name: bid_volume_0
       type: INTEGER
       description: Bid-side unadjusted top-of-book volume. From VtCommon proto (shared across trade tables).
       category: measure
       typical_aggregation: SUM
       source: OroSwingData.bid_volume_0 (data/OroSwingData.proto)
+      synonyms: ["bid size 0", "best bid size"]
     - name: ref_theoevent_stream_id
       type: INTEGER
       description: Reference theoevent stream id from the last vol curve update (theoServer callback).

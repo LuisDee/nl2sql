@@ -11,25 +11,34 @@ table:
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: mako_ingress_timestamp
       type: TIMESTAMP
       description: Timestamp injected by the switch when the data packet arrives into Mako network.
       category: time
+      source: "MarketEvent.makoIngressTimestamp (data/OboMarketData.proto)"
+      synonyms: ["ingress time", "software receive time"]
     - name: mako_ingress_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
         data packet arrives into Mako network.
       category: time
+      source: "MarketEvent.makoIngressTimestamp_ns (data/OboMarketData.proto)"
     - name: sequence_number
       type: INTEGER
       description: Sequence number (numeric).
       category: identifier
       filterable: true
+      source: "MarketEvent.sequenceNumber (data/OboMarketData.proto)"
+      synonyms: ["seq num"]
     - name: channel_id
       type: INTEGER
       description: Channel identifier for the data feed or connection.
@@ -81,34 +90,43 @@ table:
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: mako_symbol
       type: STRING
       description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
         join.
       category: dimension
       filterable: true
+      source: "PosData.proto::makoSymbol"
+      synonyms: ["internal symbol"]
     - name: streamsource_stream_id
       type: INTEGER
       description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.streamId (data/OboMarketData.proto)"
     - name: streamsource_event_id
       type: INTEGER
       description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.eventId (data/OboMarketData.proto)"
     - name: streamsource_message_id
       type: INTEGER
       description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.messageId (data/OboMarketData.proto)"
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
     - name: datasource_hostname
       type: STRING
       description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"

@@ -11,59 +11,74 @@ table:
       description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
         internally for data pipeline monitoring and replay.
       category: time
+      source: "Kafka metadata"
+      synonyms: ["kafka time", "ingestion time"]
     - name: record_written_timestamp
       type: TIMESTAMP
       description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
         data freshness and pipeline latency.
       category: time
+      source: "Pipeline metadata"
+      synonyms: ["write time", "bq write time"]
     - name: kafka_partition
       type: INTEGER
       description: Kafka partition number from which this record was consumed. Used internally for data pipeline
         tracking and replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: kafka_offset
       type: INTEGER
       description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
         pipeline replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: partition_timestamp_local
       type: TIMESTAMP
       description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
         pipeline.
       category: time
+      source: "kafka infrastructure"
     - name: partition_number
       type: INTEGER
       description: Numeric partition identifier within the data pipeline. Used for data distribution and parallel
         processing.
       category: measure
       typical_aggregation: AVG
+      source: "kafka infrastructure"
     - name: stream_id
       type: INTEGER
       description: Unique identifier for the data stream.
       category: identifier
       filterable: true
+      source: "Theoreticals.proto::streamId"
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
     - name: datasource_hostname
       type: STRING
       description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"
     - name: event_type
       type: STRING
       description: VT Event that triggered the swing.
       category: dimension
       filterable: true
+      source: "MarketEvent.eventType (data/OboMarketData.proto)"
+      synonyms: ["vt event type", "trigger event"]
     - name: metadata
       type: RECORD
       description: Nested metadata record containing stream identification and entity scope.
@@ -78,3 +93,4 @@ table:
       type: DATE
       description: Trade date embedded within the original proto message.
       category: time
+      source: "derived (data-loader)"

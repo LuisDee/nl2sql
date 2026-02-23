@@ -12,181 +12,244 @@ table:
         tracking and replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: kafka_offset
       type: INTEGER
       description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
         pipeline replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: event_date
       type: DATE
       description: Date of the event, may differ from trade_date for overnight sessions.
       category: time
       filterable: true
+      source: "derived (data-loader)"
     - name: exchange_timestamp
       type: TIMESTAMP
       description: Exchange-provided nano-second timestamp of the event.
       category: time
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms: ["exchange time", "matching engine time"]
     - name: hw_nic_rx_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the hw nic rx occurred.
       category: time
+      source: "MarketEvent.hardwareNicRxTimestamp (data/OboMarketData.proto)"
+      synonyms: ["nic timestamp", "wire time", "hardware timestamp"]
     - name: mako_ingress_timestamp
       type: TIMESTAMP
       description: Timestamp injected by the switch when the data packet arrives into Mako network.
       category: time
+      source: "MarketEvent.makoIngressTimestamp (data/OboMarketData.proto)"
+      synonyms: ["ingress time", "software receive time"]
     - name: software_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the software occurred.
       category: time
+      source: "MarketEvent.softwareRxTimestamp (data/OboMarketData.proto)"
+      synonyms: ["software time", "process time"]
     - name: exchange_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
         event.
       category: time
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms: ["exchange time ns"]
     - name: hw_nic_rx_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of the hw nic rx timestamp. Combine with hw_nic_rx_timestamp for full
         nanosecond-resolution timing.
       category: time
+      source: "MarketEvent.hardwareNicRxTimestamp_ns (data/OboMarketData.proto)"
     - name: mako_ingress_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
         data packet arrives into Mako network.
       category: time
+      source: "MarketEvent.makoIngressTimestamp_ns (data/OboMarketData.proto)"
     - name: software_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of the software timestamp. Combine with software_timestamp for full
         nanosecond-resolution timing.
       category: time
+      source: "MarketEvent.softwareRxTimestamp_ns (data/OboMarketData.proto)"
     - name: instrument_hash
       type: STRING
       description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: event_type
       type: INTEGER
       description: VT Event that triggered the swing.
       category: dimension
       filterable: true
+      source: "MarketEvent.eventType (data/OboMarketData.proto)"
+      synonyms: ["vt event type", "trigger event"]
     - name: sequence_number
       type: INTEGER
       description: Sequence number (numeric).
       category: identifier
       filterable: true
+      source: "MarketEvent.sequenceNumber (data/OboMarketData.proto)"
+      synonyms: ["seq num"]
     - name: side
       type: INTEGER
       description: 'Side of the order or quote: BID (buy) or ASK (sell).'
       category: measure
       typical_aggregation: AVG
+      source: "kafka infrastructure"
+      synonyms: ["market side"]
     - name: price
       type: FLOAT
       description: Price of the trade or order.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::price"
+      synonyms: ["fill price", "execution price", "trade price"]
     - name: quantity
       type: INTEGER
       description: Quantity of the trade or order in number of lots.
       category: measure
       typical_aggregation: AVG
+      source: "kafka infrastructure"
+      synonyms: ["size", "volume"]
     - name: order_id
       type: INTEGER
       description: Mako-internal order identifier linking fills to the parent order.
       category: identifier
       filterable: true
+      source: "PosData.proto::orderId"
+      synonyms: ["mako order id"]
     - name: order_position
       type: INTEGER
       description: The position of the order in the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.orderPosition (data/OboMarketData.proto)"
+      synonyms: ["queue position"]
     - name: market_state
       type: INTEGER
       description: Numeric code representing the current market state (pre-open, open, auction, halt, close, etc.).
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.marketState (data/OboMarketData.proto)"
+      synonyms: ["trading state"]
     - name: keyframe
       type: BOOLEAN
       description: If true, message is part of a keyframe/snapshot of current order book state.
       category: dimension
       filterable: true
+      source: "kafka infrastructure"
+      synonyms: ["snapshot"]
     - name: instrument_type
       type: STRING
       description: Type classification of the instrument for market state purposes.
       category: dimension
       filterable: true
+      source: "MarketEvent.instrumentType_name (data/OboMarketData.proto)"
     - name: data_order_identifier
       type: INTEGER
       description: Sequence number relative to current exchange message for deterministic ordering.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.dataOrderIdentifier (data/OboMarketData.proto)"
     - name: data_timestamp
       type: TIMESTAMP
       description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp (data/OboMarketData.proto)"
+      synonyms: ["data time", "ingestion time"]
     - name: data_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
         (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp_ns (data/OboMarketData.proto)"
     - name: is_snap
       type: BOOLEAN
       description: Boolean flag indicating whether the snap condition is true.
       category: dimension
       filterable: true
+      source: "derived (data-loader)"
+      synonyms: ["snapshot"]
     - name: inst_type_name
       type: STRING
       description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
         reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::instTypeName"
+      synonyms: ["instrument type", "product type", "security type"]
     - name: strike
       type: FLOAT
       description: Strike price for options, enriched from the instruments reference table. NULL for non-option
         instruments.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::strike"
+      synonyms: ["exercise price", "strike price", "K"]
     - name: term
       type: STRING
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::term"
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]
     - name: option_type
       type: INTEGER
       description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
         instruments.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionType"
+      synonyms: ["call put", "C/P"]
     - name: option_type_name
       type: STRING
       description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionTypeName"
+      synonyms: ["call put name", "option direction"]
     - name: expiry_timestamp
       type: TIMESTAMP
       description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
+      source: "PosData.proto::expiryTimestamp"
+      synonyms: ["expiry", "expiration", "maturity date"]
     - name: mako_symbol
       type: STRING
       description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
         join.
       category: dimension
       filterable: true
+      source: "PosData.proto::makoSymbol"
+      synonyms: ["internal symbol"]
     - name: currency
       type: INTEGER
       description: Enum appears as an int in composition.
       category: dimension
       filterable: true
+      source: "PosData.proto::currency"
+      synonyms: ["ccy", "currency code"]
     - name: pos_exch
       type: INTEGER
       description: Enum appears as an int in composition.
@@ -197,43 +260,52 @@ table:
       description: On TradeSummary events only.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.cancelQuantity (data/OboMarketData.proto)"
     - name: hidden_quantity
       type: INTEGER
       description: On TradeSummary events only.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.hiddenQuantity (data/OboMarketData.proto)"
     - name: fill_quantity
       type: INTEGER
       description: On TradeSummary events only.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.fillQuantity (data/OboMarketData.proto)"
     - name: mako_sequence_number
       type: INTEGER
       description: Instrument-level absolute sequence number.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.makoSequenceNumber (data/OboMarketData.proto)"
     - name: streamsource_stream_id
       type: INTEGER
       description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.streamId (data/OboMarketData.proto)"
     - name: streamsource_event_id
       type: INTEGER
       description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.eventId (data/OboMarketData.proto)"
     - name: streamsource_message_id
       type: INTEGER
       description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.messageId (data/OboMarketData.proto)"
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
     - name: datasource_hostname
       type: STRING
       description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"

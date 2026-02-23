@@ -16,100 +16,132 @@ table:
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: kafka_message_timestamp
       type: TIMESTAMP
       description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
         internally for data pipeline monitoring and replay.
       category: time
+      source: "Kafka metadata"
+      synonyms: ["kafka time", "ingestion time"]
     - name: record_written_timestamp
       type: TIMESTAMP
       description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
         data freshness and pipeline latency.
       category: time
+      source: "Pipeline metadata"
+      synonyms: ["write time", "bq write time"]
     - name: kafka_partition
       type: INTEGER
       description: Kafka partition number from which this record was consumed. Used internally for data pipeline
         tracking and replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: kafka_offset
       type: INTEGER
       description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
         pipeline replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: portfolio
       type: STRING
       description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
+      source: "PosData.proto::portfolio"
+      synonyms: ["book", "trading book"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: partition_timestamp_local
       type: TIMESTAMP
       description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
         pipeline.
       category: time
+      source: "kafka infrastructure"
     - name: partition_number
       type: INTEGER
       description: Numeric partition identifier within the data pipeline. Used for data distribution and parallel
         processing.
       category: measure
       typical_aggregation: AVG
+      source: "kafka infrastructure"
     - name: event_date
       type: DATE
       description: Date of the event, may differ from trade_date for overnight sessions.
       category: time
       filterable: true
+      source: "derived (data-loader)"
     - name: exchange_timestamp
       type: TIMESTAMP
       description: Exchange-provided nano-second timestamp of the event.
       category: time
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms: ["exchange time", "matching engine time"]
     - name: exchange_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
         event.
       category: time
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms: ["exchange time ns"]
     - name: hw_nic_rx_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the hw nic rx occurred.
       category: time
+      source: "MarketEvent.hardwareNicRxTimestamp (data/OboMarketData.proto)"
+      synonyms: ["nic timestamp", "wire time", "hardware timestamp"]
     - name: hw_nic_rx_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of the hw nic rx timestamp. Combine with hw_nic_rx_timestamp for full
         nanosecond-resolution timing.
       category: time
+      source: "MarketEvent.hardwareNicRxTimestamp_ns (data/OboMarketData.proto)"
     - name: mako_ingress_timestamp
       type: TIMESTAMP
       description: Timestamp injected by the switch when the data packet arrives into Mako network.
       category: time
+      source: "MarketEvent.makoIngressTimestamp (data/OboMarketData.proto)"
+      synonyms: ["ingress time", "software receive time"]
     - name: mako_ingress_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
         data packet arrives into Mako network.
       category: time
+      source: "MarketEvent.makoIngressTimestamp_ns (data/OboMarketData.proto)"
     - name: software_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the software occurred.
       category: time
+      source: "MarketEvent.softwareRxTimestamp (data/OboMarketData.proto)"
+      synonyms: ["software time", "process time"]
     - name: software_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of the software timestamp. Combine with software_timestamp for full
         nanosecond-resolution timing.
       category: time
+      source: "MarketEvent.softwareRxTimestamp_ns (data/OboMarketData.proto)"
     - name: currency
       type: INTEGER
       description: Enum appears as an int in composition.
       category: dimension
       filterable: true
+      source: "PosData.proto::currency"
+      synonyms: ["ccy", "currency code"]
     - name: inst_type
       type: STRING
       description: Numeric instrument type code.
@@ -120,227 +152,310 @@ table:
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::term"
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]
     - name: expiry_timestamp
       type: TIMESTAMP
       description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
+      source: "PosData.proto::expiryTimestamp"
+      synonyms: ["expiry", "expiration", "maturity date"]
     - name: strike
       type: FLOAT
       description: Strike price for options, enriched from the instruments reference table. NULL for non-option
         instruments.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::strike"
+      synonyms: ["exercise price", "strike price", "K"]
     - name: option_type
       type: STRING
       description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
         instruments.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionType"
+      synonyms: ["call put", "C/P"]
     - name: mako_symbol
       type: STRING
       description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
         join.
       category: dimension
       filterable: true
+      source: "PosData.proto::makoSymbol"
+      synonyms: ["internal symbol"]
     - name: sequence_number
       type: INTEGER
       description: Sequence number (numeric).
       category: identifier
       filterable: true
+      source: "MarketEvent.sequenceNumber (data/OboMarketData.proto)"
+      synonyms: ["seq num"]
     - name: ask_price_0
       type: FLOAT
       description: Ask-side unadjusted top-of-book price.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[0].price"
+      synonyms: ["ask 0", "best ask", "best offer"]
     - name: ask_price_1
       type: FLOAT
       description: Unadjusted ask-side price at level 1 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[1].price"
+      synonyms: ["ask 1"]
     - name: ask_price_2
       type: FLOAT
       description: Unadjusted ask-side price at level 2 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[2].price"
+      synonyms: ["ask 2"]
     - name: ask_price_3
       type: FLOAT
       description: Unadjusted ask-side price at level 3 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[3].price"
+      synonyms: ["ask 3"]
     - name: ask_price_4
       type: FLOAT
       description: Unadjusted ask-side price at level 4 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[4].price"
+      synonyms: ["ask 4"]
     - name: bid_price_0
       type: FLOAT
       description: Bid-side unadjusted top-of-book price.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[0].price"
+      synonyms: ["bid 0", "best bid"]
     - name: bid_price_1
       type: FLOAT
       description: Unadjusted bid-side price at level 1 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[1].price"
+      synonyms: ["bid 1"]
     - name: bid_price_2
       type: FLOAT
       description: Unadjusted bid-side price at level 2 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[2].price"
+      synonyms: ["bid 2"]
     - name: bid_price_3
       type: FLOAT
       description: Unadjusted bid-side price at level 3 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[3].price"
+      synonyms: ["bid 3"]
     - name: bid_price_4
       type: FLOAT
       description: Unadjusted bid-side price at level 4 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[4].price"
+      synonyms: ["bid 4"]
     - name: ask_volume_0
       type: INTEGER
       description: Ask-side unadjusted top-of-book volume.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::asks[0].volume"
+      synonyms: ["ask size 0", "best ask size", "offer size"]
     - name: ask_volume_1
       type: INTEGER
       description: Unadjusted ask-side volume at level 1 of the order book.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::asks[1].volume"
+      synonyms: ["ask size 1"]
     - name: ask_volume_2
       type: INTEGER
       description: Unadjusted ask-side volume at level 2 of the order book.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::asks[2].volume"
+      synonyms: ["ask size 2"]
     - name: ask_volume_3
       type: INTEGER
       description: Unadjusted ask-side volume at level 3 of the order book.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::asks[3].volume"
+      synonyms: ["ask size 3"]
     - name: ask_volume_4
       type: INTEGER
       description: Unadjusted ask-side volume at level 4 of the order book.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::asks[4].volume"
+      synonyms: ["ask size 4"]
     - name: bid_volume_0
       type: INTEGER
       description: Bid-side unadjusted top-of-book volume.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::bids[0].volume"
+      synonyms: ["bid size 0", "best bid size"]
     - name: bid_volume_1
       type: INTEGER
       description: Unadjusted bid-side volume at level 1 of the order book.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::bids[1].volume"
+      synonyms: ["bid size 1"]
     - name: bid_volume_2
       type: INTEGER
       description: Unadjusted bid-side volume at level 2 of the order book.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::bids[2].volume"
+      synonyms: ["bid size 2"]
     - name: bid_volume_3
       type: INTEGER
       description: Unadjusted bid-side volume at level 3 of the order book.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::bids[3].volume"
+      synonyms: ["bid size 3"]
     - name: bid_volume_4
       type: INTEGER
       description: Unadjusted bid-side volume at level 4 of the order book.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::bids[4].volume"
+      synonyms: ["bid size 4"]
     - name: ask_orders_0
       type: INTEGER
       description: Number of ask-side orders at level 0 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[0].orders"
+      synonyms: ["ask order count 0"]
     - name: ask_orders_1
       type: INTEGER
       description: Number of ask-side orders at level 1 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[1].orders"
+      synonyms: ["ask order count 1"]
     - name: ask_orders_2
       type: INTEGER
       description: Number of ask-side orders at level 2 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[2].orders"
+      synonyms: ["ask order count 2"]
     - name: ask_orders_3
       type: INTEGER
       description: Number of ask-side orders at level 3 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[3].orders"
+      synonyms: ["ask order count 3"]
     - name: ask_orders_4
       type: INTEGER
       description: Number of ask-side orders at level 4 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[4].orders"
+      synonyms: ["ask order count 4"]
     - name: bid_orders_0
       type: INTEGER
       description: Number of bid-side orders at level 0 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[0].orders"
+      synonyms: ["bid order count 0"]
     - name: bid_orders_1
       type: INTEGER
       description: Number of bid-side orders at level 1 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[1].orders"
+      synonyms: ["bid order count 1"]
     - name: bid_orders_2
       type: INTEGER
       description: Number of bid-side orders at level 2 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[2].orders"
+      synonyms: ["bid order count 2"]
     - name: bid_orders_3
       type: INTEGER
       description: Number of bid-side orders at level 3 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[3].orders"
+      synonyms: ["bid order count 3"]
     - name: bid_orders_4
       type: INTEGER
       description: Number of bid-side orders at level 4 of the order book.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[4].orders"
+      synonyms: ["bid order count 4"]
     - name: keyframe
       type: BOOLEAN
       description: If true, message is part of a keyframe/snapshot of current order book state.
       category: dimension
       filterable: true
+      source: "kafka infrastructure"
+      synonyms: ["snapshot"]
     - name: data_timestamp
       type: TIMESTAMP
       description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp (data/OboMarketData.proto)"
+      synonyms: ["data time", "ingestion time"]
     - name: data_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
         (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp_ns (data/OboMarketData.proto)"
     - name: data_order_identifier
       type: INTEGER
       description: Sequence number relative to current exchange message for deterministic ordering.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.dataOrderIdentifier (data/OboMarketData.proto)"
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
     - name: datasource_hostname
       type: STRING
       description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"
     - name: streamsource_stream_id
       type: INTEGER
       description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.streamId (data/OboMarketData.proto)"
     - name: streamsource_event_id
       type: INTEGER
       description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.eventId (data/OboMarketData.proto)"
     - name: streamsource_message_id
       type: INTEGER
       description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.messageId (data/OboMarketData.proto)"
     - name: rec_ts
       type: TIMESTAMP
       description: Timestamp when this record was received or recorded.
@@ -350,33 +465,47 @@ table:
       description: Numeric code representing the current market state (pre-open, open, auction, halt, close, etc.).
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.marketState (data/OboMarketData.proto)"
+      synonyms: ["trading state"]
     - name: implied_bid_price
       type: FLOAT
       description: Price of implied bid.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::impliedBid.price"
+      synonyms: ["implied bid", "synthetic bid"]
     - name: implied_bid_volume
       type: INTEGER
       description: Implied bid volume (numeric).
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::impliedBid.volume"
+      synonyms: ["implied bid size", "synthetic bid size"]
     - name: implied_bid_orders
       type: INTEGER
       description: Implied bid orders (numeric).
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::impliedBid.orders"
+      synonyms: ["implied bid count"]
     - name: implied_ask_price
       type: FLOAT
       description: Price of implied ask.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::impliedAsk.price"
+      synonyms: ["implied ask", "implied offer", "synthetic ask"]
     - name: implied_ask_volume
       type: INTEGER
       description: Implied ask volume (numeric).
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::impliedAsk.volume"
+      synonyms: ["implied ask size", "synthetic ask size"]
     - name: implied_ask_orders
       type: INTEGER
       description: Implied ask orders (numeric).
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::impliedAsk.orders"
+      synonyms: ["implied ask count"]

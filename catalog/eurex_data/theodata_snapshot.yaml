@@ -15,85 +15,111 @@ table:
       description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
         internally for data pipeline monitoring and replay.
       category: time
+      source: "Kafka metadata"
+      synonyms: ["kafka time", "ingestion time"]
     - name: record_written_timestamp
       type: TIMESTAMP
       description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
         data freshness and pipeline latency.
       category: time
+      source: "Pipeline metadata"
+      synonyms: ["write time", "bq write time"]
     - name: kafka_partition
       type: INTEGER
       description: Kafka partition number from which this record was consumed. Used internally for data pipeline
         tracking and replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: kafka_offset
       type: INTEGER
       description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
         pipeline replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: portfolio
       type: STRING
       description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
+      source: "PosData.proto::portfolio"
+      synonyms: ["book", "trading book"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: partition_timestamp_local
       type: TIMESTAMP
       description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
         pipeline.
       category: time
+      source: "kafka infrastructure"
     - name: partition_number
       type: INTEGER
       description: Numeric partition identifier within the data pipeline. Used for data distribution and parallel
         processing.
       category: measure
       typical_aggregation: AVG
+      source: "kafka infrastructure"
     - name: event_date
       type: DATE
       description: Date of the event, may differ from trade_date for overnight sessions.
       category: time
       filterable: true
+      source: "derived (data-loader)"
     - name: theo_event_tx_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the theo event tx occurred.
       category: time
+      source: "Theoreticals.proto::theoEventTxTimestamp"
+      synonyms: ["theo transmit time", "theo publish time"]
     - name: theo_event_tx_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of the theo event tx timestamp. Combine with theo_event_tx_timestamp
         for full nanosecond-resolution timing.
       category: time
+      source: "Theoreticals.proto::theoEventTxTimestamp"
     - name: when_timestamp
       type: TIMESTAMP
       description: Theoreticals::when (resolution of seconds).
       category: time
+      source: "Theoreticals.proto::whenTimestamp"
+      synonyms: ["computation time", "calc time"]
     - name: when_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of when timestamp. Theoreticals::when (resolution of seconds).
       category: time
+      source: "Theoreticals.proto::whenTimestamp"
     - name: source_event_timestamp
       type: TIMESTAMP
       description: Should not be used to discern between theo updates; use theoEventTxTimestamp instead.
       category: time
+      source: "Theoreticals.proto::sourceEventTimestamp"
+      synonyms: ["trigger time", "source time"]
     - name: source_event_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of source event timestamp. Should not be used to discern between theo
         updates; use theoEventTxTimestamp instead.
       category: time
+      source: "Theoreticals.proto::sourceEventTimestamp"
     - name: currency
       type: INTEGER
       description: Enum appears as an int in composition.
       category: dimension
       filterable: true
+      source: "PosData.proto::currency"
+      synonyms: ["ccy", "currency code"]
     - name: inst_type
       type: STRING
       description: Numeric instrument type code.
@@ -104,209 +130,276 @@ table:
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::term"
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]
     - name: expiry_timestamp
       type: TIMESTAMP
       description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
+      source: "PosData.proto::expiryTimestamp"
+      synonyms: ["expiry", "expiration", "maturity date"]
     - name: strike
       type: FLOAT
       description: Strike price for options, enriched from the instruments reference table. NULL for non-option
         instruments.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::strike"
+      synonyms: ["exercise price", "strike price", "K"]
     - name: option_type
       type: STRING
       description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
         instruments.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionType"
+      synonyms: ["call put", "C/P"]
     - name: instrument_hash
       type: STRING
       description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: mako_symbol
       type: STRING
       description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
         join.
       category: dimension
       filterable: true
+      source: "PosData.proto::makoSymbol"
+      synonyms: ["internal symbol"]
     - name: curve_id
       type: INTEGER
       description: Identifier for the volatility/pricing curve used in theoretical calculations.
       category: identifier
       filterable: true
+      source: "PosData.proto::curveId"
+      synonyms: ["vol curve", "vol curve id"]
     - name: carry_id
       type: INTEGER
       description: Identifier for the carry/interest rate curve used in theoretical calculations.
       category: identifier
       filterable: true
+      source: "PosData.proto::carryId"
+      synonyms: ["dividend curve", "carry curve id"]
     - name: stream_id
       type: INTEGER
       description: Unique identifier for the data stream.
       category: identifier
       filterable: true
+      source: "Theoreticals.proto::streamId"
     - name: tv
       type: FLOAT
       description: Theoretical value the VT saw at time of swing/market trade.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::tv"
+      synonyms: ["theo", "theoretical value", "fair value", "machine price", "TV"]
     - name: tv_offset
       type: FLOAT
       description: Tv offset (field).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::tvOffset"
+      synonyms: ["theo offset", "tv adjustment"]
     - name: delta
       type: FLOAT
       description: Option delta (rate of change of option price with respect to underlying price).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::delta"
+      synonyms: ["delta exposure", "hedge ratio"]
     - name: gamma
       type: FLOAT
       description: Option gamma (rate of change of delta with respect to underlying price).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::gamma"
+      synonyms: ["gamma exposure", "convexity"]
     - name: vega
       type: FLOAT
       description: Option vega (sensitivity of option price to changes in implied volatility).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::vega"
+      synonyms: ["vol sensitivity", "vega exposure"]
     - name: theta
       type: FLOAT
       description: Option theta (time decay, rate of change of option price with respect to time).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::theta"
+      synonyms: ["time decay", "theta decay"]
     - name: rho
       type: FLOAT
       description: Option rho (sensitivity of option price to changes in interest rates).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::rho"
+      synonyms: ["rate sensitivity", "interest rate sensitivity"]
     - name: tte
       type: FLOAT
       description: Time to expiry in years for the instrument.
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::tte"
+      synonyms: ["time to expiry", "time to maturity"]
     - name: raw_delta
       type: FLOAT
       description: Raw delta (field).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::rawDelta"
+      synonyms: ["unadjusted delta", "raw hedge ratio"]
     - name: raw_gamma
       type: FLOAT
       description: Raw gamma (field).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::rawGamma"
+      synonyms: ["unadjusted gamma", "raw convexity"]
     - name: vol
       type: FLOAT
       description: Implied volatility of the instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::vol"
+      synonyms: ["implied volatility", "IV", "sigma", "implied vol"]
     - name: norm_strike
       type: FLOAT
       description: Norm strike (field).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::normStrike"
+      synonyms: ["moneyness", "normalized strike"]
     - name: under
       type: FLOAT
       description: Price of the underlying instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::under"
+      synonyms: ["underlying", "spot", "underlying price", "spot price"]
     - name: roll
       type: FLOAT
       description: Roll value at time of swing/trade.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::roll"
+      synonyms: ["calendar roll", "roll value", "carry cost"]
     - name: forward
       type: FLOAT
       description: Forward price of the underlying instrument used in theoretical calculations.
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::forward"
+      synonyms: ["forward price", "fwd", "forward value"]
     - name: short_rate
       type: FLOAT
       description: Rate value for short.
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::shortRate"
+      synonyms: ["rate", "risk-free rate", "short rate"]
     - name: greek_atm
       type: FLOAT
       description: 'Volatility surface Greek parameter: atm.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekAtm"
+      synonyms: ["atm vol"]
     - name: greek_skew
       type: FLOAT
       description: 'Volatility surface Greek parameter: skew.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekSkew"
+      synonyms: ["vol skew"]
     - name: greek_call_skew
       type: FLOAT
       description: 'Volatility surface Greek parameter: call skew.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekCallSkew"
     - name: greek_put_k
       type: FLOAT
       description: 'Volatility surface Greek parameter: put k.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekPutK"
     - name: greek_call_k
       type: FLOAT
       description: 'Volatility surface Greek parameter: call k.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekCallK"
     - name: greek_put_a
       type: FLOAT
       description: 'Volatility surface Greek parameter: put a.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekPutA"
     - name: greek_call_a
       type: FLOAT
       description: 'Volatility surface Greek parameter: call a.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekCallA"
     - name: greek_put_b
       type: FLOAT
       description: 'Volatility surface Greek parameter: put b.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekPutB"
     - name: greek_call_b
       type: FLOAT
       description: 'Volatility surface Greek parameter: call b.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekCallB"
     - name: greek_datm
       type: FLOAT
       description: 'Volatility surface Greek parameter: datm.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::greekDatm"
     - name: param_atm
       type: FLOAT
       description: 'Volatility surface parameter: atm.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::paramAtm"
     - name: param_skew
       type: FLOAT
       description: 'Volatility surface parameter: skew.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::paramSkew"
     - name: param_call_skew
       type: FLOAT
       description: 'Volatility surface parameter: call skew.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::paramCallSkew"
     - name: param_put_k
       type: FLOAT
       description: 'Volatility surface parameter: put k.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::paramPutK"
     - name: param_call_k
       type: FLOAT
       description: 'Volatility surface parameter: call k.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::paramCallK"
     - name: param_s_vol
       type: FLOAT
       description: 'Volatility surface parameter: s vol.'
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::paramSVol"
     - name: rec_ts
       type: TIMESTAMP
       description: Timestamp when this record was received or recorded.
@@ -315,52 +408,66 @@ table:
       type: TIMESTAMP
       description: 'Theoretical pricing parameter: compute timestamp start.'
       category: time
+      source: "Theoreticals.proto::theoComputeTimestampStart"
+      synonyms: ["compute start"]
     - name: theo_compute_timestamp_start_ns
       type: INTEGER
       description: Nanosecond-precision component of theo compute timestamp start. Combine with
         theo_compute_timestamp_start for full nanosecond-resolution timing.
       category: time
+      source: "Theoreticals.proto::theoComputeTimestampStart"
     - name: theo_compute_timestamp_stop
       type: TIMESTAMP
       description: 'Theoretical pricing parameter: compute timestamp stop.'
       category: time
+      source: "Theoreticals.proto::theoComputeTimestampStop"
+      synonyms: ["compute end"]
     - name: theo_compute_timestamp_stop_ns
       type: INTEGER
       description: Nanosecond-precision component of theo compute timestamp stop. Combine with
         theo_compute_timestamp_stop for full nanosecond-resolution timing.
       category: time
+      source: "Theoreticals.proto::theoComputeTimestampStop"
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
     - name: datasource_hostname
       type: STRING
       description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"
     - name: streamsource_stream_id
       type: INTEGER
       description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.streamId (data/OboMarketData.proto)"
     - name: streamsource_event_id
       type: INTEGER
       description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.eventId (data/OboMarketData.proto)"
     - name: streamsource_message_id
       type: INTEGER
       description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.messageId (data/OboMarketData.proto)"
     - name: theo_compute_type
       type: STRING
       description: Type classification for the theo compute.
       category: dimension
       filterable: true
+      source: "Theoreticals.proto::theoComputeType"
+      synonyms: ["compute type", "recalc type"]
     - name: offset_id
       type: INTEGER
       description: Offset id (numeric).
       category: identifier
       filterable: true
+      source: "Theoreticals.proto::offsetId"

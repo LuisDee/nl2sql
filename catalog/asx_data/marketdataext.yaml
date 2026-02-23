@@ -26,6 +26,7 @@ table:
         MarketDataExtended proto.
       category: time
       source: MarketDataExtended.makoIngressTimestamp (data/MarketDataExtended.proto)
+      synonyms: ["ingress time", "software receive time"]
     - name: mako_ingress_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
@@ -37,17 +38,20 @@ table:
       description: Hardware timestamp of moment price packet hit the network card. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.hardwareNicRxTimestamp (data/MarketDataExtended.proto)
+      synonyms: ["nic timestamp", "wire time"]
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of hardware nic rx timestamp. Hardware timestamp of moment price
         packet hit the network card. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.hardwareNicRxTimestamp_ns (data/MarketDataExtended.proto)
+      synonyms: ["nic ns", "hw ns"]
     - name: software_timestamp
       type: TIMESTAMP
       description: Software timestamp - time just before message decode. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.softwareRxTimestamp (data/MarketDataExtended.proto)
+      synonyms: ["software time", "process time"]
     - name: software_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of software timestamp. Software timestamp - time just before message
@@ -59,18 +63,21 @@ table:
       description: Exchange-provided nano-second timestamp of the event. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.exchangeTimestamp (data/MarketDataExtended.proto)
+      synonyms: ["exchange time", "matching engine time"]
     - name: exchange_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
         event. From MarketDataExtended proto.
       category: time
       source: MarketDataExtended.exchangeTimestamp_ns (data/MarketDataExtended.proto)
+      synonyms: ["exchange time ns"]
     - name: sequence_number
       type: INTEGER
       description: Sequence number (numeric).
       category: identifier
       filterable: true
       source: MarketDataExtended.sequenceNumber (data/MarketDataExtended.proto)
+      synonyms: ["seq num"]
     - name: market_trade_id
       type: STRING
       description: Exchange-assigned identifier to link trade with private order feed. From MarketDataExtended proto.
@@ -88,12 +95,14 @@ table:
       category: measure
       typical_aggregation: AVG
       source: kafka infrastructure
+      synonyms: ["fill price", "execution price", "trade price"]
     - name: size
       type: FLOAT
       description: Number of lots or contracts in the trade or order.
       category: measure
       typical_aggregation: AVG
       source: kafka infrastructure
+      synonyms: ["quantity", "lots", "position size"]
     - name: buy_sell
       type: STRING
       description: Buy sell (text).
@@ -140,6 +149,7 @@ table:
       category: dimension
       filterable: true
       source: MarketDataExtended.eventType (data/MarketDataExtended.proto)
+      synonyms: ["vt event type", "trigger event"]
     - name: event_type_name
       type: STRING
       description: VT Event that triggered the swing. From MarketDataExtended proto (human-readable enum name).
@@ -158,12 +168,14 @@ table:
       category: identifier
       filterable: true
       source: MarketDataExtended.orderId (data/MarketDataExtended.proto)
+      synonyms: ["mako order id"]
     - name: instrument_hash
       type: STRING
       description: SHA256 of Mako instrument. From MarketDataExtended proto.
       category: identifier
       filterable: true
       source: MarketDataExtended.instrumentHash (data/MarketDataExtended.proto)
+      synonyms: ["instrument id", "instrument key"]
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
@@ -223,6 +235,7 @@ table:
       category: measure
       typical_aggregation: AVG
       source: instrument enrichment (data-loader)
+      synonyms: ["exercise price", "strike price", "K"]
     - name: option_type
       type: INTEGER
       description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
@@ -230,17 +243,20 @@ table:
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["call put", "C/P"]
     - name: option_type_name
       type: STRING
       description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["call put name", "option direction"]
     - name: expiry_timestamp
       type: TIMESTAMP
       description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
       source: instrument enrichment (data-loader)
+      synonyms: ["expiry", "expiration", "maturity date"]
     - name: mako_symbol
       type: STRING
       description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
@@ -248,12 +264,14 @@ table:
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["internal symbol"]
     - name: currency
       type: INTEGER
       description: Enum appears as an int in composition. From MarketDataExtended proto.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["ccy", "currency code"]
     - name: inst_type_name
       type: STRING
       description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
@@ -261,21 +279,25 @@ table:
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["instrument type", "product type", "security type"]
     - name: term
       type: STRING
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
       source: instrument enrichment (data-loader)
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
       source: kafka infrastructure
+      synonyms: ["date", "business date", "trading date"]
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
       source: kafka infrastructure
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]

@@ -16,21 +16,29 @@ table:
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: portfolio
       type: STRING
       description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
+      source: "PosData.proto::portfolio"
+      synonyms: ["book", "trading book"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: parent_instrument_hash
       type: STRING
       description: SHA256 hash identifier for the parent instrument.
       category: identifier
       filterable: true
+      source: "PosData.proto::parentInstrumentHash"
+      synonyms: ["parent hash"]
     - name: parent_no_legs
       type: INTEGER
       description: Parent instrument no legs from the instrument definition.
@@ -56,6 +64,8 @@ table:
       description: Parent instrument feed code from the instrument definition.
       category: dimension
       filterable: true
+      source: "PosData.proto::parentFeedCode"
+      synonyms: ["parent ticker"]
     - name: parent_exchange_native
       type: STRING
       description: Parent instrument exchange native from the instrument definition.
@@ -96,6 +106,8 @@ table:
       description: Parent instrument is combo from the instrument definition.
       category: dimension
       filterable: true
+      source: "PosData.proto::parentIsCombo"
+      synonyms: ["is combo", "is spread"]
     - name: parent_combo_type
       type: INTEGER
       description: Parent instrument combo type from the instrument definition.
@@ -106,6 +118,8 @@ table:
       description: Human-readable name for the parent combo type enum value.
       category: dimension
       filterable: true
+      source: "PosData.proto::parentComboTypeName"
+      synonyms: ["parent strategy type"]
     - name: parent_listed
       type: INTEGER
       description: Parent instrument listed from the instrument definition.
@@ -141,6 +155,8 @@ table:
       description: Combo leg index.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::legIndex"
+      synonyms: ["leg number"]
     - name: ratio
       type: FLOAT
       description: Leg ratio within a combo instrument, indicating relative weighting.
@@ -152,6 +168,8 @@ table:
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: underlying_hash
       type: STRING
       description: SHA256 hash identifier for the underlying.
@@ -173,6 +191,8 @@ table:
         reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::instTypeName"
+      synonyms: ["instrument type", "product type", "security type"]
     - name: listed
       type: INTEGER
       description: Enum appears as a char in composition.
@@ -193,6 +213,8 @@ table:
       description: Enum appears as an int in composition.
       category: dimension
       filterable: true
+      source: "PosData.proto::currency"
+      synonyms: ["ccy", "currency code"]
     - name: currency_name
       type: STRING
       description: Enum appears as an int in composition (human-readable enum name).
@@ -203,20 +225,28 @@ table:
       description: Revision number tracking modifications to this record.
       category: identifier
       filterable: true
+      source: "PosData.proto::revision"
+      synonyms: ["version", "amendment number"]
     - name: contract_size
       type: FLOAT
       description: Number of units per contract lot. Streamed from TradableInstrument.contractSize proto field.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::contractSize"
+      synonyms: ["multiplier", "point value", "contract multiplier"]
     - name: term
       type: STRING
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::term"
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]
     - name: expiry_timestamp
       type: TIMESTAMP
       description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
+      source: "PosData.proto::expiryTimestamp"
+      synonyms: ["expiry", "expiration", "maturity date"]
     - name: expiry_timezone
       type: STRING
       description: Timezone of the instrument expiry.
@@ -307,11 +337,15 @@ table:
         instruments.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionType"
+      synonyms: ["call put", "C/P"]
     - name: option_type_name
       type: STRING
       description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionTypeName"
+      synonyms: ["call put name", "option direction"]
     - name: exercise_type
       type: INTEGER
       description: Exercise type for options (European, American, etc.).
@@ -327,6 +361,7 @@ table:
       description: Enum appears as an int in composition.
       category: measure
       typical_aggregation: AVG
+      source: "data/PosData.proto::currency"
     - name: pos_currency_name
       type: STRING
       description: Enum appears as an int in composition (human-readable enum name).
@@ -343,6 +378,8 @@ table:
         instruments.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::strike"
+      synonyms: ["exercise price", "strike price", "K"]
     - name: underlying_inst_type
       type: INTEGER
       description: Underlying instrument inst type, mirrored from the parent instrument definition.
@@ -353,6 +390,8 @@ table:
       description: Human-readable name for the underlying inst type enum value.
       category: dimension
       filterable: true
+      source: "PosData.proto::underlyingInstTypeName"
+      synonyms: ["underlying type"]
     - name: underlying_listed
       type: INTEGER
       description: Underlying instrument listed, mirrored from the parent instrument definition.
@@ -526,3 +565,4 @@ table:
       description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
         pipeline.
       category: time
+      source: "kafka infrastructure"

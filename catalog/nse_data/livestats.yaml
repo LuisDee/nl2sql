@@ -11,33 +11,43 @@ table:
       description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
         internally for data pipeline monitoring and replay.
       category: time
+      source: "Kafka metadata"
+      synonyms: ["kafka time", "ingestion time"]
     - name: record_written_timestamp
       type: TIMESTAMP
       description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
         data freshness and pipeline latency.
       category: time
+      source: "Pipeline metadata"
+      synonyms: ["write time", "bq write time"]
     - name: kafka_partition
       type: INTEGER
       description: Kafka partition number from which this record was consumed. Used internally for data pipeline
         tracking and replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: kafka_offset
       type: INTEGER
       description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
         pipeline replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: pid
       type: INTEGER
       description: Process ID of the data source that produced this record.
       category: measure
       typical_aggregation: AVG
+      source: "QuoterTrade.proto::pid"
+      synonyms: ["process id"]
     - name: hostname
       type: STRING
       description: Hostname of the data source that produced this record.
       category: dimension
       filterable: true
+      source: "QuoterTrade.proto::hostname"
+      synonyms: ["host", "server"]
     - name: timestamp
       type: TIMESTAMP
       description: Timestamp of this event or record.
@@ -66,6 +76,7 @@ table:
       type: DATE
       description: Trade date embedded within the original proto message.
       category: time
+      source: "derived (data-loader)"
     - name: message_identifier
       type: STRING
       description: Message identifier (text).
@@ -116,28 +127,35 @@ table:
       description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
     - name: datasource_hostname
       type: STRING
       description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"
     - name: streamsource_stream_id
       type: INTEGER
       description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.streamId (data/OboMarketData.proto)"
     - name: streamsource_event_id
       type: INTEGER
       description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.eventId (data/OboMarketData.proto)"
     - name: streamsource_message_id
       type: INTEGER
       description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.messageId (data/OboMarketData.proto)"
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]

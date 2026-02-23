@@ -12,6 +12,8 @@ table:
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: exchange_code
       type: INTEGER
       description: Exchange code (numeric).
@@ -26,6 +28,7 @@ table:
       type: DATE
       description: Trade date embedded within the original proto message.
       category: time
+      source: "derived (data-loader)"
     - name: protocol_version
       type: STRING
       description: Protocol version (text).
@@ -36,16 +39,22 @@ table:
       description: Data channel or feed identifier for this event.
       category: dimension
       filterable: true
+      source: "PosData.proto::channel"
+      synonyms: ["execution channel", "trading channel"]
     - name: mako_order_id
       type: INTEGER
       description: The Mako front-office id (OrderId in bookServer).
       category: identifier
       filterable: true
+      source: "QuoterTrade.proto::makoOrderId"
+      synonyms: ["order id", "quote id"]
     - name: exchange_order_id
       type: INTEGER
       description: Exchange-assigned order identifier.
       category: identifier
       filterable: true
+      source: "PosData.proto::exchangeOrderId"
+      synonyms: ["exchange order"]
     - name: source_ip
       type: STRING
       description: Source IP address of the captured network packet.
@@ -96,10 +105,13 @@ table:
       description: Nanosecond-precision component of mako ingress timestamp. Timestamp injected by the switch when the
         data packet arrives into Mako network.
       category: time
+      source: "MarketEvent.makoIngressTimestamp_ns (data/OboMarketData.proto)"
     - name: mako_ingress_timestamp
       type: TIMESTAMP
       description: Timestamp injected by the switch when the data packet arrives into Mako network.
       category: time
+      source: "MarketEvent.makoIngressTimestamp (data/OboMarketData.proto)"
+      synonyms: ["ingress time", "software receive time"]
     - name: mako_egress_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of the mako egress timestamp. Combine with mako_egress_timestamp for
@@ -132,8 +144,12 @@ table:
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]

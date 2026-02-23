@@ -11,43 +11,57 @@ table:
       description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
         internally for data pipeline monitoring and replay.
       category: time
+      source: "Kafka metadata"
+      synonyms: ["kafka time", "ingestion time"]
     - name: record_written_timestamp
       type: TIMESTAMP
       description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
         data freshness and pipeline latency.
       category: time
+      source: "Pipeline metadata"
+      synonyms: ["write time", "bq write time"]
     - name: kafka_partition
       type: INTEGER
       description: Kafka partition number from which this record was consumed. Used internally for data pipeline
         tracking and replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: kafka_offset
       type: INTEGER
       description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
         pipeline replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: portfolio
       type: STRING
       description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
+      source: "PosData.proto::portfolio"
+      synonyms: ["book", "trading book"]
     - name: algo
       type: STRING
       description: Name of the originating trading algorithm or strategy.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::algo"
+      synonyms: ["strategy", "algo name", "trading algo"]
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: trader
       type: STRING
       description: Trader name or identifier responsible for this action.
@@ -63,6 +77,8 @@ table:
       description: The Mako front-office id (OrderId in bookServer).
       category: identifier
       filterable: true
+      source: "QuoterTrade.proto::makoOrderId"
+      synonyms: ["order id", "quote id"]
     - name: bucket
       type: STRING
       description: Bucket or group identifier for the quoter event.
@@ -77,52 +93,68 @@ table:
       type: TIMESTAMP
       description: Exchange-provided nano-second timestamp of the event.
       category: time
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms: ["exchange time", "matching engine time"]
     - name: exchange_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
         event.
       category: time
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms: ["exchange time ns"]
     - name: latency_stats_bkio
       type: INTEGER
       description: Latency statistics for the bkio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsBKIO"
+      synonyms: ["bkio latency", "dma latency"]
     - name: latency_stats_qmio
       type: INTEGER
       description: Latency statistics for the qmio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsQMIO"
+      synonyms: ["qmio latency", "throttle time", "qm throttle"]
     - name: latency_stats_itio
       type: INTEGER
       description: Latency statistics for the itio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsITIO"
+      synonyms: ["itio latency", "order send time"]
     - name: message_trade_date
       type: DATE
       description: Trade date embedded within the original proto message.
       category: time
+      source: "derived (data-loader)"
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
     - name: datasource_hostname
       type: STRING
       description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"
     - name: streamsource_stream_id
       type: INTEGER
       description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.streamId (data/OboMarketData.proto)"
     - name: streamsource_event_id
       type: INTEGER
       description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.eventId (data/OboMarketData.proto)"
     - name: streamsource_message_id
       type: INTEGER
       description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.messageId (data/OboMarketData.proto)"

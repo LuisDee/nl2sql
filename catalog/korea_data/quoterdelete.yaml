@@ -12,221 +12,307 @@ table:
         tracking and replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: kafka_offset
       type: INTEGER
       description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
         pipeline replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: portfolio
       type: STRING
       description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
+      source: "PosData.proto::portfolio"
+      synonyms: ["book", "trading book"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: instrument_hash
       type: STRING
       description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: algo
       type: STRING
       description: Name of the originating trading algorithm or strategy.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::algo"
+      synonyms: ["strategy", "algo name", "trading algo"]
     - name: ref_curve_id
       type: INTEGER
       description: ID of the vol curve for this symbol.
       category: identifier
       filterable: true
+      source: "VtCommon.proto::refCurveId"
+      synonyms: ["ref curve", "reference curve"]
     - name: ref_carry_id
       type: INTEGER
       description: Reference carry id from the last vol curve update (theoServer callback).
       category: identifier
       filterable: true
+      source: "VtCommon.proto::refCarryId"
+      synonyms: ["ref carry", "reference carry"]
     - name: ref_tv
       type: FLOAT
       description: Theoretical value of instrument on last curve ID update.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::refTv"
+      synonyms: ["reference theo", "ref fair value"]
     - name: ref_delta
       type: FLOAT
       description: Delta of instrument on last vol curve update.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::refDelta"
+      synonyms: ["reference delta"]
     - name: ref_gamma
       type: FLOAT
       description: Gamma of instrument on last vol curve update.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::refGamma"
+      synonyms: ["reference gamma"]
     - name: ref_base_price
       type: FLOAT
       description: Unadjusted raw baseval on last vol curve update.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::refBasePrice"
+      synonyms: ["ref underlying", "reference price", "ref base"]
     - name: ref_roll
       type: FLOAT
       description: Roll value on last curve update.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::refRoll"
+      synonyms: ["reference roll"]
     - name: raw_bv_bid
       type: FLOAT
       description: Unadjusted base val bid price at time of swing.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::rawBvBid"
+      synonyms: ["bv bid", "raw base bid"]
     - name: raw_bv_bid_size
       type: INTEGER
       description: Target size of raw base val bid price.
       category: measure
       typical_aggregation: SUM
+      source: "VtCommon.proto::rawBvBidSize"
+      synonyms: ["bv bid size", "base bid size"]
     - name: raw_bv_ask
       type: FLOAT
       description: Unadjusted base val ask price at time of swing.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::rawBvAsk"
+      synonyms: ["bv ask", "raw base ask"]
     - name: raw_bv_ask_size
       type: INTEGER
       description: Target size of raw base val ask price.
       category: measure
       typical_aggregation: SUM
+      source: "VtCommon.proto::rawBvAskSize"
+      synonyms: ["bv ask size", "base ask size"]
     - name: layered_base_bid
       type: FLOAT
       description: Transformation of base val bid incorporating open delta position.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::layeredBaseBid"
+      synonyms: ["adjusted base bid"]
     - name: layered_base_bid_size
       type: INTEGER
       description: Max number of deltas willing to take on at layered base bid.
       category: measure
       typical_aggregation: SUM
+      source: "VtCommon.proto::layeredBaseBidSize"
+      synonyms: ["adjusted bid size"]
     - name: layered_base_ask
       type: FLOAT
       description: Transformation of base val ask.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::layeredBaseAsk"
+      synonyms: ["adjusted base ask"]
     - name: layered_base_ask_size
       type: INTEGER
       description: Max number of deltas willing to take on at layered base ask.
       category: measure
       typical_aggregation: SUM
+      source: "VtCommon.proto::layeredBaseAskSize"
+      synonyms: ["adjusted ask size"]
     - name: layered_base_adjustment
       type: FLOAT
       description: Adjustment to relevant raw baseval side.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::layeredBaseAdjustment"
+      synonyms: ["base adjustment"]
     - name: odr_adjustment
       type: FLOAT
       description: Adjustment to raw base val due to open delta retreat.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::odrAdjustment"
+      synonyms: ["odr"]
     - name: inflight_deflection_tv_adjustment_bid
       type: FLOAT
       description: Estimated TV adjustment while waiting for fill confirmation (bid).
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::inflightDeflectionTvAdjustmentBid"
+      synonyms: ["inflight bid adjustment"]
     - name: inflight_deflection_tv_adjustment_ask
       type: FLOAT
       description: Estimated TV adjustment while waiting for fill confirmation (ask).
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::inflightDeflectionTvAdjustmentAsk"
+      synonyms: ["inflight ask adjustment"]
     - name: internal_tv_adjustment_bid
       type: FLOAT
       description: Internal adjustment/deflection made by VT after hearing about a fill (bid).
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::internalTvAdjustmentBid"
+      synonyms: ["internal adj bid"]
     - name: internal_tv_adjustment_ask
       type: FLOAT
       description: Internal adjustment/deflection made by VT after hearing about a fill (ask).
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::internalTvAdjustmentAsk"
+      synonyms: ["internal adj ask"]
     - name: nhr_adjustment_bid
       type: FLOAT
       description: Estimated adjustment to bid edge based on current position in local strikes.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::nhrAdjustmentBid"
+      synonyms: ["nhr bid", "nhr adj bid"]
     - name: nhr_adjustment_ask
       type: FLOAT
       description: Estimated adjustment to ask edge based on current position in local strikes.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::nhrAdjustmentAsk"
+      synonyms: ["nhr ask", "nhr adj ask"]
     - name: base_edge_bid
       type: FLOAT
       description: Net edge of bid side (model edge + fees + NHR).
       category: measure
       typical_aggregation: SUM
+      source: "VtCommon.proto::baseEdgeBid"
+      synonyms: ["bid edge", "bid-side edge"]
     - name: base_edge_ask
       type: FLOAT
       description: Ask-side value of base edge.
       category: measure
       typical_aggregation: SUM
+      source: "VtCommon.proto::baseEdgeAsk"
+      synonyms: ["ask edge", "ask-side edge"]
     - name: fees
       type: FLOAT
       description: Per-lot trading fees applicable to this instrument.
       category: measure
       typical_aggregation: SUM
+      source: "VtCommon.proto::fees"
+      synonyms: ["exchange fees", "transaction costs", "trading costs"]
     - name: roll
       type: FLOAT
       description: Roll value at time of swing/trade.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::roll"
+      synonyms: ["calendar roll", "roll value", "carry cost"]
     - name: bv_side
       type: STRING
       description: Which side bid/ask of the baseVal the VT is swinging off.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::bvSide"
+      synonyms: ["base value side"]
     - name: delta_adjusted_base_price
       type: FLOAT
       description: Raw baseval plus odr/layered base adjustments.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::deltaAdjustedBasePrice"
+      synonyms: ["delta adjusted_base_price", "adjusted base price"]
     - name: tv
       type: FLOAT
       description: Theoretical value the VT saw at time of swing/market trade.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::tv"
+      synonyms: ["theo", "theoretical value", "fair value", "machine price", "TV"]
     - name: base_sequence_number
       type: INTEGER
       description: Base sequence number (numeric).
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::baseSequenceNumber"
+      synonyms: ["base seq"]
     - name: option_sequence_number
       type: INTEGER
       description: Last received price tick for this option.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::optionSequenceNumber"
+      synonyms: ["option seq"]
     - name: base_instrument_hash
       type: STRING
       description: SHA256 hash identifier for the base instrument.
       category: identifier
       filterable: true
+      source: "VtCommon.proto::baseInstrumentHash"
+      synonyms: ["base hash"]
     - name: hardware_nic_rx_timestamp
       type: TIMESTAMP
       description: Hardware timestamp of moment price packet hit the network card.
       category: time
+      source: "VtCommon.proto::hardwareNicRxTimestamp"
+      synonyms: ["nic timestamp", "wire time"]
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of hardware nic rx timestamp. Hardware timestamp of moment price
         packet hit the network card.
       category: time
+      source: "VtCommon.proto::hardwareNicRxTimestamp"
+      synonyms: ["nic ns", "hw ns"]
     - name: event_timestamp
       type: TIMESTAMP
       description: Moment VT decided to trade (Swing) or processed event (MarketTrade).
       category: time
+      source: "VtCommon.proto::eventTimestamp"
+      synonyms: ["event time", "process time"]
     - name: event_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of event timestamp. Moment VT decided to trade (Swing) or processed
         event (MarketTrade).
       category: time
+      source: "VtCommon.proto::eventTimestamp"
+      synonyms: ["event time ns"]
     - name: delete_side
       type: STRING
       description: Side (BID/ASK) of the quote that was deleted.
@@ -277,84 +363,116 @@ table:
       description: VT Event that triggered the swing.
       category: dimension
       filterable: true
+      source: "MarketEvent.eventType (data/OboMarketData.proto)"
+      synonyms: ["vt event type", "trigger event"]
     - name: latency_stats_prcx
       type: INTEGER
       description: Latency statistics for the prcx processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsPRCX"
+      synonyms: ["prcx latency", "decode wait time"]
     - name: latency_stats_prcs
       type: INTEGER
       description: Latency statistics for the prcs processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsPRCS"
+      synonyms: ["prcs latency", "decoder time"]
     - name: latency_stats_vtio
       type: INTEGER
       description: Latency statistics for the vtio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsVTIO"
+      synonyms: ["vtio latency", "vt decision time"]
     - name: latency_stats_bkio
       type: INTEGER
       description: Latency statistics for the bkio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsBKIO"
+      synonyms: ["bkio latency", "dma latency"]
     - name: latency_stats_qmio
       type: INTEGER
       description: Latency statistics for the qmio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsQMIO"
+      synonyms: ["qmio latency", "throttle time", "qm throttle"]
     - name: latency_stats_itio
       type: INTEGER
       description: Latency statistics for the itio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsITIO"
+      synonyms: ["itio latency", "order send time"]
     - name: latency_stats_itex
       type: INTEGER
       description: Latency statistics for the itex processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsITEX"
+      synonyms: ["itex latency", "exchange latency"]
     - name: strike
       type: FLOAT
       description: Strike price for options, enriched from the instruments reference table. NULL for non-option
         instruments.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::strike"
+      synonyms: ["exercise price", "strike price", "K"]
     - name: option_type
       type: INTEGER
       description: Option type code (C=Call, P=Put), enriched from the instruments reference table. NULL for non-option
         instruments.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionType"
+      synonyms: ["call put", "C/P"]
     - name: option_type_name
       type: STRING
       description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionTypeName"
+      synonyms: ["call put name", "option direction"]
     - name: expiry_timestamp
       type: TIMESTAMP
       description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
+      source: "PosData.proto::expiryTimestamp"
+      synonyms: ["expiry", "expiration", "maturity date"]
     - name: mako_symbol
       type: STRING
       description: Mako-internal symbol identifier, enriched from the instruments reference table via instrument_hash
         join.
       category: dimension
       filterable: true
+      source: "PosData.proto::makoSymbol"
+      synonyms: ["internal symbol"]
     - name: currency
       type: INTEGER
       description: Enum appears as an int in composition.
       category: dimension
       filterable: true
+      source: "PosData.proto::currency"
+      synonyms: ["ccy", "currency code"]
     - name: term
       type: STRING
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::term"
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]
     - name: inst_type_name
       type: STRING
       description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
         reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::instTypeName"
+      synonyms: ["instrument type", "product type", "security type"]
     - name: is_book_resubmit
       type: BOOLEAN
       description: Boolean flag indicating whether the book resubmit condition is true.
@@ -365,11 +483,15 @@ table:
       description: Process ID of the data source that produced this record.
       category: measure
       typical_aggregation: AVG
+      source: "QuoterTrade.proto::pid"
+      synonyms: ["process id"]
     - name: hostname
       type: STRING
       description: Hostname of the data source that produced this record.
       category: dimension
       filterable: true
+      source: "QuoterTrade.proto::hostname"
+      synonyms: ["host", "server"]
     - name: inflight_trade_volume
       type: INTEGER
       description: Volume of inflight trade.
@@ -380,135 +502,179 @@ table:
       description: Price tick of base val instrument that triggered most recent baseval change.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::bvUpdateSequenceNumber"
     - name: bv_update_instrument_hash
       type: STRING
       description: SHA256 of base val instrument that triggered last baseval change.
       category: identifier
       filterable: true
+      source: "VtCommon.proto::bvUpdateInstrumentHash"
     - name: underlying_sequence_number
       type: INTEGER
       description: Sequence number of the hedge instrument.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::underlyingSequenceNumber"
     - name: underlying_instrument_hash
       type: STRING
       description: SHA256 hash identifier for the underlying instrument.
       category: identifier
       filterable: true
+      source: "PosData.proto::underlyingInstrumentHash"
+      synonyms: ["underlying hash", "underlying id"]
     - name: mako_order_id
       type: INTEGER
       description: The Mako front-office id (OrderId in bookServer).
       category: identifier
       filterable: true
+      source: "QuoterTrade.proto::makoOrderId"
+      synonyms: ["order id", "quote id"]
     - name: is_bv_invalid
       type: BOOLEAN
       description: Boolean flag indicating whether the base valuation was invalid at the time of this event.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::isBvInvalid"
+      synonyms: ["bad base value", "invalid bv"]
     - name: exchange_timestamp
       type: TIMESTAMP
       description: Exchange-provided nano-second timestamp of the event.
       category: time
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms: ["exchange time", "matching engine time"]
     - name: exchange_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of exchange timestamp. Exchange-provided nano-second timestamp of the
         event.
       category: time
+      source: "PosData.proto::exchangeTimestamp"
+      synonyms: ["exchange time ns"]
     - name: underlying_exe_exch
       type: INTEGER
       description: Exchange where the underlying trades.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::underlyingExeExch"
+      synonyms: ["underlying exchange id"]
     - name: underlying_exe_exch_name
       type: STRING
       description: Exchange where the underlying trades (human-readable enum name).
       category: dimension
       filterable: true
+      source: "PosData.proto::underlyingExeExchName"
+      synonyms: ["underlying exchange"]
     - name: is_spark
       type: BOOLEAN
       description: Denotes if VT is using a sparkOrder interface.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::isSpark"
+      synonyms: ["fast path"]
     - name: ref_inst_carry_id
       type: INTEGER
       description: Carry Id of last theo update received by algo for this instrument.
       category: identifier
       filterable: true
+      source: "VtCommon.proto::refInstCarryId"
     - name: ref_inst_curve_id
       type: INTEGER
       description: Curve Id of last theo update received by algo for this instrument.
       category: identifier
       filterable: true
+      source: "VtCommon.proto::refInstCurveId"
     - name: is_ref_theo_invalid
       type: BOOLEAN
       description: If the reference theos were valid at the time of the event.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::isRefTheoInvalid"
+      synonyms: ["invalid theo", "bad theo"]
     - name: lb_enabled
       type: BOOLEAN
       description: Boolean flag indicating whether the layered base feature was enabled.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::lbEnabled"
+      synonyms: ["lean-back", "lean back mode"]
     - name: edge_model_type
       type: INTEGER
       description: Numeric code for the edge computation model type used by the VT.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::edgeModelType"
+      synonyms: ["model type", "edge model"]
     - name: edge_model_type_name
       type: STRING
       description: Human-readable name for the edge model type enum value.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::edgeModelTypeName"
+      synonyms: ["edge model"]
     - name: streamsource_stream_id
       type: INTEGER
       description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.streamId (data/OboMarketData.proto)"
     - name: streamsource_event_id
       type: INTEGER
       description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.eventId (data/OboMarketData.proto)"
     - name: streamsource_message_id
       type: INTEGER
       description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.messageId (data/OboMarketData.proto)"
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
     - name: datasource_hostname
       type: STRING
       description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"
     - name: bid_price_0
       type: FLOAT
       description: Bid-side unadjusted top-of-book price.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::bids[0].price"
+      synonyms: ["bid 0", "best bid"]
     - name: ask_price_0
       type: FLOAT
       description: Ask-side unadjusted top-of-book price.
       category: measure
       typical_aggregation: AVG
+      source: "MarketDepth.proto::asks[0].price"
+      synonyms: ["ask 0", "best ask", "best offer"]
     - name: ask_volume_0
       type: INTEGER
       description: Ask-side unadjusted top-of-book volume.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::asks[0].volume"
+      synonyms: ["ask size 0", "best ask size", "offer size"]
     - name: bid_volume_0
       type: INTEGER
       description: Bid-side unadjusted top-of-book volume.
       category: measure
       typical_aggregation: SUM
+      source: "MarketDepth.proto::bids[0].volume"
+      synonyms: ["bid size 0", "best bid size"]
     - name: latency_stats_bvio
       type: INTEGER
       description: Latency statistics for the bvio processing stage (nanoseconds).
       category: measure
       typical_aggregation: AVG
+      source: "SwingData.proto::latencyStatsBVIO"
+      synonyms: ["bvio latency", "bv calc time"]
     - name: latency_stats_delio
       type: INTEGER
       description: Latency statistics for the delio processing stage (nanoseconds).
@@ -524,11 +690,13 @@ table:
       description: Reference theoevent stream id from the last vol curve update (theoServer callback).
       category: identifier
       filterable: true
+      source: "MarketTrade.proto::refTheoeventStreamId"
     - name: ref_theoevent_event_id
       type: INTEGER
       description: Reference theoevent event id from the last vol curve update (theoServer callback).
       category: identifier
       filterable: true
+      source: "MarketTrade.proto::refTheoeventEventId"
     - name: is_spark_resubmit
       type: BOOLEAN
       description: Boolean flag indicating whether the spark resubmit condition is true.
@@ -539,6 +707,8 @@ table:
       description: Price of last trade.
       category: measure
       typical_aggregation: AVG
+      source: "QuoterTrade.proto::lastTradePrice"
+      synonyms: ["last price", "ltp"]
     - name: price_level
       type: INTEGER
       description: Price level (numeric).

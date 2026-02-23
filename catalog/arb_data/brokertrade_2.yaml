@@ -11,404 +11,554 @@ table:
       description: Kafka ingestion timestamp recording when this message was produced to the Kafka topic. Used
         internally for data pipeline monitoring and replay.
       category: time
+      source: "Kafka metadata"
+      synonyms: ["kafka time", "ingestion time"]
     - name: record_written_timestamp
       type: TIMESTAMP
       description: Timestamp when this record was written to the data warehouse by the data pipeline. Used for tracking
         data freshness and pipeline latency.
       category: time
+      source: "Pipeline metadata"
+      synonyms: ["write time", "bq write time"]
     - name: kafka_partition
       type: INTEGER
       description: Kafka partition number from which this record was consumed. Used internally for data pipeline
         tracking and replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: kafka_offset
       type: INTEGER
       description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
         pipeline replay.
       category: identifier
       filterable: true
+      source: "kafka infrastructure"
     - name: partition_timestamp_local
       type: TIMESTAMP
       description: Local-timezone timestamp of the data partition. Used for partition-level data management in the
         pipeline.
       category: time
+      source: "kafka infrastructure"
     - name: partition_number
       type: INTEGER
       description: Numeric partition identifier within the data pipeline. Used for data distribution and parallel
         processing.
       category: measure
       typical_aggregation: AVG
+      source: "kafka infrastructure"
     - name: uuid
       type: STRING
       description: Universally unique identifier for this record.
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.uuid"
+      synonyms: ["unique id", "trade uuid", "broker trade id"]
     - name: portfolio
       type: STRING
       description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
+      source: "PosData.proto::portfolio"
+      synonyms: ["book", "trading book"]
     - name: instrument_hash
       type: STRING
       description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: parent_instrument_hash
       type: STRING
       description: SHA256 hash identifier for the parent instrument.
       category: identifier
       filterable: true
+      source: "PosData.proto::parentInstrumentHash"
+      synonyms: ["parent hash"]
     - name: entry_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the entry occurred.
       category: time
+      source: "OffFloorData.proto :: BrokerTrade.entryTimeStamp"
+      synonyms: ["entry time", "booking time"]
     - name: last_edit_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the last edit occurred.
       category: time
+      source: "OffFloorData.proto :: BrokerTrade.lastEditTimeStamp"
+      synonyms: ["last edit", "amendment time", "last modified"]
     - name: trade_timestamp
       type: TIMESTAMP
       description: Timestamp recording when the trade occurred.
       category: time
+      source: "OffFloorData.proto :: BrokerTrade.tradeTimeStamp"
+      synonyms: ["trade time", "execution time", "fill time"]
     - name: revision
       type: INTEGER
       description: Revision number tracking modifications to this record.
       category: identifier
       filterable: true
+      source: "PosData.proto::revision"
+      synonyms: ["version", "amendment number"]
     - name: counterparty
       type: STRING
       description: Counterparty identifier for this trade.
       category: dimension
       filterable: true
+      source: "PosData.proto::counterparty"
+      synonyms: ["counter party", "other side", "broker"]
     - name: user
       type: STRING
       description: User identifier associated with this trade or action.
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.user"
+      synonyms: ["trader", "entered by", "booked by", "trader name"]
     - name: inventory
       type: STRING
       description: Inventory account associated with this trade or position.
       category: dimension
       filterable: true
+      source: "PosData.proto::inventory"
+      synonyms: ["sub-account", "inventory account"]
     - name: contract_name
       type: STRING
       description: Human-readable name for the contract enum value.
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.contractName"
+      synonyms: ["product name", "contract", "instrument name"]
     - name: source
       type: STRING
       description: Source system or feed that originated this record.
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.source"
+      synonyms: ["data source", "trade source"]
     - name: broker
       type: STRING
       description: Broker identifier associated with this trade.
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.broker"
+      synonyms: ["broker name", "brokerage", "intermediary"]
     - name: datasource_pid
       type: INTEGER
       description: Data source pid identifier from the data pipeline infrastructure.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.pid (data/OboMarketData.proto)"
     - name: datasource_hostname
       type: STRING
       description: Data source hostname identifier from the data pipeline infrastructure.
       category: dimension
       filterable: true
+      source: "MarketEvent.hostname (data/OboMarketData.proto)"
     - name: streamsource_stream_id
       type: INTEGER
       description: Stream source stream id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.streamId (data/OboMarketData.proto)"
     - name: streamsource_event_id
       type: INTEGER
       description: Stream source event id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.eventId (data/OboMarketData.proto)"
     - name: streamsource_message_id
       type: INTEGER
       description: Stream source message id identifier from the data streaming infrastructure.
       category: identifier
       filterable: true
+      source: "MarketEvent.messageId (data/OboMarketData.proto)"
     - name: month
       type: INTEGER
       description: Month of a year. Must be from 1 to 12.
       category: measure
       typical_aggregation: AVG
+      source: "BrokerTrade.month (data/OffFloorData.proto)"
+      synonyms: ["trade month"]
     - name: day
       type: INTEGER
       description: Day of a month. Must be from 1 to 31.
       category: measure
       typical_aggregation: AVG
+      source: "BrokerTrade.day (data/OffFloorData.proto)"
+      synonyms: ["trade day"]
     - name: year
       type: INTEGER
       description: Year of the date. Must be from 1 to 9999, or 0 for no year.
       category: measure
       typical_aggregation: AVG
+      source: "BrokerTrade.year (data/OffFloorData.proto)"
+      synonyms: ["trade year"]
     - name: tte
       type: FLOAT
       description: Time to expiry in years for the instrument.
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::tte"
+      synonyms: ["time to expiry", "time to maturity"]
     - name: ref_price
       type: FLOAT
       description: Reference price from the last vol curve update (theoServer callback).
       category: measure
       typical_aggregation: AVG
+      source: "OffFloorData.proto :: BrokerTrade.detail.refPrice"
+      synonyms: ["reference price", "ref"]
     - name: carry_id
       type: INTEGER
       description: Identifier for the carry/interest rate curve used in theoretical calculations.
       category: identifier
       filterable: true
+      source: "PosData.proto::carryId"
+      synonyms: ["dividend curve", "carry curve id"]
     - name: curve_id
       type: INTEGER
       description: Identifier for the volatility/pricing curve used in theoretical calculations.
       category: identifier
       filterable: true
+      source: "PosData.proto::curveId"
+      synonyms: ["vol curve", "vol curve id"]
     - name: vol
       type: FLOAT
       description: Implied volatility of the instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::vol"
+      synonyms: ["implied volatility", "IV", "sigma", "implied vol"]
     - name: when_timestamp
       type: TIMESTAMP
       description: Theoreticals::when (resolution of seconds).
       category: time
+      source: "Theoreticals.proto::whenTimestamp"
+      synonyms: ["computation time", "calc time"]
     - name: vega
       type: FLOAT
       description: Option vega (sensitivity of option price to changes in implied volatility).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::vega"
+      synonyms: ["vol sensitivity", "vega exposure"]
     - name: tv
       type: FLOAT
       description: Theoretical value the VT saw at time of swing/market trade.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::tv"
+      synonyms: ["theo", "theoretical value", "fair value", "machine price", "TV"]
     - name: under
       type: FLOAT
       description: Price of the underlying instrument at the time of this event.
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::under"
+      synonyms: ["underlying", "spot", "underlying price", "spot price"]
     - name: gamma
       type: FLOAT
       description: Option gamma (rate of change of delta with respect to underlying price).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::gamma"
+      synonyms: ["gamma exposure", "convexity"]
     - name: roll
       type: FLOAT
       description: Roll value at time of swing/trade.
       category: measure
       typical_aggregation: AVG
+      source: "VtCommon.proto::roll"
+      synonyms: ["calendar roll", "roll value", "carry cost"]
     - name: delta
       type: FLOAT
       description: Option delta (rate of change of option price with respect to underlying price).
       category: measure
       typical_aggregation: AVG
+      source: "Theoreticals.proto::delta"
+      synonyms: ["delta exposure", "hedge ratio"]
     - name: price
       type: FLOAT
       description: Price of the trade or order.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::price"
+      synonyms: ["fill price", "execution price", "trade price"]
     - name: is_mako_or_market
       type: STRING
       description: Flag indicating whether this trade leg is from Mako or from the market.
       category: dimension
       filterable: true
+      synonyms: ["mako or market", "side role"]
     - name: account
       type: STRING
       description: Account identifier for this trade.
       category: dimension
       filterable: true
+      source: "PosData.proto::account"
+      synonyms: ["trading account", "broker account", "clearing account"]
     - name: note
       type: STRING
       description: Free-text note or annotation attached to this record.
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.note"
+      synonyms: ["comment", "trade note", "remark"]
     - name: mako_inventory
       type: STRING
       description: Mako inventory (text).
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.makoInventory"
+      synonyms: ["mako inv"]
     - name: mako_account
       type: STRING
       description: Mako account (text).
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.makoAccount"
+      synonyms: ["mako acct"]
     - name: market_inventory
       type: STRING
       description: Market inventory (text).
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.marketInventory"
+      synonyms: ["market inv"]
     - name: market_account
       type: STRING
       description: Market account (text).
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade.marketAccount"
+      synonyms: ["market acct"]
     - name: executable_exchange
       type: INTEGER
       description: Exchange on which this instrument is executable.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::executableExchange"
+      synonyms: ["execution exchange", "fill exchange"]
     - name: strike
       type: FLOAT
       description: Strike price for options, enriched from the instruments reference table. NULL for non-option
         instruments.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::strike"
+      synonyms: ["exercise price", "strike price", "K"]
     - name: option_type_name
       type: STRING
       description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionTypeName"
+      synonyms: ["call put name", "option direction"]
     - name: parent_is_combo
       type: BOOLEAN
       description: Parent instrument is combo from the instrument definition.
       category: dimension
       filterable: true
+      source: "PosData.proto::parentIsCombo"
+      synonyms: ["is combo", "is spread"]
     - name: leg_ratio
       type: FLOAT
       description: Combo leg ratio.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::legRatio"
+      synonyms: ["ratio", "leg multiplier"]
     - name: leg_index
       type: INTEGER
       description: Combo leg index.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::legIndex"
+      synonyms: ["leg number"]
     - name: underlying_inst_type_name
       type: STRING
       description: Human-readable name for the underlying inst type enum value.
       category: dimension
       filterable: true
+      source: "PosData.proto::underlyingInstTypeName"
+      synonyms: ["underlying type"]
     - name: combo_type_name
       type: STRING
       description: Human-readable name for the combo type enum value.
       category: dimension
       filterable: true
+      source: "PosData.proto::comboTypeName"
+      synonyms: ["spread type", "strategy type"]
     - name: underlying_symbol
       type: STRING
       description: Underlying instrument symbol, mirrored from the parent instrument definition.
       category: dimension
       filterable: true
+      source: "PosData.proto::underlyingSymbol"
+      synonyms: ["underlying ticker", "underlying product"]
     - name: market_or_mako_trade
       type: STRING
       description: Indicator distinguishing whether this is a market trade or a Mako trade.
       category: dimension
       filterable: true
+      source: "OffFloorData.proto :: BrokerTrade (derived)"
+      synonyms: ["mako market", "trade direction", "liquidity role"]
     - name: count_calendar
       type: INTEGER
       description: Count calendar (numeric).
       category: measure
       typical_aggregation: AVG
+      synonyms: ["calendar count", "num calendars"]
     - name: is_parent
       type: BOOLEAN
       description: Boolean flag indicating whether the parent condition is true.
       category: dimension
       filterable: true
+      source: "PosData.proto::isParent"
+      synonyms: ["combo level", "parent flag"]
     - name: is_ref_component
       type: INTEGER
       description: Flag indicating whether the ref component condition is true. Stored as integer (0=false, 1=true).
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::isRefComponent"
+      synonyms: ["reference leg"]
     - name: underlying_exe_exch
       type: INTEGER
       description: Exchange where the underlying trades.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::underlyingExeExch"
+      synonyms: ["underlying exchange id"]
     - name: liquid
       type: INTEGER
       description: Liquidity indicator or classification for the instrument.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::liquid"
+      synonyms: ["liquidity flag"]
     - name: company
       type: STRING
       description: Company or firm identifier for this trade.
       category: dimension
       filterable: true
+      synonyms: ["entity", "legal entity"]
     - name: brokerage_rate
       type: FLOAT
       description: Rate value for brokerage.
       category: measure
       typical_aggregation: AVG
+      source: "Raw field from broker trade booking system"
+      synonyms: ["commission rate", "fee rate", "broker fee rate"]
     - name: fee_method
       type: STRING
       description: Fee method (text).
       category: dimension
       filterable: true
+      source: "Raw field from broker trade booking system"
+      synonyms: ["fee type", "fee calculation method", "brokerage method"]
     - name: parent_feed_code
       type: STRING
       description: Parent instrument feed code from the instrument definition.
       category: dimension
       filterable: true
+      source: "PosData.proto::parentFeedCode"
+      synonyms: ["parent ticker"]
     - name: currency
       type: INTEGER
       description: Enum appears as an int in composition.
       category: dimension
       filterable: true
+      source: "PosData.proto::currency"
+      synonyms: ["ccy", "currency code"]
     - name: contract_size
       type: FLOAT
       description: Number of units per contract lot. Streamed from TradableInstrument.contractSize proto field.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::contractSize"
+      synonyms: ["multiplier", "point value", "contract multiplier"]
     - name: no_legs
       type: INTEGER
       description: Number of legs in a combo/spread instrument.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::noLegs"
+      synonyms: ["num legs", "leg count", "number of legs"]
     - name: inst_type_name
       type: STRING
       description: Human-readable instrument type name (e.g. option, future, stock), enriched from the instruments
         reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::instTypeName"
+      synonyms: ["instrument type", "product type", "security type"]
     - name: underlying_instrument_hash
       type: STRING
       description: SHA256 hash identifier for the underlying instrument.
       category: identifier
       filterable: true
+      source: "PosData.proto::underlyingInstrumentHash"
+      synonyms: ["underlying hash", "underlying id"]
     - name: parent_combo_type_name
       type: STRING
       description: Human-readable name for the parent combo type enum value.
       category: dimension
       filterable: true
+      source: "PosData.proto::parentComboTypeName"
+      synonyms: ["parent strategy type"]
     - name: term
       type: STRING
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::term"
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]
     - name: expiry_timestamp
       type: TIMESTAMP
       description: Expiry timestamp for the instrument, enriched from the instruments reference table.
       category: time
+      source: "PosData.proto::expiryTimestamp"
+      synonyms: ["expiry", "expiration", "maturity date"]
     - name: total_traded_size
       type: FLOAT
       description: Cumulative number of lots traded across all fills for this order.
       category: measure
       typical_aggregation: SUM
+      source: "PosData.proto::totalTradedSize"
+      synonyms: ["total lots", "total volume"]
     - name: size
       type: INTEGER
       description: Number of lots or contracts in the trade or order.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::size"
+      synonyms: ["quantity", "lots", "position size"]
     - name: ref_term
       type: STRING
       description: Reference term from the last vol curve update (theoServer callback).
       category: dimension
       filterable: true
+      source: "PosData.proto::refTerm"
+      synonyms: ["reference term"]
     - name: ref_inst_type_name
       type: STRING
       description: Human-readable name for the ref inst type enum value.
       category: dimension
       filterable: true
+      source: "PosData.proto::refInstTypeName"
+      synonyms: ["reference instrument type"]
     - name: trade_date
       type: DATE
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]

@@ -11,32 +11,44 @@ table:
       description: Trading session date used as the partition column. Always filter on this field for efficient queries.
       category: time
       filterable: true
+      source: "PosData.proto::tradeDate"
+      synonyms: ["date", "business date", "trading date"]
     - name: instrument_hash
       type: STRING
       description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument
         defining attributes. Used as the primary join key across all data and KPI tables.
       category: identifier
       filterable: true
+      source: "PosData.proto::instrumentHash"
+      synonyms: ["instrument id", "instrument key"]
     - name: symbol
       type: STRING
       description: Mako symbol identifier for the traded instrument.
       category: dimension
       filterable: true
+      source: "PosData.proto::symbol"
+      synonyms: ["ticker", "product", "instrument", "underlying symbol"]
     - name: algo
       type: STRING
       description: Name of the originating trading algorithm or strategy.
       category: dimension
       filterable: true
+      source: "VtCommon.proto::algo"
+      synonyms: ["strategy", "algo name", "trading algo"]
     - name: portfolio
       type: STRING
       description: Name of the Mako portfolio to which the algo belongs.
       category: dimension
       filterable: true
+      source: "PosData.proto::portfolio"
+      synonyms: ["book", "trading book"]
     - name: event_type
       type: INTEGER
       description: VT Event that triggered the swing.
       category: dimension
       filterable: true
+      source: "MarketEvent.eventType (data/OboMarketData.proto)"
+      synonyms: ["vt event type", "trigger event"]
     - name: market_event_type
       type: INTEGER
       description: Type classification of the market event that triggered this update.
@@ -47,30 +59,40 @@ table:
       description: 'Side of the order or quote: BID (buy) or ASK (sell).'
       category: measure
       typical_aggregation: AVG
+      source: "kafka infrastructure"
+      synonyms: ["market side"]
     - name: order_id
       type: INTEGER
       description: Mako-internal order identifier linking fills to the parent order.
       category: identifier
       filterable: true
+      source: "PosData.proto::orderId"
+      synonyms: ["mako order id"]
     - name: price
       type: FLOAT
       description: Price of the trade or order.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::price"
+      synonyms: ["fill price", "execution price", "trade price"]
     - name: data_timestamp
       type: TIMESTAMP
       description: Custom timestamp for ordering (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp (data/OboMarketData.proto)"
+      synonyms: ["data time", "ingestion time"]
     - name: data_timestamp_ns
       type: INTEGER
       description: Nanosecond-precision component of data timestamp. Custom timestamp for ordering
         (hardwareNicRxTimestamp or makoIngressTimestamp).
       category: time
+      source: "MarketEvent.dataTimestamp_ns (data/OboMarketData.proto)"
     - name: data_order_identifier
       type: INTEGER
       description: Sequence number relative to current exchange message for deterministic ordering.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.dataOrderIdentifier (data/OboMarketData.proto)"
     - name: volume_ahead_insert
       type: INTEGER
       description: Volume ahead of our order at insertion time.
@@ -96,22 +118,29 @@ table:
       description: Instrument-level absolute sequence number.
       category: measure
       typical_aggregation: AVG
+      source: "MarketEvent.makoSequenceNumber (data/OboMarketData.proto)"
     - name: term
       type: STRING
       description: Expiry term/maturity label for the instrument, enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::term"
+      synonyms: ["tenor", "expiry term", "maturity", "expiry cycle"]
     - name: option_type_name
       type: STRING
       description: Human-readable option type name (Call/Put), enriched from the instruments reference table.
       category: dimension
       filterable: true
+      source: "PosData.proto::optionTypeName"
+      synonyms: ["call put name", "option direction"]
     - name: strike
       type: FLOAT
       description: Strike price for options, enriched from the instruments reference table. NULL for non-option
         instruments.
       category: measure
       typical_aggregation: AVG
+      source: "PosData.proto::strike"
+      synonyms: ["exercise price", "strike price", "K"]
     - name: market_price_level
       type: INTEGER
       description: Market price at this order book level.

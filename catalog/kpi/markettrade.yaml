@@ -131,6 +131,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: SUM
+    source: MarketTrade.rawBvBidSize (data/MarketTrade.proto)
   - name: raw_bv_ask
     type: FLOAT
     description: >-
@@ -153,6 +154,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: SUM
+    source: MarketTrade.rawBvAskSize (data/MarketTrade.proto)
   - name: layered_base_bid
     type: FLOAT
     description: >-
@@ -161,12 +163,14 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.layeredBaseBid (data/MarketTrade.proto)
   - name: layered_base_bid_size
     type: INTEGER
     description: Size at the layered base bid price. Internal pricing model field.
     synonyms: []
     category: measure
     typical_aggregation: SUM
+    source: MarketTrade.layeredBaseBidSize (data/MarketTrade.proto)
   - name: layered_base_ask
     type: FLOAT
     description: >-
@@ -175,12 +179,14 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.layeredBaseAsk (data/MarketTrade.proto)
   - name: layered_base_ask_size
     type: INTEGER
     description: Size at the layered base ask price. Internal pricing model field.
     synonyms: []
     category: measure
     typical_aggregation: SUM
+    source: MarketTrade.layeredBaseAskSize (data/MarketTrade.proto)
   - name: layered_base_adjustment
     type: FLOAT
     description: >-
@@ -189,6 +195,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.layeredBaseAdjustment (data/MarketTrade.proto)
   - name: odr_adjustment
     type: FLOAT
     description: >-
@@ -197,6 +204,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.odrAdjustment (data/MarketTrade.proto)
   - name: inflight_deflection_tv_adjustment_bid
     type: FLOAT
     description: >-
@@ -207,6 +215,7 @@ table:
     business_rules: Removed for WHITE portfolio in KPI calculations.
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.inflightDeflectionTvAdjustmentBid (data/MarketTrade.proto)
   - name: inflight_deflection_tv_adjustment_ask
     type: FLOAT
     description: >-
@@ -217,6 +226,7 @@ table:
     business_rules: Removed for WHITE portfolio in KPI calculations.
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.inflightDeflectionTvAdjustmentAsk (data/MarketTrade.proto)
   - name: internal_tv_adjustment_bid
     type: FLOAT
     description: >-
@@ -225,6 +235,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.internalTvAdjustmentBid (data/MarketTrade.proto)
   - name: internal_tv_adjustment_ask
     type: FLOAT
     description: >-
@@ -233,6 +244,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.internalTvAdjustmentAsk (data/MarketTrade.proto)
   - name: nhr_adjustment_bid
     type: FLOAT
     description: >-
@@ -241,6 +253,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.nhrAdjustmentBid (data/MarketTrade.proto)
   - name: nhr_adjustment_ask
     type: FLOAT
     description: >-
@@ -249,6 +262,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.nhrAdjustmentAsk (data/MarketTrade.proto)
   - name: base_edge_bid
     type: FLOAT
     description: >-
@@ -258,6 +272,7 @@ table:
     - bid edge
     category: measure
     typical_aggregation: SUM
+    source: MarketTrade.baseEdgeBid (data/MarketTrade.proto)
   - name: base_edge_ask
     type: FLOAT
     description: >-
@@ -267,6 +282,7 @@ table:
     - ask edge
     category: measure
     typical_aggregation: SUM
+    source: MarketTrade.baseEdgeAsk (data/MarketTrade.proto)
   - name: fees
     type: FLOAT
     description: >-
@@ -293,6 +309,7 @@ table:
     - ask
     category: dimension
     filterable: true
+    source: MarketTrade.bvSide_name (data/MarketTrade.proto)
   - name: delta_adjusted_base_price
     type: FLOAT
     description: >-
@@ -313,6 +330,7 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    source: MarketTrade.NULL (data/MarketTrade.proto)
   - name: option_sequence_number
     type: INTEGER
     description: >-
@@ -321,6 +339,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.optionSequenceNumber (data/MarketTrade.proto)
   - name: base_instrument_hash
     type: STRING
     description: >-
@@ -329,6 +348,7 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    source: MarketTrade.NULL (data/MarketTrade.proto)
   - name: hardware_nic_rx_timestamp
     type: TIMESTAMP
     description: >-
@@ -380,6 +400,7 @@ table:
     business_rules: Prefer instant_edge for KPI analysis. This raw field may have different sign conventions.
     category: measure
     typical_aggregation: AVG
+    source: kafka infrastructure
   - name: is_mako_trade
     type: INTEGER
     description: >-
@@ -397,6 +418,7 @@ table:
       markettrade are Mako trades — no filter needed.
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.isMakoTrade (data/MarketTrade.proto)
   - name: counterparty_id
     type: STRING
     description: >-
@@ -409,6 +431,7 @@ table:
     - counterparty
     category: identifier
     filterable: true
+    source: MarketTrade.counterpartyId (data/MarketTrade.proto)
   - name: exchange_timestamp
     type: TIMESTAMP
     description: >-
@@ -421,6 +444,7 @@ table:
     - match time
     - exchange execution time
     category: time
+    source: MarketTrade.exchangeTimestamp (data/MarketTrade.proto)
   - name: exchange_timestamp_ns
     type: INTEGER
     description: >-
@@ -428,6 +452,7 @@ table:
       for ultra-low-latency analysis.
     synonyms: []
     category: time
+    source: MarketTrade.exchangeTimestamp_ns (data/MarketTrade.proto)
   - name: is_active_instrument
     type: BOOLEAN
     description: >-
@@ -441,6 +466,7 @@ table:
     - 'false'
     - 'true'
     comprehensive: true
+    source: MarketTrade.isActiveInstrument (data/MarketTrade.proto)
   - name: bv_update_sequence_number
     type: INTEGER
     description: >-
@@ -449,6 +475,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.bvUpdateSequenceNumber (data/MarketTrade.proto)
   - name: bv_update_instrument_hash
     type: STRING
     description: >-
@@ -469,6 +496,7 @@ table:
     - '0fb6845ba17cbe2590a5e74052ea5d926ccd0f768c40a1e30a5f2b9ccaf1c475'
     - '0f87d34b1439c37a639bad1bdff1cce802a79ff2211883df013b4670ecef5a62'
     comprehensive: false
+    source: MarketTrade.bvUpdateInstrumentHash (data/MarketTrade.proto)
   - name: underlying_sequence_number
     type: INTEGER
     description: >-
@@ -477,6 +505,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.underlyingSequenceNumber (data/MarketTrade.proto)
   - name: underlying_instrument_hash
     type: STRING
     description: >-
@@ -497,6 +526,7 @@ table:
     - '0fb6845ba17cbe2590a5e74052ea5d926ccd0f768c40a1e30a5f2b9ccaf1c475'
     - '0f87d34b1439c37a639bad1bdff1cce802a79ff2211883df013b4670ecef5a62'
     comprehensive: false
+    source: MarketTrade.underlyingInstrumentHash (data/MarketTrade.proto)
   - name: first_fill_sequence_number
     type: INTEGER
     description: >-
@@ -505,6 +535,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.firstFillSequenceNumber (data/MarketTrade.proto)
   - name: last_fill_sequence_number
     type: INTEGER
     description: >-
@@ -513,6 +544,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.lastFillSequenceNumber (data/MarketTrade.proto)
   - name: contains_implied_fills
     type: BOOLEAN
     description: >-
@@ -526,6 +558,7 @@ table:
     - 'false'
     - 'true'
     comprehensive: true
+    source: MarketTrade.containsImpliedFills (data/MarketTrade.proto)
   - name: underlying_exe_exch
     type: INTEGER
     description: >-
@@ -534,6 +567,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.underlyingExeExch (data/MarketTrade.proto)
   - name: underlying_exe_exch_name
     type: STRING
     description: >-
@@ -547,6 +581,7 @@ table:
     - 'EXCH_CODE_OM'
     - 'EXCH_CODE_COPENHAGEN'
     comprehensive: true
+    source: MarketTrade.underlyingExeExch_name (data/MarketTrade.proto)
   - name: is_spark
     type: BOOLEAN
     description: >-
@@ -558,6 +593,7 @@ table:
     example_values:
     - 'false'
     comprehensive: true
+    source: MarketTrade.isSpark (data/MarketTrade.proto)
   - name: ref_inst_curve_id
     type: INTEGER
     description: >-
@@ -566,6 +602,7 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    source: MarketTrade.refInstCurveId (data/MarketTrade.proto)
   - name: ref_inst_carry_id
     type: INTEGER
     description: >-
@@ -574,6 +611,7 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    source: MarketTrade.refInstCarryId (data/MarketTrade.proto)
   - name: is_ref_theo_invalid
     type: BOOLEAN
     description: >-
@@ -588,6 +626,7 @@ table:
     - 'false'
     - 'true'
     comprehensive: true
+    source: MarketTrade.isRefTheoInvalid (data/MarketTrade.proto)
   - name: lb_enabled
     type: BOOLEAN
     description: >-
@@ -600,6 +639,7 @@ table:
     example_values:
     - 'false'
     comprehensive: true
+    source: MarketTrade.lbEnabled (data/MarketTrade.proto)
   - name: edge_model_type
     type: INTEGER
     description: >-
@@ -613,6 +653,7 @@ table:
     - '2'
     - '0'
     comprehensive: true
+    source: MarketTrade.edgeModelType (data/MarketTrade.proto)
   - name: edge_model_type_name
     type: STRING
     description: >-
@@ -625,6 +666,7 @@ table:
     - 'EDGE_MODEL_PM'
     - 'EDGE_MODEL_NULL'
     comprehensive: true
+    source: MarketTrade.edgeModelType_name (data/MarketTrade.proto)
   - name: ref_theoevent_stream_id
     type: STRING
     description: >-
@@ -633,6 +675,7 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    source: MarketTrade.streamId (data/MarketTrade.proto)
   - name: ref_theoevent_event_id
     type: STRING
     description: >-
@@ -641,6 +684,7 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    source: MarketTrade.eventId (data/MarketTrade.proto)
   - name: exch_aggressor_side
     type: STRING
     description: >-
@@ -936,6 +980,7 @@ table:
     - K
     category: measure
     typical_aggregation: AVG
+    source: instrument enrichment (data-loader)
   - name: option_type
     type: INTEGER
     description: >-
@@ -952,6 +997,7 @@ table:
     - '80'
     - '67'
     comprehensive: true
+    source: instrument enrichment (data-loader)
   - name: currency_id
     type: INTEGER
     description: >-
@@ -989,6 +1035,7 @@ table:
     - Put
     category: dimension
     filterable: true
+    source: instrument enrichment (data-loader)
   - name: underlying_inst_type_name
     type: STRING
     description: >-
@@ -1016,6 +1063,7 @@ table:
     - 'OPTION'
     - 'COMBO'
     comprehensive: true
+    source: instrument enrichment (data-loader)
   - name: term
     type: STRING
     description: >-
@@ -1045,6 +1093,7 @@ table:
     - 'Mar-2026 W2'
     - 'Dec-2030'
     comprehensive: true
+    source: instrument enrichment (data-loader)
   - name: expiry_timestamp
     type: TIMESTAMP
     description: >-
@@ -1057,6 +1106,7 @@ table:
     - maturity date
     - expiration date
     category: time
+    source: instrument enrichment (data-loader)
   - name: is_bv_invalid
     type: BOOLEAN
     description: >-
@@ -1071,6 +1121,7 @@ table:
     - 'false'
     - 'true'
     comprehensive: true
+    source: MarketTrade.IsBvInvalid (data/MarketTrade.proto)
   - name: option_exchange
     type: STRING
     description: >-
@@ -1111,6 +1162,7 @@ table:
     - '25830621416'
     - '25830621202'
     comprehensive: false
+    source: MarketTrade.streamId (data/MarketTrade.proto)
   - name: streamsource_event_id
     type: INTEGER
     description: >-
@@ -1119,6 +1171,7 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    source: MarketTrade.eventId (data/MarketTrade.proto)
   - name: streamsource_message_id
     type: INTEGER
     description: >-
@@ -1127,6 +1180,7 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    source: MarketTrade.messageId (data/MarketTrade.proto)
   - name: datasource_pid
     type: INTEGER
     description: >-
@@ -1135,6 +1189,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: MarketTrade.pid (data/MarketTrade.proto)
   - name: datasource_hostname
     type: STRING
     description: >-
@@ -1149,6 +1204,7 @@ table:
     - 'omxps304'
     - 'omxps931'
     comprehensive: true
+    source: MarketTrade.hostname (data/MarketTrade.proto)
   - name: ref_delta
     type: FLOAT
     description: >-
@@ -3741,6 +3797,7 @@ table:
     - raw_gamma
     - roll
     - under
+    source: KPI intermediate (markettrade.raw_delta_mid_bv)
   - name: base_adjustment
     type: FLOAT
     description: >-
@@ -3753,6 +3810,7 @@ table:
     related_columns:
     - layered_base_adjustment
     - odr_adjustment
+    source: KPI intermediate (markettrade.base_adjustment)
   - name: buy_sell_multiplier
     type: INTEGER
     description: >-
@@ -8654,6 +8712,7 @@ table:
     related_columns:
     - forward
     - under
+    source: KPI intermediate (markettrade.stock_roll)
   - name: reference_roll
     type: FLOAT
     description: >-
@@ -8669,6 +8728,7 @@ table:
     - ref_roll
     - roll
     - under
+    source: KPI intermediate (markettrade.reference_roll)
   - name: is_expiry_trade
     type: BOOLEAN
     description: >-

@@ -3372,6 +3372,7 @@ table:
     filterable: true
     related_columns:
     - ref_base_val
+    source: KPI intermediate (clicktrade.mid_base_val)
   - name: base_adjustment
     type: INTEGER
     description: >
@@ -3383,6 +3384,7 @@ table:
     formula: '0'
     category: measure
     typical_aggregation: AVG
+    source: KPI intermediate (clicktrade.base_adjustment)
   - name: fees
     type: INTEGER
     description: >
@@ -3401,6 +3403,7 @@ table:
     formula: '0'
     category: measure
     typical_aggregation: SUM
+    source: KPI intermediate (clicktrade.fees)
   - name: trade_aggressor_side
     type: STRING
     description: >
@@ -3420,6 +3423,7 @@ table:
     related_columns:
     - price
     - tv
+    source: KPI intermediate (clicktrade.trade_aggressor_side)
   - name: trade_side
     type: STRING
     description: >
@@ -3472,6 +3476,7 @@ table:
     typical_aggregation: AVG
     related_columns:
     - trade_side
+    source: KPI computation (clicktrade.buy_sell_multiplier)
   - name: vol_path_estimate_1s
     type: FLOAT
     description: >
@@ -7223,6 +7228,7 @@ table:
     typical_aggregation: AVG
     related_columns:
     - delta_theo
+    source: KPI intermediate (clicktrade.delta)
   - name: gamma
     type: FLOAT
     description: >
@@ -8003,6 +8009,7 @@ table:
     related_columns:
     - forward
     - under
+    source: KPI intermediate (clicktrade.stock_roll)
   - name: reference_roll
     type: FLOAT
     description: >
@@ -8017,6 +8024,7 @@ table:
     - forward
     - roll
     - under
+    source: KPI intermediate (clicktrade.reference_roll)
   - name: is_expiry_trade
     type: BOOLEAN
     description: >

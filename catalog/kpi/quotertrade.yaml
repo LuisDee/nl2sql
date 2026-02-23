@@ -53,6 +53,7 @@ table:
     example_values: ['MON', 'WHITE', 'RED', 'BROADWAY', 'FIXEDINCOME_US']
     category: dimension
     filterable: true
+    source: QuoterTrade.portfolio (data/QuoterTrade.proto)
   - name: algo
     type: STRING
     description: Algorithm or quoting strategy name that generated the resting quote which was filled. Common quoter
@@ -66,6 +67,7 @@ table:
     example_values: ['OST_MQ', 'OST_X', 'ZB_TAK']
     category: dimension
     filterable: true
+    source: QuoterTrade.algo (data/QuoterTrade.proto)
   - name: ref_curve_id
     type: INTEGER
     description: Reference volatility curve identifier used at the time of the quoter fill. Links to the vol surface
@@ -81,6 +83,7 @@ table:
     - '297969'
     - '128249'
     comprehensive: true
+    source: QuoterTrade.refCurveId (data/QuoterTrade.proto)
   - name: ref_carry_id
     type: INTEGER
     description: Reference carry or dividend curve identifier active at the time of the quoter fill. Links to the
@@ -96,6 +99,7 @@ table:
     - '17096'
     - '12101'
     comprehensive: true
+    source: QuoterTrade.refCarryId (data/QuoterTrade.proto)
   - name: ref_tv
     type: FLOAT
     description: Reference theoretical value (fair value) of the option at the time the quoter fill occurred.
@@ -107,6 +111,7 @@ table:
     - ref theoretical value
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.refTv (data/QuoterTrade.proto)
   - name: ref_base_price
     type: FLOAT
     description: Reference base (underlying) price at the time of the quoter fill. This is the underlying
@@ -118,6 +123,7 @@ table:
     - ref spot
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.refBasePrice (data/QuoterTrade.proto)
   - name: ref_roll
     type: FLOAT
     description: Reference roll value at the time of the quoter fill. The roll captures the cost of rolling
@@ -128,6 +134,7 @@ table:
     - ref calendar roll
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.refRoll (data/QuoterTrade.proto)
   - name: raw_bv_bid
     type: FLOAT
     description: Raw base value (underlying) bid price before any layering or adjustment logic was applied.
@@ -138,6 +145,7 @@ table:
     - raw underlying bid
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.rawBvBid (data/QuoterTrade.proto)
   - name: raw_bv_bid_size
     type: INTEGER
     description: Raw base value bid size in lots at the time of the quoter fill. Shows how much liquidity
@@ -148,6 +156,7 @@ table:
     - underlying bid size
     category: measure
     typical_aggregation: SUM
+    source: QuoterTrade.rawBvBidSize (data/QuoterTrade.proto)
   - name: raw_bv_ask
     type: FLOAT
     description: Raw base value (underlying) ask price before any layering or adjustment logic was applied.
@@ -158,6 +167,7 @@ table:
     - raw underlying ask
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.rawBvAsk (data/QuoterTrade.proto)
   - name: raw_bv_ask_size
     type: INTEGER
     description: Raw base value ask size in lots at the time of the quoter fill. Shows how much liquidity
@@ -168,6 +178,7 @@ table:
     - underlying ask size
     category: measure
     typical_aggregation: SUM
+    source: QuoterTrade.rawBvAskSize (data/QuoterTrade.proto)
   - name: layered_base_bid
     type: FLOAT
     description: Layered base bid price after all adjustments (ODR, deflection, internal) have been applied
@@ -177,6 +188,7 @@ table:
     - adjusted bv bid
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.layeredBaseBid (data/QuoterTrade.proto)
   - name: layered_base_bid_size
     type: INTEGER
     description: Size (in lots) available at the layered base bid level after adjustments. Represents
@@ -186,6 +198,7 @@ table:
     - adjusted bid size
     category: measure
     typical_aggregation: SUM
+    source: QuoterTrade.layeredBaseBidSize (data/QuoterTrade.proto)
   - name: layered_base_ask
     type: FLOAT
     description: Layered base ask price after all adjustments (ODR, deflection, internal) have been applied
@@ -195,6 +208,7 @@ table:
     - adjusted bv ask
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.layeredBaseAsk (data/QuoterTrade.proto)
   - name: layered_base_ask_size
     type: INTEGER
     description: Size (in lots) available at the layered base ask level after adjustments. Represents
@@ -204,6 +218,7 @@ table:
     - adjusted ask size
     category: measure
     typical_aggregation: SUM
+    source: QuoterTrade.layeredBaseAskSize (data/QuoterTrade.proto)
   - name: layered_base_adjustment
     type: FLOAT
     description: Total adjustment applied to the raw base value to produce the layered base price. This is
@@ -213,6 +228,7 @@ table:
     - base adjustment total
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.layeredBaseAdjustment (data/QuoterTrade.proto)
   - name: odr_adjustment
     type: FLOAT
     description: Order-driven re-pricing (ODR) adjustment applied to the base value. This adjustment
@@ -222,6 +238,7 @@ table:
     - order driven repricing
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.odrAdjustment (data/QuoterTrade.proto)
   - name: inflight_deflection_tv_adjustment_bid
     type: FLOAT
     description: In-flight deflection adjustment to the theoretical value on the bid side. Accounts for
@@ -251,6 +268,7 @@ table:
     - internal bid adjustment
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.internalTvAdjustmentBid (data/QuoterTrade.proto)
   - name: internal_tv_adjustment_ask
     type: FLOAT
     description: Internal theoretical value adjustment on the ask side. Captures desk-level or strategy-level
@@ -260,6 +278,7 @@ table:
     - internal ask adjustment
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.internalTvAdjustmentAsk (data/QuoterTrade.proto)
   - name: nhr_adjustment_bid
     type: FLOAT
     description: Net hedge ratio (NHR) adjustment on the bid side. Adjusts the TV for imperfect hedging
@@ -291,6 +310,7 @@ table:
     - raw bid edge
     category: measure
     typical_aggregation: SUM
+    source: QuoterTrade.baseEdgeBid (data/QuoterTrade.proto)
   - name: base_edge_ask
     type: FLOAT
     description: Base edge on the ask side in ticks or price units. Represents the theoretical profit
@@ -301,6 +321,7 @@ table:
     - raw ask edge
     category: measure
     typical_aggregation: SUM
+    source: QuoterTrade.baseEdgeAsk (data/QuoterTrade.proto)
   - name: fees
     type: FLOAT
     description: Total trading fees including exchange fees and clearing costs for the quoter fill, in
@@ -314,6 +335,7 @@ table:
     business_rules: Fees are always positive. Subtract from PnL for net profitability.
     category: measure
     typical_aggregation: SUM
+    source: QuoterTrade.fees (data/QuoterTrade.proto)
   - name: bv_side
     type: STRING
     description: Indicates which side of the base value (underlying) market was most recently updated at
@@ -324,6 +346,7 @@ table:
     example_values: ['bid', 'ask']
     category: dimension
     filterable: true
+    source: QuoterTrade.bvSide_name (data/QuoterTrade.proto)
   - name: delta_adjusted_base_price
     type: FLOAT
     description: The delta-adjusted base (underlying) price used in KPI calculations. This is the reference
@@ -335,6 +358,7 @@ table:
     business_rules: Used in mid_tv formula as the base for gamma correction
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.deltaAdjustedBasePrice (data/QuoterTrade.proto)
   - name: base_sequence_number
     type: INTEGER
     description: Sequence number of the base (underlying) market data update at the time of the quoter fill.
@@ -343,6 +367,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.bvUpdateSequenceNumber (data/QuoterTrade.proto)
   - name: option_sequence_number
     type: INTEGER
     description: Sequence number of the option market data update at the time of the quoter fill. Used for
@@ -351,6 +376,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.optionSequenceNumber (data/QuoterTrade.proto)
   - name: base_instrument_hash
     type: STRING
     description: Unique hash identifier for the base (underlying) instrument associated with this quoter fill.
@@ -366,6 +392,7 @@ table:
     - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
     - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
     comprehensive: true
+    source: QuoterTrade.bvUpdateInstrumentHash (data/QuoterTrade.proto)
   - name: hardware_nic_rx_timestamp
     type: TIMESTAMP
     description: Hardware NIC (network interface card) receive timestamp captured at the network hardware level.
@@ -375,6 +402,7 @@ table:
     - nic timestamp
     - hardware timestamp
     category: time
+    source: QuoterTrade.hardwareNicRxTimestamp (data/QuoterTrade.proto)
   - name: hardware_nic_rx_timestamp_ns
     type: INTEGER
     description: Hardware NIC receive timestamp in nanoseconds since epoch. Provides nanosecond precision for
@@ -383,6 +411,7 @@ table:
     synonyms:
     - nic timestamp ns
     category: time
+    source: QuoterTrade.hardwareNicRxTimestamp_ns (data/QuoterTrade.proto)
   - name: is_deleting
     type: BOOLEAN
     description: Whether the quoter was in the process of deleting (fast-deleting) the quote when it was filled.
@@ -502,6 +531,7 @@ table:
     synonyms:
     - last update time ns
     category: time
+    source: QuoterTrade.lastUpdateTimestamp_ns (data/QuoterTrade.proto)
   - name: tv_bid
     type: FLOAT
     description: Reference theoretical value offset by the bid-side deflection at the time of the quoter fill.
@@ -533,6 +563,7 @@ table:
     - last tv bid
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.lastUpdateTvBid (data/QuoterTrade.proto)
   - name: last_update_tv_ask
     type: FLOAT
     description: Theoretical value on the ask side as of the quoter's last pricing refresh before the fill.
@@ -542,6 +573,7 @@ table:
     - last tv ask
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.lastUpdateTvAsk (data/QuoterTrade.proto)
   - name: mako_symbol
     type: STRING
     description: Internal Mako trading system symbol for the instrument. May differ from the exchange symbol
@@ -557,6 +589,7 @@ table:
     - 'SDVK'
     - 'AZNS'
     comprehensive: true
+    source: instrument enrichment (data-loader)
   - name: bv_update_sequence_number
     type: INTEGER
     description: Sequence number of the base value (underlying) update event that was current at the time
@@ -565,6 +598,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.bvUpdateSequenceNumber (data/QuoterTrade.proto)
   - name: bv_update_instrument_hash
     type: STRING
     description: Instrument hash of the base value update source at the time of the quoter fill. Identifies
@@ -578,6 +612,7 @@ table:
     - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
     - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
     comprehensive: true
+    source: QuoterTrade.bvUpdateInstrumentHash (data/QuoterTrade.proto)
   - name: underlying_sequence_number
     type: INTEGER
     description: Sequence number for the underlying instrument's market data at the time of the quoter fill.
@@ -586,6 +621,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.underlyingSequenceNumber (data/QuoterTrade.proto)
   - name: underlying_instrument_hash
     type: STRING
     description: Unique hash identifier for the underlying instrument of this option quoter fill. Used to
@@ -600,6 +636,7 @@ table:
     - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
     - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
     comprehensive: true
+    source: QuoterTrade.underlyingInstrumentHash (data/QuoterTrade.proto)
   - name: pid
     type: STRING
     description: Process identifier of the quoting engine instance that generated this fill event. Used for
@@ -609,6 +646,7 @@ table:
     - process id
     category: dimension
     filterable: true
+    source: QuoterTrade.NULL (data/QuoterTrade.proto)
   - name: hostname
     type: STRING
     description: Hostname of the server running the quoting engine instance that produced this fill. Used for
@@ -619,6 +657,7 @@ table:
     - host
     category: dimension
     filterable: true
+    source: QuoterTrade.NULL (data/QuoterTrade.proto)
   - name: mako_order_id
     type: INTEGER
     description: Internal Mako order identifier for the quote that was filled. Unique within a trading session.
@@ -645,6 +684,7 @@ table:
     - match time
     - fill time
     category: time
+    source: QuoterTrade.exchangeTimestamp (data/QuoterTrade.proto)
   - name: exchange_timestamp_ns
     type: INTEGER
     description: Exchange matching engine timestamp in nanoseconds since epoch. Provides the highest precision
@@ -653,6 +693,7 @@ table:
     synonyms:
     - exchange time ns
     category: time
+    source: QuoterTrade.exchangeTimestamp_ns (data/QuoterTrade.proto)
   - name: is_updating
     type: BOOLEAN
     description: Whether the quoter was in the process of updating its quote when the fill occurred. True means
@@ -676,6 +717,7 @@ table:
     - underlying exchange code
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.underlyingExeExch (data/QuoterTrade.proto)
   - name: underlying_exe_exch_name
     type: STRING
     description: Human-readable name of the exchange where the underlying instrument is traded. Identifies
@@ -689,6 +731,7 @@ table:
     example_values:
     - 'EXCH_CODE_SAX'
     comprehensive: true
+    source: QuoterTrade.underlyingExeExch_name (data/QuoterTrade.proto)
   - name: is_spark
     type: BOOLEAN
     description: Whether this quoter fill occurred via the Spark fast-path execution channel. Spark provides
@@ -702,6 +745,7 @@ table:
     example_values:
     - 'false'
     comprehensive: true
+    source: QuoterTrade.isSpark (data/QuoterTrade.proto)
   - name: ref_inst_carry_id
     type: INTEGER
     description: Reference instrument-level carry curve identifier at the time of the quoter fill. This is
@@ -715,6 +759,7 @@ table:
     - '17096'
     - '12101'
     comprehensive: true
+    source: QuoterTrade.refInstCarryId (data/QuoterTrade.proto)
   - name: ref_inst_curve_id
     type: INTEGER
     description: Reference instrument-level volatility curve identifier at the time of the quoter fill. This is
@@ -728,6 +773,7 @@ table:
     - '297969'
     - '128249'
     comprehensive: true
+    source: QuoterTrade.refInstCurveId (data/QuoterTrade.proto)
   - name: is_ref_theo_invalid
     type: BOOLEAN
     description: Whether the reference theoretical value was marked as invalid at the time of the quoter fill.
@@ -741,6 +787,7 @@ table:
     example_values:
     - 'false'
     comprehensive: true
+    source: QuoterTrade.isRefTheoInvalid (data/QuoterTrade.proto)
   - name: lb_enabled
     type: BOOLEAN
     description: Whether lean-back mode was enabled for the quoter at the time of the fill. Lean-back widens
@@ -754,6 +801,7 @@ table:
     example_values:
     - 'false'
     comprehensive: true
+    source: QuoterTrade.lbEnabled (data/QuoterTrade.proto)
   - name: edge_model_type
     type: INTEGER
     description: Numeric code identifying the edge model used for pricing this instrument at the time of the
@@ -767,6 +815,7 @@ table:
     - '2'
     - '0'
     comprehensive: true
+    source: QuoterTrade.edgeModelType (data/QuoterTrade.proto)
   - name: edge_model_type_name
     type: STRING
     description: Human-readable name of the edge model used for pricing this instrument at the time of the
@@ -781,6 +830,7 @@ table:
     - 'EDGE_MODEL_PM'
     - 'EDGE_MODEL_NULL'
     comprehensive: true
+    source: QuoterTrade.edgeModelType_name (data/QuoterTrade.proto)
   - name: ref_theoevent_stream_id
     type: STRING
     description: Stream identifier for the reference theo event that was active at the time of the quoter fill.
@@ -789,6 +839,7 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    source: QuoterTrade.streamId (data/QuoterTrade.proto)
   - name: ref_theoevent_event_id
     type: STRING
     description: Event identifier for the specific reference theo event that was active at the time of the quoter
@@ -797,6 +848,7 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    source: QuoterTrade.eventId (data/QuoterTrade.proto)
   - name: last_trade_price
     type: FLOAT
     description: Last traded price on the exchange for this instrument at the time of the quoter fill. Provides
@@ -865,6 +917,7 @@ table:
     business_rules: Used in instant_edge formula. Compare to tv for edge analysis.
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.tradePrice (data/QuoterTrade.proto)
   - name: trade_row_key
     type: STRING
     description: Unique key identifying this specific quoter fill row. Guaranteed unique across all rows in the
@@ -907,6 +960,7 @@ table:
     business_rules: ALWAYS filter on trade_date to avoid full table scans. This is the partition column.
     category: time
     filterable: true
+    source: kafka infrastructure
   - name: parent_is_combo
     type: BOOLEAN
     description: Whether the parent instrument is a combination or spread (e.g., straddle, strangle, calendar).
@@ -977,6 +1031,7 @@ table:
     - 'dbb4c6bffea93f49a7e785c000be54f0148e62d3e774dadcebd36936fb72e759'
     - '7ae811825bc42df8499c63ee3890188488ef03abdb6eae91ba23be48795b63fc'
     comprehensive: true
+    source: QuoterTrade.instrumentHash (data/QuoterTrade.proto)
   - name: parent_instrument_hash
     type: STRING
     description: Instrument hash of the parent combo or spread if this fill is part of a multi-leg strategy.
@@ -1047,6 +1102,7 @@ table:
     - strike level
     category: measure
     typical_aggregation: AVG
+    source: instrument enrichment (data-loader)
   - name: option_type
     type: INTEGER
     description: Numeric option type code indicating whether this is a call or put option. Use option_type_name
@@ -1062,6 +1118,7 @@ table:
     - '67'
     - '80'
     comprehensive: true
+    source: instrument enrichment (data-loader)
   - name: currency_id
     type: INTEGER
     description: Numeric currency identifier for the instrument's denomination. Maps to the trading currency
@@ -1096,6 +1153,7 @@ table:
     example_values: ['Call', 'Put']
     category: dimension
     filterable: true
+    source: instrument enrichment (data-loader)
   - name: underlying_inst_type_name
     type: STRING
     description: Human-readable name of the underlying instrument type (e.g., Future, Equity, Index). Identifies
@@ -1119,6 +1177,7 @@ table:
     example_values: ['Option', 'Future', 'Spread']
     category: dimension
     filterable: true
+    source: instrument enrichment (data-loader)
   - name: term
     type: STRING
     description: Expiry term or tenor label describing the expiration cycle of the option (e.g., monthly, weekly,
@@ -1132,6 +1191,7 @@ table:
     example_values: ['monthly', 'weekly', 'quarterly']
     category: dimension
     filterable: true
+    source: instrument enrichment (data-loader)
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract that was filled by the quoter. Defines when the
@@ -1143,6 +1203,7 @@ table:
     - maturity date
     - expiry date
     category: time
+    source: instrument enrichment (data-loader)
   - name: is_bv_invalid
     type: BOOLEAN
     description: Whether the base value (underlying price) was flagged as invalid at the time of the quoter fill.
@@ -1156,6 +1217,7 @@ table:
     example_values:
     - 'false'
     comprehensive: true
+    source: QuoterTrade.IsBvInvalid (data/QuoterTrade.proto)
   - name: option_exchange
     type: STRING
     description: Exchange where the option was listed and where the quoter fill occurred. Identifies the specific
@@ -1194,6 +1256,7 @@ table:
     - '25833766945'
     - '25833766919'
     comprehensive: true
+    source: QuoterTrade.streamId (data/QuoterTrade.proto)
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream for this quoter fill. Uniquely identifies the event
@@ -1207,6 +1270,7 @@ table:
     - '1771322957438814514'
     - '1771320414482869855'
     comprehensive: true
+    source: QuoterTrade.eventId (data/QuoterTrade.proto)
   - name: streamsource_message_id
     type: INTEGER
     description: Message identifier within the source stream for this quoter fill. Part of the data provenance
@@ -1220,6 +1284,7 @@ table:
     - '63822861697025'
     - '110614265462785'
     comprehensive: true
+    source: QuoterTrade.messageId (data/QuoterTrade.proto)
   - name: datasource_pid
     type: INTEGER
     description: Process identifier of the data source that originally emitted this quoter fill event. Part of
@@ -1228,6 +1293,7 @@ table:
     synonyms: []
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.pid (data/QuoterTrade.proto)
   - name: datasource_hostname
     type: STRING
     description: Hostname of the server that originally emitted this quoter fill event. Part of the data
@@ -1240,6 +1306,7 @@ table:
     - 'omxps304'
     - 'omxps305'
     comprehensive: true
+    source: QuoterTrade.hostname (data/QuoterTrade.proto)
   - name: ref_delta
     type: FLOAT
     description: Reference delta of the option at the time of the quoter fill. This is the delta used in KPI
@@ -1251,6 +1318,7 @@ table:
     business_rules: Used in mid_tv gamma correction formula
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.refDelta (data/QuoterTrade.proto)
   - name: ref_gamma
     type: FLOAT
     description: Reference gamma of the option at the time of the quoter fill. This is the gamma used in KPI
@@ -1262,6 +1330,7 @@ table:
     business_rules: Used in mid_tv formula for second-order correction
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.refGamma (data/QuoterTrade.proto)
   - name: mdepth_sequence_number
     type: INTEGER
     description: Market depth sequence number at the time of the quoter fill. Identifies the specific order book
@@ -1344,6 +1413,7 @@ table:
     - fill time
     - trade time
     category: time
+    source: QuoterTrade.eventTimestamp (data/QuoterTrade.proto)
   - name: event_timestamp_ns
     type: INTEGER
     description: Event timestamp in nanoseconds since epoch for the quoter fill. Provides nanosecond-precision
@@ -1352,6 +1422,7 @@ table:
     synonyms:
     - event time ns
     category: time
+    source: QuoterTrade.eventTimestamp_ns (data/QuoterTrade.proto)
   - name: option_mdepth_timestamp
     type: TIMESTAMP
     description: Timestamp of the option market depth snapshot that was current at the time of the quoter fill.
@@ -1408,6 +1479,7 @@ table:
     - top bid
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.bid_price_0 (data/QuoterTrade.proto)
   - name: bid_volume_0
     type: INTEGER
     description: Volume (in lots) available at the best bid price (level 0) for the option at the time of the
@@ -1418,6 +1490,7 @@ table:
     - best bid size
     category: measure
     typical_aggregation: SUM
+    source: QuoterTrade.bid_volume_0 (data/QuoterTrade.proto)
   - name: ask_price_0
     type: FLOAT
     description: Best ask (top-of-book) price for the option at the time of the quoter fill. Level 0 represents
@@ -1429,6 +1502,7 @@ table:
     - top ask
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.ask_price_0 (data/QuoterTrade.proto)
   - name: ask_volume_0
     type: INTEGER
     description: Volume (in lots) available at the best ask price (level 0) for the option at the time of the
@@ -1439,6 +1513,7 @@ table:
     - best ask size
     category: measure
     typical_aggregation: SUM
+    source: QuoterTrade.ask_volume_0 (data/QuoterTrade.proto)
   - name: ul_bid_price_0
     type: FLOAT
     description: Best bid price for the underlying instrument at the time of the quoter fill. Shows the
@@ -3534,6 +3609,7 @@ table:
     related_columns:
     - raw_bv_ask
     - raw_bv_bid
+    source: KPI intermediate (quotertrade.mid_base_val)
   - name: raw_delta_mid_bv
     type: FLOAT
     description: Raw (unadjusted) delta computed at the mid base value at the time of the quoter fill. The delta
@@ -3550,6 +3626,7 @@ table:
     - raw_gamma
     - roll
     - under
+    source: KPI intermediate (quotertrade.raw_delta_mid_bv)
   - name: base_adjustment
     type: FLOAT
     description: Total base (underlying) price adjustment applied at the time of the quoter fill. Summarizes all
@@ -3564,6 +3641,7 @@ table:
     related_columns:
     - layered_base_adjustment
     - odr_adjustment
+    source: KPI intermediate (quotertrade.base_adjustment)
   - name: tv
     type: FLOAT
     description: Theoretical value (fair value, theo) of the option at the time of the quoter fill, in the
@@ -3586,6 +3664,7 @@ table:
     - trade_side
     - tv_ask
     - tv_bid
+    source: KPI intermediate (quotertrade.tv)
   - name: buy_sell_multiplier
     type: INTEGER
     description: Direction multiplier for the quoter fill. +1 for buy (quoter was filled on their bid) and -1
@@ -3602,6 +3681,7 @@ table:
     typical_aggregation: AVG
     related_columns:
     - trade_side
+    source: KPI computation (quotertrade.buy_sell_multiplier)
   - name: mid_tv
     type: FLOAT
     description: Mid-point theoretical value, the skew-neutral fair value of the option computed using the
@@ -3666,6 +3746,7 @@ table:
     - trade_price
     - trade_side
     - trade_size
+    source: KPI computation (quotertrade.instant_pnl)
   - name: instant_pnl_w_fees
     type: FLOAT
     description: Instant PnL after deducting exchange fees and clearing costs. This is the net theoretical profit
@@ -3686,6 +3767,7 @@ table:
     - nhr_adjustment_bid
     - trade_price
     - trade_side
+    source: KPI computation (quotertrade.instant_pnl_w_fees)
   - name: instant_edge_mid_tv
     type: FLOAT
     description: Instantaneous edge relative to the mid-point theoretical value (mid_tv) rather than the
@@ -6979,6 +7061,7 @@ table:
     - ref_base_price
     - ref_delta
     - ref_gamma
+    source: KPI intermediate (quotertrade.delta)
   - name: gamma
     type: FLOAT
     description: Option gamma at the time of the quoter fill, measuring the rate of change of delta per unit
@@ -7090,6 +7173,7 @@ table:
     - roll at fill
     category: measure
     typical_aggregation: AVG
+    source: QuoterTrade.roll (data/QuoterTrade.proto)
   - name: abs_trade_size
     type: FLOAT
     description: Absolute (unsigned) trade size in lots for the quoter fill. Always positive regardless of
@@ -7571,6 +7655,7 @@ table:
     related_columns:
     - forward
     - under
+    source: KPI intermediate (quotertrade.stock_roll)
   - name: reference_roll
     type: FLOAT
     description: Reference roll value at the time of the quoter fill. The baseline roll assumption used by
@@ -7586,6 +7671,7 @@ table:
     - ref_roll
     - roll
     - under
+    source: KPI intermediate (quotertrade.reference_roll)
   - name: is_expiry_trade
     type: BOOLEAN
     description: Whether the quoter fill occurred on the option's expiry day. Expiry-day fills have unique

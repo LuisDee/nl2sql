@@ -292,6 +292,7 @@ table:
     - trade month
     category: measure
     typical_aggregation: AVG
+    source: BrokerTrade.month (data/OffFloorData.proto)
   - name: day
     type: INTEGER
     description: >-
@@ -302,6 +303,7 @@ table:
     - trade day
     category: measure
     typical_aggregation: AVG
+    source: BrokerTrade.day (data/OffFloorData.proto)
   - name: year
     type: INTEGER
     description: >-
@@ -312,6 +314,7 @@ table:
     - trade year
     category: measure
     typical_aggregation: AVG
+    source: BrokerTrade.year (data/OffFloorData.proto)
   - name: ref_price
     type: FLOAT
     description: >-
@@ -628,6 +631,7 @@ table:
     business_rules: ALWAYS filter on trade_date in queries. This is the partition column. Omitting it causes full scans.
     category: time
     filterable: true
+    source: kafka infrastructure
   - name: price
     type: FLOAT
     description: >-
@@ -869,6 +873,7 @@ table:
     - '0ef812ed59d2a2999eab07d0f8788aaf7ae0bd9c8041f95afb3183197c0e3666'
     - '0c2810fcf599644dfbe5e08628b88b06de94f6e74dcd921c5efb244b897ab1c9'
     comprehensive: true
+    source: BrokerTrade.instrumentHash (data/OffFloorData.proto)
   - name: parent_feed_code
     type: STRING
     description: >-
@@ -4136,6 +4141,7 @@ table:
     synonyms: []
     business_rules: Internal pipeline field. Use trade_date for date filtering.
     category: time
+    source: kafka infrastructure
   - name: partition_number
     type: INTEGER
     description: >-
@@ -4146,6 +4152,7 @@ table:
     business_rules: Internal pipeline field.
     category: measure
     typical_aggregation: AVG
+    source: kafka infrastructure
   - name: ref_base_val
     type: FLOAT
     description: >-
@@ -4247,6 +4254,7 @@ table:
     related_columns:
     - ul_ask_price_0
     - ul_bid_price_0
+    source: KPI intermediate (brokertrade.mid_base_val)
   - name: base_adjustment
     type: INTEGER
     description: >-
@@ -4258,6 +4266,7 @@ table:
     formula: '0'
     category: measure
     typical_aggregation: AVG
+    source: KPI intermediate (brokertrade.base_adjustment)
   - name: fees
     type: INTEGER
     description: >-
@@ -4273,6 +4282,7 @@ table:
     formula: '0'
     category: measure
     typical_aggregation: SUM
+    source: KPI intermediate (brokertrade.fees)
   - name: trade_side
     type: STRING
     description: >-
@@ -4294,6 +4304,7 @@ table:
     - is_parent
     - parent_is_combo
     - size
+    source: KPI intermediate (brokertrade.trade_side)
   - name: size
     type: INTEGER
     description: >-
@@ -4314,6 +4325,7 @@ table:
     - is_parent
     - total_traded_size
     - trade_side
+    source: KPI intermediate (brokertrade.size)
   - name: buy_sell_multiplier
     type: INTEGER
     description: >-
@@ -4330,6 +4342,7 @@ table:
     typical_aggregation: AVG
     related_columns:
     - trade_side
+    source: KPI computation (brokertrade.buy_sell_multiplier)
   - name: market_mako_multiplier
     type: INTEGER
     description: >-
@@ -4360,6 +4373,7 @@ table:
     related_columns:
     - adjusted_roll
     - trade_ref_price
+    source: KPI intermediate (brokertrade.adjusted_trade_ref_price)
   - name: ref_trade_side
     type: STRING
     description: >-
@@ -4388,6 +4402,7 @@ table:
     typical_aggregation: AVG
     related_columns:
     - ref_trade_side
+    source: KPI computation (brokertrade.ref_buy_sell_multiplier)
   - name: instant_edge
     type: FLOAT
     description: >-
@@ -4411,6 +4426,7 @@ table:
     - price
     - trade_side
     - trade_tv
+    source: KPI computation (brokertrade.instant_edge)
   - name: instant_pnl
     type: FLOAT
     description: >-
@@ -4434,6 +4450,7 @@ table:
     - price
     - size
     - trade_side
+    source: KPI computation (brokertrade.instant_pnl)
   - name: instant_pnl_w_fees
     type: FLOAT
     description: >-
@@ -11382,6 +11399,7 @@ table:
     - time to maturity
     category: measure
     typical_aggregation: AVG
+    source: BrokerTrade.tte (data/OffFloorData.proto)
   - name: forward
     type: FLOAT
     description: >-
@@ -11421,6 +11439,7 @@ table:
     related_columns:
     - forward
     - under
+    source: KPI intermediate (brokertrade.stock_roll)
   - name: reference_roll
     type: FLOAT
     description: >-
@@ -11437,6 +11456,7 @@ table:
     - forward
     - roll
     - under
+    source: KPI intermediate (brokertrade.reference_roll)
   - name: abs_traded_size
     type: FLOAT
     description: >-

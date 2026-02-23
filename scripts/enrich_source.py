@@ -127,21 +127,53 @@ def build_proto_column_map(
 
 
 def build_kpi_source_map(table_name: str, kpi_yaml: dict) -> dict[str, str]:
-    """Build source mapping for KPI columns from kpi_computations.yaml."""
+    """Build source mapping for KPI columns from kpi_computations.yaml.
+
+    Handles both dict-style (test fixtures) and list-style (real YAML) structures.
+    """
     result: dict[str, str] = {}
 
-    # Shared formulas
-    for col_name in kpi_yaml.get("shared_formulas", {}):
-        result[col_name] = f"KPI shared formula ({col_name})"
+    # Shared formulas (always a dict keyed by name)
+    shared = kpi_yaml.get("shared_formulas", {})
+    if isinstance(shared, dict):
+        for col_name in shared:
+            result[col_name] = f"KPI shared formula ({col_name})"
 
-    # Trade-type-specific
-    trade_type = kpi_yaml.get("trade_types", {}).get(table_name, {})
+    # Trade-type-specific: can be dict (test) or list (real YAML)
+    trade_types = kpi_yaml.get("trade_types", {})
 
-    for col_name in trade_type.get("metrics", {}):
-        result[col_name] = f"KPI computation ({table_name}.{col_name})"
+    if isinstance(trade_types, list):
+        trade_type = {}
+        for tt in trade_types:
+            if tt.get("name") == table_name:
+                trade_type = tt
+                break
+    elif isinstance(trade_types, dict):
+        trade_type = trade_types.get(table_name, {})
+    else:
+        trade_type = {}
 
-    for col_name in trade_type.get("intermediate_calculations", {}):
-        result[col_name] = f"KPI intermediate ({table_name}.{col_name})"
+    # Metrics: can be dict (test) or list (real YAML)
+    metrics = trade_type.get("metrics", {})
+    if isinstance(metrics, list):
+        for m in metrics:
+            col_name = m.get("name", "")
+            if col_name:
+                result[col_name] = f"KPI computation ({table_name}.{col_name})"
+    elif isinstance(metrics, dict):
+        for col_name in metrics:
+            result[col_name] = f"KPI computation ({table_name}.{col_name})"
+
+    # Intermediate calculations: can be dict (test) or list (real YAML)
+    intermediates = trade_type.get("intermediate_calculations", {})
+    if isinstance(intermediates, list):
+        for ic in intermediates:
+            col_name = ic.get("name", "")
+            if col_name:
+                result[col_name] = f"KPI intermediate ({table_name}.{col_name})"
+    elif isinstance(intermediates, dict):
+        for col_name in intermediates:
+            result[col_name] = f"KPI intermediate ({table_name}.{col_name})"
 
     return result
 

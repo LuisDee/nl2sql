@@ -3385,6 +3385,7 @@ table:
     - raw_gamma
     - roll
     - under
+    source: KPI intermediate (otoswing.raw_delta_mid_bv)
   - name: base_adjustment
     type: FLOAT
     description: Adjustment applied to the base (underlying) price for this OTO swing trade. Captures any systematic corrections
@@ -3413,6 +3414,7 @@ table:
     typical_aggregation: AVG
     related_columns:
     - routed_buy_sell
+    source: KPI computation (otoswing.buy_sell_multiplier)
   - name: tv
     type: FLOAT
     description: Theoretical value (fair value) of the option at the time of the OTO swing trade, as computed by the pricing
@@ -8537,6 +8539,7 @@ table:
     related_columns:
     - forward
     - under
+    source: KPI intermediate (otoswing.stock_roll)
   - name: reference_roll
     type: FLOAT
     description: Reference roll value, the roll figure captured at the reference snapshot used for KPI computation baseline.
@@ -8550,6 +8553,7 @@ table:
     - ref_roll
     - roll
     - under
+    source: KPI intermediate (otoswing.reference_roll)
   - name: is_expiry_trade
     type: BOOLEAN
     description: 'Boolean indicating whether this OTO swing trade occurred on the option''s expiry day. Expiry-day trades

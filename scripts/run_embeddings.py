@@ -230,32 +230,43 @@ def _build_table_descriptions(s: Settings) -> list[dict[str, str]]:
     """Build table description rows from YAML catalog.
 
     Each row has: source_type, layer, dataset_name, table_name, description.
-    Reads from catalog/<layer>/_dataset.yaml for dataset-level descriptions
-    and catalog/<layer>/<table>.yaml for table-level descriptions.
+    Reads from all catalog subdirectories (kpi, data, and market dirs).
     """
+    from nl2sql_agent.catalog_loader import _catalog_subdirs, resolve_placeholders
+
     descriptions: list[dict[str, str]] = []
 
-    for layer in ("kpi", "data"):
-        dataset_name = s.kpi_dataset if layer == "kpi" else s.data_dataset
+    for subdir in _catalog_subdirs():
+        subdir_path = CATALOG_DIR / subdir
+        if not subdir_path.exists():
+            continue
 
         # Dataset-level description
-        ds_path = CATALOG_DIR / layer / "_dataset.yaml"
+        ds_path = subdir_path / "_dataset.yaml"
         if ds_path.exists():
             ds_data = load_yaml(ds_path)
-            ds_desc = ds_data.get("dataset", {}).get("description", "")
-            descriptions.append(
-                {
-                    "source_type": "dataset",
-                    "layer": layer,
-                    "dataset_name": dataset_name,
-                    "table_name": "",
-                    "description": ds_desc.strip(),
-                }
+            ds_info = ds_data.get("dataset", {})
+            ds_desc = ds_info.get("description", "").strip()
+            raw_dataset = ds_info.get("name", "")
+            dataset_name = resolve_placeholders(
+                raw_dataset,
+                kpi_dataset=s.kpi_dataset,
+                data_dataset=s.data_dataset,
+                dataset_prefix=s.dataset_prefix,
             )
+            if ds_desc:
+                descriptions.append(
+                    {
+                        "source_type": "dataset",
+                        "layer": subdir,
+                        "dataset_name": dataset_name,
+                        "table_name": "",
+                        "description": ds_desc,
+                    }
+                )
 
         # Table-level descriptions from individual YAML files
-        layer_dir = CATALOG_DIR / layer
-        for yaml_file in sorted(layer_dir.glob("*.yaml")):
+        for yaml_file in sorted(subdir_path.glob("*.yaml")):
             if yaml_file.name.startswith("_"):
                 continue
             content = load_yaml(yaml_file)
@@ -263,11 +274,18 @@ def _build_table_descriptions(s: Settings) -> list[dict[str, str]]:
             desc = table.get("description", "").strip()
             if not desc:
                 continue  # Skip skeleton/WIP tables with empty descriptions
+            raw_ds = table.get("dataset", "")
+            ds_name = resolve_placeholders(
+                raw_ds,
+                kpi_dataset=s.kpi_dataset,
+                data_dataset=s.data_dataset,
+                dataset_prefix=s.dataset_prefix,
+            )
             descriptions.append(
                 {
                     "source_type": "table",
-                    "layer": layer,
-                    "dataset_name": dataset_name,
+                    "layer": subdir,
+                    "dataset_name": ds_name,
                     "table_name": table.get("name", yaml_file.stem),
                     "description": desc,
                 }

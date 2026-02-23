@@ -26,6 +26,18 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '5'
+    - '6'
+    - '3'
+    - '8'
+    - '7'
+    - '9'
+    - '4'
+    - '1'
+    - '0'
+    - '2'
+    comprehensive: true
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
@@ -549,6 +561,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
@@ -557,6 +572,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: streamsource_message_id
     type: INTEGER
     description: Message identifier within the source stream event, used when a single event contains multiple messages.
@@ -565,6 +583,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: datasource_pid
     type: INTEGER
     description: Process ID of the data source application that produced this record. Used for data provenance tracking
@@ -620,6 +641,10 @@ table:
     - C/P
     category: dimension
     filterable: true
+    example_values:
+    - '80'
+    - '67'
+    comprehensive: true
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
@@ -656,6 +681,9 @@ table:
     - mako ticker
     category: dimension
     filterable: true
+    example_values:
+    - 'BETS'
+    comprehensive: true
   - name: currency
     type: INTEGER
     description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
@@ -698,6 +726,15 @@ table:
     - expiry cycle
     category: dimension
     filterable: true
+    example_values:
+    - 'Feb-2026'
+    - 'Mar-2026'
+    - 'May-2026'
+    - 'Apr-2026'
+    - 'Jun-2026'
+    - 'Dec-2026'
+    - 'Sep-2026'
+    comprehensive: true
   - name: trade_date
     type: DATE
     description: Business date of the trading session, used as the primary partition column for this table. Always
@@ -723,3 +760,6 @@ table:
     - underlying symbol
     category: dimension
     filterable: true
+    example_values:
+    - 'BETS'
+    comprehensive: true

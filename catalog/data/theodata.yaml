@@ -28,6 +28,13 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '1'
+    - '3'
+    - '4'
+    - '2'
+    - '0'
+    comprehensive: true
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
@@ -143,6 +150,9 @@ table:
     - recalc type
     category: dimension
     filterable: true
+    example_values:
+    - 'TERM_COMPUTE'
+    comprehensive: true
   - name: instrument_hash
     type: STRING
     description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
@@ -165,6 +175,18 @@ table:
     - vol curve id
     category: identifier
     filterable: true
+    example_values:
+    - '260456'
+    - '260416'
+    - '260422'
+    - '260394'
+    - '260393'
+    - '260407'
+    - '260392'
+    - '260455'
+    - '260417'
+    - '260431'
+    comprehensive: false
   - name: carry_id
     type: INTEGER
     description: Identifier of the carry/dividend curve used in the pricing model for this computation. The carry curve
@@ -176,6 +198,9 @@ table:
     - carry curve id
     category: identifier
     filterable: true
+    example_values:
+    - '3344'
+    comprehensive: true
   - name: stream_id
     type: INTEGER
     description: Identifier of the data stream that produced this theo record. Used for data pipeline routing and
@@ -185,6 +210,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: tv
     type: FLOAT
     description: Theoretical value (fair value) computed by the pricing model for this option at this point in time.
@@ -374,6 +402,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: greek_atm
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -538,6 +569,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'omxps981'
+    comprehensive: true
   - name: streamsource_stream_id
     type: INTEGER
     description: Stream identifier from the event streaming infrastructure, indicating which logical stream this record
@@ -547,6 +581,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '25775046681'
+    comprehensive: true
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
@@ -586,6 +623,10 @@ table:
     - C/P
     category: dimension
     filterable: true
+    example_values:
+    - '80'
+    - '67'
+    comprehensive: true
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
@@ -622,6 +663,9 @@ table:
     - mako ticker
     category: dimension
     filterable: true
+    example_values:
+    - 'BETS'
+    comprehensive: true
   - name: currency
     type: INTEGER
     description: Numeric currency code identifying the denomination of the instrument and its theoretical values.
@@ -667,6 +711,15 @@ table:
     - expiry cycle
     category: dimension
     filterable: true
+    example_values:
+    - 'Mar-2026'
+    - 'Feb-2026'
+    - 'Jun-2026'
+    - 'Apr-2026'
+    - 'Sep-2026'
+    - 'Dec-2026'
+    - 'May-2026'
+    comprehensive: true
   - name: trade_date
     type: DATE
     description: Business date of the trading session, used as the primary partition column for this table. Always
@@ -691,6 +744,9 @@ table:
     - strategy
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    comprehensive: true
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -704,3 +760,6 @@ table:
     - underlying symbol
     category: dimension
     filterable: true
+    example_values:
+    - 'BETS'
+    comprehensive: true

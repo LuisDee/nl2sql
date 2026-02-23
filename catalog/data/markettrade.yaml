@@ -29,6 +29,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
@@ -60,6 +63,11 @@ table:
     - trading algo
     category: dimension
     filterable: true
+    example_values:
+    - 'OST_X'
+    - 'OST_Q'
+    - 'OST_CLICK'
+    comprehensive: true
   - name: ref_curve_id
     type: INTEGER
     description: Identifier of the volatility curve active at the time of the last theoServer callback before this
@@ -329,6 +337,11 @@ table:
     - base value side
     category: dimension
     filterable: true
+    example_values:
+    - 'BUYSELL_BUY'
+    - 'BUYSELL_SELL'
+    - 'BUYSELL_NULL_BUYSELL'
+    comprehensive: true
   - name: delta_adjusted_base_price
     type: FLOAT
     description: Equal to the raw base value (relevant side depending on trade direction) plus ODR and layered base
@@ -522,6 +535,10 @@ table:
     - is active
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    - 'true'
+    comprehensive: true
   - name: bv_update_sequence_number
     type: INTEGER
     description: Sequence number of the base value update event at the time of this market trade. Used for correlating
@@ -538,6 +555,18 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '68c7c384ef678b316d8444a8c2ecfdd807b21d08e4ed2b6d004e7cbdea4eb4e1'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    - '147007ef905b8c03c43c4ed421b0d92f301b74206dc0791fba299c0ed643c4e6'
+    - 'eb118d52ef072990e77a70619322833b53bd6ba48e52896f26413d02ce6a434c'
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '4aa0f3665ff6617f77fad1594368883fd77312d36d6274cbf3dd5cd5737ca111'
+    - '9dd29ca5be63a5d7b48a69438f417361576a35820974b12cbd8c683dbf77dfdc'
+    - 'a9282b0c15514437a0f13961db6760bf94dad6f5d04d551f120b2a70b6af682a'
+    - '0fb6845ba17cbe2590a5e74052ea5d926ccd0f768c40a1e30a5f2b9ccaf1c475'
+    - '0f87d34b1439c37a639bad1bdff1cce802a79ff2211883df013b4670ecef5a62'
+    comprehensive: false
   - name: underlying_sequence_number
     type: INTEGER
     description: Sequence number of the underlying instrument's market data event associated with this market trade.
@@ -554,6 +583,18 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '68c7c384ef678b316d8444a8c2ecfdd807b21d08e4ed2b6d004e7cbdea4eb4e1'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    - '147007ef905b8c03c43c4ed421b0d92f301b74206dc0791fba299c0ed643c4e6'
+    - 'eb118d52ef072990e77a70619322833b53bd6ba48e52896f26413d02ce6a434c'
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '4aa0f3665ff6617f77fad1594368883fd77312d36d6274cbf3dd5cd5737ca111'
+    - '9dd29ca5be63a5d7b48a69438f417361576a35820974b12cbd8c683dbf77dfdc'
+    - 'a9282b0c15514437a0f13961db6760bf94dad6f5d04d551f120b2a70b6af682a'
+    - '0fb6845ba17cbe2590a5e74052ea5d926ccd0f768c40a1e30a5f2b9ccaf1c475'
+    - '0f87d34b1439c37a639bad1bdff1cce802a79ff2211883df013b4670ecef5a62'
+    comprehensive: false
   - name: first_fill_sequence_number
     type: INTEGER
     description: Sequence number of the first recorded fill that contributed to this market trade. When a market trade
@@ -585,6 +626,10 @@ table:
     - implied fill flag
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    - 'true'
+    comprehensive: true
   - name: is_bv_invalid
     type: BOOLEAN
     description: Flag indicating whether the base value (underlying price) was invalid or stale at the time of the
@@ -593,6 +638,10 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    - 'true'
+    comprehensive: true
   - name: underlying_exe_exch
     type: INTEGER
     description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
@@ -610,6 +659,11 @@ table:
     - underlying exchange
     category: dimension
     filterable: true
+    example_values:
+    - 'EXCH_CODE_SAX'
+    - 'EXCH_CODE_OM'
+    - 'EXCH_CODE_COPENHAGEN'
+    comprehensive: true
   - name: is_spark
     type: BOOLEAN
     description: Flag indicating whether this market trade event was processed via the Spark fast-path pipeline.
@@ -620,6 +674,9 @@ table:
     - fast path
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: ref_inst_curve_id
     type: INTEGER
     description: Reference instrument volatility curve identifier, tracking the vol curve version used for this specific
@@ -644,6 +701,10 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    - 'true'
+    comprehensive: true
   - name: lb_enabled
     type: BOOLEAN
     description: Flag indicating whether lean-back mode was enabled for this instrument at the time of the market trade.
@@ -655,6 +716,9 @@ table:
     - lean back mode
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: edge_model_type
     type: INTEGER
     description: Numeric code identifying the edge model type used for this instrument when computing edge on the
@@ -663,6 +727,10 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - '2'
+    - '0'
+    comprehensive: true
   - name: edge_model_type_name
     type: STRING
     description: Human-readable name of the edge model type used for this instrument when computing edge on the market
@@ -672,6 +740,10 @@ table:
     - edge model
     category: dimension
     filterable: true
+    example_values:
+    - 'EDGE_MODEL_PM'
+    - 'EDGE_MODEL_NULL'
+    comprehensive: true
   - name: streamsource_stream_id
     type: INTEGER
     description: Stream identifier from the event streaming infrastructure, indicating which logical stream this record
@@ -680,6 +752,18 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '25830621357'
+    - '25830621215'
+    - '25829572658'
+    - '25830621185'
+    - '25829572661'
+    - '25830621447'
+    - '25830621193'
+    - '25829572656'
+    - '25830621416'
+    - '25830621202'
+    comprehensive: false
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
@@ -712,6 +796,12 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'omxps305'
+    - 'omxps901'
+    - 'omxps304'
+    - 'omxps931'
+    comprehensive: true
   - name: bid_price_0
     type: FLOAT
     description: Top-of-book bid price (best bid) at depth level 0 before the market trade. The unadjusted bid-side
@@ -806,6 +896,10 @@ table:
     - C/P
     category: dimension
     filterable: true
+    example_values:
+    - '80'
+    - '67'
+    comprehensive: true
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
@@ -838,6 +932,18 @@ table:
     - internal symbol
     category: dimension
     filterable: true
+    example_values:
+    - 'OMX'
+    - 'AZNS'
+    - 'EVO_SS'
+    - 'SAABB'
+    - 'SINCH_SS'
+    - 'ATCOA'
+    - 'NOVOB'
+    - 'BOLI'
+    - 'VOLV'
+    - 'EQT_SS'
+    comprehensive: false
   - name: currency
     type: INTEGER
     description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
@@ -878,6 +984,21 @@ table:
     - expiry cycle
     category: dimension
     filterable: true
+    example_values:
+    - 'Feb-2026'
+    - 'Mar-2026'
+    - 'Apr-2026'
+    - 'Jun-2026'
+    - 'Dec-2026'
+    - 'May-2026'
+    - 'Sep-2026'
+    - 'Feb-2026 W4'
+    - 'Mar-2026 W1'
+    - 'Dec-2027'
+    - 'Jun-2027'
+    - 'Mar-2026 W2'
+    - 'Dec-2030'
+    comprehensive: true
   - name: trade_date
     type: DATE
     description: Business date of the trading session, used as the primary partition column for this table. Always
@@ -901,6 +1022,10 @@ table:
     - strategy
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    - 'EXPIRY'
+    comprehensive: true
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -913,3 +1038,15 @@ table:
     - underlying symbol
     category: dimension
     filterable: true
+    example_values:
+    - 'OMX'
+    - 'AZNS'
+    - 'EVO_SS'
+    - 'SAABB'
+    - 'SINCH_SS'
+    - 'ATCOA'
+    - 'NOVOB'
+    - 'BOLI'
+    - 'VOLV'
+    - 'EQT_SS'
+    comprehensive: false

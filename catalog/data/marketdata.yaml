@@ -24,6 +24,18 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '5'
+    - '3'
+    - '6'
+    - '7'
+    - '8'
+    - '9'
+    - '4'
+    - '1'
+    - '0'
+    - '2'
+    comprehensive: true
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record.
@@ -39,6 +51,9 @@ table:
     - instrument
     category: dimension
     filterable: true
+    example_values:
+    - 'BETS'
+    comprehensive: true
   - name: trade_date
     type: DATE
     description: Business date of the trade, used for partitioning.
@@ -109,6 +124,24 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - '1'
+    - '7'
+    - '2'
+    - '5'
+    - '207'
+    - '3'
+    - '17'
+    - '4'
+    - '195'
+    - '212'
+    - '16'
+    - '205'
+    - '204'
+    - '202'
+    - '201'
+    - '203'
+    comprehensive: true
   - name: sequence_number
     type: INTEGER
     description: Sequence number for ordering events.
@@ -166,12 +199,19 @@ table:
     - snapshot
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: instrument_type
     type: STRING
     description: Type of instrument.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'STOCK'
+    - 'OPTION'
+    comprehensive: true
   - name: data_order_identifier
     type: INTEGER
     description: Data order identifier.
@@ -195,6 +235,9 @@ table:
     - snapshot
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: strike
     type: FLOAT
     description: Option strike price.
@@ -212,6 +255,10 @@ table:
     - C/P
     category: dimension
     filterable: true
+    example_values:
+    - '80'
+    - '67'
+    comprehensive: true
   - name: option_type_name
     type: STRING
     description: Option type name (Call or Put).
@@ -219,6 +266,10 @@ table:
     - call put name
     category: dimension
     filterable: true
+    example_values:
+    - 'OPTION_TYPE_PUT'
+    - 'OPTION_TYPE_CALL'
+    comprehensive: true
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract.
@@ -234,6 +285,9 @@ table:
     - internal symbol
     category: dimension
     filterable: true
+    example_values:
+    - 'BETS'
+    comprehensive: true
   - name: currency
     type: INTEGER
     description: Currency identifier for the instrument.
@@ -241,6 +295,9 @@ table:
     - ccy
     category: dimension
     filterable: true
+    example_values:
+    - '16'
+    comprehensive: true
   - name: term
     type: STRING
     description: Expiry term or tenor label (e.g. monthly, weekly).
@@ -250,6 +307,15 @@ table:
     - maturity
     category: dimension
     filterable: true
+    example_values:
+    - 'Feb-2026'
+    - 'Mar-2026'
+    - 'Apr-2026'
+    - 'May-2026'
+    - 'Jun-2026'
+    - 'Dec-2026'
+    - 'Sep-2026'
+    comprehensive: true
   - name: inst_type_name
     type: STRING
     description: Instrument type name (e.g. Option, Future, Spread).
@@ -258,6 +324,10 @@ table:
     - product type
     category: dimension
     filterable: true
+    example_values:
+    - 'OPTION'
+    - 'STOCK'
+    comprehensive: true
   - name: cancel_quantity
     type: STRING
     description: Cancel quantity.
@@ -288,18 +358,27 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: streamsource_event_id
     type: INTEGER
     description: 'Data provenance field: streamsource_event_id.'
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: streamsource_message_id
     type: INTEGER
     description: 'Data provenance field: streamsource_message_id.'
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: datasource_pid
     type: INTEGER
     description: 'Data provenance field: datasource_pid.'

@@ -33,6 +33,18 @@ table:
     source: 'SwingData.proto :: VtCommon.props'
     category: dimension
     filterable: true
+    example_values:
+    - 'OMX'
+    - 'AZNS'
+    - 'SAABB'
+    - 'VOLV'
+    - 'SSABA'
+    - 'ERIC'
+    - 'BOLI'
+    - 'SINCH_SS'
+    - 'HEXAB'
+    - 'EVO_SS'
+    comprehensive: false
   - name: portfolio
     type: STRING
     description: Trading portfolio or book to which this OTO swing trade is assigned. Portfolios group related trading activity
@@ -46,6 +58,9 @@ table:
     source: 'SwingData.proto :: VtCommon.props'
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    comprehensive: true
   - name: algo
     type: STRING
     description: Algorithm or strategy identifier that generated this OTO swing trade. Identifies which trading algorithm
@@ -59,6 +74,9 @@ table:
     source: 'SwingData.proto :: VtCommon.props'
     category: dimension
     filterable: true
+    example_values:
+    - 'OST_X'
+    comprehensive: true
   - name: ref_curve_id
     type: INTEGER
     description: Identifier of the volatility curve used at the reference snapshot for this OTO swing trade's KPI computation.
@@ -366,6 +384,12 @@ table:
     source: 'SwingData.proto :: SwingData.baseOrderEventType'
     category: dimension
     filterable: true
+    example_values:
+    - 'Undefined'
+    - 'Insert'
+    - 'Delete'
+    - 'FullExecution'
+    comprehensive: true
   - name: base_order_event_side
     type: STRING
     description: The side (bid/ask or buy/sell) of the base (underlying) order event associated with this OTO swing. Indicates
@@ -376,6 +400,11 @@ table:
     source: 'SwingData.proto :: SwingData.baseOrderEventSide'
     category: dimension
     filterable: true
+    example_values:
+    - 'BUYSELL_NULL_BUYSELL'
+    - 'BUYSELL_SELL'
+    - 'BUYSELL_BUY'
+    comprehensive: true
   - name: takeout_type
     type: STRING
     description: Finer-grained classification of the OTO swing takeout opportunity, providing more detail than takeout_category.
@@ -387,6 +416,11 @@ table:
     source: 'SwingData.proto :: SwingData.takeoutType'
     category: dimension
     filterable: true
+    example_values:
+    - 'OptionTick'
+    - 'BaseMove'
+    - 'TheoChange'
+    comprehensive: true
   - name: event_type
     type: STRING
     description: General event type classification for this OTO swing record. Indicates the nature of the event in the swing
@@ -396,6 +430,14 @@ table:
     source: 'SwingData.proto :: SwingData.eventType'
     category: dimension
     filterable: true
+    example_values:
+    - 'PriceUpdate'
+    - 'BaseValuation'
+    - 'Timer'
+    - 'TheoChange'
+    - 'ParamChange'
+    - 'OrderConf'
+    comprehensive: true
   - name: fanout_identifier
     type: INTEGER
     description: Identifier linking related OTO swing events that fanned out from a single opportunity. When one underlying
@@ -660,6 +702,18 @@ table:
     - mako ticker
     category: dimension
     filterable: true
+    example_values:
+    - 'OMX'
+    - 'AZNS'
+    - 'SAABB'
+    - 'VOLV'
+    - 'SSABA'
+    - 'ERIC'
+    - 'BOLI'
+    - 'SINCH_SS'
+    - 'HEXAB'
+    - 'EVO_SS'
+    comprehensive: false
   - name: pid
     type: STRING
     description: Process identifier of the trading engine instance that generated this OTO swing event. Used for operational
@@ -700,6 +754,18 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '68c7c384ef678b316d8444a8c2ecfdd807b21d08e4ed2b6d004e7cbdea4eb4e1'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    - 'eb118d52ef072990e77a70619322833b53bd6ba48e52896f26413d02ce6a434c'
+    - '0fb6845ba17cbe2590a5e74052ea5d926ccd0f768c40a1e30a5f2b9ccaf1c475'
+    - 'd6c154ea0a8ef678bdaeff2cb66f0995fb5b30b22b183cd1df538f507766b919'
+    - '2988f5c8ec2de4344f54546df552d7dd6566e62a308f12120b6b7913a57b3cc8'
+    - 'a9282b0c15514437a0f13961db6760bf94dad6f5d04d551f120b2a70b6af682a'
+    - 'b24ab058cbdc18ac3e4bbe43cb5e1cfb092d590bfe7dfc741bd0b6d661816526'
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '147007ef905b8c03c43c4ed421b0d92f301b74206dc0791fba299c0ed643c4e6'
+    comprehensive: false
   - name: underlying_sequence_number
     type: INTEGER
     description: Sequence number of the underlying market data event. Used for precise ordering of underlying price updates.
@@ -712,6 +778,18 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '68c7c384ef678b316d8444a8c2ecfdd807b21d08e4ed2b6d004e7cbdea4eb4e1'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    - 'eb118d52ef072990e77a70619322833b53bd6ba48e52896f26413d02ce6a434c'
+    - '0fb6845ba17cbe2590a5e74052ea5d926ccd0f768c40a1e30a5f2b9ccaf1c475'
+    - 'd6c154ea0a8ef678bdaeff2cb66f0995fb5b30b22b183cd1df538f507766b919'
+    - '2988f5c8ec2de4344f54546df552d7dd6566e62a308f12120b6b7913a57b3cc8'
+    - 'a9282b0c15514437a0f13961db6760bf94dad6f5d04d551f120b2a70b6af682a'
+    - 'b24ab058cbdc18ac3e4bbe43cb5e1cfb092d590bfe7dfc741bd0b6d661816526'
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '147007ef905b8c03c43c4ed421b0d92f301b74206dc0791fba299c0ed643c4e6'
+    comprehensive: false
   - name: underlying_exe_exch
     type: INTEGER
     description: Numeric exchange identifier for the underlying execution venue.
@@ -724,6 +802,11 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'EXCH_CODE_SAX'
+    - 'EXCH_CODE_OM'
+    - 'EXCH_CODE_COPENHAGEN'
+    comprehensive: true
   - name: is_spark
     type: BOOLEAN
     description: Boolean indicating whether this OTO swing event used the Spark (fast-path) execution pipeline. Spark events
@@ -734,6 +817,9 @@ table:
     business_rules: Spark-path events typically have lower latency. Filter by is_spark for latency analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: ref_inst_carry_id
     type: INTEGER
     description: Reference instrument carry curve identifier, linking to the carry model used for this specific instrument
@@ -784,6 +870,9 @@ table:
     business_rules: Filter out rows where is_ref_theo_invalid = true for reliable edge analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: lb_enabled
     type: BOOLEAN
     description: Boolean indicating whether lean-back mode was enabled for this OTO swing trade. Lean-back mode widens edge
@@ -794,6 +883,9 @@ table:
     business_rules: When true, min_edge was widened. May indicate less favorable market conditions.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: edge_model_type
     type: INTEGER
     description: Numeric identifier for the edge model type used to evaluate this OTO swing trade. Different edge models may
@@ -803,6 +895,9 @@ table:
     - edge model
     category: dimension
     filterable: true
+    example_values:
+    - '2'
+    comprehensive: true
   - name: edge_model_type_name
     type: STRING
     description: Human-readable name of the edge model type used for this OTO swing trade. Identifies which pricing/edge model
@@ -812,6 +907,9 @@ table:
     - edge model name
     category: dimension
     filterable: true
+    example_values:
+    - 'EDGE_MODEL_PM'
+    comprehensive: true
   - name: is_negative_edge_allowed
     type: BOOLEAN
     description: Boolean flag indicating whether this OTO swing was allowed to trade with negative edge (i.e., at a theoretical
@@ -824,6 +922,9 @@ table:
     source: 'SwingData.proto :: SwingData.isNegativeEdgeAllowed'
     category: dimension
     filterable: true
+    example_values:
+    - 'true'
+    comprehensive: true
   - name: latency_stats_bvio
     type: INTEGER
     description: Latency statistic for the base value IO (underlying value processing) stage of the OTO swing processing pipeline,
@@ -843,6 +944,18 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '25775046679'
+    - '25775046743'
+    - '0'
+    - '25775046747'
+    - '25775046779'
+    - '25775046767'
+    - '25775046693'
+    - '25775046805'
+    - '25775046707'
+    - '25775046697'
+    comprehensive: false
   - name: ref_theoevent_event_id
     type: INTEGER
     description: Event identifier of the reference theo event, used for precise identification of which pricing event produced
@@ -916,6 +1029,9 @@ table:
     - trade classification
     category: dimension
     filterable: true
+    example_values:
+    - 'swing'
+    comprehensive: true
   - name: trade_date
     type: DATE
     description: Business date of the OTO swing trade, formatted as DATE. This is the partition column -- ALWAYS include a
@@ -939,6 +1055,10 @@ table:
     - combo flag
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    - 'true'
+    comprehensive: true
   - name: is_parent
     type: BOOLEAN
     description: Boolean indicating whether this row represents the parent (combo-level) record rather than an individual
@@ -949,6 +1069,10 @@ table:
     business_rules: Filter is_parent = true for combo-level analysis, false for leg-level analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    - 'true'
+    comprehensive: true
   - name: is_auction
     type: BOOLEAN
     description: Boolean indicating whether this OTO swing trade occurred during an exchange auction period (e.g., opening/closing
@@ -959,6 +1083,9 @@ table:
     business_rules: Consider filtering out auction trades for intraday performance analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: contract_size
     type: FLOAT
     description: Contract multiplier for the traded instrument, representing the notional value per point of price movement.
@@ -982,6 +1109,18 @@ table:
     - inst hash
     category: identifier
     filterable: true
+    example_values:
+    - '13ae70ada90a02083a19211dfd500058b9288754d4d53fcd908f95a4ac2d7eeb'
+    - '0f0073d76e3b3ce4261a9ecf40abb507999aab186605532fa98a9b09682edc9a'
+    - '5f91488d6c8c018e1a78f2b546bb51f9d4135d380e587e24aa0d940c88091dd9'
+    - '42bfb7b3b7f2e03748f4cb7976fb3833a04c30cabd5298fd6419c4b26e6c6fde'
+    - 'f0d22b6ccdd78c8f7cda7bf60ee22332cec76aaa97a8398349293235ce1ec45f'
+    - 'd845b1fb2c5804c0d7e08637be24ec91c5d56d8753a44312f51356430433a0de'
+    - 'd24de852e204ae1077df7dc13b426f5e1259009a2e7827a26a49af67080fc51b'
+    - '9bbe6d6bbd5bbd554f5aef30e1faf0763634045af254330813a43f85ebf6d03d'
+    - '87ed41cfbd15d35d04477be7706cdd14892b689f064a070bc2bf39b3fc6d6ba2'
+    - '6d0bfd84d0bcd029b77cd22c5acf445a8933cbf05cf2470f604815fa8ab0662b'
+    comprehensive: false
   - name: parent_instrument_hash
     type: STRING
     description: Instrument hash of the parent combo for this leg. Null or empty for non-combo trades. Use to join legs to
@@ -991,6 +1130,18 @@ table:
     - combo hash
     category: identifier
     filterable: true
+    example_values:
+    - '13ae70ada90a02083a19211dfd500058b9288754d4d53fcd908f95a4ac2d7eeb'
+    - '0f0073d76e3b3ce4261a9ecf40abb507999aab186605532fa98a9b09682edc9a'
+    - '5f91488d6c8c018e1a78f2b546bb51f9d4135d380e587e24aa0d940c88091dd9'
+    - '42bfb7b3b7f2e03748f4cb7976fb3833a04c30cabd5298fd6419c4b26e6c6fde'
+    - 'f0d22b6ccdd78c8f7cda7bf60ee22332cec76aaa97a8398349293235ce1ec45f'
+    - 'd845b1fb2c5804c0d7e08637be24ec91c5d56d8753a44312f51356430433a0de'
+    - 'd24de852e204ae1077df7dc13b426f5e1259009a2e7827a26a49af67080fc51b'
+    - '9bbe6d6bbd5bbd554f5aef30e1faf0763634045af254330813a43f85ebf6d03d'
+    - '87ed41cfbd15d35d04477be7706cdd14892b689f064a070bc2bf39b3fc6d6ba2'
+    - '6d0bfd84d0bcd029b77cd22c5acf445a8933cbf05cf2470f604815fa8ab0662b'
+    comprehensive: false
   - name: parent_feed_code
     type: STRING
     description: Feed code (exchange identifier) of the parent combo instrument. Used for exchange reconciliation of multi-leg
@@ -999,6 +1150,18 @@ table:
     - parent code
     category: dimension
     filterable: true
+    example_values:
+    - 'OMX:OMX:APR26:3100P:1|OMX:OMX:APR26:3000P:-1'
+    - 'OMX:OMX:SEP26:2900P:1|OMX:OMX:JUN26:2900P:-1'
+    - 'OMX:EVO_SS:FEB26:580P'
+    - 'OMX:EPIA:FEB26:255C'
+    - 'OMX:SKFABB:JUN26:210P'
+    - 'OMX:SAABB:APR26:510P'
+    - 'OMX:OMX:MAR26:3000P'
+    - 'OMX:OMX:JUN26:2700P'
+    - 'OMX:LUMI:FEB26:190P'
+    - 'OMX:HEXAB:JUN26:105C'
+    comprehensive: false
   - name: no_legs
     type: INTEGER
     description: Number of legs in the combo structure. 1 for single instruments, 2 for spreads, 3+ for butterflies and other
@@ -1049,6 +1212,10 @@ table:
     business_rules: Use option_type_name for readable filtering. Numeric encoding is exchange-specific.
     category: dimension
     filterable: true
+    example_values:
+    - '67'
+    - '80'
+    comprehensive: true
   - name: currency_id
     type: INTEGER
     description: Currency identifier for the instrument's denomination. Maps to the currency in which PnL and fees are expressed.
@@ -1057,6 +1224,11 @@ table:
     - currency code
     category: identifier
     filterable: true
+    example_values:
+    - '16'
+    - '38'
+    - '4'
+    comprehensive: true
   - name: parent_combo_type_name
     type: STRING
     description: Combo type name of the parent instrument (e.g., Straddle, Strangle, Spread). Describes the structure of the
@@ -1085,6 +1257,10 @@ table:
     - underlying type
     category: dimension
     filterable: true
+    example_values:
+    - 'STOCK'
+    - 'INDEX'
+    comprehensive: true
   - name: inst_type_name
     type: STRING
     description: Instrument type name for the traded product (e.g., Option, Future, Spread). Useful for filtering by product
@@ -1094,6 +1270,10 @@ table:
     - product type
     category: dimension
     filterable: true
+    example_values:
+    - 'OPTION'
+    - 'COMBO'
+    comprehensive: true
   - name: term
     type: STRING
     description: Expiry term or tenor label for the option contract (e.g., monthly, weekly, quarterly). Useful for grouping
@@ -1105,6 +1285,20 @@ table:
     - expiry cycle
     category: dimension
     filterable: true
+    example_values:
+    - 'Mar-2026'
+    - 'Feb-2026'
+    - 'Apr-2026'
+    - 'Jun-2026'
+    - 'Dec-2026'
+    - 'May-2026'
+    - 'Feb-2026 W4'
+    - 'CALENDAR'
+    - 'Sep-2026'
+    - 'Mar-2026 W1'
+    - 'Jun-2027'
+    - 'Dec-2027'
+    comprehensive: true
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract. The exact date and time at which the option ceases to exist.
@@ -1133,6 +1327,9 @@ table:
     - option venue
     category: dimension
     filterable: true
+    example_values:
+    - 'omx'
+    comprehensive: true
   - name: underlying_exchange
     type: STRING
     description: Exchange where the underlying instrument is traded. Identifies the venue for the underlying side used in
@@ -1142,6 +1339,9 @@ table:
     - underlying venue
     category: dimension
     filterable: true
+    example_values:
+    - 'omx'
+    comprehensive: true
   - name: streamsource_stream_id
     type: INTEGER
     description: 'Data provenance field: streamsource_stream_id. Used to trace this record back to the original data stream
@@ -1149,6 +1349,18 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '25801261103'
+    - '25801261092'
+    - '25801261215'
+    - '25801261070'
+    - '25801261090'
+    - '25801261087'
+    - '25801261068'
+    - '25801261197'
+    - '25801261091'
+    - '25801261067'
+    comprehensive: false
   - name: streamsource_event_id
     type: INTEGER
     description: 'Data provenance field: streamsource_event_id. Used to trace this record back to the original data stream
@@ -1176,6 +1388,10 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'omxps305'
+    - 'omxps304'
+    comprehensive: true
   - name: ref_delta
     type: FLOAT
     description: Reference delta used in the KPI computation pipeline, captured at the reference snapshot time. May differ
@@ -1231,6 +1447,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot
     type: BOOLEAN
     description: Boolean indicating whether the theoretical data (TV, greeks) used was from a periodic snapshot rather than
@@ -1238,6 +1457,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: tv_offset
     type: FLOAT
     description: Offset applied to the theoretical value at the time of the OTO swing trade. Captures any manual or systematic
@@ -1502,12 +1724,18 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1s
     type: BOOLEAN
     description: Whether the 1 second theo data was from a periodic snapshot.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_1s
     type: TIMESTAMP
     description: Timestamp of the event at the 1 second forward snapshot.
@@ -1624,12 +1852,18 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_5s
     type: BOOLEAN
     description: Whether the 5 seconds theo data was from a periodic snapshot.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_5s
     type: TIMESTAMP
     description: Timestamp of the event at the 5 seconds forward snapshot.
@@ -1746,12 +1980,18 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_10s
     type: BOOLEAN
     description: Whether the 10 seconds theo data was from a periodic snapshot.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_10s
     type: TIMESTAMP
     description: Timestamp of the event at the 10 seconds forward snapshot.
@@ -1868,12 +2108,18 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_30s
     type: BOOLEAN
     description: Whether the 30 seconds theo data was from a periodic snapshot.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_30s
     type: TIMESTAMP
     description: Timestamp of the event at the 30 seconds forward snapshot.
@@ -1990,12 +2236,18 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1m
     type: BOOLEAN
     description: Whether the 1 minute theo data was from a periodic snapshot.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_1m
     type: TIMESTAMP
     description: Timestamp of the event at the 1 minute forward snapshot.
@@ -2112,12 +2364,18 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_5m
     type: BOOLEAN
     description: Whether the 5 minutes theo data was from a periodic snapshot.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_5m
     type: TIMESTAMP
     description: Timestamp of the event at the 5 minutes forward snapshot.
@@ -2234,12 +2492,18 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_10m
     type: BOOLEAN
     description: Whether the 10 minutes theo data was from a periodic snapshot.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_10m
     type: TIMESTAMP
     description: Timestamp of the event at the 10 minutes forward snapshot.
@@ -2356,12 +2620,18 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_30m
     type: BOOLEAN
     description: Whether the 30 minutes theo data was from a periodic snapshot.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_30m
     type: TIMESTAMP
     description: Timestamp of the event at the 30 minutes forward snapshot.
@@ -2478,12 +2748,18 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1h
     type: BOOLEAN
     description: Whether the 1 hour theo data was from a periodic snapshot.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_1h
     type: TIMESTAMP
     description: Timestamp of the event at the 1 hour forward snapshot.
@@ -2588,6 +2864,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_eod
     type: STRING
     description: Whether the end-of-day theo data was from a periodic snapshot.
@@ -2925,72 +3204,109 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5s
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 5 seconds was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_10s
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 10 seconds was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_30s
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 30 seconds was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1m
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 1 minute was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5m
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 5 minutes was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_10m
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 10 minutes was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    - 'true'
+    comprehensive: true
   - name: is_auction_marketdepth_30m
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 30 minutes was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1h
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 1 hour was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_eod
     type: BOOLEAN
     description: Boolean indicating whether the market depth at end-of-day was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1D
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 1 day (next open) was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5D
     type: BOOLEAN
     description: Boolean indicating whether the market depth at 5 days (T+5 open) was during an auction period.
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth
     type: BOOLEAN
     description: Boolean indicating whether the market depth data at the time of the trade was from an auction period. Auction
@@ -2999,6 +3315,9 @@ table:
     business_rules: Auction depth may not be representative of continuous market conditions.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp
     type: TIMESTAMP
     description: Timestamp of the OTO swing event at microsecond precision. Records when the swing opportunity was detected
@@ -3033,6 +3352,9 @@ table:
     - execution venue
     category: dimension
     filterable: true
+    example_values:
+    - 'NORD'
+    comprehensive: true
   - name: swing_mid_base_val
     type: FLOAT
     description: Mid-point base (underlying) value used in the swing theoretical value calculation. Represents the estimated
@@ -3141,6 +3463,10 @@ table:
     source: kpi_otoswing_normalized.sql
     category: dimension
     filterable: true
+    example_values:
+    - 'SELL'
+    - 'BUY'
+    comprehensive: true
   - name: instant_edge
     type: FLOAT
     description: Instantaneous edge at the time of the OTO swing trade in ticks per unit, measuring theoretical profit before
@@ -8234,5 +8560,8 @@ table:
     business_rules: Expiry-day trades often have extreme greeks. Consider analyzing separately.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   note: OTO sweep trades. Has unique fired_at metrics that measure PnL relative to the routed/fired price, separate from filled/average
     price. When a trader asks 'oto sweep performance', 'how much did we swing', or 'swing edge', use this table.

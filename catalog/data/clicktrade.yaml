@@ -45,6 +45,9 @@ table:
     - underlying symbol
     category: dimension
     filterable: true
+    example_values:
+    - 'AZA_SS'
+    comprehensive: true
   - name: portfolio
     type: STRING
     description: Name of the Mako trading portfolio or book to which this click trade belongs. Used for filtering
@@ -56,6 +59,9 @@ table:
     - strategy
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    comprehensive: true
   - name: instrument_hash
     type: STRING
     description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
@@ -67,6 +73,9 @@ table:
     - instrument key
     category: identifier
     filterable: true
+    example_values:
+    - 'f22c462cc6fc5e4b35b25b2f99f52a3aeb57ed37da60bc1af12340234279d450'
+    comprehensive: true
   - name: inst_type_name
     type: STRING
     description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
@@ -133,6 +142,9 @@ table:
     - trader name
     category: identifier
     filterable: true
+    example_values:
+    - 'OMDAM1'
+    comprehensive: true
   - name: mako_id
     type: STRING
     description: Mako system internal identifier for this click trade, assigned by the position management system.
@@ -143,6 +155,9 @@ table:
     - mako identifier
     category: identifier
     filterable: true
+    example_values:
+    - 'CCHATZIM'
+    comprehensive: true
   - name: algorithm
     type: STRING
     description: Name of the algorithm or strategy associated with this click trade. For manual click trades, this
@@ -155,6 +170,9 @@ table:
     - trading algo
     category: dimension
     filterable: true
+    example_values:
+    - 'COMBO_TAKEOUT'
+    comprehensive: true
   - name: channel
     type: STRING
     description: Trading channel through which this click trade was executed (e.g. electronic exchange, voice broker,
@@ -166,6 +184,9 @@ table:
     - trading channel
     category: dimension
     filterable: true
+    example_values:
+    - 'MANUAL'
+    comprehensive: true
   - name: inventory
     type: STRING
     description: Inventory or sub-account classification for this click trade. Determines which internal inventory
@@ -177,6 +198,9 @@ table:
     - inventory account
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    comprehensive: true
   - name: account
     type: STRING
     description: Trading account identifier for this click trade (e.g. BGC, MGN for broker-facilitated trades). Used
@@ -189,6 +213,9 @@ table:
     - clearing account
     category: dimension
     filterable: true
+    example_values:
+    - 'MAIN'
+    comprehensive: true
   - name: transaction_timestamp
     type: TIMESTAMP
     description: Timestamp when this click trade transaction occurred in the Mako position management system. Represents
@@ -240,6 +267,9 @@ table:
     - exchange trade id
     category: identifier
     filterable: true
+    example_values:
+    - '50354370:26249:1191'
+    comprehensive: true
   - name: exchange_order_id
     type: STRING
     description: Order identifier assigned by the exchange for the order that resulted in this click trade fill. Used
@@ -249,6 +279,9 @@ table:
     - exchange order
     category: identifier
     filterable: true
+    example_values:
+    - '334:OMDAM1'
+    comprehensive: true
   - name: agg_pos_timestamp
     type: STRING
     description: Timestamp of the aggregate position snapshot associated with this click trade, stored as STRING. Records
@@ -284,6 +317,9 @@ table:
     - amendment number
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: revision_timestamp
     type: TIMESTAMP
     description: Timestamp when this revision of the click trade record was created. Records when the trade was last
@@ -370,6 +406,9 @@ table:
     - amender
     category: dimension
     filterable: true
+    example_values:
+    - 'POS'
+    comprehensive: true
   - name: transaction_id
     type: INTEGER
     description: Unique transaction identifier assigned by Mako's position management system for this click trade.
@@ -379,6 +418,9 @@ table:
     - trade id
     category: identifier
     filterable: true
+    example_values:
+    - '1077703870'
+    comprehensive: true
   - name: order_id
     type: INTEGER
     description: Mako order identifier for the order that resulted in this click trade fill. Used for tracking the
@@ -388,6 +430,9 @@ table:
     - mako order id
     category: identifier
     filterable: true
+    example_values:
+    - '1077703867'
+    comprehensive: true
   - name: position_type
     type: INTEGER
     description: Numeric code indicating the type of position event. POSITION=80 (position snapshot), TRADE=84 (trade
@@ -411,6 +456,9 @@ table:
     - pos id
     category: identifier
     filterable: true
+    example_values:
+    - '242974'
+    comprehensive: true
   - name: curve_id
     type: INTEGER
     description: Identifier of the volatility curve active at the time of this click trade. Used to trace which vol
@@ -422,6 +470,9 @@ table:
     - vol curve id
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: carry_id
     type: INTEGER
     description: Identifier of the carry/dividend curve active at the time of this click trade. Used for tracing rate
@@ -432,6 +483,9 @@ table:
     - carry curve id
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: trade_id
     type: INTEGER
     description: Unique trade identifier assigned by the position management system for this specific click trade
@@ -442,6 +496,9 @@ table:
     - execution id
     category: identifier
     filterable: true
+    example_values:
+    - '1'
+    comprehensive: true
   - name: text
     type: STRING
     description: Free-text field associated with this click trade, typically containing trader notes, comments, or
@@ -498,6 +555,9 @@ table:
     - internal symbol
     category: dimension
     filterable: true
+    example_values:
+    - 'AZA_SS'
+    comprehensive: true
   - name: contract_size
     type: STRING
     description: Contract multiplier (point value) for the instrument, stored as STRING. Defines how many units of the
@@ -518,6 +578,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - 'ff161170e643c8c81187f5249c84ad3b09ba99a35f86975985dc90245f677a7d'
+    comprehensive: true
   - name: underlying_exe_exch
     type: INTEGER
     description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
@@ -546,6 +609,9 @@ table:
     - strategy type
     category: dimension
     filterable: true
+    example_values:
+    - 'COMBO_PARENT'
+    comprehensive: true
   - name: executable_exchange
     type: INTEGER
     description: Numeric exchange code identifying the exchange where this click trade order was executed. May differ
@@ -568,6 +634,9 @@ table:
     - parent flag
     category: dimension
     filterable: true
+    example_values:
+    - 'true'
+    comprehensive: true
   - name: is_ref_component
     type: INTEGER
     description: Flag indicating whether this leg is the reference component of a combo trade. The reference component
@@ -649,6 +718,9 @@ table:
     - parent hash
     category: identifier
     filterable: true
+    example_values:
+    - 'f22c462cc6fc5e4b35b25b2f99f52a3aeb57ed37da60bc1af12340234279d450'
+    comprehensive: true
   - name: parent_is_combo
     type: BOOLEAN
     description: Flag indicating whether the parent instrument is a combo/spread. When true, this click trade is part
@@ -660,6 +732,9 @@ table:
     - is spread
     category: dimension
     filterable: true
+    example_values:
+    - 'true'
+    comprehensive: true
   - name: ref_inst_type_name
     type: STRING
     description: Instrument type name of the reference instrument in a combo trade. Identifies what type of instrument
@@ -708,3 +783,6 @@ table:
     - underlying product
     category: dimension
     filterable: true
+    example_values:
+    - 'AZA_SS'
+    comprehensive: true

@@ -33,6 +33,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
@@ -41,6 +44,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '1857'
+    - '1856'
+    - '1855'
+    comprehensive: true
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -54,6 +62,11 @@ table:
     - underlying symbol
     category: dimension
     filterable: true
+    example_values:
+    - 'SINCH_SS'
+    - 'SDVK'
+    - 'AZNS'
+    comprehensive: true
   - name: portfolio
     type: STRING
     description: Name of the Mako trading portfolio or book to which the quoter algo belongs. Used for filtering quoter
@@ -66,6 +79,9 @@ table:
     - strategy
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    comprehensive: true
   - name: trade_date
     type: DATE
     description: Business date of the trading session, used as the primary partition column for this table. Always
@@ -89,6 +105,11 @@ table:
     - instrument key
     category: identifier
     filterable: true
+    example_values:
+    - 'e13a8cfda77f7f5dd0c52faf9615b1363bcd78dde04f24671760cb7900ca085a'
+    - 'dbb4c6bffea93f49a7e785c000be54f0148e62d3e774dadcebd36936fb72e759'
+    - '7ae811825bc42df8499c63ee3890188488ef03abdb6eae91ba23be48795b63fc'
+    comprehensive: true
   - name: algo
     type: STRING
     description: Name of the originating quoter algorithm that was quoting this instrument and received this fill.
@@ -101,6 +122,9 @@ table:
     - trading algo
     category: dimension
     filterable: true
+    example_values:
+    - 'OST_Q'
+    comprehensive: true
   - name: ref_curve_id
     type: INTEGER
     description: Identifier of the volatility curve active at the time of the last theoServer callback before this
@@ -112,6 +136,11 @@ table:
     - reference curve
     category: identifier
     filterable: true
+    example_values:
+    - '329875'
+    - '297969'
+    - '128249'
+    comprehensive: true
   - name: ref_carry_id
     type: INTEGER
     description: Identifier of the carry/dividend curve active at the time of the last theoServer callback before this
@@ -123,6 +152,11 @@ table:
     - reference carry
     category: identifier
     filterable: true
+    example_values:
+    - '8618'
+    - '17096'
+    - '12101'
+    comprehensive: true
   - name: ref_tv
     type: FLOAT
     description: Theoretical value of the instrument on the last vol curve update (last theoServer callback), calculated
@@ -381,6 +415,10 @@ table:
     - base value side
     category: dimension
     filterable: true
+    example_values:
+    - 'BUYSELL_SELL'
+    - 'BUYSELL_BUY'
+    comprehensive: true
   - name: delta_adjusted_base_price
     type: FLOAT
     description: Equal to the raw base value (relevant side depending on trade direction) plus ODR and layered base
@@ -432,6 +470,11 @@ table:
     - base hash
     category: identifier
     filterable: true
+    example_values:
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    comprehensive: true
   - name: hardware_nic_rx_timestamp
     type: TIMESTAMP
     description: Hardware NIC receive timestamp recording when the fill notification packet physically arrived at Mako's
@@ -478,6 +521,9 @@ table:
     - deleting flag
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: trade_price
     type: FLOAT
     description: Execution price at which this quoter fill occurred. The actual price at which the resting quote was
@@ -526,6 +572,9 @@ table:
     - fill side
     category: dimension
     filterable: true
+    example_values:
+    - 'BUYSELL_SELL'
+    comprehensive: true
   - name: total_level_size
     type: INTEGER
     description: Total number of lots resting on this price level after the fill, including both Mako's remaining
@@ -668,6 +717,10 @@ table:
     - C/P
     category: dimension
     filterable: true
+    example_values:
+    - '67'
+    - '80'
+    comprehensive: true
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
@@ -700,6 +753,11 @@ table:
     - internal symbol
     category: dimension
     filterable: true
+    example_values:
+    - 'SINCH_SS'
+    - 'SDVK'
+    - 'AZNS'
+    comprehensive: true
   - name: currency
     type: INTEGER
     description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
@@ -725,6 +783,10 @@ table:
     - expiry cycle
     category: dimension
     filterable: true
+    example_values:
+    - 'May-2026'
+    - 'Mar-2026'
+    comprehensive: true
   - name: inst_type_name
     type: STRING
     description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
@@ -757,6 +819,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    comprehensive: true
   - name: underlying_sequence_number
     type: INTEGER
     description: Sequence number of the underlying instrument's market data event associated with this quoter fill.
@@ -774,6 +841,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    comprehensive: true
   - name: pid
     type: STRING
     description: Process ID of the quoter application instance that handled this fill event. Used for debugging and
@@ -804,6 +876,11 @@ table:
     - quote id
     category: identifier
     filterable: true
+    example_values:
+    - '1078738257'
+    - '1076047425'
+    - '1076032570'
+    comprehensive: true
   - name: is_bv_invalid
     type: BOOLEAN
     description: Flag indicating whether the base value (underlying price) was invalid or stale at the time of the
@@ -813,6 +890,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: exchange_timestamp
     type: TIMESTAMP
     description: Timestamp assigned by the exchange matching engine for this quoter fill. Represents the authoritative
@@ -842,6 +922,9 @@ table:
     - updating flag
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: underlying_exe_exch
     type: INTEGER
     description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
@@ -859,6 +942,9 @@ table:
     - underlying exchange
     category: dimension
     filterable: true
+    example_values:
+    - 'EXCH_CODE_SAX'
+    comprehensive: true
   - name: is_spark
     type: BOOLEAN
     description: Flag indicating whether this quoter event was processed via the Spark fast-path execution pipeline.
@@ -869,6 +955,9 @@ table:
     - fast path
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: ref_inst_carry_id
     type: INTEGER
     description: Reference instrument carry/dividend curve identifier, tracking the carry curve version used for this
@@ -877,6 +966,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '8618'
+    - '17096'
+    - '12101'
+    comprehensive: true
   - name: ref_inst_curve_id
     type: INTEGER
     description: Reference instrument volatility curve identifier, tracking the vol curve version used for this specific
@@ -885,6 +979,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '329875'
+    - '297969'
+    - '128249'
+    comprehensive: true
   - name: is_ref_theo_invalid
     type: BOOLEAN
     description: Flag indicating whether the reference theoretical value (ref_tv) was invalid or stale at the time of
@@ -894,6 +993,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: lb_enabled
     type: BOOLEAN
     description: Flag indicating whether lean-back mode was enabled for this instrument at the time of the quoter fill.
@@ -905,6 +1007,9 @@ table:
     - lean back mode
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: edge_model_type
     type: INTEGER
     description: Numeric code identifying the edge model type used for this instrument during the quoter fill. Different
@@ -913,6 +1018,10 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - '2'
+    - '0'
+    comprehensive: true
   - name: edge_model_type_name
     type: STRING
     description: Human-readable name of the edge model type used for this instrument during the quoter fill. Derived
@@ -922,6 +1031,10 @@ table:
     - edge model
     category: dimension
     filterable: true
+    example_values:
+    - 'EDGE_MODEL_PM'
+    - 'EDGE_MODEL_NULL'
+    comprehensive: true
   - name: streamsource_stream_id
     type: INTEGER
     description: Stream identifier from the event streaming infrastructure, indicating which logical stream this record
@@ -930,6 +1043,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '25833766950'
+    - '25833766945'
+    - '25833766919'
+    comprehensive: true
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
@@ -938,6 +1056,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '1771338364927765096'
+    - '1771322957438814514'
+    - '1771320414482869855'
+    comprehensive: true
   - name: streamsource_message_id
     type: INTEGER
     description: Message identifier within the source stream event, used when a single event contains multiple messages.
@@ -946,6 +1069,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '66330451509249'
+    - '63822861697025'
+    - '110614265462785'
+    comprehensive: true
   - name: datasource_pid
     type: INTEGER
     description: Process ID of the data source application that produced this record. Used for data provenance tracking
@@ -962,6 +1090,10 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'omxps304'
+    - 'omxps305'
+    comprehensive: true
   - name: bid_price_0
     type: FLOAT
     description: Top-of-book bid price (best bid) at depth level 0 for this instrument at the time of the quoter fill.

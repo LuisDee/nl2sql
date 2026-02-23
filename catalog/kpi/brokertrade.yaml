@@ -67,6 +67,12 @@ table:
     source: Kafka metadata
     category: identifier
     filterable: true
+    example_values:
+    - '3'
+    - '4'
+    - '2'
+    - '1'
+    comprehensive: true
   - name: kafka_offset
     type: INTEGER
     description: >-
@@ -78,6 +84,13 @@ table:
     source: Kafka metadata
     category: identifier
     filterable: true
+    example_values:
+    - '599'
+    - '591'
+    - '543'
+    - '426'
+    - '424'
+    comprehensive: true
   - name: uuid
     type: STRING
     description: >-
@@ -93,6 +106,13 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.uuid'
     category: dimension
     filterable: true
+    example_values:
+    - 'ed8bf1ac-4527-41cb-8921-1ae9b8e52ef0'
+    - 'd6004955-027d-466d-803c-b5721cb53f08'
+    - '90529284-08c4-4874-9ab8-3445338115b7'
+    - '8673ef6a-5fc3-46fd-aa3a-7c137feaaf33'
+    - '5c06de3b-98d8-4822-b664-0c15cc9a84eb'
+    comprehensive: true
   - name: portfolio
     type: STRING
     description: >-
@@ -107,6 +127,9 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.portfolio'
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    comprehensive: true
   - name: entry_timestamp
     type: TIMESTAMP
     description: >-
@@ -158,6 +181,10 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.revision'
     category: identifier
     filterable: true
+    example_values:
+    - '1'
+    - '2'
+    comprehensive: true
   - name: counterparty
     type: STRING
     description: >-
@@ -186,6 +213,9 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.user'
     category: dimension
     filterable: true
+    example_values:
+    - 'CCHATZIM'
+    comprehensive: true
   - name: inventory
     type: STRING
     description: >-
@@ -211,6 +241,13 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.contractName'
     category: dimension
     filterable: true
+    example_values:
+    - 'SHBA VOL +Sep26 140C/(-52)S @ 142'
+    - 'ORSTED VOL +Jun26 166.34C/(-79.2)S @ 155.5'
+    - 'NOVOB VOL +Mar26 330C/(-35)S @ 309'
+    - 'NOVOB VOL +Mar26 320C/(-44)S @ 309.4'
+    - 'NOVOB VOL +Dec27 300P/(+38)S @ 309.7'
+    comprehensive: true
   - name: source
     type: STRING
     description: >-
@@ -223,6 +260,9 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.source'
     category: dimension
     filterable: true
+    example_values:
+    - 'CSCREEN'
+    comprehensive: true
   - name: broker
     type: STRING
     description: >-
@@ -237,6 +277,11 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.broker'
     category: dimension
     filterable: true
+    example_values:
+    - 'TRADS'
+    - 'GFI'
+    - 'CANTOR'
+    comprehensive: true
   - name: month
     type: INTEGER
     description: >-
@@ -344,6 +389,9 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.makoInventory'
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    comprehensive: true
   - name: mako_account
     type: STRING
     description: >-
@@ -355,6 +403,9 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.makoAccount'
     category: dimension
     filterable: true
+    example_values:
+    - 'MAIN'
+    comprehensive: true
   - name: market_inventory
     type: STRING
     description: >-
@@ -403,6 +454,11 @@ table:
     - underlying
     category: dimension
     filterable: true
+    example_values:
+    - 'NOVOB'
+    - 'SHBA'
+    - 'ORSTED'
+    comprehensive: true
   - name: combo_type_name
     type: STRING
     description: >-
@@ -433,6 +489,11 @@ table:
     - underlying product
     category: dimension
     filterable: true
+    example_values:
+    - 'NOVOB'
+    - 'SHBA'
+    - 'ORSTED'
+    comprehensive: true
   - name: market_or_mako_trade
     type: STRING
     description: >-
@@ -506,6 +567,9 @@ table:
     - legal entity
     category: dimension
     filterable: true
+    example_values:
+    - 'MDA'
+    comprehensive: true
   - name: underlying_instrument_hash
     type: STRING
     description: >-
@@ -517,6 +581,11 @@ table:
     - underlying id
     category: identifier
     filterable: true
+    example_values:
+    - '9dd29ca5be63a5d7b48a69438f417361576a35820974b12cbd8c683dbf77dfdc'
+    - 'c17a1d4e1c8670eec7326592844df34861812e51e952b426b5ae486daead762f'
+    - '1dfbd7ae6a340ae0c5a0d12cda719bd8346ddbde392a0c837649eda67b97b596'
+    comprehensive: true
   - name: parent_combo_type_name
     type: STRING
     description: >-
@@ -528,6 +597,9 @@ table:
     - parent structure
     category: dimension
     filterable: true
+    example_values:
+    - 'VOL'
+    comprehensive: true
   - name: total_traded_size
     type: FLOAT
     description: >-
@@ -660,6 +732,13 @@ table:
     business_rules: Unique per row. Use for deduplication and row-level joins.
     category: identifier
     filterable: true
+    example_values:
+    - 'WHITEdc96693ad9028c7db548529d306f1319f0b17c7830c157c6633be8d9aacc079917713290108673ef6a-5fc3-46fd-aa3a-7c137feaaf331market'
+    - 'WHITEcd9d979279dc5be0d55adffaaed0ce51bc3ae2dee0ed97145682bc550a5ef53617713418905c06de3b-98d8-4822-b664-0c15cc9a84eb2market'
+    - 'WHITE527633d1a1f8c3c3b5d2adc1bed0babdf187466a3a34d3d4cb76a6d436b8a63a177132810290529284-08c4-4874-9ab8-3445338115b71market'
+    - 'WHITE0ef812ed59d2a2999eab07d0f8788aaf7ae0bd9c8041f95afb3183197c0e36661771331609d6004955-027d-466d-803c-b5721cb53f081market'
+    - 'WHITE0c2810fcf599644dfbe5e08628b88b06de94f6e74dcd921c5efb244b897ab1c91771328995ed8bf1ac-4527-41cb-8921-1ae9b8e52ef01market'
+    comprehensive: true
   - name: trade_identifier
     type: STRING
     description: >-
@@ -671,6 +750,13 @@ table:
     - broker trade id
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITEdc96693ad9028c7db548529d306f1319f0b17c7830c157c6633be8d9aacc079917713290108673ef6a-5fc3-46fd-aa3a-7c137feaaf331marketdc96693ad9028c7db548529d306f1319f0b17c7830c157c6633be8d9aacc0799'
+    - 'WHITEcd9d979279dc5be0d55adffaaed0ce51bc3ae2dee0ed97145682bc550a5ef53617713418905c06de3b-98d8-4822-b664-0c15cc9a84eb2marketcd9d979279dc5be0d55adffaaed0ce51bc3ae2dee0ed97145682bc550a5ef536'
+    - 'WHITE527633d1a1f8c3c3b5d2adc1bed0babdf187466a3a34d3d4cb76a6d436b8a63a177132810290529284-08c4-4874-9ab8-3445338115b71market527633d1a1f8c3c3b5d2adc1bed0babdf187466a3a34d3d4cb76a6d436b8a63a'
+    - 'WHITE0ef812ed59d2a2999eab07d0f8788aaf7ae0bd9c8041f95afb3183197c0e36661771331609d6004955-027d-466d-803c-b5721cb53f081market0ef812ed59d2a2999eab07d0f8788aaf7ae0bd9c8041f95afb3183197c0e3666'
+    - 'WHITE0c2810fcf599644dfbe5e08628b88b06de94f6e74dcd921c5efb244b897ab1c91771328995ed8bf1ac-4527-41cb-8921-1ae9b8e52ef01market0c2810fcf599644dfbe5e08628b88b06de94f6e74dcd921c5efb244b897ab1c9'
+    comprehensive: true
   - name: trade_type
     type: STRING
     description: >-
@@ -682,6 +768,9 @@ table:
     - trade category
     category: dimension
     filterable: true
+    example_values:
+    - 'brokertrade'
+    comprehensive: true
   - name: parent_is_combo
     type: BOOLEAN
     description: >-
@@ -694,6 +783,9 @@ table:
     - is multi-leg
     category: dimension
     filterable: true
+    example_values:
+    - 'true'
+    comprehensive: true
   - name: is_parent
     type: BOOLEAN
     description: >-
@@ -707,6 +799,9 @@ table:
     business_rules: Filter is_parent=FALSE for leg-level analysis; is_parent=TRUE for combo-level summary.
     category: dimension
     filterable: true
+    example_values:
+    - 'true'
+    comprehensive: true
   - name: is_auction
     type: BOOLEAN
     description: >-
@@ -718,6 +813,9 @@ table:
     - during auction
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: contract_size
     type: FLOAT
     description: >-
@@ -746,6 +844,13 @@ table:
     source: 'OffFloorData.proto :: BrokerTrade.instrumentHash'
     category: identifier
     filterable: true
+    example_values:
+    - 'dc96693ad9028c7db548529d306f1319f0b17c7830c157c6633be8d9aacc0799'
+    - 'cd9d979279dc5be0d55adffaaed0ce51bc3ae2dee0ed97145682bc550a5ef536'
+    - '527633d1a1f8c3c3b5d2adc1bed0babdf187466a3a34d3d4cb76a6d436b8a63a'
+    - '0ef812ed59d2a2999eab07d0f8788aaf7ae0bd9c8041f95afb3183197c0e3666'
+    - '0c2810fcf599644dfbe5e08628b88b06de94f6e74dcd921c5efb244b897ab1c9'
+    comprehensive: true
   - name: parent_instrument_hash
     type: STRING
     description: >-
@@ -757,6 +862,13 @@ table:
     - combo hash
     category: identifier
     filterable: true
+    example_values:
+    - 'dc96693ad9028c7db548529d306f1319f0b17c7830c157c6633be8d9aacc0799'
+    - 'cd9d979279dc5be0d55adffaaed0ce51bc3ae2dee0ed97145682bc550a5ef536'
+    - '527633d1a1f8c3c3b5d2adc1bed0babdf187466a3a34d3d4cb76a6d436b8a63a'
+    - '0ef812ed59d2a2999eab07d0f8788aaf7ae0bd9c8041f95afb3183197c0e3666'
+    - '0c2810fcf599644dfbe5e08628b88b06de94f6e74dcd921c5efb244b897ab1c9'
+    comprehensive: true
   - name: parent_feed_code
     type: STRING
     description: >-
@@ -768,6 +880,13 @@ table:
     - parent code
     category: dimension
     filterable: true
+    example_values:
+    - 'OMX:SHBA:SEP26:140C:1|SAX:SHBA:S:-52:@142'
+    - 'OMX:ORSTED:JUN26:166.34C:1|COP:ORSTED:S:-79.2:@155.5'
+    - 'OMX:NOVOB:MAR26:330C:1|COP:NOVOB:S:-35:@309'
+    - 'OMX:NOVOB:MAR26:320C:1|COP:NOVOB:S:-44:@309.4'
+    - 'OMX:NOVOB:DEC27:300P:1|COP:NOVOB:S:38:@309.7'
+    comprehensive: true
   - name: no_legs
     type: INTEGER
     description: >-
@@ -843,6 +962,10 @@ table:
     - currency code
     category: identifier
     filterable: true
+    example_values:
+    - '38'
+    - '16'
+    comprehensive: true
   - name: option_type_name
     type: STRING
     description: >-
@@ -928,6 +1051,9 @@ table:
     business_rules: Consider filtering out rows where is_bv_invalid=TRUE for accurate KPI analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: option_exchange
     type: STRING
     description: >-
@@ -939,6 +1065,9 @@ table:
     - option venue
     category: dimension
     filterable: true
+    example_values:
+    - 'omx'
+    comprehensive: true
   - name: underlying_exchange
     type: STRING
     description: >-
@@ -950,6 +1079,9 @@ table:
     - underlying venue
     category: dimension
     filterable: true
+    example_values:
+    - 'omx'
+    comprehensive: true
   - name: ref_delta
     type: FLOAT
     description: >-
@@ -1409,6 +1541,9 @@ table:
     business_rules: Internal data quality field for the 1s interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1s
     type: STRING
     description: >-
@@ -1613,6 +1748,9 @@ table:
     business_rules: Internal data quality field for the 5s interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_5s
     type: STRING
     description: >-
@@ -1817,6 +1955,9 @@ table:
     business_rules: Internal data quality field for the 10s interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_10s
     type: STRING
     description: >-
@@ -2021,6 +2162,9 @@ table:
     business_rules: Internal data quality field for the 30s interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_30s
     type: STRING
     description: >-
@@ -2225,6 +2369,9 @@ table:
     business_rules: Internal data quality field for the 1m interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1m
     type: STRING
     description: >-
@@ -2429,6 +2576,9 @@ table:
     business_rules: Internal data quality field for the 5m interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_5m
     type: STRING
     description: >-
@@ -2633,6 +2783,9 @@ table:
     business_rules: Internal data quality field for the 10m interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_10m
     type: STRING
     description: >-
@@ -2837,6 +2990,9 @@ table:
     business_rules: Internal data quality field for the 30m interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_30m
     type: STRING
     description: >-
@@ -3041,6 +3197,9 @@ table:
     business_rules: Internal data quality field for the 1h interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1h
     type: STRING
     description: >-
@@ -3225,6 +3384,9 @@ table:
     business_rules: Internal data quality field for the end-of-day interval.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_eod
     type: STRING
     description: >-
@@ -3780,6 +3942,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5s
     type: BOOLEAN
     description: >-
@@ -3790,6 +3955,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_10s
     type: BOOLEAN
     description: >-
@@ -3800,6 +3968,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_30s
     type: BOOLEAN
     description: >-
@@ -3810,6 +3981,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1m
     type: BOOLEAN
     description: >-
@@ -3820,6 +3994,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5m
     type: BOOLEAN
     description: >-
@@ -3830,6 +4007,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_10m
     type: BOOLEAN
     description: >-
@@ -3840,6 +4020,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_30m
     type: BOOLEAN
     description: >-
@@ -3850,6 +4033,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1h
     type: BOOLEAN
     description: >-
@@ -3860,6 +4046,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_eod
     type: BOOLEAN
     description: >-
@@ -3870,6 +4059,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1D
     type: BOOLEAN
     description: >-
@@ -3880,6 +4072,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5D
     type: BOOLEAN
     description: >-
@@ -3890,6 +4085,9 @@ table:
     business_rules: Consider excluding auction-period snapshots for reliable slippage analysis.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth
     type: BOOLEAN
     description: >-
@@ -3901,6 +4099,9 @@ table:
     - auction depth flag
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_ref_trade
     type: BOOLEAN
     description: >-
@@ -3912,6 +4113,9 @@ table:
     - hedge trade
     category: dimension
     filterable: true
+    example_values:
+    - 'true'
+    comprehensive: true
   - name: is_ref_leg_zero_size
     type: INTEGER
     description: >-
@@ -3973,6 +4177,12 @@ table:
     - hedge tenor
     category: dimension
     filterable: true
+    example_values:
+    - 'Mar-2026'
+    - 'Sep-2026'
+    - 'Jun-2026'
+    - 'Dec-2027'
+    comprehensive: true
   - name: ref_size
     type: INTEGER
     description: >-
@@ -4009,6 +4219,9 @@ table:
     - listing exchange
     category: dimension
     filterable: true
+    example_values:
+    - 'NORD'
+    comprehensive: true
   - name: trade_ref_price
     type: FLOAT
     description: >-
@@ -4158,6 +4371,10 @@ table:
     - hedge side
     category: dimension
     filterable: true
+    example_values:
+    - 'BUY'
+    - 'SELL'
+    comprehensive: true
   - name: ref_buy_sell_multiplier
     type: INTEGER
     description: >-
@@ -11251,3 +11468,6 @@ table:
     business_rules: Consider segmenting expiry-day trades separately; they have extreme greeks and atypical slippage.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true

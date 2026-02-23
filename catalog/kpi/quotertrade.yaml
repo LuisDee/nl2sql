@@ -35,6 +35,11 @@ table:
     source: QuoterTrade.proto
     category: dimension
     filterable: true
+    example_values:
+    - 'SINCH_SS'
+    - 'SDVK'
+    - 'AZNS'
+    comprehensive: true
   - name: portfolio
     type: STRING
     description: Trading portfolio or book that the quoter fill belongs to. Used to segment quoter performance
@@ -71,6 +76,11 @@ table:
     - vol curve ref
     category: identifier
     filterable: true
+    example_values:
+    - '329875'
+    - '297969'
+    - '128249'
+    comprehensive: true
   - name: ref_carry_id
     type: INTEGER
     description: Reference carry or dividend curve identifier active at the time of the quoter fill. Links to the
@@ -81,6 +91,11 @@ table:
     - dividend curve ref
     category: identifier
     filterable: true
+    example_values:
+    - '8618'
+    - '17096'
+    - '12101'
+    comprehensive: true
   - name: ref_tv
     type: FLOAT
     description: Reference theoretical value (fair value) of the option at the time the quoter fill occurred.
@@ -346,6 +361,11 @@ table:
     - base hash
     category: identifier
     filterable: true
+    example_values:
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    comprehensive: true
   - name: hardware_nic_rx_timestamp
     type: TIMESTAMP
     description: Hardware NIC (network interface card) receive timestamp captured at the network hardware level.
@@ -375,6 +395,9 @@ table:
     business_rules: Fills with is_deleting=true are often adverse selection events
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: trade_size
     type: INTEGER
     description: Number of contracts (lots) traded in this quoter fill. This is the signed trade size reflecting
@@ -529,6 +552,11 @@ table:
     - mako ticker
     category: dimension
     filterable: true
+    example_values:
+    - 'SINCH_SS'
+    - 'SDVK'
+    - 'AZNS'
+    comprehensive: true
   - name: bv_update_sequence_number
     type: INTEGER
     description: Sequence number of the base value (underlying) update event that was current at the time
@@ -545,6 +573,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    comprehensive: true
   - name: underlying_sequence_number
     type: INTEGER
     description: Sequence number for the underlying instrument's market data at the time of the quoter fill.
@@ -562,6 +595,11 @@ table:
     - underlying hash
     category: identifier
     filterable: true
+    example_values:
+    - '6cd7ed5db6c389ccb2bdd4dc0e92d8a336c8120d7b06610a6229421d7f8dab72'
+    - '412a2e343c979a50f2fa3f1163d182ec32407a256be734943b1c93794d7e5065'
+    - '3e679a0809271aa92f35fb3544154917e92fcbfae8f1933a3f5e06ffbd649c13'
+    comprehensive: true
   - name: pid
     type: STRING
     description: Process identifier of the quoting engine instance that generated this fill event. Used for
@@ -592,6 +630,11 @@ table:
     source: 'QuoterTrade.proto :: makoOrderId'
     category: identifier
     filterable: true
+    example_values:
+    - '1078738257'
+    - '1076047425'
+    - '1076032570'
+    comprehensive: true
   - name: exchange_timestamp
     type: TIMESTAMP
     description: Timestamp assigned by the exchange matching engine when the fill occurred. This is the most
@@ -621,6 +664,9 @@ table:
     business_rules: Fills with is_updating=true may have stale pricing
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: underlying_exe_exch
     type: INTEGER
     description: Numeric exchange identifier for the underlying instrument's execution venue. Maps to the
@@ -640,6 +686,9 @@ table:
     - underlying venue
     category: dimension
     filterable: true
+    example_values:
+    - 'EXCH_CODE_SAX'
+    comprehensive: true
   - name: is_spark
     type: BOOLEAN
     description: Whether this quoter fill occurred via the Spark fast-path execution channel. Spark provides
@@ -650,6 +699,9 @@ table:
     - fast path
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: ref_inst_carry_id
     type: INTEGER
     description: Reference instrument-level carry curve identifier at the time of the quoter fill. This is
@@ -658,6 +710,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '8618'
+    - '17096'
+    - '12101'
+    comprehensive: true
   - name: ref_inst_curve_id
     type: INTEGER
     description: Reference instrument-level volatility curve identifier at the time of the quoter fill. This is
@@ -666,6 +723,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '329875'
+    - '297969'
+    - '128249'
+    comprehensive: true
   - name: is_ref_theo_invalid
     type: BOOLEAN
     description: Whether the reference theoretical value was marked as invalid at the time of the quoter fill.
@@ -676,6 +738,9 @@ table:
     business_rules: Filter out is_ref_theo_invalid=true for clean KPI analysis
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: lb_enabled
     type: BOOLEAN
     description: Whether lean-back mode was enabled for the quoter at the time of the fill. Lean-back widens
@@ -686,6 +751,9 @@ table:
     - leaning back
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: edge_model_type
     type: INTEGER
     description: Numeric code identifying the edge model used for pricing this instrument at the time of the
@@ -695,6 +763,10 @@ table:
     - model type code
     category: dimension
     filterable: true
+    example_values:
+    - '2'
+    - '0'
+    comprehensive: true
   - name: edge_model_type_name
     type: STRING
     description: Human-readable name of the edge model used for pricing this instrument at the time of the
@@ -705,6 +777,10 @@ table:
     - edge model
     category: dimension
     filterable: true
+    example_values:
+    - 'EDGE_MODEL_PM'
+    - 'EDGE_MODEL_NULL'
+    comprehensive: true
   - name: ref_theoevent_stream_id
     type: STRING
     description: Stream identifier for the reference theo event that was active at the time of the quoter fill.
@@ -800,6 +876,11 @@ table:
     - unique key
     category: identifier
     filterable: true
+    example_values:
+    - 'OST_QWHITEe13a8cfda77f7f5dd0c52faf9615b1363bcd78dde04f24671760cb7900ca085a177132041448286694419547175111.3'
+    - 'OST_QWHITEdbb4c6bffea93f49a7e785c000be54f0148e62d3e774dadcebd36936fb72e7591771322957438811136251693872023.4'
+    - 'OST_QWHITE7ae811825bc42df8499c63ee3890188488ef03abdb6eae91ba23be48795b63fc17713383649277629445890690061.05'
+    comprehensive: true
   - name: trade_type
     type: STRING
     description: Classification of the trade type for this quoter fill. Identifies the source or mechanism of
@@ -810,6 +891,9 @@ table:
     - fill type
     category: dimension
     filterable: true
+    example_values:
+    - 'quote'
+    comprehensive: true
   - name: trade_date
     type: DATE
     description: Business date of the quoter fill, used as the partition column for this table. ALWAYS include
@@ -834,6 +918,9 @@ table:
     - is strategy
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_parent
     type: BOOLEAN
     description: Whether this row represents the parent (combo) level aggregation rather than an individual leg.
@@ -844,6 +931,9 @@ table:
     business_rules: For leg-level analysis, filter is_parent=false
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction
     type: BOOLEAN
     description: Whether the quoter fill occurred during an exchange auction period (opening, closing, or
@@ -855,6 +945,9 @@ table:
     business_rules: Consider excluding auction fills for standard quoter performance analysis
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: contract_size
     type: FLOAT
     description: Contract multiplier (point value) for the instrument. Converts price ticks to currency PnL.
@@ -879,6 +972,11 @@ table:
     - inst hash
     category: identifier
     filterable: true
+    example_values:
+    - 'e13a8cfda77f7f5dd0c52faf9615b1363bcd78dde04f24671760cb7900ca085a'
+    - 'dbb4c6bffea93f49a7e785c000be54f0148e62d3e774dadcebd36936fb72e759'
+    - '7ae811825bc42df8499c63ee3890188488ef03abdb6eae91ba23be48795b63fc'
+    comprehensive: true
   - name: parent_instrument_hash
     type: STRING
     description: Instrument hash of the parent combo or spread if this fill is part of a multi-leg strategy.
@@ -889,6 +987,11 @@ table:
     - parent hash
     category: identifier
     filterable: true
+    example_values:
+    - 'e13a8cfda77f7f5dd0c52faf9615b1363bcd78dde04f24671760cb7900ca085a'
+    - 'dbb4c6bffea93f49a7e785c000be54f0148e62d3e774dadcebd36936fb72e759'
+    - '7ae811825bc42df8499c63ee3890188488ef03abdb6eae91ba23be48795b63fc'
+    comprehensive: true
   - name: parent_feed_code
     type: STRING
     description: Exchange feed code for the parent combo instrument. The human-readable identifier assigned by
@@ -898,6 +1001,11 @@ table:
     - combo feed code
     category: dimension
     filterable: true
+    example_values:
+    - 'OMX:SINCH_SS:MAY26:25C'
+    - 'OMX:SDVK:MAR26:370P'
+    - 'OMX:AZNS:MAY26:2050C'
+    comprehensive: true
   - name: no_legs
     type: INTEGER
     description: Number of legs in the combination or spread strategy. Value of 1 indicates a single-leg trade
@@ -950,6 +1058,10 @@ table:
     - option kind
     category: dimension
     filterable: true
+    example_values:
+    - '67'
+    - '80'
+    comprehensive: true
   - name: currency_id
     type: INTEGER
     description: Numeric currency identifier for the instrument's denomination. Maps to the trading currency
@@ -960,6 +1072,9 @@ table:
     - currency code
     category: identifier
     filterable: true
+    example_values:
+    - '16'
+    comprehensive: true
   - name: parent_combo_type_name
     type: STRING
     description: Human-readable name of the combo type for the parent instrument (e.g., Calendar, Straddle,
@@ -990,6 +1105,9 @@ table:
     - underlying type
     category: dimension
     filterable: true
+    example_values:
+    - 'STOCK'
+    comprehensive: true
   - name: inst_type_name
     type: STRING
     description: Human-readable name of the instrument type for this quoter fill (e.g., Option, Future, Spread).
@@ -1035,6 +1153,9 @@ table:
     business_rules: Filter out is_bv_invalid=true for reliable KPI analysis
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: option_exchange
     type: STRING
     description: Exchange where the option was listed and where the quoter fill occurred. Identifies the specific
@@ -1045,6 +1166,9 @@ table:
     - option venue
     category: dimension
     filterable: true
+    example_values:
+    - 'omx'
+    comprehensive: true
   - name: underlying_exchange
     type: STRING
     description: Exchange where the underlying instrument is traded. May differ from option_exchange when the
@@ -1054,6 +1178,9 @@ table:
     - underlying venue
     category: dimension
     filterable: true
+    example_values:
+    - 'omx'
+    comprehensive: true
   - name: streamsource_stream_id
     type: INTEGER
     description: Stream identifier in the data pipeline that produced this quoter fill record. Part of the data
@@ -1062,6 +1189,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '25833766950'
+    - '25833766945'
+    - '25833766919'
+    comprehensive: true
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream for this quoter fill. Uniquely identifies the event
@@ -1070,6 +1202,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '1771338364927765096'
+    - '1771322957438814514'
+    - '1771320414482869855'
+    comprehensive: true
   - name: streamsource_message_id
     type: INTEGER
     description: Message identifier within the source stream for this quoter fill. Part of the data provenance
@@ -1078,6 +1215,11 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '66330451509249'
+    - '63822861697025'
+    - '110614265462785'
+    comprehensive: true
   - name: datasource_pid
     type: INTEGER
     description: Process identifier of the data source that originally emitted this quoter fill event. Part of
@@ -1094,6 +1236,10 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'omxps304'
+    - 'omxps305'
+    comprehensive: true
   - name: ref_delta
     type: FLOAT
     description: Reference delta of the option at the time of the quoter fill. This is the delta used in KPI
@@ -1134,6 +1280,11 @@ table:
     - volatility curve
     category: identifier
     filterable: true
+    example_values:
+    - '329875'
+    - '297969'
+    - '128249'
+    comprehensive: true
   - name: carry_id
     type: INTEGER
     description: Carry (dividend) curve identifier that was active at the time of the quoter fill. Maps to the
@@ -1144,6 +1295,11 @@ table:
     - carry curve
     category: identifier
     filterable: true
+    example_values:
+    - '8618'
+    - '17096'
+    - '12101'
+    comprehensive: true
   - name: is_mdepth_snapshot
     type: BOOLEAN
     description: Whether the market depth data at the time of the fill was from a full snapshot (true) or an
@@ -1153,6 +1309,9 @@ table:
     - market depth snapshot
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot
     type: BOOLEAN
     description: Whether the theo data at the time of the fill was from a full snapshot (true) or an incremental
@@ -1162,6 +1321,9 @@ table:
     - theo snapshot
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: tv_offset
     type: FLOAT
     description: Offset applied to the raw theoretical value to produce the working TV. This captures manual
@@ -1481,6 +1643,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1s
     type: BOOLEAN
     description: Whether theo data at the 1s snapshot was from a full recalculation (true) or incremental
@@ -1488,6 +1653,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_1s
     type: TIMESTAMP
     description: Timestamp of the market data event used for the 1-second snapshot after the quoter fill.
@@ -1629,6 +1797,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_5s
     type: BOOLEAN
     description: Whether theo data at the 5s snapshot was from a full recalculation or incremental update.
@@ -1636,6 +1807,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_5s
     type: TIMESTAMP
     description: Timestamp of the market data event used for the 5-second snapshot after the quoter fill.
@@ -1772,6 +1946,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_10s
     type: BOOLEAN
     description: Whether theo data at the 10s snapshot was from a full recalculation or incremental
@@ -1779,6 +1956,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_10s
     type: TIMESTAMP
     description: Timestamp of the market data event used for the 10-second snapshot after the quoter fill.
@@ -1915,6 +2095,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_30s
     type: BOOLEAN
     description: Whether theo data at the 30s snapshot was from a full recalculation or incremental
@@ -1922,6 +2105,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_30s
     type: TIMESTAMP
     description: Timestamp of the market data event used for the 30-second snapshot after the quoter fill.
@@ -2058,6 +2244,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1m
     type: BOOLEAN
     description: Whether theo data at the 1m snapshot was from a full recalculation or incremental
@@ -2065,6 +2254,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_1m
     type: TIMESTAMP
     description: Timestamp of the market data event used for the 1-minute snapshot after the quoter fill.
@@ -2201,6 +2393,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_5m
     type: BOOLEAN
     description: Whether theo data at the 5m snapshot was from a full recalculation or incremental
@@ -2208,6 +2403,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_5m
     type: TIMESTAMP
     description: Timestamp of the market data event used for the 5-minute snapshot after the quoter fill.
@@ -2344,6 +2542,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_10m
     type: BOOLEAN
     description: Whether theo data at the 10m snapshot was from a full recalculation or incremental
@@ -2351,6 +2552,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_10m
     type: TIMESTAMP
     description: Timestamp of the market data event used for the 10-minute snapshot after the quoter fill.
@@ -2487,6 +2691,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_30m
     type: BOOLEAN
     description: Whether theo data at the 30m snapshot was from a full recalculation or incremental
@@ -2494,6 +2701,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_30m
     type: TIMESTAMP
     description: Timestamp of the market data event used for the 30-minute snapshot after the quoter fill.
@@ -2630,6 +2840,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1h
     type: BOOLEAN
     description: Whether theo data at the 1h snapshot was from a full recalculation or incremental
@@ -2637,6 +2850,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: event_timestamp_1h
     type: TIMESTAMP
     description: Timestamp of the market data event used for the 1-hour snapshot after the quoter fill.
@@ -3154,6 +3370,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5s
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 5-second horizon was captured during
@@ -3162,6 +3381,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_10s
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 10-second horizon was captured during
@@ -3170,6 +3392,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_30s
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 30-second horizon was captured during
@@ -3178,6 +3403,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1m
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 1-minute horizon was captured during
@@ -3186,6 +3414,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5m
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 5-minute horizon was captured during
@@ -3194,6 +3425,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_10m
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 10-minute horizon was captured during
@@ -3202,6 +3436,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_30m
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 30-minute horizon was captured during
@@ -3210,6 +3447,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1h
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 1-hour horizon was captured during
@@ -3218,6 +3458,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_eod
     type: BOOLEAN
     description: Whether the option market depth snapshot at the end-of-day horizon was captured during
@@ -3226,6 +3469,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1D
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 1-day horizon was captured during
@@ -3234,6 +3480,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5D
     type: BOOLEAN
     description: Whether the option market depth snapshot at the 5-day horizon was captured during
@@ -3242,6 +3491,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth
     type: BOOLEAN
     description: Whether the option market depth snapshot at the time of the quoter fill was captured during
@@ -3250,6 +3502,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: exchange
     type: STRING
     description: Exchange where the quoter fill was executed. Identifies the specific options venue (e.g., Eurex,
@@ -3261,6 +3516,9 @@ table:
     - exchange name
     category: dimension
     filterable: true
+    example_values:
+    - 'NORD'
+    comprehensive: true
   - name: mid_base_val
     type: FLOAT
     description: Mid-point base (underlying) value at the time of the quoter fill. Calculated as the midpoint
@@ -7339,3 +7597,6 @@ table:
     business_rules: Expiry-day fills have extreme gamma and theta. Analyze separately.
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true

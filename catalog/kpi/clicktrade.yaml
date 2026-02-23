@@ -44,6 +44,9 @@ table:
     source: 'PosData.proto :: PositionEvent.symbol'
     category: dimension
     filterable: true
+    example_values:
+    - 'AZA_SS'
+    comprehensive: true
   - name: portfolio
     type: STRING
     description: >
@@ -59,6 +62,9 @@ table:
     source: 'PosData.proto :: PositionEvent.portfolio'
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    comprehensive: true
   - name: trader_id
     type: STRING
     description: >
@@ -73,6 +79,9 @@ table:
     source: 'PosData.proto :: PositionEvent.userId'
     category: identifier
     filterable: true
+    example_values:
+    - 'OMDAM1'
+    comprehensive: true
   - name: mako_id
     type: STRING
     description: >
@@ -84,6 +93,9 @@ table:
     source: 'PosData.proto :: PositionEvent.makoId'
     category: identifier
     filterable: true
+    example_values:
+    - 'CCHATZIM'
+    comprehensive: true
   - name: algorithm
     type: STRING
     description: >
@@ -126,6 +138,9 @@ table:
     source: 'PosData.proto :: PositionEvent.channel'
     category: dimension
     filterable: true
+    example_values:
+    - 'MANUAL'
+    comprehensive: true
   - name: inventory
     type: STRING
     description: >
@@ -138,6 +153,9 @@ table:
     source: 'PosData.proto :: PositionEvent.inventory'
     category: dimension
     filterable: true
+    example_values:
+    - 'WHITE'
+    comprehensive: true
   - name: account
     type: STRING
     description: >
@@ -151,6 +169,9 @@ table:
     source: 'PosData.proto :: PositionEvent.account'
     category: dimension
     filterable: true
+    example_values:
+    - 'MAIN'
+    comprehensive: true
   - name: exchange_timestamp
     type: TIMESTAMP
     description: >
@@ -196,6 +217,9 @@ table:
     source: 'PosData.proto :: PositionEvent.exchangeTransactionId'
     category: identifier
     filterable: true
+    example_values:
+    - '50354370:26249:1191'
+    comprehensive: true
   - name: exchange_order_id
     type: STRING
     description: >
@@ -207,6 +231,9 @@ table:
     source: 'PosData.proto :: PositionEvent.exchangeOrderId'
     category: identifier
     filterable: true
+    example_values:
+    - '334:OMDAM1'
+    comprehensive: true
   - name: agg_pos_timestamp
     type: STRING
     description: >
@@ -248,6 +275,9 @@ table:
     source: 'PosData.proto :: PositionEvent.revision'
     category: identifier
     filterable: true
+    example_values:
+    - '0'
+    comprehensive: true
   - name: revision_timestamp
     type: TIMESTAMP
     description: >
@@ -305,6 +335,9 @@ table:
     - amended by
     category: dimension
     filterable: true
+    example_values:
+    - 'POS'
+    comprehensive: true
   - name: transaction_id
     type: INTEGER
     description: >
@@ -317,6 +350,9 @@ table:
     source: 'PosData.proto :: PositionEvent.transactionId'
     category: identifier
     filterable: true
+    example_values:
+    - '1077703870'
+    comprehensive: true
   - name: order_id
     type: INTEGER
     description: >
@@ -328,6 +364,9 @@ table:
     source: 'PosData.proto :: PositionEvent.orderId'
     category: identifier
     filterable: true
+    example_values:
+    - '1077703867'
+    comprehensive: true
   - name: position_type
     type: INTEGER
     description: >
@@ -352,6 +391,9 @@ table:
     synonyms: []
     category: identifier
     filterable: true
+    example_values:
+    - '242974'
+    comprehensive: true
   - name: trade_id
     type: INTEGER
     description: >
@@ -364,6 +406,9 @@ table:
     source: 'PosData.proto :: PositionEvent.fillId'
     category: identifier
     filterable: true
+    example_values:
+    - '1'
+    comprehensive: true
   - name: text
     type: STRING
     description: >
@@ -386,6 +431,9 @@ table:
     - mako ticker
     category: dimension
     filterable: true
+    example_values:
+    - 'AZA_SS'
+    comprehensive: true
   - name: underlying_instrument_hash
     type: STRING
     description: >
@@ -397,6 +445,9 @@ table:
     source: 'PosData.proto :: PositionEvent.instrumentHash (of underlying)'
     category: identifier
     filterable: true
+    example_values:
+    - 'ff161170e643c8c81187f5249c84ad3b09ba99a35f86975985dc90245f677a7d'
+    comprehensive: true
   - name: underlying_exe_exch
     type: INTEGER
     description: >
@@ -509,6 +560,9 @@ table:
     - underlying name
     category: dimension
     filterable: true
+    example_values:
+    - 'AZA_SS'
+    comprehensive: true
   - name: price
     type: FLOAT
     description: >
@@ -536,6 +590,9 @@ table:
     - row key
     category: identifier
     filterable: true
+    example_values:
+    - 'COMBO_TAKEOUTWHITEf22c462cc6fc5e4b35b25b2f99f52a3aeb57ed37da60bc1af12340234279d450177132903301740582110777038671077703870'
+    comprehensive: true
   - name: trade_type
     type: STRING
     description: >
@@ -547,6 +604,9 @@ table:
     - trade origin
     category: dimension
     filterable: true
+    example_values:
+    - 'click'
+    comprehensive: true
   - name: trade_date
     type: DATE
     description: >
@@ -576,6 +636,9 @@ table:
     - combo trade
     category: dimension
     filterable: true
+    example_values:
+    - 'true'
+    comprehensive: true
   - name: is_parent
     type: BOOLEAN
     description: >
@@ -589,6 +652,9 @@ table:
       leg-level breakdown. Single-leg trades have is_parent=FALSE.
     category: dimension
     filterable: true
+    example_values:
+    - 'true'
+    comprehensive: true
   - name: is_auction
     type: BOOLEAN
     description: >
@@ -600,6 +666,9 @@ table:
     - during auction
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: contract_size
     type: FLOAT
     description: >
@@ -630,6 +699,9 @@ table:
     source: 'PosData.proto :: PositionEvent.instrumentHash'
     category: identifier
     filterable: true
+    example_values:
+    - 'f22c462cc6fc5e4b35b25b2f99f52a3aeb57ed37da60bc1af12340234279d450'
+    comprehensive: true
   - name: parent_instrument_hash
     type: STRING
     description: >
@@ -641,6 +713,9 @@ table:
     - combo hash
     category: identifier
     filterable: true
+    example_values:
+    - 'f22c462cc6fc5e4b35b25b2f99f52a3aeb57ed37da60bc1af12340234279d450'
+    comprehensive: true
   - name: parent_feed_code
     type: STRING
     description: >
@@ -650,6 +725,9 @@ table:
     - combo feed code
     category: dimension
     filterable: true
+    example_values:
+    - 'OMX:AZA_SS:MAR26:325P:1|OMX:AZA_SS:FEB26:335P:-1'
+    comprehensive: true
   - name: no_legs
     type: INTEGER
     description: >
@@ -798,6 +876,9 @@ table:
     - expiry bucket
     category: dimension
     filterable: true
+    example_values:
+    - 'CALENDAR'
+    comprehensive: true
   - name: expiry_timestamp
     type: STRING
     description: >
@@ -837,6 +918,9 @@ table:
     - exchange name
     category: dimension
     filterable: true
+    example_values:
+    - 'omx'
+    comprehensive: true
   - name: underlying_exchange
     type: STRING
     description: >
@@ -847,6 +931,9 @@ table:
     - underlying venue
     category: dimension
     filterable: true
+    example_values:
+    - 'omx'
+    comprehensive: true
   - name: streamsource_stream_id
     type: STRING
     description: >
@@ -955,6 +1042,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot
     type: STRING
     description: >
@@ -1346,6 +1436,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1s
     type: STRING
     description: >
@@ -1505,6 +1598,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_5s
     type: STRING
     description: >
@@ -1651,6 +1747,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_10s
     type: STRING
     description: >
@@ -1797,6 +1896,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_30s
     type: STRING
     description: >
@@ -1943,6 +2045,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1m
     type: STRING
     description: >
@@ -2089,6 +2194,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_5m
     type: STRING
     description: >
@@ -2235,6 +2343,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_10m
     type: STRING
     description: >
@@ -2381,6 +2492,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_30m
     type: STRING
     description: >
@@ -2527,6 +2641,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_1h
     type: STRING
     description: >
@@ -2659,6 +2776,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_theodata_snapshot_eod
     type: STRING
     description: >
@@ -3058,6 +3178,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5s
     type: BOOLEAN
     description: >
@@ -3068,6 +3191,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_10s
     type: BOOLEAN
     description: >
@@ -3078,6 +3204,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_30s
     type: BOOLEAN
     description: >
@@ -3088,6 +3217,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1m
     type: BOOLEAN
     description: >
@@ -3098,6 +3230,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5m
     type: BOOLEAN
     description: >
@@ -3108,6 +3243,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_10m
     type: BOOLEAN
     description: >
@@ -3118,6 +3256,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_30m
     type: BOOLEAN
     description: >
@@ -3128,6 +3269,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1h
     type: BOOLEAN
     description: >
@@ -3138,6 +3282,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_eod
     type: BOOLEAN
     description: >
@@ -3148,6 +3295,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_1D
     type: BOOLEAN
     description: >
@@ -3158,6 +3308,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth_5D
     type: BOOLEAN
     description: >
@@ -3168,6 +3321,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: is_auction_marketdepth
     type: BOOLEAN
     description: >
@@ -3178,6 +3334,9 @@ table:
     synonyms: []
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true
   - name: exchange
     type: STRING
     description: >
@@ -7871,3 +8030,6 @@ table:
     - expiry day
     category: dimension
     filterable: true
+    example_values:
+    - 'false'
+    comprehensive: true

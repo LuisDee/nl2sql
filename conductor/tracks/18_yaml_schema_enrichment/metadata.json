@@ -1,0 +1,10 @@
+{
+  "id": "18_yaml_schema_enrichment",
+  "name": "YAML Schema Enrichment & Data Profiling",
+  "wave": 15,
+  "complexity": "L",
+  "status": "new",
+  "dependencies": ["17_routing_and_pipeline"],
+  "interfaces_owned": ["enriched_yaml_schema", "data_profiling_pipeline"],
+  "interfaces_consumed": ["yaml_catalog", "bigquery", "column_embeddings"]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "19_embedding_enrichment",
+  "name": "Embedding Strategy & Glossary Collection",
+  "wave": 16,
+  "complexity": "L",
+  "status": "new",
+  "dependencies": ["18_yaml_schema_enrichment"],
+  "interfaces_owned": ["enriched_embeddings", "glossary_embeddings", "enriched_vector_search_cte"],
+  "interfaces_consumed": ["enriched_yaml_schema", "column_embeddings", "vector_search_columns", "bigquery"]
+}

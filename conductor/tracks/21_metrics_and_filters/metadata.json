@@ -1,0 +1,10 @@
+{
+  "id": "21_metrics_and_filters",
+  "name": "Metric Definitions, Named Filters & Monitoring",
+  "wave": 16,
+  "complexity": "M",
+  "status": "new",
+  "dependencies": ["18_yaml_schema_enrichment"],
+  "interfaces_owned": ["metric_definitions", "named_filters", "monitoring_tests"],
+  "interfaces_consumed": ["enriched_yaml_schema", "yaml_catalog", "eval_runner"]
+}

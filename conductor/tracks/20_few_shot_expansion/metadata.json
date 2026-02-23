@@ -1,0 +1,10 @@
+{
+  "id": "20_few_shot_expansion",
+  "name": "Few-Shot Example Expansion",
+  "wave": 15,
+  "complexity": "M",
+  "status": "new",
+  "dependencies": ["17_routing_and_pipeline"],
+  "interfaces_owned": ["expanded_examples"],
+  "interfaces_consumed": ["yaml_catalog", "query_memory", "bigquery"]
+}

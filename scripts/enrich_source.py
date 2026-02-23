@@ -23,18 +23,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_DIR = PROJECT_ROOT / "catalog"
 METADATA_DIR = PROJECT_ROOT / "metadata"
 
-ALL_TABLES: dict[str, list[str]] = {
-    "kpi": ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"],
-    "data": [
-        "markettrade",
-        "quotertrade",
-        "clicktrade",
-        "swingdata",
-        "theodata",
-        "marketdata",
-        "marketdepth",
-    ],
-}
+from table_registry import ALL_TABLES, filter_tables
 
 # Kafka/infrastructure columns that don't come from proto definitions
 _KAFKA_FIELDS = frozenset(
@@ -296,8 +285,12 @@ def _flush_source(
 # ---------------------------------------------------------------------------
 
 
-def main(dry_run: bool = False) -> dict[str, dict]:
-    """Run source field enrichment across all table YAMLs."""
+def main(
+    dry_run: bool = False,
+    layer: str | None = None,
+    table: str | None = None,
+) -> dict[str, dict]:
+    """Run source field enrichment across table YAMLs."""
     # Load metadata indexes
     transforms = yaml.safe_load(
         (METADATA_DIR / "data_loader_transforms.yaml").read_text()
@@ -307,8 +300,9 @@ def main(dry_run: bool = False) -> dict[str, dict]:
     kpi_data = yaml.safe_load((METADATA_DIR / "kpi_computations.yaml").read_text())
 
     all_stats: dict[str, dict] = {}
+    target_tables = filter_tables(layer, table) if (layer or table) else ALL_TABLES
 
-    for layer, tables in ALL_TABLES.items():
+    for layer, tables in target_tables.items():
         for table_name in tables:
             yaml_path = CATALOG_DIR / layer / f"{table_name}.yaml"
             if not yaml_path.exists():
@@ -356,5 +350,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Report changes without writing",
     )
+    parser.add_argument("--layer", help="Filter to one layer (kpi/data)")
+    parser.add_argument("--table", help="Filter to one table name")
     args = parser.parse_args()
-    main(dry_run=args.dry_run)
+    main(dry_run=args.dry_run, layer=args.layer, table=args.table)

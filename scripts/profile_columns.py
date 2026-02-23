@@ -24,18 +24,7 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_DIR = PROJECT_ROOT / "catalog"
 
-ALL_TABLES: dict[str, list[str]] = {
-    "kpi": ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"],
-    "data": [
-        "markettrade",
-        "quotertrade",
-        "clicktrade",
-        "swingdata",
-        "theodata",
-        "marketdata",
-        "marketdepth",
-    ],
-}
+from table_registry import ALL_TABLES, filter_tables
 
 # Schema constraint
 MAX_EXAMPLE_VALUES = 25
@@ -328,7 +317,13 @@ def _query_bq(sql: str, project: str, location: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
-def main(*, dry_run: bool = False, trade_date: str = "2026-02-17") -> dict[str, dict]:
+def main(
+    *,
+    dry_run: bool = False,
+    trade_date: str = "2026-02-17",
+    layer: str | None = None,
+    table: str | None = None,
+) -> dict[str, dict]:
     """Run BQ profiling and update YAML catalog with example_values."""
     from nl2sql_agent.config import Settings
 
@@ -338,8 +333,9 @@ def main(*, dry_run: bool = False, trade_date: str = "2026-02-17") -> dict[str, 
 
     dataset_map = {"kpi": s.kpi_dataset, "data": s.data_dataset}
     all_stats: dict[str, dict] = {}
+    target_tables = filter_tables(layer, table) if (layer or table) else ALL_TABLES
 
-    for layer, tables in ALL_TABLES.items():
+    for layer, tables in target_tables.items():
         dataset = dataset_map[layer]
         for table_name in tables:
             yaml_path = CATALOG_DIR / layer / f"{table_name}.yaml"
@@ -406,5 +402,12 @@ if __name__ == "__main__":
         default="2026-02-17",
         help="Trade date partition filter (default: 2026-02-17)",
     )
+    parser.add_argument("--layer", help="Filter to one layer (kpi/data)")
+    parser.add_argument("--table", help="Filter to one table name")
     args = parser.parse_args()
-    main(dry_run=args.dry_run, trade_date=args.trade_date)
+    main(
+        dry_run=args.dry_run,
+        trade_date=args.trade_date,
+        layer=args.layer,
+        table=args.table,
+    )

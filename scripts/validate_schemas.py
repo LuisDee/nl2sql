@@ -19,19 +19,7 @@ ROOT = Path(__file__).parent.parent
 SCHEMA_DIR = ROOT / "schemas"
 CATALOG_DIR = ROOT / "catalog"
 
-# Tables that have both a catalog YAML and a BQ schema
-TABLE_MAP = {
-    "kpi": ["brokertrade", "clicktrade", "markettrade", "otoswing", "quotertrade"],
-    "data": [
-        "clicktrade",
-        "markettrade",
-        "swingdata",
-        "quotertrade",
-        "theodata",
-        "marketdata",
-        "marketdepth",
-    ],
-}
+from table_registry import ALL_TABLES as TABLE_MAP
 
 
 def load_bq_columns_offline(layer: str, table: str) -> set[str]:
@@ -92,6 +80,8 @@ def main() -> None:
         action="store_true",
         help="Use committed schemas/*.json files (default)",
     )
+    parser.add_argument("--layer", help="Filter to one layer (kpi/data)")
+    parser.add_argument("--table", help="Filter to one table name")
     args = parser.parse_args()
 
     if args.live:
@@ -109,7 +99,15 @@ def main() -> None:
     total_hallucinated = 0
     total_missing = 0
 
-    for layer, tables in TABLE_MAP.items():
+    from table_registry import filter_tables
+
+    target_tables = (
+        filter_tables(args.layer, args.table)
+        if (args.layer or args.table)
+        else TABLE_MAP
+    )
+
+    for layer, tables in target_tables.items():
         for table in tables:
             yaml_cols = load_yaml_columns(layer, table)
             if not yaml_cols:

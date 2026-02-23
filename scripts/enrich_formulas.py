@@ -25,8 +25,7 @@ METADATA_DIR = PROJECT_ROOT / "metadata"
 CATALOG_DIR = PROJECT_ROOT / "catalog"
 KPI_COMPUTATIONS_PATH = METADATA_DIR / "kpi_computations.yaml"
 
-KPI_TABLES = ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"]
-
+from table_registry import KPI_TABLES
 
 # ---------------------------------------------------------------------------
 # Core functions
@@ -325,8 +324,11 @@ def _apply_changes_to_file(
 # ---------------------------------------------------------------------------
 
 
-def main(dry_run: bool = False) -> dict[str, dict[str, int]]:
-    """Run formula enrichment across all KPI tables.
+def main(
+    dry_run: bool = False,
+    table: str | None = None,
+) -> dict[str, dict[str, int]]:
+    """Run formula enrichment across KPI tables.
 
     Returns:
         ``{table_name: stats_dict}`` for each table processed.
@@ -334,8 +336,9 @@ def main(dry_run: bool = False) -> dict[str, dict[str, int]]:
     computations = load_kpi_computations(KPI_COMPUTATIONS_PATH)
     intervals = get_all_intervals(computations)
     all_stats: dict[str, dict[str, int]] = {}
+    target_tables = [t for t in KPI_TABLES if t == table] if table else KPI_TABLES
 
-    for table_name in KPI_TABLES:
+    for table_name in target_tables:
         yaml_path = CATALOG_DIR / "kpi" / f"{table_name}.yaml"
         if not yaml_path.exists():
             print(f"SKIP: {yaml_path} not found")
@@ -367,5 +370,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dry-run", action="store_true", help="Report changes without writing"
     )
+    parser.add_argument("--table", help="Filter to one table name")
     args = parser.parse_args()
-    main(dry_run=args.dry_run)
+    main(dry_run=args.dry_run, table=args.table)

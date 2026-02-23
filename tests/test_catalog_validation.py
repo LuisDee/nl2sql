@@ -9,31 +9,24 @@ All enrichment fields are optional, so this test passes on un-enriched YAMLs
 and becomes progressively stricter as enrichment is applied.
 """
 
+# -- Table YAMLs -----------------------------------------------------------
+import sys
+from pathlib import Path
+
 import pytest
 
 from catalog.schema import ColumnSchema, DatasetSchema, GlossarySchema, TableSchema
 from nl2sql_agent.catalog_loader import CATALOG_DIR, load_yaml
 
-# -- Table YAMLs -----------------------------------------------------------
-
-KPI_TABLES = ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"]
-DATA_TABLES = [
-    "markettrade",
-    "quotertrade",
-    "clicktrade",
-    "swingdata",
-    "theodata",
-    "marketdata",
-    "marketdepth",
-]
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+from table_registry import ALL_TABLES
 
 
 def _table_params():
     """Generate (layer, table_name) pairs for parametrize."""
-    for t in KPI_TABLES:
-        yield "kpi", t
-    for t in DATA_TABLES:
-        yield "data", t
+    for layer, tables in ALL_TABLES.items():
+        for t in tables:
+            yield layer, t
 
 
 class TestTableYamlValidation:
@@ -110,6 +103,29 @@ class TestDatasetYamlValidation:
         validated = DatasetSchema(**ds_data)
         assert validated.layer == layer
         assert len(validated.tables) > 0
+
+
+class TestEnrichmentCoverage:
+    """CI gate: all tables must pass enrichment coverage thresholds.
+
+    Thresholds are set to the current floor across all tables.
+    Ratchet these up as enrichment improves.
+    """
+
+    def test_all_tables_meet_coverage_thresholds(self):
+        """Every registered table passes the floor coverage thresholds."""
+        from check_coverage import check_all_tables
+
+        # Current floor thresholds (ratchet up over time)
+        thresholds = {
+            "min_category": 95,
+            "min_source": 5,  # KPI tables still low; ratchet up
+            "min_formula": 20,  # KPI formulas partially enriched
+            "min_description": 100,
+        }
+        results = check_all_tables(thresholds=thresholds)
+        for table_key, report in results.items():
+            assert report["passed"], f"{table_key} failed coverage: {report['gaps']}"
 
 
 class TestGlossaryYamlValidation:

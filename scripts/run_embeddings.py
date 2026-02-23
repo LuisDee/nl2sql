@@ -8,7 +8,10 @@ Usage:
     python scripts/run_embeddings.py --step verify-model
     python scripts/run_embeddings.py --step create-tables
     python scripts/run_embeddings.py --step populate-schema
+    python scripts/run_embeddings.py --step populate-columns
+    python scripts/run_embeddings.py --step populate-examples
     python scripts/run_embeddings.py --step populate-symbols
+    python scripts/run_embeddings.py --step populate-glossary
     python scripts/run_embeddings.py --step generate-embeddings
     python scripts/run_embeddings.py --step create-indexes
     python scripts/run_embeddings.py --step test-search
@@ -20,12 +23,22 @@ import csv
 from pathlib import Path
 
 try:
+    from scripts.populate_embeddings import (
+        populate_column_embeddings,
+        populate_query_memory,
+    )
     from scripts.populate_glossary import populate_glossary_embeddings
 except ModuleNotFoundError:
+    from populate_embeddings import (  # type: ignore[no-redef]
+        populate_column_embeddings,
+        populate_query_memory,
+    )
     from populate_glossary import populate_glossary_embeddings  # type: ignore[no-redef]
 
 from nl2sql_agent.catalog_loader import (
     CATALOG_DIR,
+    load_all_examples,
+    load_all_table_yamls,
     load_routing_rules,
     load_yaml,
 )
@@ -632,11 +645,37 @@ def test_vector_search(bq: BigQueryProtocol, s: Settings) -> None:
             print(f"  {dict(row)}")
 
 
+def populate_columns(bq: BigQueryProtocol, s: Settings) -> None:
+    """Step 4c: Populate column_embeddings from YAML catalog.
+
+    Loads all table YAMLs (including multi-market directories) and inserts
+    column-level metadata into column_embeddings table. Idempotent via MERGE.
+    """
+    tables = load_all_table_yamls()
+    logger.info("populate_columns_start", table_count=len(tables))
+    count = populate_column_embeddings(bq, tables, s)
+    logger.info("populate_columns_complete", columns=count)
+
+
+def populate_examples(bq: BigQueryProtocol, s: Settings) -> None:
+    """Step 4d: Populate query_memory from example files.
+
+    Loads validated Q->SQL pairs from examples/ directory and inserts
+    into query_memory table. Idempotent via MERGE.
+    """
+    examples = load_all_examples()
+    logger.info("populate_examples_start", example_count=len(examples))
+    count = populate_query_memory(bq, examples, s)
+    logger.info("populate_examples_complete", examples=count)
+
+
 STEPS = {
     "create-dataset": create_metadata_dataset,
     "verify-model": verify_embedding_model,
     "create-tables": create_embedding_tables,
     "populate-schema": populate_schema_embeddings,
+    "populate-columns": populate_columns,
+    "populate-examples": populate_examples,
     "populate-symbols": populate_symbols,
     "populate-glossary": populate_glossary,
     "generate-embeddings": generate_embeddings,
@@ -649,6 +688,8 @@ ALL_STEPS_ORDER = [
     "verify-model",
     "create-tables",
     "populate-schema",
+    "populate-columns",
+    "populate-examples",
     "populate-symbols",
     "populate-glossary",
     "generate-embeddings",

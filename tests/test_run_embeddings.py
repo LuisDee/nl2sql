@@ -662,6 +662,35 @@ class TestPipelineStepOrder:
 
         assert "populate-glossary" in STEPS
 
+    def test_populate_columns_before_generate_embeddings(self):
+        from scripts.run_embeddings import ALL_STEPS_ORDER
+
+        columns_idx = ALL_STEPS_ORDER.index("populate-columns")
+        generate_idx = ALL_STEPS_ORDER.index("generate-embeddings")
+        assert columns_idx < generate_idx
+
+    def test_populate_examples_before_generate_embeddings(self):
+        from scripts.run_embeddings import ALL_STEPS_ORDER
+
+        examples_idx = ALL_STEPS_ORDER.index("populate-examples")
+        generate_idx = ALL_STEPS_ORDER.index("generate-embeddings")
+        assert examples_idx < generate_idx
+
+    def test_populate_columns_in_steps_dict(self):
+        from scripts.run_embeddings import STEPS
+
+        assert "populate-columns" in STEPS
+
+    def test_populate_examples_in_steps_dict(self):
+        from scripts.run_embeddings import STEPS
+
+        assert "populate-examples" in STEPS
+
+    def test_all_steps_order_has_11_steps(self):
+        from scripts.run_embeddings import ALL_STEPS_ORDER
+
+        assert len(ALL_STEPS_ORDER) == 11
+
 
 # ---------------------------------------------------------------------------
 # TestEscapeBqString

@@ -181,7 +181,7 @@
 
 ---
 
-## [~] Track: Metadata Population, Verification & Data Profiling
+## [x] Track: Metadata Population, Verification & Data Profiling
 - **ID:** 22_metadata_population
 - **Wave:** 17
 - **Complexity:** L

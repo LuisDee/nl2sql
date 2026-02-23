@@ -2,6 +2,8 @@
 
 How to set up the NL2SQL agent from scratch in a new GCP project.
 
+> **Already have GCP infrastructure ready?** See [GETTING_STARTED.md](GETTING_STARTED.md) for the quick path: clone, configure, seed embeddings, and start using the agent.
+
 ---
 
 ## Part 1: GCP Infrastructure (one-time)
@@ -188,13 +190,15 @@ cp nl2sql_agent/.env.example nl2sql_agent/.env
 |----------|------|---------|-------------|
 | `LITELLM_API_KEY` | str | *(required)* | API key for the LiteLLM proxy |
 | `LITELLM_API_BASE` | str | *(required)* | LiteLLM proxy URL (e.g. `http://localhost:4000`) |
-| `LITELLM_MODEL` | str | `gemini-3-flash-preview` | Default LLM model for simple queries |
-| `LITELLM_MODEL_COMPLEX` | str | `gemini-3-pro-preview` | LLM model for complex queries |
+| `LITELLM_MODEL` | str | `openai/gemini-3-flash-preview` | Default LLM model. Must include `openai/` prefix. |
+| `LITELLM_MODEL_COMPLEX` | str | `openai/gemini-3-pro-preview` | Complex query LLM model. Must include `openai/` prefix. |
 | `GCP_PROJECT` | str | `cloud-data-n-base-d4b3` | GCP project containing the data |
 | `BQ_LOCATION` | str | `europe-west2` | BigQuery dataset location |
-| `KPI_DATASET` | str | `nl2sql_omx_kpi` | KPI gold-layer dataset name |
-| `DATA_DATASET` | str | `nl2sql_omx_data` | Data silver-layer dataset name |
-| `METADATA_DATASET` | str | `nl2sql_metadata` | Metadata/embeddings dataset name |
+| `DATASET_PREFIX` | str | `nl2sql_` | Prefix for all dataset names. Set to `""` for prod. |
+| `DEFAULT_EXCHANGE` | str | `omx` | Exchange code for dataset name computation |
+| `KPI_DATASET` | str | *(auto)* | KPI gold-layer dataset. Auto-computed: `{prefix}{exchange}_kpi` |
+| `DATA_DATASET` | str | *(auto)* | Data silver-layer dataset. Auto-computed: `{prefix}{exchange}_data` |
+| `METADATA_DATASET` | str | *(auto)* | Metadata/embeddings dataset. Auto-computed: `{prefix}metadata` |
 | `VERTEX_AI_CONNECTION` | str | `cloud-ai-d-base-a2df.europe-west2.vertex-ai-connection` | Fully-qualified Vertex AI connection |
 | `EMBEDDING_MODEL_REF` | str | `cloud-ai-d-base-a2df.nl2sql.text_embedding_model` | Fully-qualified BQ ML model reference |
 | `EMBEDDING_MODEL` | str | `text-embedding-005` | Underlying Vertex AI model name |
@@ -203,19 +207,20 @@ cp nl2sql_agent/.env.example nl2sql_agent/.env
 | `VECTOR_SEARCH_TOP_K` | int | `5` | Number of results for vector search |
 | `ADK_SUPPRESS_GEMINI_LITELLM_WARNINGS` | bool | — | Set `true` to suppress ADK/LiteLLM warnings |
 
+> **Dataset auto-computation**: If you set `DATASET_PREFIX=nl2sql_` and `DEFAULT_EXCHANGE=omx`, the datasets resolve to `nl2sql_omx_kpi`, `nl2sql_omx_data`, `nl2sql_metadata`. You can still override individual datasets explicitly — explicit values take precedence.
+
 ### Example: Dev (same-project, local LiteLLM)
 
 ```env
 LITELLM_API_KEY=<your-litellm-master-key>
 LITELLM_API_BASE=http://localhost:4000
-LITELLM_MODEL=claude-haiku
-LITELLM_MODEL_COMPLEX=claude-sonnet
+LITELLM_MODEL=openai/claude-haiku
+LITELLM_MODEL_COMPLEX=openai/claude-sonnet
 
 GCP_PROJECT=melodic-stone-437916-t3
 BQ_LOCATION=europe-west2
-KPI_DATASET=nl2sql_omx_kpi
-DATA_DATASET=nl2sql_omx_data
-METADATA_DATASET=nl2sql_metadata
+DATASET_PREFIX=nl2sql_
+DEFAULT_EXCHANGE=omx
 
 VERTEX_AI_CONNECTION=melodic-stone-437916-t3.europe-west2.vertex-ai-connection
 EMBEDDING_MODEL_REF=melodic-stone-437916-t3.nl2sql.text_embedding_model
@@ -224,20 +229,21 @@ EMBEDDING_MODEL=text-embedding-005
 ADK_SUPPRESS_GEMINI_LITELLM_WARNINGS=true
 ```
 
+Computed datasets: `nl2sql_omx_kpi`, `nl2sql_omx_data`, `nl2sql_metadata`
+
 ### Example: Prod (cross-project, hosted LiteLLM)
 
 ```env
 LITELLM_API_KEY=<prod-litellm-key>
 LITELLM_API_BASE=https://litellm.production.mako-cloud.com/
 
-LITELLM_MODEL=gemini-3-flash-preview
-LITELLM_MODEL_COMPLEX=gemini-3-pro-preview
+LITELLM_MODEL=openai/gemini-3-flash-preview
+LITELLM_MODEL_COMPLEX=openai/gemini-3-pro-preview
 
 GCP_PROJECT=cloud-data-n-base-d4b3
 BQ_LOCATION=europe-west2
-KPI_DATASET=nl2sql_omx_kpi
-DATA_DATASET=nl2sql_omx_data
-METADATA_DATASET=nl2sql_metadata
+DATASET_PREFIX=
+DEFAULT_EXCHANGE=omx
 
 VERTEX_AI_CONNECTION=cloud-ai-d-base-a2df.europe-west2.vertex-ai-connection
 EMBEDDING_MODEL_REF=cloud-ai-d-base-a2df.nl2sql.text_embedding_model
@@ -245,6 +251,8 @@ EMBEDDING_MODEL=text-embedding-005
 
 ADK_SUPPRESS_GEMINI_LITELLM_WARNINGS=true
 ```
+
+Computed datasets: `omx_kpi`, `omx_data`, `metadata`
 
 > **Docker note**: When running in Docker, use `http://host.docker.internal:4000` instead of `http://localhost:4000` for `LITELLM_API_BASE`.
 

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}brazil_data"
   fqn: '{project}.{dataset_prefix}brazil_data.basevaldata'
   layer: data
-  description: ""
+  description: "Base valuation data containing reference pricing parameters used for theoretical value calculations. Includes base bid/ask values, forward prices, and carry rates for valuation models. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

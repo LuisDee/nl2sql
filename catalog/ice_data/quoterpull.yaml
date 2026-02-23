@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}ice_data"
   fqn: '{project}.{dataset_prefix}ice_data.quoterpull'
   layer: data
-  description: ""
+  description: "Quoter pull-back events recording when the auto-quoter temporarily withdraws quotes from the market, typically in response to adverse price movements or risk limits. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: trade_date

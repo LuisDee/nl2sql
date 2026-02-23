@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}euronext_data"
   fqn: '{project}.{dataset_prefix}euronext_data.ordertransevent'
   layer: data
-  description: ""
+  description: "Order transaction events recording the full lifecycle of order submissions, modifications, and acknowledgements from the exchange. Contains transaction type, order state, and exchange response details. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

@@ -3,7 +3,7 @@ table:
   dataset: "{data_dataset}"
   fqn: '{project}.{data_dataset}.pcaporder'
   layer: data
-  description: ""
+  description: "PCAP-captured order messages from raw network packet capture. Contains order-level data extracted from network traffic for latency measurement and order flow reconstruction. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}euronext_data"
   fqn: '{project}.{dataset_prefix}euronext_data.marketdepth_snapshot'
   layer: data
-  description: ""
+  description: "Point-in-time snapshots of the market depth order book, similar to marketdepth but captured at specific intervals rather than on every book change. Contains multi-level bid/ask prices and volumes. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: snap_ts

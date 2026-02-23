@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}nse_data"
   fqn: '{project}.{dataset_prefix}nse_data.mako_underlyingtrade'
   layer: data
-  description: ""
+  description: "Mako's underlying hedge trade executions. Contains trades in the underlying instrument used to delta-hedge options positions, including price, size, and hedge context. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: trade_date

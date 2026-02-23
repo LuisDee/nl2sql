@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}eurex_data"
   fqn: '{project}.{dataset_prefix}eurex_data.quoterdelete'
   layer: data
-  description: ""
+  description: "Quoter delete and cancel events recording when the auto-quoter removes or cancels resting quotes from the order book. Contains the instrument, side, timestamp, and reason for the deletion. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

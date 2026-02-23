@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}brazil_data"
   fqn: '{project}.{dataset_prefix}brazil_data.orderposdata'
   layer: data
-  description: ""
+  description: "Order position data combining order execution details with resulting position changes. Links order fill events to position snapshots for order-level position tracking. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: trade_date

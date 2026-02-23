@@ -3,7 +3,7 @@ table:
   dataset: "{data_dataset}"
   fqn: '{project}.{data_dataset}.tradedata'
   layer: data
-  description: ""
+  description: "Raw trade execution data from the PositionEvent proto (PosData.proto). Contains all position and trade events including algorithm name, position type, and transaction details. This is the superset table from which the clicktrade KPI table is derived by filtering on algorithm and position type. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

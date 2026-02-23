@@ -3,7 +3,7 @@ table:
   dataset: "{data_dataset}"
   fqn: '{project}.{data_dataset}.marketstate'
   layer: data
-  description: ""
+  description: "Exchange market state transition events recording changes between trading phases (pre-open, open, auction, close, halt, etc.). Use for determining when instruments were tradeable. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: trade_date

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}nse_data"
   fqn: '{project}.{dataset_prefix}nse_data.makotonuvamapcapdata'
   layer: data
-  description: ""
+  description: "Mako-to-Nuvama PCAP data capturing network packets sent from Mako's trading infrastructure to the Nuvama broker gateway. Used for order-level latency analysis on the outbound path. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: instrument_hash

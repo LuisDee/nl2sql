@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}nse_data"
   fqn: '{project}.{dataset_prefix}nse_data.nuvamatonsepcapdata'
   layer: data
-  description: ""
+  description: "Nuvama-to-NSE PCAP data capturing network packets sent from the Nuvama broker gateway to the NSE exchange. Used for measuring broker-to-exchange latency on the outbound order path. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: instrument_hash

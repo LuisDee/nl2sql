@@ -3,7 +3,7 @@ table:
   dataset: "{data_dataset}"
   fqn: '{project}.{data_dataset}.instrumentreceival'
   layer: data
-  description: ""
+  description: "Instrument definition messages received from the exchange feed. Records when new instrument definitions (symbol, strike, expiry, contract size, etc.) are received and processed by the trading system. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

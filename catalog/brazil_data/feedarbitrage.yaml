@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}brazil_data"
   fqn: '{project}.{dataset_prefix}brazil_data.feedarbitrage'
   layer: data
-  description: ""
+  description: "Feed arbitrage detection data capturing discrepancies between multiple market data feeds. Used for monitoring feed quality and detecting arbitrage opportunities across feed sources. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: trade_date

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}nse_data"
   fqn: '{project}.{dataset_prefix}nse_data.kpibaseval'
   layer: data
-  description: ""
+  description: "KPI base valuation reference data containing baseline pricing parameters used in KPI computations. Provides the reference values for edge and PnL calculations in the KPI layer. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

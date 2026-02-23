@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}brazil_data"
   fqn: '{project}.{dataset_prefix}brazil_data.orderfillevent'
   layer: data
-  description: ""
+  description: "Order fill events from the exchange confirming partial or complete fills of submitted orders. Contains fill price, size, order identifiers, and exchange timestamps. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}brazil_data"
   fqn: '{project}.{dataset_prefix}brazil_data.instrumentmetadata'
   layer: data
-  description: ""
+  description: "Instrument metadata attributes providing additional reference data beyond the core instruments table. Contains exchange-specific metadata fields for instrument classification and configuration. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

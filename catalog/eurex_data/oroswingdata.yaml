@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}eurex_data"
   fqn: '{project}.{dataset_prefix}eurex_data.oroswingdata'
   layer: data
-  description: ""
+  description: "ORO (One-Ratio-One) swing pricing data from the OroSwingData proto. Contains swing trade opportunities routed by the ORO algorithm, including routed price/size, market price, fill volumes, and latency statistics. The KPI-layer otoswing table is derived from this data. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

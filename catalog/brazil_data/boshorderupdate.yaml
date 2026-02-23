@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}brazil_data"
   fqn: '{project}.{dataset_prefix}brazil_data.boshorderupdate'
   layer: data
-  description: ""
+  description: "Bosh order update events recording modifications to previously submitted orders. Contains updated price, size, and order state information. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

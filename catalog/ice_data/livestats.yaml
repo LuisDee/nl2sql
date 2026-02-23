@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}ice_data"
   fqn: '{project}.{dataset_prefix}ice_data.livestats'
   layer: data
-  description: ""
+  description: "Live trading statistics with running tallies captured during the trading session. Contains real-time aggregated metrics such as fill counts, volumes, and PnL snapshots updated throughout the day. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_message_timestamp

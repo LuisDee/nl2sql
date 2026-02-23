@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}korea_data"
   fqn: '{project}.{dataset_prefix}korea_data.posdata'
   layer: data
-  description: ""
+  description: "Position data snapshots from the PositionEvent proto (PosData.proto). Contains position state records including instrument, portfolio, size, price, and settlement details. The tradedata and clicktrade tables are derived subsets of this data. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}arb_data"
   fqn: '{project}.{dataset_prefix}arb_data.algostartup'
   layer: data
-  description: ""
+  description: "Algo trading engine startup configuration events. Contains the initial parameters, portfolio assignments, and algorithm settings recorded when a trading algo instance starts up. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_message_timestamp

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}brazil_data"
   fqn: '{project}.{dataset_prefix}brazil_data.boshorder'
   layer: data
-  description: ""
+  description: "Bosh order data capturing order submissions to the exchange. Contains order price, size, side, instrument details, and submission timestamps. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: partition_number

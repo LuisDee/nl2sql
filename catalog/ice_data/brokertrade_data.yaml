@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}ice_data"
   fqn: '{project}.{dataset_prefix}ice_data.brokertrade_data'
   layer: data
-  description: ""
+  description: "Broker trade data records containing off-floor/OTC trade execution details. Similar to brokertrade but in a separate data format with broker, counterparty, and fill information. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_message_timestamp

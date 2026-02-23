@@ -3,7 +3,7 @@ table:
   dataset: "{data_dataset}"
   fqn: '{project}.{data_dataset}.quoterupdate'
   layer: data
-  description: ""
+  description: "Quoter quote update events recording when the auto-quoter modifies resting quotes in the order book. Contains updated price, size, and the theoretical values driving the update. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

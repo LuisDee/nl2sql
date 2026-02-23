@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}eurex_data"
   fqn: '{project}.{dataset_prefix}eurex_data.pcapquote'
   layer: data
-  description: ""
+  description: "PCAP-captured quote messages from raw network packet capture. Contains quote-level data extracted from network traffic for latency measurement and quote flow analysis. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

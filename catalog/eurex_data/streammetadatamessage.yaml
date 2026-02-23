@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}eurex_data"
   fqn: '{project}.{dataset_prefix}eurex_data.streammetadatamessage'
   layer: data
-  description: ""
+  description: "Stream metadata messages containing connection and session information for the data streaming infrastructure. Records stream IDs, data source identifiers, and pipeline metadata. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_message_timestamp

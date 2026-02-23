@@ -16,7 +16,8 @@ import yaml
 
 CATALOG_DIR = Path(__file__).resolve().parent.parent / "catalog"
 
-# Tables to check (layer, table_name) — only enriched tables (non-empty table description)
+# Tables to check (layer, table_name) — only fully enriched tables
+# (non-empty table description AND all columns have descriptions)
 _TABLES = []
 for _layer in ("kpi", "data"):
     _dir = CATALOG_DIR / _layer
@@ -24,8 +25,14 @@ for _layer in ("kpi", "data"):
         for _f in sorted(_dir.glob("*.yaml")):
             if not _f.name.startswith("_"):
                 _data = yaml.safe_load(_f.read_text())
-                _desc = _data.get("table", {}).get("description", "")
-                if _desc and _desc.strip():  # Skip skeleton/WIP tables
+                _tbl = _data.get("table", {})
+                _desc = _tbl.get("description", "")
+                if not (_desc and _desc.strip()):
+                    continue
+                # Also check that at least one column has a description
+                _cols = _tbl.get("columns", [])
+                _has_col_descs = any(c.get("description", "").strip() for c in _cols)
+                if _has_col_descs:
                     _TABLES.append((_layer, _f.stem))
 
 

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}ice_data"
   fqn: '{project}.{dataset_prefix}ice_data.norm_strike_voldata'
   layer: data
-  description: ""
+  description: "Normalized strike volatility surface data containing implied volatility values mapped to normalized strike coordinates. Used for volatility surface analysis and skew studies. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

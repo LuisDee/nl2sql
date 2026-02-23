@@ -3,7 +3,7 @@ table:
   dataset: "{data_dataset}"
   fqn: '{project}.{data_dataset}.marketstate_open_close_times'
   layer: data
-  description: ""
+  description: "Market session open and close time records derived from market state transitions. Provides the definitive open/close timestamps for each instrument or market segment on a given trading day. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: trade_date

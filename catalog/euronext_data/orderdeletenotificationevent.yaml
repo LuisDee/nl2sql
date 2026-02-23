@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}euronext_data"
   fqn: '{project}.{dataset_prefix}euronext_data.orderdeletenotificationevent'
   layer: data
-  description: ""
+  description: "Order delete notification events from the exchange confirming that a previously submitted order has been deleted or cancelled. Contains order identifiers, timestamps, and cancellation reasons. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}arb_data"
   fqn: '{project}.{dataset_prefix}arb_data.marketdata_trades'
   layer: data
-  description: ""
+  description: "Market data feed filtered to individual trade tick events only. A subset of the full marketdata stream containing only trade executions (not quote updates or book changes). Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}eurex_data"
   fqn: '{project}.{dataset_prefix}eurex_data.instruments'
   layer: data
-  description: ""
+  description: "Master instrument reference data containing symbol, strike, expiry, option type, contract size, currency, and instrument hash. Used as the lookup table for instrument enrichment joins across all other data tables. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: parent_raw_proto

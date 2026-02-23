@@ -3,7 +3,7 @@ table:
   dataset: "{data_dataset}"
   fqn: '{project}.{data_dataset}.brokertrade_2'
   layer: data
-  description: ""
+  description: "Broker trade execution records in version 2 format, sourced from the OffFloorData proto (BrokerTrade message). Contains off-floor/OTC trade details including broker, counterparty, portfolio, leg fills, and instrument enrichment. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_message_timestamp

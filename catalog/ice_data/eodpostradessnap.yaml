@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}ice_data"
   fqn: '{project}.{dataset_prefix}ice_data.eodpostradessnap'
   layer: data
-  description: ""
+  description: "End-of-day post-trade position snapshots. Contains a snapshot of positions and trade summaries captured after the trading session closes. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

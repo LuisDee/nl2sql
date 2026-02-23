@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}eurex_data"
   fqn: '{project}.{dataset_prefix}eurex_data.theodata_snapshot'
   layer: data
-  description: ""
+  description: "Point-in-time snapshots of theoretical pricing data, similar to theodata but captured at specific intervals. Contains theo values, Greeks, and volatility parameters per instrument. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: snap_ts

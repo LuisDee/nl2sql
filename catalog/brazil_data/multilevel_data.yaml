@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}brazil_data"
   fqn: '{project}.{dataset_prefix}brazil_data.multilevel_data'
   layer: data
-  description: ""
+  description: "Multi-level pricing data containing bid/ask prices and volumes across multiple order book levels. Provides a detailed view of market microstructure at various price levels. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: trade_date

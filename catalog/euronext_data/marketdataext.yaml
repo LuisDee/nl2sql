@@ -3,7 +3,7 @@ table:
   dataset: "{dataset_prefix}euronext_data"
   fqn: '{project}.{dataset_prefix}euronext_data.marketdataext'
   layer: data
-  description: ""
+  description: "Extended market data from the MarketDataExtended proto. Supplements the standard marketdata feed with additional fields including buyer/seller IDs, aggressor timestamps, trade exchange timestamps, and entering firm identifiers. Partitioned by trade_date."
   partition_field: trade_date
   columns:
     - name: kafka_partition

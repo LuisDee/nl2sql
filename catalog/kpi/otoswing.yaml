@@ -53,7 +53,6 @@ table:
     synonyms:
     - book
     - trading book
-    - strategy
     - desk
     source: 'SwingData.proto :: VtCommon.props'
     category: dimension
@@ -257,7 +256,7 @@ table:
     synonyms:
     - nhr bid
     - nhr adj bid
-    business_rules: 'Used in instant_edge_fired_at formula: edge = TV - nhr_adjustment_bid - price.'
+    business_rules: Used in all instant_edge variants (regular, fired_at, mid_tv). Subtracted from TV before computing edge.
     category: measure
     typical_aggregation: AVG
   - name: nhr_adjustment_ask
@@ -537,8 +536,6 @@ table:
       of the sweep. This is the primary profitability metric for swing trades, measuring how much theoretical value was captured
       by the aggressive sweep. Positive means profitable. Traders refer to this as swing profit or swing PnL.
     synonyms:
-    - swing profit
-    - swing pnl
     - sweep edge
     - oto edge
     - swing capture
@@ -841,7 +838,6 @@ table:
       Key parameter for tuning swing aggressiveness. Also known as required edge.
     synonyms:
     - required edge
-    - required_edge_bps
     - min required edge
     - edge threshold
     business_rules: Orders are only routed when estimated edge >= min_edge. Lower values = more aggressive swing strategy.
@@ -1411,7 +1407,7 @@ table:
     synonyms:
     - reference gamma
     - kpi gamma
-    business_rules: Used in swing_mid_tv formula and delta_slippage second-order corrections.
+    business_rules: Used in swing_mid_tv formula (second-order Taylor expansion) and gamma-adjusted delta calculations.
     source: kpi_otoswing_normalized.sql
     category: measure
     typical_aggregation: AVG
@@ -3477,7 +3473,6 @@ table:
     synonyms:
     - edge
     - trading edge
-    - edge_bps
     - instant profit per unit
     formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN (CASE WHEN trade_volume > 0 THEN ((tv - nhr_adjustment_bid) - avg_trade_price) ELSE 0 END) ELSE (CASE WHEN trade_volume > 0 THEN (avg_trade_price - (tv - nhr_adjustment_bid)) ELSE 0 END) END"
     business_rules: Based on avg_trade_price. Compare with instant_edge_fired_at for routed price version.
@@ -3519,7 +3514,6 @@ table:
     synonyms:
     - PnL
     - profit
-    - loss
     - instant profit
     - trade pnl
     formula: "CASE WHEN routed_buy_sell IN ('BUYSELL_BUY', '66') THEN ((tv - nhr_adjustment_bid) - avg_trade_price) * trade_volume * contract_size ELSE (avg_trade_price - (tv - nhr_adjustment_bid)) * trade_volume * contract_size END"
@@ -3749,8 +3743,8 @@ table:
     - routed side
     - fire direction
     - routed direction
-    business_rules: Raw proto enum. 0 or BUYSELL_BUY = buy, 1 or BUYSELL_SELL = sell. Use routed_buy_sell_normalized for clean
-      values.
+    business_rules: Raw proto enum. 66 or BUYSELL_BUY = buy, 83 or BUYSELL_SELL = sell (ASCII 'B'/'S'). Use
+      routed_buy_sell_normalized for clean values.
     source: 'SwingData.proto :: SwingData.routedBuySell'
     example_values:
     - BUYSELL_BUY

@@ -71,7 +71,6 @@ table:
     synonyms:
     - book
     - trading book
-    - strategy
     category: dimension
     filterable: true
     example_values:
@@ -1145,7 +1144,6 @@ table:
     source: "SwingData.proto::minEdge"
     synonyms:
     - required edge
-    - required_edge_bps
     - min required edge
     - edge threshold
     category: measure

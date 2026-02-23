@@ -122,7 +122,6 @@ table:
     synonyms:
     - book
     - trading book
-    - strategy
     - desk
     source: 'OffFloorData.proto :: BrokerTrade.portfolio'
     category: dimension
@@ -4414,7 +4413,6 @@ table:
     synonyms:
     - edge
     - trading edge
-    - edge_bps
     - instant edge
     - theoretical edge
     formula: "CASE WHEN trade_side = 'BUY' THEN (trade_tv - price) * market_mako_multiplier WHEN trade_side = 'SELL' THEN (price - trade_tv) * market_mako_multiplier ELSE 0 END"
@@ -4437,7 +4435,6 @@ table:
     synonyms:
     - PnL
     - profit
-    - loss
     - instant profit
     - gross pnl
     formula: "CASE WHEN trade_side = 'BUY' THEN (trade_tv - price) * ABS(size) * contract_size * market_mako_multiplier WHEN trade_side = 'SELL' THEN (price - trade_tv) * ABS(size) * contract_size * market_mako_multiplier ELSE 0 END"

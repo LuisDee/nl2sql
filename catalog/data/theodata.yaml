@@ -297,8 +297,6 @@ table:
     source: "Theoreticals.proto::tte"
     synonyms:
     - time to expiry
-    - days to expiry
-    - DTE
     - time to maturity
     category: measure
     typical_aggregation: AVG
@@ -344,7 +342,6 @@ table:
     source: "Theoreticals.proto::normStrike"
     synonyms:
     - moneyness
-    - delta bucket
     - normalized strike
     category: measure
     typical_aggregation: AVG
@@ -741,7 +738,6 @@ table:
     synonyms:
     - book
     - trading book
-    - strategy
     category: dimension
     filterable: true
     example_values:

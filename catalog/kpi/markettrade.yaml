@@ -212,7 +212,7 @@ table:
       value for in-flight (pending) orders that would deflect the market. Part of the WHITE portfolio
       special handling.
     synonyms: []
-    business_rules: Removed for WHITE portfolio in KPI calculations.
+    business_rules: Excluded from TV computation for WHITE portfolio trades (value exists but is not used in KPI formula).
     category: measure
     typical_aggregation: AVG
     source: MarketTrade.inflightDeflectionTvAdjustmentBid (data/MarketTrade.proto)
@@ -223,7 +223,7 @@ table:
       value for in-flight (pending) orders that would deflect the market. Part of the WHITE portfolio
       special handling.
     synonyms: []
-    business_rules: Removed for WHITE portfolio in KPI calculations.
+    business_rules: Excluded from TV computation for WHITE portfolio trades (value exists but is not used in KPI formula).
     category: measure
     typical_aggregation: AVG
     source: MarketTrade.inflightDeflectionTvAdjustmentAsk (data/MarketTrade.proto)
@@ -736,7 +736,6 @@ table:
     synonyms:
     - book
     - trading book
-    - strategy
     - desk
     example_values:
     - MON
@@ -3844,7 +3843,6 @@ table:
     synonyms:
     - edge
     - trading edge
-    - edge_bps
     - capture
     - theoretical edge
     formula: "CASE WHEN trade_aggressor_side = 'BUY' THEN (trade_price - tv) WHEN trade_aggressor_side = 'SELL' THEN (tv - trade_price) ELSE 0 END"
@@ -3869,7 +3867,6 @@ table:
     synonyms:
     - PnL
     - profit
-    - loss
     - instant profit
     - dollar pnl
     - trade pnl

@@ -79,7 +79,6 @@ glossary:
         - trading edge
         - capture
         - theoretical edge
-        - edge_bps
         - instant edge
       related_columns:
         - markettrade.instant_edge

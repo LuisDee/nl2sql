@@ -48,7 +48,6 @@ table:
     synonyms:
     - book
     - trading book
-    - strategy
     - desk
     example_values: ['MON', 'WHITE', 'RED', 'BROADWAY', 'FIXEDINCOME_US']
     category: dimension
@@ -3693,7 +3692,7 @@ table:
     - mid theo
     - mid theoretical value
     formula: 'tv + delta * (mid_base_val - delta_adjusted_base_price) + 0.5 * ref_gamma * POW((mid_base_val - delta_adjusted_base_price), 2)'
-    business_rules: Unique to quotertrade. tv_change columns in quotertrade use mid_tv as base, not tv like markettrade.
+    business_rules: Also exists in otoswing. tv_change columns in quotertrade use mid_tv as base, not tv like markettrade.
     source: kpi_quotertrade_calculations.sql
     category: measure
     typical_aggregation: AVG
@@ -3733,7 +3732,6 @@ table:
     synonyms:
     - PnL
     - profit
-    - loss
     - instant profit
     - quoter pnl
     formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((tv - nhr_adjustment_bid) - trade_price) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (tv - nhr_adjustment_bid)) * trade_size * contract_size ELSE 0 END"
@@ -3778,7 +3776,7 @@ table:
     - mid tv edge
     - edge to mid
     source: kpi_quotertrade_calculations.sql
-    business_rules: Unique to quotertrade. Uses mid_tv instead of TV as reference.
+    business_rules: Also exists in otoswing. Uses mid_tv instead of TV as reference.
     formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((mid_tv - nhr_adjustment_bid) - trade_price) WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (mid_tv - nhr_adjustment_bid)) ELSE 0 END"
     category: measure
     typical_aggregation: SUM
@@ -3797,7 +3795,7 @@ table:
     - mid tv pnl
     - pnl to mid
     source: kpi_quotertrade_calculations.sql
-    business_rules: Unique to quotertrade. Skew-neutral PnL measurement.
+    business_rules: Also exists in otoswing. Skew-neutral PnL measurement.
     formula: "CASE WHEN trade_side = 'BUYSELL_BUY' THEN ((mid_tv - nhr_adjustment_bid) - trade_price) * trade_size * contract_size WHEN trade_side = 'BUYSELL_SELL' THEN (trade_price - (mid_tv - nhr_adjustment_bid)) * trade_size * contract_size ELSE 0 END"
     category: measure
     typical_aggregation: SUM
@@ -3855,7 +3853,7 @@ table:
     - skew capture
     formula: '(tv - mid_tv) * trade_size * contract_size * buy_sell_multiplier * -1'
     source: kpi_quotertrade_calculations.sql
-    business_rules: Positive = captured skew (good). Negative = lost skew (bad). Unique to quotertrade.
+    business_rules: Positive = captured skew (good). Negative = lost skew (bad). Also exists in otoswing.
     category: measure
     typical_aggregation: SUM
     related_columns:
@@ -3876,7 +3874,7 @@ table:
     - trade direction
     example_values: ['BUY', 'SELL', 'BUYSELL_BUY', 'BUYSELL_SELL']
     source: 'QuoterTrade.proto :: tradeSide (pb.BuySell)'
-    business_rules: Unique to quotertrade. Normalized from BUYSELL_BUY/BUYSELL_SELL in the proto.
+    business_rules: Normalized from BUYSELL_BUY/BUYSELL_SELL in the proto. Clicktrade and brokertrade also have trade_side.
     category: dimension
     filterable: true
   - name: vol_path_estimate_1s

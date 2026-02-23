@@ -57,7 +57,6 @@ table:
     synonyms:
     - book
     - trading book
-    - strategy
     - desk
     source: 'PosData.proto :: PositionEvent.portfolio'
     category: dimension
@@ -3398,8 +3397,8 @@ table:
     - trading fees
     - commissions
     business_rules: >
-      Fees are always non-negative. Use instant_pnl_w_fees for net P&L which already subtracts
-      fees, or compute instant_pnl - fees manually.
+      Always 0 for clicktrade (fees not tracked). instant_pnl_w_fees equals instant_pnl for this
+      table.
     formula: '0'
     category: measure
     typical_aggregation: SUM
@@ -7381,7 +7380,6 @@ table:
     synonyms:
     - edge
     - trading edge
-    - edge_bps
     - theoretical edge
     formula: >
       CASE WHEN trade_side = 'BUY' THEN (tv - price)
@@ -7403,7 +7401,6 @@ table:
     synonyms:
     - PnL
     - profit
-    - loss
     - instant profit
     - gross pnl
     - P&L

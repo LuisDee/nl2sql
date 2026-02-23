@@ -56,7 +56,6 @@ table:
     synonyms:
     - book
     - trading book
-    - strategy
     category: dimension
     filterable: true
     example_values:

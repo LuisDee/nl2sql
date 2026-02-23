@@ -73,7 +73,7 @@ dataset:
         execution. Positive = traded better than fair value (captured edge),
         negative = traded worse. This is the primary performance metric traders
         care about. Always present on every KPI row.
-      synonyms: ["edge", "the edge", "how much edge", "trading edge", "edge_bps"]
+      synonyms: ["edge", "the edge", "how much edge", "trading edge"]
     instant_pnl:
       description: >
         Immediate profit or loss from the trade at execution time, measured in the
@@ -81,7 +81,7 @@ dataset:
         of execution, before any subsequent market moves. Positive = profitable trade,
         negative = loss. Commonly aggregated via SUM to get total PnL for a period,
         portfolio, or symbol.
-      synonyms: ["PnL", "instant PnL", "profit", "loss", "P&L", "pnl"]
+      synonyms: ["PnL", "instant PnL", "profit", "P&L", "pnl"]
     instant_pnl_w_fees:
       description: >
         Instant PnL with fees deducted. Same as instant_pnl but after subtracting

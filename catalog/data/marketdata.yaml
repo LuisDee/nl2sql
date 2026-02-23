@@ -22,10 +22,12 @@ table:
     type: INTEGER
     description: Kafka partition the record was consumed from.
     synonyms: []
+    category: identifier
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record.
     synonyms: []
+    category: identifier
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the instrument.
@@ -33,6 +35,7 @@ table:
     - ticker
     - product
     - instrument
+    category: dimension
   - name: trade_date
     type: DATE
     description: Business date of the trade, used for partitioning.
@@ -40,115 +43,140 @@ table:
     - date
     - business date
     - trading date
+    category: time
   - name: event_date
     type: DATE
     description: Event date.
     synonyms: []
+    category: time
   - name: exchange_timestamp
     type: TIMESTAMP
     description: Timestamp from the exchange matching engine.
     synonyms:
     - exchange time
+    category: time
   - name: hw_nic_rx_timestamp
     type: TIMESTAMP
     description: 'Timestamp field: hw_nic_rx_timestamp.'
     synonyms: []
+    category: time
   - name: mako_ingress_timestamp
     type: TIMESTAMP
     description: 'Timestamp field: mako_ingress_timestamp.'
     synonyms: []
+    category: time
   - name: software_timestamp
     type: TIMESTAMP
     description: 'Timestamp field: software_timestamp.'
     synonyms: []
+    category: time
   - name: exchange_timestamp_ns
     type: INTEGER
     description: 'Timestamp field: exchange_timestamp_ns.'
     synonyms: []
+    category: time
   - name: hw_nic_rx_timestamp_ns
     type: INTEGER
     description: 'Timestamp field: hw_nic_rx_timestamp_ns.'
     synonyms: []
+    category: time
   - name: mako_ingress_timestamp_ns
     type: INTEGER
     description: 'Timestamp field: mako_ingress_timestamp_ns.'
     synonyms: []
+    category: time
   - name: software_timestamp_ns
     type: INTEGER
     description: 'Timestamp field: software_timestamp_ns.'
     synonyms: []
+    category: time
   - name: instrument_hash
     type: STRING
     description: Unique hash identifier for the instrument.
     synonyms:
     - instrument id
     - instrument key
+    category: identifier
   - name: event_type
     type: INTEGER
     description: Type of the event.
     synonyms: []
+    category: dimension
   - name: sequence_number
     type: INTEGER
     description: Sequence number for ordering events.
     synonyms:
     - seq num
+    category: identifier
   - name: side
     type: INTEGER
     description: Side of the market data event (bid/ask/trade).
     synonyms:
     - market side
+    category: measure
   - name: price
     type: FLOAT
     description: Trade execution price.
     synonyms:
     - fill price
     - execution price
+    category: measure
   - name: quantity
     type: INTEGER
     description: Quantity in the market data event.
     synonyms:
     - size
     - volume
+    category: measure
   - name: order_id
     type: INTEGER
     description: Exchange order identifier.
     synonyms: []
+    category: identifier
   - name: order_position
     type: INTEGER
     description: Position of the order in the book.
     synonyms:
     - queue position
+    category: measure
   - name: market_state
     type: INTEGER
     description: Current market state (e.g. open, auction, closed).
     synonyms:
     - trading state
+    category: measure
   - name: keyframe
     type: BOOLEAN
     description: Whether this is a full snapshot (keyframe) or incremental update.
     synonyms:
     - snapshot
+    category: dimension
   - name: instrument_type
     type: STRING
     description: Type of instrument.
     synonyms: []
+    category: dimension
   - name: data_order_identifier
     type: INTEGER
     description: Data order identifier.
     synonyms: []
+    category: measure
   - name: data_timestamp
     type: TIMESTAMP
     description: 'Timestamp field: data_timestamp.'
     synonyms: []
+    category: time
   - name: data_timestamp_ns
     type: INTEGER
     description: 'Timestamp field: data_timestamp_ns.'
     synonyms: []
+    category: time
   - name: is_snap
     type: BOOLEAN
     description: Whether this record is a snapshot.
     synonyms:
     - snapshot
+    category: dimension
   - name: strike
     type: FLOAT
     description: Option strike price.
@@ -156,17 +184,20 @@ table:
     - exercise price
     - strike price
     - K
+    category: measure
   - name: option_type
     type: INTEGER
     description: Option type code (call/put).
     synonyms:
     - call put
     - C/P
+    category: dimension
   - name: option_type_name
     type: STRING
     description: Option type name (Call or Put).
     synonyms:
     - call put name
+    category: dimension
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract.
@@ -174,16 +205,19 @@ table:
     - expiry
     - expiration
     - maturity date
+    category: time
   - name: mako_symbol
     type: STRING
     description: Internal Mako system symbol for the instrument.
     synonyms:
     - internal symbol
+    category: dimension
   - name: currency
     type: INTEGER
     description: Currency identifier for the instrument.
     synonyms:
     - ccy
+    category: dimension
   - name: term
     type: STRING
     description: Expiry term or tenor label (e.g. monthly, weekly).
@@ -191,45 +225,56 @@ table:
     - tenor
     - expiry term
     - maturity
+    category: dimension
   - name: inst_type_name
     type: STRING
     description: Instrument type name (e.g. Option, Future, Spread).
     synonyms:
     - instrument type
     - product type
+    category: dimension
   - name: cancel_quantity
     type: STRING
     description: Cancel quantity.
     synonyms: []
+    category: dimension
   - name: hidden_quantity
     type: STRING
     description: Hidden quantity.
     synonyms: []
+    category: dimension
   - name: fill_quantity
     type: STRING
     description: Fill quantity.
     synonyms: []
+    category: dimension
   - name: mako_sequence_number
     type: INTEGER
     description: Mako sequence number.
     synonyms: []
+    category: measure
   - name: streamsource_stream_id
     type: INTEGER
     description: 'Data provenance field: streamsource_stream_id.'
     synonyms: []
+    category: identifier
   - name: streamsource_event_id
     type: INTEGER
     description: 'Data provenance field: streamsource_event_id.'
     synonyms: []
+    category: identifier
   - name: streamsource_message_id
     type: INTEGER
     description: 'Data provenance field: streamsource_message_id.'
     synonyms: []
+    category: identifier
   - name: datasource_pid
     type: INTEGER
     description: 'Data provenance field: datasource_pid.'
     synonyms: []
+    category: measure
   - name: datasource_hostname
     type: STRING
     description: 'Data provenance field: datasource_hostname.'
     synonyms: []
+    category: dimension

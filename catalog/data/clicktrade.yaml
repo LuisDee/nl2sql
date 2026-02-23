@@ -30,6 +30,7 @@ table:
     - date
     - business date
     - trading date
+    category: time
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -41,6 +42,7 @@ table:
     - product
     - instrument
     - underlying symbol
+    category: dimension
   - name: portfolio
     type: STRING
     description: Name of the Mako trading portfolio or book to which this click trade belongs. Used for filtering
@@ -50,6 +52,7 @@ table:
     - book
     - trading book
     - strategy
+    category: dimension
   - name: instrument_hash
     type: STRING
     description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
@@ -59,6 +62,7 @@ table:
     synonyms:
     - instrument id
     - instrument key
+    category: identifier
   - name: inst_type_name
     type: STRING
     description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
@@ -73,6 +77,7 @@ table:
     - instrument type
     - product type
     - security type
+    category: dimension
   - name: expiry_timestamp
     type: STRING
     description: Expiration timestamp of the option contract as a string, indicating the date and time at which the option
@@ -83,6 +88,7 @@ table:
     - expiry
     - expiration
     - maturity date
+    category: dimension
   - name: term
     type: STRING
     description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly, quarterly).
@@ -93,6 +99,7 @@ table:
     - expiry term
     - maturity
     - expiry cycle
+    category: dimension
   - name: currency
     type: STRING
     description: Currency code identifying the denomination of the instrument. Unlike other data tables which use numeric
@@ -105,6 +112,7 @@ table:
     synonyms:
     - ccy
     - currency code
+    category: dimension
   - name: trader_id
     type: STRING
     description: Identifier of the trader who manually executed this click trade. Unique per trader within the Mako
@@ -115,6 +123,7 @@ table:
     - trader
     - user id
     - trader name
+    category: identifier
   - name: mako_id
     type: STRING
     description: Mako system internal identifier for this click trade, assigned by the position management system.
@@ -123,6 +132,7 @@ table:
     source: "PosData.proto::makoId"
     synonyms:
     - mako identifier
+    category: identifier
   - name: algorithm
     type: STRING
     description: Name of the algorithm or strategy associated with this click trade. For manual click trades, this
@@ -133,6 +143,7 @@ table:
     - strategy
     - algo name
     - trading algo
+    category: dimension
   - name: channel
     type: STRING
     description: Trading channel through which this click trade was executed (e.g. electronic exchange, voice broker,
@@ -142,6 +153,7 @@ table:
     synonyms:
     - execution channel
     - trading channel
+    category: dimension
   - name: inventory
     type: STRING
     description: Inventory or sub-account classification for this click trade. Determines which internal inventory
@@ -151,6 +163,7 @@ table:
     synonyms:
     - sub-account
     - inventory account
+    category: dimension
   - name: account
     type: STRING
     description: Trading account identifier for this click trade (e.g. BGC, MGN for broker-facilitated trades). Used
@@ -161,6 +174,7 @@ table:
     - trading account
     - broker account
     - clearing account
+    category: dimension
   - name: transaction_timestamp
     type: TIMESTAMP
     description: Timestamp when this click trade transaction occurred in the Mako position management system. Represents
@@ -170,12 +184,14 @@ table:
     synonyms:
     - transaction time
     - booking time
+    category: time
   - name: transaction_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the transaction timestamp, providing sub-microsecond precision for when the
       trade was booked in the position system. Combine with transaction_timestamp for full nanosecond-precision timing.
     source: "PosData.proto::transactionTimestamp"
     synonyms: []
+    category: time
   - name: exchange_timestamp
     type: TIMESTAMP
     description: Timestamp provided by the exchange for this click trade execution. Represents the authoritative exchange
@@ -184,12 +200,14 @@ table:
     synonyms:
     - exchange time
     - matching engine time
+    category: time
   - name: exchange_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the exchange timestamp, providing sub-microsecond precision for the exact
       moment the exchange matched this click trade.
     source: "PosData.proto::exchangeTimestamp"
     synonyms: []
+    category: time
   - name: exchange_date
     type: DATE
     description: Date of the transaction at the exchange level. May differ from trade_date in cases of overnight
@@ -197,6 +215,7 @@ table:
     source: "PosData.proto::exchangeDate"
     synonyms:
     - exchange trading date
+    category: time
   - name: exchange_transaction_id
     type: STRING
     description: Transaction identifier assigned by the exchange for this click trade execution. Used for exchange-level
@@ -204,6 +223,7 @@ table:
     source: "PosData.proto::exchangeTransactionId"
     synonyms:
     - exchange trade id
+    category: identifier
   - name: exchange_order_id
     type: STRING
     description: Order identifier assigned by the exchange for the order that resulted in this click trade fill. Used
@@ -211,24 +231,28 @@ table:
     source: "PosData.proto::exchangeOrderId"
     synonyms:
     - exchange order
+    category: identifier
   - name: agg_pos_timestamp
     type: STRING
     description: Timestamp of the aggregate position snapshot associated with this click trade, stored as STRING. Records
       when the position aggregation was performed after this trade was booked. Used for position reconciliation.
     source: "PosData.proto::aggPosTimestamp"
     synonyms: []
+    category: dimension
   - name: agg_pos_timestamp_ns
     type: STRING
     description: Nanosecond component of the aggregate position timestamp, stored as STRING. Provides additional
       precision for position aggregation timing.
     source: "PosData.proto::aggPosTimestamp"
     synonyms: []
+    category: dimension
   - name: agg_pos_date
     type: STRING
     description: Date of the aggregate position snapshot, stored as STRING. Records which position snapshot date this
       click trade was included in. Used for position reconciliation across trading dates.
     source: "PosData.proto::aggPosDate"
     synonyms: []
+    category: dimension
   - name: revision
     type: INTEGER
     description: Revision number of this click trade record in the position management system. Increments when the trade
@@ -238,6 +262,7 @@ table:
     synonyms:
     - version
     - amendment number
+    category: identifier
   - name: revision_timestamp
     type: TIMESTAMP
     description: Timestamp when this revision of the click trade record was created. Records when the trade was last
@@ -245,12 +270,14 @@ table:
     source: "PosData.proto::revisionTimestamp"
     synonyms:
     - amendment time
+    category: time
   - name: revision_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the revision timestamp, providing sub-microsecond precision for when this
       amendment was recorded.
     source: "PosData.proto::revisionTimestamp"
     synonyms: []
+    category: time
   - name: traded_size
     type: INTEGER
     description: Number of contracts (lots) traded in this click trade execution. Represents the actual filled quantity
@@ -262,6 +289,7 @@ table:
     - quantity
     - lots
     - trade quantity
+    category: measure
   - name: price
     type: FLOAT
     description: Execution price of this click trade as reported by the exchange. The price at which the order was filled.
@@ -271,6 +299,7 @@ table:
     - fill price
     - execution price
     - trade price
+    category: measure
   - name: size
     type: STRING
     description: Position size or trade size stored as STRING. Interpretation depends on the position_type field -- for
@@ -281,6 +310,7 @@ table:
     - quantity
     - lots
     - position size
+    category: dimension
   - name: tv
     type: FLOAT
     description: Theoretical value (fair value) of the option at the time of this click trade. Represents Mako's
@@ -293,6 +323,7 @@ table:
     - fair value
     - machine price
     - TV
+    category: measure
   - name: counterparty
     type: STRING
     description: Counterparty or market participant on the other side of this click trade. May be a broker name, exchange
@@ -303,6 +334,7 @@ table:
     - counter party
     - other side
     - broker
+    category: dimension
   - name: revisor
     type: STRING
     description: Identifier of the person or system that last revised this click trade record. Tracks accountability
@@ -310,6 +342,7 @@ table:
     source: "PosData.proto::revisor"
     synonyms:
     - amender
+    category: dimension
   - name: transaction_id
     type: INTEGER
     description: Unique transaction identifier assigned by Mako's position management system for this click trade.
@@ -317,6 +350,7 @@ table:
     source: "PosData.proto::transactionId"
     synonyms:
     - trade id
+    category: identifier
   - name: order_id
     type: INTEGER
     description: Mako order identifier for the order that resulted in this click trade fill. Used for tracking the
@@ -324,6 +358,7 @@ table:
     source: "PosData.proto::orderId"
     synonyms:
     - mako order id
+    category: identifier
   - name: position_type
     type: INTEGER
     description: Numeric code indicating the type of position event. POSITION=80 (position snapshot), TRADE=84 (trade
@@ -336,6 +371,7 @@ table:
     synonyms:
     - event type
     - pos type
+    category: dimension
   - name: position_id
     type: INTEGER
     description: Unique position identifier linking this trade to its resulting position in the Mako system. Used for
@@ -343,6 +379,7 @@ table:
     source: "PosData.proto::positionId"
     synonyms:
     - pos id
+    category: identifier
   - name: curve_id
     type: INTEGER
     description: Identifier of the volatility curve active at the time of this click trade. Used to trace which vol
@@ -352,6 +389,7 @@ table:
     synonyms:
     - vol curve
     - vol curve id
+    category: identifier
   - name: carry_id
     type: INTEGER
     description: Identifier of the carry/dividend curve active at the time of this click trade. Used for tracing rate
@@ -360,6 +398,7 @@ table:
     synonyms:
     - dividend curve
     - carry curve id
+    category: identifier
   - name: trade_id
     type: INTEGER
     description: Unique trade identifier assigned by the position management system for this specific click trade
@@ -368,6 +407,7 @@ table:
     synonyms:
     - fill id
     - execution id
+    category: identifier
   - name: text
     type: STRING
     description: Free-text field associated with this click trade, typically containing trader notes, comments, or
@@ -378,6 +418,7 @@ table:
     - note
     - comment
     - trade note
+    category: dimension
   - name: strike
     type: STRING
     description: Option strike price stored as STRING in clicktrade (unlike FLOAT in other tables). The exercise price
@@ -388,6 +429,7 @@ table:
     - exercise price
     - strike price
     - K
+    category: dimension
   - name: option_type
     type: STRING
     description: Option type code stored as STRING in clicktrade (unlike INTEGER in other tables). Indicates whether the
@@ -396,6 +438,7 @@ table:
     synonyms:
     - call put
     - C/P
+    category: dimension
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Use for
@@ -407,6 +450,7 @@ table:
     synonyms:
     - call put name
     - option direction
+    category: dimension
   - name: mako_symbol
     type: STRING
     description: Internal Mako system symbol for the instrument, used as the canonical identifier within Mako's trading
@@ -414,6 +458,7 @@ table:
     source: "PosData.proto::makoSymbol"
     synonyms:
     - internal symbol
+    category: dimension
   - name: contract_size
     type: STRING
     description: Contract multiplier (point value) for the instrument, stored as STRING. Defines how many units of the
@@ -424,18 +469,21 @@ table:
     - multiplier
     - point value
     - contract multiplier
+    category: dimension
   - name: underlying_instrument_hash
     type: STRING
     description: SHA256 hash identifier of the underlying instrument. Links this click trade to the underlying's market
       data and depth records. Used for cross-referencing with the underlying's state at trade time.
     source: "PosData.proto::underlyingInstrumentHash"
     synonyms: []
+    category: identifier
   - name: underlying_exe_exch
     type: INTEGER
     description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
       analysis to understand which exchange's underlying was relevant for this click trade.
     source: "PosData.proto::underlyingExeExch"
     synonyms: []
+    category: measure
   - name: underlying_exe_exch_name
     type: STRING
     description: Human-readable name of the exchange where the underlying instrument executes. Derived from the numeric
@@ -443,6 +491,7 @@ table:
     source: "PosData.proto::underlyingExeExchName"
     synonyms:
     - underlying exchange
+    category: dimension
   - name: combo_type_name
     type: STRING
     description: Type of combo/spread strategy for this click trade (e.g. calendar spread, vertical spread, straddle,
@@ -452,6 +501,7 @@ table:
     synonyms:
     - spread type
     - strategy type
+    category: dimension
   - name: executable_exchange
     type: INTEGER
     description: Numeric exchange code identifying the exchange where this click trade order was executed. May differ
@@ -461,6 +511,7 @@ table:
     synonyms:
     - execution exchange
     - fill exchange
+    category: measure
   - name: is_parent
     type: BOOLEAN
     description: Flag indicating whether this row represents the parent (combo/strategy) level of a multi-leg trade.
@@ -470,6 +521,7 @@ table:
     synonyms:
     - combo level
     - parent flag
+    category: dimension
   - name: is_ref_component
     type: INTEGER
     description: Flag indicating whether this leg is the reference component of a combo trade. The reference component
@@ -478,6 +530,7 @@ table:
     source: "PosData.proto::isRefComponent"
     synonyms:
     - reference leg
+    category: measure
   - name: leg_index
     type: STRING
     description: Index of this leg within the combo/spread trade structure, stored as STRING. Identifies the position
@@ -486,6 +539,7 @@ table:
     source: "PosData.proto::legIndex"
     synonyms:
     - leg number
+    category: dimension
   - name: leg_ratio
     type: STRING
     description: Ratio of this leg within the combo trade, stored as STRING. Defines the quantity multiplier for this
@@ -495,6 +549,7 @@ table:
     synonyms:
     - ratio
     - leg multiplier
+    category: dimension
   - name: liquid
     type: INTEGER
     description: Liquidity classification flag for this instrument at the time of the click trade. Indicates the
@@ -503,6 +558,7 @@ table:
     source: "PosData.proto::liquid"
     synonyms:
     - liquidity flag
+    category: measure
   - name: no_legs
     type: STRING
     description: Number of legs in the combo/spread trade, stored as STRING. Indicates the complexity of the strategy
@@ -513,6 +569,7 @@ table:
     - num legs
     - leg count
     - number of legs
+    category: dimension
   - name: parent_combo_type_name
     type: STRING
     description: Combo type name of the parent instrument when this row represents a leg within a larger strategy.
@@ -521,6 +578,7 @@ table:
     source: "PosData.proto::parentComboTypeName"
     synonyms:
     - parent strategy type
+    category: dimension
   - name: parent_feed_code
     type: STRING
     description: Exchange feed code of the parent combo instrument. Used for identifying the parent strategy's exchange
@@ -528,6 +586,7 @@ table:
     source: "PosData.proto::parentFeedCode"
     synonyms:
     - parent ticker
+    category: dimension
   - name: parent_instrument_hash
     type: STRING
     description: SHA256 hash identifier of the parent combo instrument when this row represents an individual leg.
@@ -535,6 +594,7 @@ table:
     source: "PosData.proto::parentInstrumentHash"
     synonyms:
     - parent hash
+    category: identifier
   - name: parent_is_combo
     type: BOOLEAN
     description: Flag indicating whether the parent instrument is a combo/spread. When true, this click trade is part
@@ -544,6 +604,7 @@ table:
     synonyms:
     - is combo
     - is spread
+    category: dimension
   - name: ref_inst_type_name
     type: STRING
     description: Instrument type name of the reference instrument in a combo trade. Identifies what type of instrument
@@ -551,6 +612,7 @@ table:
     source: "PosData.proto::refInstTypeName"
     synonyms:
     - reference instrument type
+    category: dimension
   - name: ref_term
     type: STRING
     description: Term/tenor of the reference instrument in a combo trade. Identifies the expiry cycle of the reference
@@ -558,6 +620,7 @@ table:
     source: "PosData.proto::refTerm"
     synonyms:
     - reference term
+    category: dimension
   - name: total_traded_size
     type: STRING
     description: Total size traded across all legs of a multi-leg trade, stored as STRING. Represents the aggregate
@@ -567,6 +630,7 @@ table:
     synonyms:
     - total lots
     - total volume
+    category: dimension
   - name: underlying_inst_type_name
     type: STRING
     description: Instrument type name of the underlying instrument (e.g. FUTURE, EQUITY_INDEX). Identifies the asset
@@ -574,6 +638,7 @@ table:
     source: "PosData.proto::underlyingInstTypeName"
     synonyms:
     - underlying type
+    category: dimension
   - name: underlying_symbol
     type: STRING
     description: Exchange symbol of the underlying instrument. Identifies the specific underlying product (e.g. the
@@ -582,3 +647,4 @@ table:
     synonyms:
     - underlying ticker
     - underlying product
+    category: dimension

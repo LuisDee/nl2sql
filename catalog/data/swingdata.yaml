@@ -24,12 +24,14 @@ table:
       and replay. Not typically needed for analytical queries but useful for debugging data ingestion issues.
     source: "SwingData.proto::kafka_partition"
     synonyms: []
+    category: identifier
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
       pipeline replay. Not typically needed for analytical queries but useful for debugging data ingestion ordering.
     source: "SwingData.proto::kafka_offset"
     synonyms: []
+    category: identifier
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -41,6 +43,7 @@ table:
     - product
     - instrument
     - underlying symbol
+    category: dimension
   - name: portfolio
     type: STRING
     description: Name of the Mako trading portfolio or book to which the algo that generated this swing belongs. Used
@@ -51,6 +54,7 @@ table:
     - book
     - trading book
     - strategy
+    category: dimension
   - name: trade_date
     type: DATE
     description: Business date of the trading session, used as the primary partition column for this table. Always
@@ -61,6 +65,7 @@ table:
     - date
     - business date
     - trading date
+    category: time
   - name: instrument_hash
     type: STRING
     description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
@@ -70,6 +75,7 @@ table:
     synonyms:
     - instrument id
     - instrument key
+    category: identifier
   - name: algo
     type: STRING
     description: Name of the originating algorithm or trading strategy that evaluated and initiated this swing opportunity.
@@ -80,6 +86,7 @@ table:
     - strategy
     - algo name
     - trading algo
+    category: dimension
   - name: ref_curve_id
     type: INTEGER
     description: Identifier of the volatility curve active at the time of the last theoServer callback before this swing.
@@ -89,6 +96,7 @@ table:
     synonyms:
     - ref curve
     - reference curve
+    category: identifier
   - name: ref_carry_id
     type: INTEGER
     description: Identifier of the carry/dividend curve active at the time of the last theoServer callback before this swing.
@@ -98,6 +106,7 @@ table:
     synonyms:
     - ref carry
     - reference carry
+    category: identifier
   - name: ref_tv
     type: FLOAT
     description: Theoretical value of the instrument on the last vol curve update (last theoServer callback), calculated
@@ -107,6 +116,7 @@ table:
     synonyms:
     - reference theo
     - ref fair value
+    category: measure
   - name: ref_delta
     type: FLOAT
     description: Delta of the instrument on the last vol curve update (last theoServer callback). Used as the reference
@@ -115,6 +125,7 @@ table:
     source: "VtCommon.proto::refDelta"
     synonyms:
     - reference delta
+    category: measure
   - name: ref_gamma
     type: FLOAT
     description: Gamma of the instrument on the last vol curve update (last theoServer callback). Used alongside ref_delta
@@ -123,6 +134,7 @@ table:
     source: "VtCommon.proto::refGamma"
     synonyms:
     - reference gamma
+    category: measure
   - name: ref_base_price
     type: FLOAT
     description: Unadjusted raw base value (underlying price) on the last vol curve update (last theoServer callback).
@@ -133,6 +145,7 @@ table:
     - ref underlying
     - reference price
     - ref base
+    category: measure
   - name: ref_roll
     type: FLOAT
     description: Roll/carry adjustment value on the last curve update, reflecting the cost of rolling a position forward
@@ -141,6 +154,7 @@ table:
     source: "VtCommon.proto::refRoll"
     synonyms:
     - reference roll
+    category: measure
   - name: raw_bv_bid
     type: FLOAT
     description: Raw (unadjusted) base value bid price before any layered base, inflight deflection, or internal TV
@@ -150,6 +164,7 @@ table:
     synonyms:
     - bv bid
     - raw base bid
+    category: measure
   - name: raw_bv_bid_size
     type: INTEGER
     description: Size (in contracts/lots) available at the raw base value bid price. Indicates the depth of underlying
@@ -157,6 +172,7 @@ table:
       to support the swing hedge.
     source: "VtCommon.proto::rawBvBidSize"
     synonyms: []
+    category: measure
   - name: raw_bv_ask
     type: FLOAT
     description: Raw (unadjusted) base value ask price before any layered base, inflight deflection, or internal TV
@@ -166,6 +182,7 @@ table:
     synonyms:
     - bv ask
     - raw base ask
+    category: measure
   - name: raw_bv_ask_size
     type: INTEGER
     description: Size (in contracts/lots) available at the raw base value ask price. Indicates the depth of underlying
@@ -173,6 +190,7 @@ table:
       to support the swing hedge.
     source: "VtCommon.proto::rawBvAskSize"
     synonyms: []
+    category: measure
   - name: layered_base_bid
     type: FLOAT
     description: Layered base bid price after applying all internal adjustments (ODR, inflight deflection, NHR). This
@@ -181,12 +199,14 @@ table:
     source: "VtCommon.proto::layeredBaseBid"
     synonyms:
     - adjusted base bid
+    category: measure
   - name: layered_base_bid_size
     type: INTEGER
     description: Size (in contracts/lots) available at the layered base bid price after adjustments. Represents the
       adjusted underlying bid depth that the VT uses for its swing decisions and size calculations.
     source: "VtCommon.proto::layeredBaseBidSize"
     synonyms: []
+    category: measure
   - name: layered_base_ask
     type: FLOAT
     description: Layered base ask price after applying all internal adjustments (ODR, inflight deflection, NHR). This
@@ -195,12 +215,14 @@ table:
     source: "VtCommon.proto::layeredBaseAsk"
     synonyms:
     - adjusted base ask
+    category: measure
   - name: layered_base_ask_size
     type: INTEGER
     description: Size (in contracts/lots) available at the layered base ask price after adjustments. Represents the
       adjusted underlying ask depth that the VT uses for its swing decisions and size calculations.
     source: "VtCommon.proto::layeredBaseAskSize"
     synonyms: []
+    category: measure
   - name: layered_base_adjustment
     type: FLOAT
     description: Total layered base adjustment applied to the raw base value. Represents the aggregate of multiple
@@ -209,6 +231,7 @@ table:
     source: "VtCommon.proto::layeredBaseAdjustment"
     synonyms:
     - base adjustment
+    category: measure
   - name: odr_adjustment
     type: FLOAT
     description: Order-driven-repricing (ODR) adjustment applied to the base value. ODR adjusts the effective underlying
@@ -217,6 +240,7 @@ table:
     source: "VtCommon.proto::odrAdjustment"
     synonyms:
     - odr
+    category: measure
   - name: inflight_deflection_tv_adjustment_bid
     type: FLOAT
     description: Inflight deflection adjustment applied to the theoretical value on the bid side. Accounts for the
@@ -225,6 +249,7 @@ table:
     source: "VtCommon.proto::inflightDeflectionTvAdjustmentBid"
     synonyms:
     - inflight bid adjustment
+    category: measure
   - name: inflight_deflection_tv_adjustment_ask
     type: FLOAT
     description: Inflight deflection adjustment applied to the theoretical value on the ask side. Accounts for the
@@ -233,6 +258,7 @@ table:
     source: "VtCommon.proto::inflightDeflectionTvAdjustmentAsk"
     synonyms:
     - inflight ask adjustment
+    category: measure
   - name: internal_tv_adjustment_bid
     type: FLOAT
     description: Internal theoretical value adjustment on the bid side, reflecting additional proprietary offsets applied
@@ -240,6 +266,7 @@ table:
       effects not modeled in the base theo computation.
     source: "VtCommon.proto::internalTvAdjustmentBid"
     synonyms: []
+    category: measure
   - name: internal_tv_adjustment_ask
     type: FLOAT
     description: Internal theoretical value adjustment on the ask side, reflecting additional proprietary offsets applied
@@ -247,6 +274,7 @@ table:
       effects not modeled in the base theo computation.
     source: "VtCommon.proto::internalTvAdjustmentAsk"
     synonyms: []
+    category: measure
   - name: nhr_adjustment_bid
     type: FLOAT
     description: Non-hedge-ratio (NHR) adjustment on the bid side. Captures adjustments related to hedging inefficiencies
@@ -254,6 +282,7 @@ table:
       edge calculation on the bid.
     source: "VtCommon.proto::nhrAdjustmentBid"
     synonyms: []
+    category: measure
   - name: nhr_adjustment_ask
     type: FLOAT
     description: Non-hedge-ratio (NHR) adjustment on the ask side. Captures adjustments related to hedging inefficiencies
@@ -261,6 +290,7 @@ table:
       edge calculation on the ask.
     source: "VtCommon.proto::nhrAdjustmentAsk"
     synonyms: []
+    category: measure
   - name: base_edge_bid
     type: FLOAT
     description: Base edge on the bid side, representing the raw difference between the theoretical value and the market
@@ -270,6 +300,7 @@ table:
     synonyms:
     - bid edge
     - bid-side edge
+    category: measure
   - name: base_edge_ask
     type: FLOAT
     description: Base edge on the ask side, representing the raw difference between the market ask price and the
@@ -279,6 +310,7 @@ table:
     synonyms:
     - ask edge
     - ask-side edge
+    category: measure
   - name: fees
     type: FLOAT
     description: Total trading fees comprising exchange fees and clearing costs for this swing trade. Deducted from
@@ -289,6 +321,7 @@ table:
     - exchange fees
     - transaction costs
     - trading costs
+    category: measure
   - name: roll
     type: FLOAT
     description: Roll/carry adjustment value reflecting the cost of rolling a position forward (dividends, interest,
@@ -299,6 +332,7 @@ table:
     - calendar roll
     - roll value
     - carry cost
+    category: measure
   - name: bv_side
     type: STRING
     description: Side of the base value update that triggered this swing event (bid or ask). Indicates whether the
@@ -307,6 +341,7 @@ table:
     source: "VtCommon.proto::bvSide"
     synonyms:
     - base value side
+    category: dimension
   - name: delta_adjusted_base_price
     type: FLOAT
     description: Equal to the raw base value (relevant side depending on trade direction) plus ODR and layered base
@@ -316,6 +351,7 @@ table:
     synonyms:
     - delta adjusted_base_price
     - adjusted base price
+    category: measure
   - name: tv
     type: FLOAT
     description: Theoretical value the VT saw at time of swing. This is the delta/gamma-adjusted refTv including all
@@ -328,6 +364,7 @@ table:
     - fair value
     - machine price
     - TV
+    category: measure
   - name: base_sequence_number
     type: STRING
     description: Sequence number of the base (underlying) instrument's market data event that triggered this swing
@@ -335,12 +372,14 @@ table:
       event ordering in analysis.
     source: "VtCommon.proto::baseSequenceNumber"
     synonyms: []
+    category: dimension
   - name: option_sequence_number
     type: INTEGER
     description: Sequence number of the option instrument's market data event associated with this swing. Used for
       correlating swing events to specific option book changes and ensuring correct event ordering in analysis.
     source: "VtCommon.proto::optionSequenceNumber"
     synonyms: []
+    category: measure
   - name: base_instrument_hash
     type: STRING
     description: SHA256 hash identifier of the base (underlying) instrument used in this swing. Links back to the
@@ -349,6 +388,7 @@ table:
     source: "VtCommon.proto::baseInstrumentHash"
     synonyms:
     - base hash
+    category: identifier
   - name: hardware_nic_rx_timestamp
     type: TIMESTAMP
     description: Hardware NIC receive timestamp recording when the triggering market data packet physically arrived at
@@ -358,6 +398,7 @@ table:
     synonyms:
     - nic timestamp
     - wire time
+    category: time
   - name: hardware_nic_rx_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the hardware NIC receive timestamp, providing sub-microsecond precision for
@@ -365,6 +406,7 @@ table:
       hardware_nic_rx_timestamp for full nanosecond-precision wire-arrival timing.
     source: "VtCommon.proto::hardwareNicRxTimestamp"
     synonyms: []
+    category: time
   - name: event_timestamp
     type: TIMESTAMP
     description: Timestamp of the moment the VT decided to trade and sent the order (for swings) or when the trade
@@ -374,12 +416,14 @@ table:
     synonyms:
     - event time
     - decision time
+    category: time
   - name: event_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the event timestamp, providing sub-microsecond precision for the exact moment
       the VT made its swing decision. Combine with event_timestamp for full nanosecond-precision decision timing.
     source: "VtCommon.proto::eventTimestamp"
     synonyms: []
+    category: time
   - name: takeout_category
     type: STRING
     description: High-level category classifying the reason the VT identified this swing opportunity. Values include
@@ -394,6 +438,7 @@ table:
     synonyms:
     - swing category
     - trigger category
+    category: dimension
   - name: base_order_event_type
     type: STRING
     description: Type of order book change in the underlying instrument that triggered this swing, if the takeout was
@@ -402,6 +447,7 @@ table:
     source: "SwingData.proto::baseOrderEventType"
     synonyms:
     - base event type
+    category: dimension
   - name: base_order_event_side
     type: STRING
     description: Side of the underlying instrument's order book that changed to trigger this swing (buy or sell), if
@@ -410,6 +456,7 @@ table:
     source: "SwingData.proto::baseOrderEventSide"
     synonyms:
     - base event side
+    category: dimension
   - name: takeout_type
     type: STRING
     description: Fine-grained reason for this swing takeout, providing more detail than takeout_category. Values include
@@ -430,6 +477,7 @@ table:
     synonyms:
     - swing type
     - trigger type
+    category: dimension
   - name: event_type
     type: STRING
     description: The VT event type that triggered the swing evaluation (EVENT_TYPE_* constants). Identifies the internal
@@ -439,6 +487,7 @@ table:
     synonyms:
     - vt event type
     - trigger event
+    category: dimension
   - name: fanout_identifier
     type: INTEGER
     description: Ordinal identifier of the swing when using fan-out logic, where a single price change can trigger
@@ -447,6 +496,7 @@ table:
     source: "SwingData.proto::fanoutIdentifier"
     synonyms:
     - fanout id
+    category: measure
   - name: fanout_count
     type: INTEGER
     description: Number of identical orders sent as part of this single swing event using fan-out logic. A fanout_count
@@ -455,6 +505,7 @@ table:
     source: "SwingData.proto::fanoutCount"
     synonyms:
     - fanout total
+    category: measure
   - name: opportunity_index
     type: INTEGER
     description: Ordinal index of this swing opportunity when multiple orders were routed in a single swing evaluation.
@@ -463,6 +514,7 @@ table:
     source: "SwingData.proto::opportunityIndex"
     synonyms:
     - opp index
+    category: measure
   - name: num_opportunities
     type: INTEGER
     description: Total number of orders routed in this swing evaluation. When a single market event triggers the VT to
@@ -471,6 +523,7 @@ table:
     source: "SwingData.proto::numOpportunities"
     synonyms:
     - total opportunities
+    category: measure
   - name: swing_properties
     type: INTEGER
     description: Bitmask of properties about the swing order, encoding various flags such as SizeIncreasedForLP4 and
@@ -479,6 +532,7 @@ table:
     source: "SwingData.proto::swingProperties"
     synonyms:
     - swing flags
+    category: measure
   - name: market_price
     type: FLOAT
     description: For base-move takeouts, the top-of-book market price on the opposite side of the book at the time
@@ -488,6 +542,7 @@ table:
     synonyms:
     - mkt price
     - market level
+    category: measure
   - name: market_size
     type: INTEGER
     description: For base-move takeouts, the top-of-book market volume on the opposite side of the book at the time
@@ -497,6 +552,7 @@ table:
     synonyms:
     - mkt size
     - available size
+    category: measure
   - name: routed_price
     type: FLOAT
     description: Trade price that the VT targeted when routing this swing order. This is the price the order was sent
@@ -506,6 +562,7 @@ table:
     synonyms:
     - intended price
     - target price
+    category: measure
   - name: routed_size
     type: FLOAT
     description: Size (number of contracts/lots) that the VT intended to trade when routing this swing order. May
@@ -515,6 +572,7 @@ table:
     synonyms:
     - intended size
     - target size
+    category: measure
   - name: routed_buy_sell
     type: STRING
     description: Direction of the swing order routed by the VT -- either buy or sell. Indicates whether the VT was
@@ -525,6 +583,7 @@ table:
     - routed side
     - swing direction
     - order side
+    category: dimension
   - name: avg_trade_price
     type: FLOAT
     description: Average execution price across all constituent fills that made up the overall swing trade. When a swing
@@ -535,6 +594,7 @@ table:
     - avg fill price
     - average execution price
     - vwap
+    category: measure
   - name: swing_edge
     type: FLOAT
     description: Edge that the VT calculated when deciding to swing -- the expected profit per contract based on the
@@ -545,6 +605,7 @@ table:
     - swing profit
     - swing pnl
     - expected edge
+    category: measure
   - name: trade_volume
     type: INTEGER
     description: Actual number of contracts that were filled in this swing trade. Will be 0 if the VT decided to swing
@@ -555,6 +616,7 @@ table:
     - fill volume
     - executed volume
     - filled lots
+    category: measure
   - name: mako_order_id
     type: INTEGER
     description: Mako-assigned internal order identifier for this swing order. Used to trace the order through Mako's
@@ -563,6 +625,7 @@ table:
     source: "SwingData.proto::makoOrderId"
     synonyms:
     - order id
+    category: identifier
   - name: exch_order_id
     type: STRING
     description: Exchange-assigned identifier for this swing order, provided by the exchange matching engine upon
@@ -570,6 +633,7 @@ table:
     source: "SwingData.proto::exchOrderId"
     synonyms:
     - exchange order id
+    category: identifier
   - name: exch_trans_id
     type: INTEGER
     description: Exchange-assigned transaction identifier for the trade execution. Provided by the exchange matching
@@ -577,6 +641,7 @@ table:
     source: "SwingData.proto::exchTransId"
     synonyms:
     - exchange transaction id
+    category: identifier
   - name: latency_stats_prcx
     type: INTEGER
     description: PRCX latency in nanoseconds -- time spent awaiting software decode of the price packet. Measures the
@@ -586,6 +651,7 @@ table:
     synonyms:
     - prcx latency
     - decode wait time
+    category: measure
   - name: latency_stats_prcs
     type: INTEGER
     description: PRCS latency in nanoseconds -- time spent in the price feed decoder processing the market data packet.
@@ -595,6 +661,7 @@ table:
     synonyms:
     - prcs latency
     - decoder time
+    category: measure
   - name: latency_stats_vtio
     type: INTEGER
     description: VTIO latency in nanoseconds -- time spent by the VT (Virtual Trader) to evaluate the opportunity and
@@ -604,6 +671,7 @@ table:
     synonyms:
     - vtio latency
     - vt decision time
+    category: measure
   - name: latency_stats_bkio
     type: INTEGER
     description: BKIO latency in nanoseconds -- time spent in the DMA (Direct Market Access) layer routing the order.
@@ -613,6 +681,7 @@ table:
     synonyms:
     - bkio latency
     - dma latency
+    category: measure
   - name: latency_stats_qmio
     type: INTEGER
     description: QMIO latency in nanoseconds -- time the order was throttled within the QM (Quote Manager) layer.
@@ -623,6 +692,7 @@ table:
     - qmio latency
     - throttle time
     - qm throttle
+    category: measure
   - name: latency_stats_itio
     type: INTEGER
     description: ITIO latency in nanoseconds -- time taken by the order interface layer to form the exchange-specific
@@ -632,6 +702,7 @@ table:
     synonyms:
     - itio latency
     - order send time
+    category: measure
   - name: latency_stats_itex
     type: INTEGER
     description: ITEX latency in nanoseconds -- exchange-specific timing component whose meaning varies between exchanges.
@@ -641,6 +712,7 @@ table:
     synonyms:
     - itex latency
     - exchange latency
+    category: measure
   - name: exchange_timestamp
     type: TIMESTAMP
     description: Timestamp assigned by the exchange matching engine for this swing trade execution or order acknowledgement.
@@ -650,6 +722,7 @@ table:
     synonyms:
     - exchange time
     - matching engine time
+    category: time
   - name: exchange_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the exchange timestamp, providing sub-microsecond precision for the exact
@@ -657,6 +730,7 @@ table:
       round-trip latency measurement.
     source: "SwingData.proto::exchangeTimestamp"
     synonyms: []
+    category: time
   - name: strike
     type: FLOAT
     description: Option strike price (exercise price) at which the holder can buy (call) or sell (put) the underlying.
@@ -667,6 +741,7 @@ table:
     - exercise price
     - strike price
     - K
+    category: measure
   - name: option_type
     type: INTEGER
     description: Numeric code indicating whether the option is a call or put. Used as the raw integer representation
@@ -675,6 +750,7 @@ table:
     synonyms:
     - call put
     - C/P
+    category: dimension
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
@@ -687,6 +763,7 @@ table:
     synonyms:
     - call put name
     - option direction
+    category: dimension
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract, indicating the exact date and time at which the option
@@ -697,6 +774,7 @@ table:
     - expiry
     - expiration
     - maturity date
+    category: time
   - name: mako_symbol
     type: STRING
     description: Internal Mako system symbol for the instrument, used as the canonical identifier within Mako's trading
@@ -704,6 +782,7 @@ table:
     source: "SwingData.proto::makoSymbol"
     synonyms:
     - internal symbol
+    category: dimension
   - name: currency
     type: INTEGER
     description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
@@ -715,6 +794,7 @@ table:
     synonyms:
     - ccy
     - currency code
+    category: dimension
   - name: term
     type: STRING
     description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly, quarterly).
@@ -726,6 +806,7 @@ table:
     - expiry term
     - maturity
     - expiry cycle
+    category: dimension
   - name: inst_type_name
     type: STRING
     description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
@@ -740,6 +821,7 @@ table:
     - instrument type
     - product type
     - security type
+    category: dimension
   - name: pid
     type: STRING
     description: Process ID of the VT (Virtual Trader) application instance that generated this swing event. Used for
@@ -747,6 +829,7 @@ table:
     source: "SwingData.proto::pid"
     synonyms:
     - process id
+    category: dimension
   - name: hostname
     type: STRING
     description: Hostname of the server running the VT application that generated this swing event. Used for operational
@@ -756,6 +839,7 @@ table:
     synonyms:
     - host
     - server
+    category: dimension
   - name: fanout_index
     type: INTEGER
     description: Index of this specific order within the fan-out sequence (starts at 1). When a single swing triggers
@@ -763,6 +847,7 @@ table:
       Used alongside fanout_count for multi-venue execution analysis.
     source: "SwingData.proto::fanoutIndex"
     synonyms: []
+    category: measure
   - name: bv_update_sequence_number
     type: INTEGER
     description: Sequence number of the base value update event that contributed to this swing evaluation. Used for
@@ -770,6 +855,7 @@ table:
       market depth records.
     source: "VtCommon.proto::bvUpdateSequenceNumber"
     synonyms: []
+    category: measure
   - name: bv_update_instrument_hash
     type: STRING
     description: SHA256 hash of the instrument whose base value update contributed to this swing evaluation. May differ
@@ -777,12 +863,14 @@ table:
       option swing).
     source: "VtCommon.proto::bvUpdateInstrumentHash"
     synonyms: []
+    category: identifier
   - name: underlying_sequence_number
     type: INTEGER
     description: Sequence number of the underlying instrument's market data event associated with this swing. Used for
       correlating swing events to specific underlying price movements and ensuring correct event ordering.
     source: "VtCommon.proto::underlyingSequenceNumber"
     synonyms: []
+    category: measure
   - name: underlying_instrument_hash
     type: STRING
     description: SHA256 hash identifier of the underlying instrument. Links this swing event to the underlying's market
@@ -790,6 +878,7 @@ table:
       the swing decision.
     source: "VtCommon.proto::underlyingInstrumentHash"
     synonyms: []
+    category: identifier
   - name: is_bv_invalid
     type: STRING
     description: Flag indicating whether the base value (underlying price) was invalid or stale at the time of the swing
@@ -797,12 +886,14 @@ table:
       Used for filtering out potentially unreliable swing data.
     source: "VtCommon.proto::isBvInvalid"
     synonyms: []
+    category: dimension
   - name: underlying_exe_exch
     type: INTEGER
     description: Numeric exchange code identifying where the underlying instrument executes. Used for multi-venue
       analysis to understand which exchange's underlying price was driving the swing opportunity.
     source: "VtCommon.proto::underlyingExeExch"
     synonyms: []
+    category: measure
   - name: underlying_exe_exch_name
     type: STRING
     description: Human-readable name of the exchange where the underlying instrument executes. Derived from the numeric
@@ -810,6 +901,7 @@ table:
     source: "VtCommon.proto::underlyingExeExchName"
     synonyms:
     - underlying exchange
+    category: dimension
   - name: is_spark
     type: BOOLEAN
     description: Flag indicating whether this swing event was processed via the Spark fast-path execution pipeline.
@@ -818,6 +910,7 @@ table:
     source: "VtCommon.proto::isSpark"
     synonyms:
     - fast path
+    category: dimension
   - name: ref_inst_carry_id
     type: INTEGER
     description: Reference instrument carry/dividend curve identifier, tracking the carry curve version used for this
@@ -825,6 +918,7 @@ table:
       where different instruments reference different carry curves.
     source: "VtCommon.proto::refInstCarryId"
     synonyms: []
+    category: identifier
   - name: ref_inst_curve_id
     type: INTEGER
     description: Reference instrument volatility curve identifier, tracking the vol curve version used for this specific
@@ -832,6 +926,7 @@ table:
       instruments reference different vol curves.
     source: "VtCommon.proto::refInstCurveId"
     synonyms: []
+    category: identifier
   - name: min_edge
     type: FLOAT
     description: Minimum edge threshold required to route an order for this swing. The VT will only send an order if
@@ -843,6 +938,7 @@ table:
     - required_edge_bps
     - min required edge
     - edge threshold
+    category: measure
   - name: raw_min_edge
     type: FLOAT
     description: Unadjusted minimum edge requirement before any offsets or adjustments are applied. Added via git commit
@@ -852,6 +948,7 @@ table:
     synonyms:
     - unadjusted min edge
     - raw edge threshold
+    category: measure
   - name: is_ref_theo_invalid
     type: BOOLEAN
     description: Flag indicating whether the reference theoretical value (ref_tv) was invalid or stale at the time of
@@ -859,6 +956,7 @@ table:
       filtering to exclude swings based on stale pricing inputs.
     source: "VtCommon.proto::isRefTheoInvalid"
     synonyms: []
+    category: dimension
   - name: lb_enabled
     type: BOOLEAN
     description: Flag indicating whether lean-back mode was enabled for this instrument at the time of the swing.
@@ -868,6 +966,7 @@ table:
     synonyms:
     - lean-back
     - lean back mode
+    category: dimension
   - name: edge_model_type
     type: INTEGER
     description: Numeric code identifying the edge model type used for this instrument during the swing evaluation.
@@ -875,6 +974,7 @@ table:
       performance differences across edge model configurations.
     source: "VtCommon.proto::edgeModelType"
     synonyms: []
+    category: dimension
   - name: edge_model_type_name
     type: STRING
     description: Human-readable name of the edge model type used for this instrument during the swing evaluation.
@@ -883,6 +983,7 @@ table:
     source: "VtCommon.proto::edgeModelTypeName"
     synonyms:
     - edge model
+    category: dimension
   - name: streamsource_stream_id
     type: INTEGER
     description: Stream identifier from the event streaming infrastructure, indicating which logical stream this record
@@ -890,24 +991,28 @@ table:
       stream.
     source: "SwingData.proto::streamsource_stream_id"
     synonyms: []
+    category: identifier
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
       for ordering events. Used for data provenance and ensuring correct event ordering during replay or debugging.
     source: "SwingData.proto::streamsource_event_id"
     synonyms: []
+    category: identifier
   - name: streamsource_message_id
     type: INTEGER
     description: Message identifier within the source stream event, used when a single event contains multiple messages.
       Provides the finest-grained provenance tracking for tracing individual records back through the data pipeline.
     source: "SwingData.proto::streamsource_message_id"
     synonyms: []
+    category: identifier
   - name: datasource_pid
     type: INTEGER
     description: Process ID of the data source application that produced this record. Used for data provenance tracking
       and debugging — identifies which specific process generated this swing data record on the source host machine.
     source: "SwingData.proto::datasource_pid"
     synonyms: []
+    category: measure
   - name: datasource_hostname
     type: STRING
     description: Hostname of the server running the data source application that produced this record. Used for data
@@ -915,6 +1020,7 @@ table:
       generated this swing data record.
     source: "SwingData.proto::datasource_hostname"
     synonyms: []
+    category: dimension
   - name: is_negative_edge_allowed
     type: BOOLEAN
     description: Flag indicating whether the VT is allowed to execute trades with negative edge for this instrument.
@@ -923,6 +1029,7 @@ table:
     source: "SwingData.proto::isNegativeEdgeAllowed"
     synonyms:
     - negative edge flag
+    category: dimension
   - name: bid_price_0
     type: FLOAT
     description: Top-of-book bid price (best bid) at depth level 0 for this instrument at the time of the swing event.
@@ -932,6 +1039,7 @@ table:
     synonyms:
     - bid 0
     - best bid
+    category: measure
   - name: ask_price_0
     type: FLOAT
     description: Top-of-book ask price (best offer) at depth level 0 for this instrument at the time of the swing event.
@@ -941,6 +1049,7 @@ table:
     synonyms:
     - ask 0
     - best ask
+    category: measure
   - name: ask_volume_0
     type: INTEGER
     description: Number of contracts (lots) resting at the best ask (depth level 0) at the time of the swing event.
@@ -950,6 +1059,7 @@ table:
     synonyms:
     - ask size 0
     - best ask size
+    category: measure
   - name: bid_volume_0
     type: INTEGER
     description: Number of contracts (lots) resting at the best bid (depth level 0) at the time of the swing event.
@@ -959,6 +1069,7 @@ table:
     synonyms:
     - bid size 0
     - best bid size
+    category: measure
   - name: latency_stats_bvio
     type: INTEGER
     description: BVIO latency in nanoseconds -- time spent calculating the base value (BV) from the underlying market
@@ -968,6 +1079,7 @@ table:
     synonyms:
     - bvio latency
     - bv calc time
+    category: measure
   - name: ref_theoevent_stream_id
     type: INTEGER
     description: Stream identifier of the theo event that provided the reference theoretical values (ref_tv, ref_delta,
@@ -975,6 +1087,7 @@ table:
       VT was referencing when it decided to swing.
     source: "SwingData.proto::refTheoeventStreamId"
     synonyms: []
+    category: identifier
   - name: ref_theoevent_event_id
     type: INTEGER
     description: Event identifier of the theo event that provided the reference theoretical values used in this swing.
@@ -982,6 +1095,7 @@ table:
       edge calculation.
     source: "SwingData.proto::refTheoeventEventId"
     synonyms: []
+    category: identifier
   - name: base_size
     type: FLOAT
     description: Reference size of the underlying/base instrument used in the swing calculation. Added via git commit
@@ -991,3 +1105,4 @@ table:
     synonyms:
     - underlying size
     - base instrument size
+    category: measure

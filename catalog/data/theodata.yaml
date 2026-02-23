@@ -26,18 +26,21 @@ table:
       and replay. Not typically needed for analytical queries but useful for debugging data ingestion issues.
     source: "Theoreticals.proto::kafka_partition"
     synonyms: []
+    category: identifier
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
       pipeline replay. Not typically needed for analytical queries but useful for debugging data ingestion ordering.
     source: "Theoreticals.proto::kafka_offset"
     synonyms: []
+    category: identifier
   - name: event_date
     type: DATE
     description: Calendar date on which this theo computation event occurred. May differ from trade_date in edge cases
       around midnight or timezone boundaries. Generally use trade_date for partitioning and filtering.
     source: "Theoreticals.proto::event_date"
     synonyms: []
+    category: time
   - name: theo_event_tx_timestamp
     type: TIMESTAMP
     description: Timestamp when the theo computation event was transmitted by the pricing engine to downstream consumers.
@@ -47,6 +50,7 @@ table:
     synonyms:
     - theo transmit time
     - theo publish time
+    category: time
   - name: theo_event_tx_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the theo event transmission timestamp, providing sub-microsecond precision for
@@ -54,6 +58,7 @@ table:
       nanosecond-precision timing.
     source: "Theoreticals.proto::theoEventTxTimestamp"
     synonyms: []
+    category: time
   - name: when_timestamp
     type: TIMESTAMP
     description: Timestamp of the theoretical computation from the pricing model, recording when the pricing engine
@@ -63,6 +68,7 @@ table:
     synonyms:
     - computation time
     - calc time
+    category: time
   - name: when_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the when_timestamp, providing sub-microsecond precision for the exact moment
@@ -70,6 +76,7 @@ table:
       timing of the calculation.
     source: "Theoreticals.proto::whenTimestamp"
     synonyms: []
+    category: time
   - name: source_event_timestamp
     type: TIMESTAMP
     description: Timestamp of the source market data event that triggered this theo recomputation. Indicates when the
@@ -79,6 +86,7 @@ table:
     synonyms:
     - trigger time
     - source time
+    category: time
   - name: source_event_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the source event timestamp, providing sub-microsecond precision for the arrival
@@ -86,6 +94,7 @@ table:
       nanosecond-precision latency measurement.
     source: "Theoreticals.proto::sourceEventTimestamp"
     synonyms: []
+    category: time
   - name: theo_compute_timestamp_start
     type: TIMESTAMP
     description: Timestamp marking the start of the theo computation cycle in the pricing engine. Together with
@@ -94,6 +103,7 @@ table:
     source: "Theoreticals.proto::theoComputeTimestampStart"
     synonyms:
     - compute start
+    category: time
   - name: theo_compute_timestamp_start_ns
     type: INTEGER
     description: Nanosecond component of the theo computation start timestamp, providing sub-microsecond precision for
@@ -101,6 +111,7 @@ table:
       timing of computation duration.
     source: "Theoreticals.proto::theoComputeTimestampStart"
     synonyms: []
+    category: time
   - name: theo_compute_timestamp_stop
     type: TIMESTAMP
     description: Timestamp marking the end of the theo computation cycle in the pricing engine. The difference between
@@ -109,6 +120,7 @@ table:
     source: "Theoreticals.proto::theoComputeTimestampStop"
     synonyms:
     - compute end
+    category: time
   - name: theo_compute_timestamp_stop_ns
     type: INTEGER
     description: Nanosecond component of the theo computation stop timestamp, providing sub-microsecond precision for
@@ -116,6 +128,7 @@ table:
       computation duration measurement.
     source: "Theoreticals.proto::theoComputeTimestampStop"
     synonyms: []
+    category: time
   - name: theo_compute_type
     type: STRING
     description: Type of theo computation performed by the pricing engine, such as full recompute, delta update, or
@@ -125,6 +138,7 @@ table:
     synonyms:
     - compute type
     - recalc type
+    category: dimension
   - name: instrument_hash
     type: STRING
     description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
@@ -134,6 +148,7 @@ table:
     synonyms:
     - instrument id
     - instrument key
+    category: identifier
   - name: curve_id
     type: INTEGER
     description: Identifier of the volatility curve used by the pricing model for this computation. Each vol curve
@@ -143,6 +158,7 @@ table:
     synonyms:
     - vol curve
     - vol curve id
+    category: identifier
   - name: carry_id
     type: INTEGER
     description: Identifier of the carry/dividend curve used in the pricing model for this computation. The carry curve
@@ -152,6 +168,7 @@ table:
     synonyms:
     - dividend curve
     - carry curve id
+    category: identifier
   - name: stream_id
     type: INTEGER
     description: Identifier of the data stream that produced this theo record. Used for data pipeline routing and
@@ -159,6 +176,7 @@ table:
       which engine produced a given computation.
     source: "Theoreticals.proto::streamId"
     synonyms: []
+    category: identifier
   - name: tv
     type: FLOAT
     description: Theoretical value (fair value) computed by the pricing model for this option at this point in time.
@@ -171,6 +189,7 @@ table:
     - fair value
     - machine price
     - TV
+    category: measure
   - name: tv_offset
     type: FLOAT
     description: Manual or systematic offset applied to the theoretical value by the trading desk. Used to adjust the
@@ -180,6 +199,7 @@ table:
     synonyms:
     - theo offset
     - tv adjustment
+    category: measure
   - name: delta
     type: FLOAT
     description: First-order sensitivity of the option's theoretical value to changes in the underlying price. Ranges
@@ -189,6 +209,7 @@ table:
     synonyms:
     - delta exposure
     - hedge ratio
+    category: measure
   - name: gamma
     type: FLOAT
     description: Rate of change of delta with respect to underlying price movement. Measures convexity of the option's
@@ -197,6 +218,7 @@ table:
     synonyms:
     - gamma exposure
     - convexity
+    category: measure
   - name: vega
     type: FLOAT
     description: Sensitivity of the option's theoretical value to a 1-point change in implied volatility. Higher vega
@@ -205,6 +227,7 @@ table:
     synonyms:
     - vol sensitivity
     - vega exposure
+    category: measure
   - name: theta
     type: FLOAT
     description: Daily time decay -- the rate at which the option loses value as time passes, all else equal. Typically
@@ -213,6 +236,7 @@ table:
     synonyms:
     - time decay
     - theta decay
+    category: measure
   - name: rho
     type: FLOAT
     description: Sensitivity of the option's value to changes in interest rates. Typically small for short-dated options
@@ -222,6 +246,7 @@ table:
     synonyms:
     - rate sensitivity
     - interest rate sensitivity
+    category: measure
   - name: tte
     type: FLOAT
     description: Time to expiry expressed in years (e.g., 0.25 = 3 months). Key input to the pricing model -- options
@@ -232,6 +257,7 @@ table:
     - days to expiry
     - DTE
     - time to maturity
+    category: measure
   - name: raw_delta
     type: FLOAT
     description: Unadjusted delta before any internal adjustments or offsets applied by the pricing infrastructure.
@@ -241,6 +267,7 @@ table:
     synonyms:
     - unadjusted delta
     - raw hedge ratio
+    category: measure
   - name: raw_gamma
     type: FLOAT
     description: Unadjusted gamma before any internal adjustments or offsets applied by the pricing infrastructure.
@@ -250,6 +277,7 @@ table:
     synonyms:
     - unadjusted gamma
     - raw convexity
+    category: measure
   - name: vol
     type: FLOAT
     description: Implied volatility -- the market's expectation of future underlying price movement, extracted from
@@ -260,6 +288,7 @@ table:
     - IV
     - sigma
     - implied vol
+    category: measure
   - name: norm_strike
     type: FLOAT
     description: Normalized strike measuring moneyness of the option relative to the at-the-money level. Used by
@@ -270,6 +299,7 @@ table:
     - moneyness
     - delta bucket
     - normalized strike
+    category: measure
   - name: under
     type: FLOAT
     description: Current price of the underlying instrument at the time this theo snapshot was computed. Used as
@@ -280,6 +310,7 @@ table:
     - spot
     - underlying price
     - spot price
+    category: measure
   - name: roll
     type: FLOAT
     description: Roll/carry adjustment value reflecting the cost of rolling a position forward (dividends, interest,
@@ -289,6 +320,7 @@ table:
     - calendar roll
     - roll value
     - carry cost
+    category: measure
   - name: forward
     type: FLOAT
     description: Forward price of the underlying accounting for carry costs (dividends, interest rates, roll). Used
@@ -298,6 +330,7 @@ table:
     - forward price
     - fwd
     - forward value
+    category: measure
   - name: short_rate
     type: FLOAT
     description: Short-term interest rate used in the pricing model for this computation. Affects forward prices and
@@ -307,6 +340,7 @@ table:
     - rate
     - risk-free rate
     - short rate
+    category: measure
   - name: offset_id
     type: INTEGER
     description: Identifier for the theo offset configuration applied to this instrument. Different offset_id values
@@ -314,6 +348,7 @@ table:
       value. Use to track which offset regime was active during a computation.
     source: "Theoreticals.proto::offsetId"
     synonyms: []
+    category: identifier
   - name: greek_atm
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -322,6 +357,7 @@ table:
     source: "Theoreticals.proto::greekAtm"
     synonyms:
     - atm vol
+    category: measure
   - name: greek_skew
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -330,6 +366,7 @@ table:
     source: "Theoreticals.proto::greekSkew"
     synonyms:
     - vol skew
+    category: measure
   - name: greek_call_skew
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -337,6 +374,7 @@ table:
       Greek-space, allowing asymmetric smile fitting.
     source: "Theoreticals.proto::greekCallSkew"
     synonyms: []
+    category: measure
   - name: greek_put_k
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -344,6 +382,7 @@ table:
       affecting how steeply vol rises for deep out-of-the-money puts.
     source: "Theoreticals.proto::greekPutK"
     synonyms: []
+    category: measure
   - name: greek_call_k
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -351,6 +390,7 @@ table:
       affecting how steeply vol rises for deep out-of-the-money calls.
     source: "Theoreticals.proto::greekCallK"
     synonyms: []
+    category: measure
   - name: greek_put_a
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -358,6 +398,7 @@ table:
       the shape of the far out-of-the-money put volatility.
     source: "Theoreticals.proto::greekPutA"
     synonyms: []
+    category: measure
   - name: greek_call_a
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -365,6 +406,7 @@ table:
       the shape of the far out-of-the-money call volatility.
     source: "Theoreticals.proto::greekCallA"
     synonyms: []
+    category: measure
   - name: greek_put_b
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -372,6 +414,7 @@ table:
       additional degrees of freedom for fitting the far-wing put vol smile.
     source: "Theoreticals.proto::greekPutB"
     synonyms: []
+    category: measure
   - name: greek_call_b
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -379,6 +422,7 @@ table:
       additional degrees of freedom for fitting the far-wing call vol smile.
     source: "Theoreticals.proto::greekCallB"
     synonyms: []
+    category: measure
   - name: greek_datm
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -386,6 +430,7 @@ table:
       for the vol surface that accounts for skew when defining at-the-money.
     source: "Theoreticals.proto::greekDatm"
     synonyms: []
+    category: measure
   - name: param_atm
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -393,6 +438,7 @@ table:
       Represents the raw curve-fitting output before Greek-space transformation.
     source: "Theoreticals.proto::paramAtm"
     synonyms: []
+    category: measure
   - name: param_skew
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -400,6 +446,7 @@ table:
       slope before Greek-space transformation.
     source: "Theoreticals.proto::paramSkew"
     synonyms: []
+    category: measure
   - name: param_call_skew
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -407,6 +454,7 @@ table:
       before Greek-space transformation.
     source: "Theoreticals.proto::paramCallSkew"
     synonyms: []
+    category: measure
   - name: param_put_k
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -414,6 +462,7 @@ table:
       before Greek-space transformation.
     source: "Theoreticals.proto::paramPutK"
     synonyms: []
+    category: measure
   - name: param_call_k
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -421,6 +470,7 @@ table:
       before Greek-space transformation.
     source: "Theoreticals.proto::paramCallK"
     synonyms: []
+    category: measure
   - name: param_s_vol
     type: FLOAT
     description: Volatility surface fitting parameter used by the pricing model to construct the implied volatility
@@ -428,6 +478,7 @@ table:
       spot price movements and implied volatility changes.
     source: "Theoreticals.proto::paramSVol"
     synonyms: []
+    category: measure
   - name: datasource_pid
     type: INTEGER
     description: Process ID of the data source application that produced this record. Used for data provenance tracking
@@ -435,6 +486,7 @@ table:
       host machine.
     source: "Theoreticals.proto::datasource_pid"
     synonyms: []
+    category: measure
   - name: datasource_hostname
     type: STRING
     description: Hostname of the server running the data source application that produced this record. Used for data
@@ -442,6 +494,7 @@ table:
       that generated this theo computation.
     source: "Theoreticals.proto::datasource_hostname"
     synonyms: []
+    category: dimension
   - name: streamsource_stream_id
     type: INTEGER
     description: Stream identifier from the event streaming infrastructure, indicating which logical stream this record
@@ -449,18 +502,21 @@ table:
       stream.
     source: "Theoreticals.proto::streamsource_stream_id"
     synonyms: []
+    category: identifier
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
       for ordering events. Used for data provenance and ensuring correct event ordering during replay or debugging.
     source: "Theoreticals.proto::streamsource_event_id"
     synonyms: []
+    category: identifier
   - name: streamsource_message_id
     type: INTEGER
     description: Message identifier within the source stream event, used when a single event contains multiple messages.
       Provides the finest-grained provenance tracking for tracing individual records back through the data pipeline.
     source: "Theoreticals.proto::streamsource_message_id"
     synonyms: []
+    category: identifier
   - name: strike
     type: FLOAT
     description: Option strike price (exercise price) at which the holder can buy (call) or sell (put) the underlying.
@@ -471,6 +527,7 @@ table:
     - exercise price
     - strike price
     - K
+    category: measure
   - name: option_type
     type: INTEGER
     description: Numeric code indicating whether the option is a call or put. Used as the raw integer representation
@@ -480,6 +537,7 @@ table:
     synonyms:
     - call put
     - C/P
+    category: dimension
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
@@ -492,6 +550,7 @@ table:
     synonyms:
     - call put name
     - option direction
+    category: dimension
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract, indicating the exact date and time at which the option
@@ -503,6 +562,7 @@ table:
     - expiration
     - maturity date
     - expiration date
+    category: time
   - name: mako_symbol
     type: STRING
     description: Internal Mako system symbol for the instrument, used as the canonical identifier within Mako's trading
@@ -511,6 +571,7 @@ table:
     synonyms:
     - internal symbol
     - mako ticker
+    category: dimension
   - name: currency
     type: INTEGER
     description: Numeric currency code identifying the denomination of the instrument and its theoretical values.
@@ -525,6 +586,7 @@ table:
     synonyms:
     - ccy
     - currency code
+    category: dimension
   - name: inst_type_name
     type: STRING
     description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
@@ -539,6 +601,7 @@ table:
     - instrument type
     - product type
     - security type
+    category: dimension
   - name: term
     type: STRING
     description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly, quarterly).
@@ -550,6 +613,7 @@ table:
     - expiry term
     - maturity
     - expiry cycle
+    category: dimension
   - name: trade_date
     type: DATE
     description: Business date of the trading session, used as the primary partition column for this table. Always
@@ -560,6 +624,7 @@ table:
     - date
     - business date
     - trading date
+    category: time
   - name: portfolio
     type: STRING
     description: Name of the Mako trading portfolio or book to which this instrument's pricing belongs. Used for
@@ -570,6 +635,7 @@ table:
     - book
     - trading book
     - strategy
+    category: dimension
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -581,3 +647,4 @@ table:
     - product
     - instrument
     - underlying symbol
+    category: dimension

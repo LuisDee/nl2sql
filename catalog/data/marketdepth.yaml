@@ -24,18 +24,21 @@ table:
       and replay. Not typically needed for analytical queries but useful for debugging data ingestion issues.
     source: "MarketDepth.proto::kafka_partition"
     synonyms: []
+    category: identifier
   - name: kafka_offset
     type: INTEGER
     description: Kafka offset of the record within its partition. Used for exactly-once processing guarantees and data
       pipeline replay. Not typically needed for analytical queries but useful for debugging data ingestion ordering.
     source: "MarketDepth.proto::kafka_offset"
     synonyms: []
+    category: identifier
   - name: event_date
     type: DATE
     description: Calendar date on which this market depth event occurred. May differ from trade_date in edge cases
       around midnight or timezone boundaries. Generally use trade_date for partitioning and filtering.
     source: "MarketDepth.proto::event_date"
     synonyms: []
+    category: time
   - name: exchange_timestamp
     type: TIMESTAMP
     description: Timestamp assigned by the exchange matching engine for this order book update. Represents the
@@ -45,6 +48,7 @@ table:
     synonyms:
     - exchange time
     - matching engine time
+    category: time
   - name: exchange_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the exchange timestamp, providing sub-microsecond precision for the exact
@@ -52,6 +56,7 @@ table:
       nanosecond-precision timing of book state changes.
     source: "MarketDepth.proto::exchangeTimestamp"
     synonyms: []
+    category: time
   - name: hw_nic_rx_timestamp
     type: TIMESTAMP
     description: Hardware NIC receive timestamp recording when the market data packet physically arrived at Mako's
@@ -62,6 +67,7 @@ table:
     - nic timestamp
     - wire time
     - hardware timestamp
+    category: time
   - name: hw_nic_rx_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the hardware NIC receive timestamp, providing sub-microsecond precision for
@@ -69,6 +75,7 @@ table:
       full nanosecond-precision wire-arrival timing.
     source: "MarketDepth.proto::hwNicRxTimestamp"
     synonyms: []
+    category: time
   - name: mako_ingress_timestamp
     type: TIMESTAMP
     description: Timestamp when the market depth packet entered Mako's software processing pipeline after being received
@@ -78,6 +85,7 @@ table:
     synonyms:
     - ingress time
     - software receive time
+    category: time
   - name: mako_ingress_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the Mako ingress timestamp, providing sub-microsecond precision for the moment
@@ -85,6 +93,7 @@ table:
       ingress timing.
     source: "MarketDepth.proto::makoIngressTimestamp"
     synonyms: []
+    category: time
   - name: software_timestamp
     type: TIMESTAMP
     description: Timestamp recorded by the software layer after processing the market depth update. Represents when
@@ -94,6 +103,7 @@ table:
     synonyms:
     - software time
     - process time
+    category: time
   - name: software_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the software processing timestamp, providing sub-microsecond precision for
@@ -101,6 +111,7 @@ table:
       nanosecond-precision processing latency measurement.
     source: "MarketDepth.proto::softwareTimestamp"
     synonyms: []
+    category: time
   - name: instrument_hash
     type: STRING
     description: Unique SHA256 hash identifier for the instrument, deterministically computed from the instrument's
@@ -110,6 +121,7 @@ table:
     synonyms:
     - instrument id
     - instrument key
+    category: identifier
   - name: sequence_number
     type: INTEGER
     description: Monotonically increasing sequence number assigned to each market depth event for strict ordering.
@@ -119,6 +131,7 @@ table:
     synonyms:
     - seq num
     - event sequence
+    category: identifier
   - name: ask_price_0
     type: FLOAT
     description: Top-of-book ask price at depth level 0 (best offer). Level 0 is the tightest ask price available
@@ -129,6 +142,7 @@ table:
     - ask 0
     - best ask
     - best offer
+    category: measure
   - name: ask_price_1
     type: FLOAT
     description: Ask price at depth level 1 (second-best offer). Shows the next available selling price behind the
@@ -137,6 +151,7 @@ table:
     source: "MarketDepth.proto::asks[1].price"
     synonyms:
     - ask 1
+    category: measure
   - name: ask_price_2
     type: FLOAT
     description: Ask price at depth level 2 (third-best offer). Represents the third tier of selling interest in the
@@ -144,6 +159,7 @@ table:
     source: "MarketDepth.proto::asks[2].price"
     synonyms:
     - ask 2
+    category: measure
   - name: ask_price_3
     type: FLOAT
     description: Ask price at depth level 3 (fourth-best offer). Represents deeper selling interest in the order book.
@@ -151,6 +167,7 @@ table:
     source: "MarketDepth.proto::asks[3].price"
     synonyms:
     - ask 3
+    category: measure
   - name: ask_price_4
     type: FLOAT
     description: Ask price at depth level 4 (deepest visible offer). The furthest available ask price in the 5-level
@@ -158,6 +175,7 @@ table:
     source: "MarketDepth.proto::asks[4].price"
     synonyms:
     - ask 4
+    category: measure
   - name: bid_price_0
     type: FLOAT
     description: Top-of-book bid price at depth level 0 (best bid). Level 0 is the tightest bid price available
@@ -167,6 +185,7 @@ table:
     synonyms:
     - bid 0
     - best bid
+    category: measure
   - name: bid_price_1
     type: FLOAT
     description: Bid price at depth level 1 (second-best bid). Shows the next available buying price behind the
@@ -175,6 +194,7 @@ table:
     source: "MarketDepth.proto::bids[1].price"
     synonyms:
     - bid 1
+    category: measure
   - name: bid_price_2
     type: FLOAT
     description: Bid price at depth level 2 (third-best bid). Represents the third tier of buying interest in the
@@ -182,6 +202,7 @@ table:
     source: "MarketDepth.proto::bids[2].price"
     synonyms:
     - bid 2
+    category: measure
   - name: bid_price_3
     type: FLOAT
     description: Bid price at depth level 3 (fourth-best bid). Represents deeper buying interest in the order book.
@@ -189,6 +210,7 @@ table:
     source: "MarketDepth.proto::bids[3].price"
     synonyms:
     - bid 3
+    category: measure
   - name: bid_price_4
     type: FLOAT
     description: Bid price at depth level 4 (deepest visible bid). The furthest available bid price in the 5-level
@@ -196,6 +218,7 @@ table:
     source: "MarketDepth.proto::bids[4].price"
     synonyms:
     - bid 4
+    category: measure
   - name: ask_volume_0
     type: INTEGER
     description: Number of contracts (lots) resting at the best ask (depth level 0). Higher volume at the tightest
@@ -206,6 +229,7 @@ table:
     - ask size 0
     - best ask size
     - offer size
+    category: measure
   - name: ask_volume_1
     type: INTEGER
     description: Number of contracts (lots) resting at ask depth level 1. Shows the amount of selling liquidity at
@@ -214,6 +238,7 @@ table:
     source: "MarketDepth.proto::asks[1].volume"
     synonyms:
     - ask size 1
+    category: measure
   - name: ask_volume_2
     type: INTEGER
     description: Number of contracts (lots) resting at ask depth level 2. Represents the selling liquidity at the
@@ -221,6 +246,7 @@ table:
     source: "MarketDepth.proto::asks[2].volume"
     synonyms:
     - ask size 2
+    category: measure
   - name: ask_volume_3
     type: INTEGER
     description: Number of contracts (lots) resting at ask depth level 3. Represents deeper selling liquidity in the
@@ -228,6 +254,7 @@ table:
     source: "MarketDepth.proto::asks[3].volume"
     synonyms:
     - ask size 3
+    category: measure
   - name: ask_volume_4
     type: INTEGER
     description: Number of contracts (lots) resting at ask depth level 4 (deepest visible). The furthest visible
@@ -236,6 +263,7 @@ table:
     source: "MarketDepth.proto::asks[4].volume"
     synonyms:
     - ask size 4
+    category: measure
   - name: bid_volume_0
     type: INTEGER
     description: Number of contracts (lots) resting at the best bid (depth level 0). Higher volume at the tightest
@@ -245,6 +273,7 @@ table:
     synonyms:
     - bid size 0
     - best bid size
+    category: measure
   - name: bid_volume_1
     type: INTEGER
     description: Number of contracts (lots) resting at bid depth level 1. Shows the amount of buying liquidity at
@@ -253,6 +282,7 @@ table:
     source: "MarketDepth.proto::bids[1].volume"
     synonyms:
     - bid size 1
+    category: measure
   - name: bid_volume_2
     type: INTEGER
     description: Number of contracts (lots) resting at bid depth level 2. Represents the buying liquidity at the
@@ -260,6 +290,7 @@ table:
     source: "MarketDepth.proto::bids[2].volume"
     synonyms:
     - bid size 2
+    category: measure
   - name: bid_volume_3
     type: INTEGER
     description: Number of contracts (lots) resting at bid depth level 3. Represents deeper buying liquidity in the
@@ -267,6 +298,7 @@ table:
     source: "MarketDepth.proto::bids[3].volume"
     synonyms:
     - bid size 3
+    category: measure
   - name: bid_volume_4
     type: INTEGER
     description: Number of contracts (lots) resting at bid depth level 4 (deepest visible). The furthest visible
@@ -275,6 +307,7 @@ table:
     source: "MarketDepth.proto::bids[4].volume"
     synonyms:
     - bid size 4
+    category: measure
   - name: ask_orders_0
     type: INTEGER
     description: Count of individual orders resting at the best ask (depth level 0). More orders at a level suggests
@@ -283,6 +316,7 @@ table:
     source: "MarketDepth.proto::asks[0].orders"
     synonyms:
     - ask order count 0
+    category: measure
   - name: ask_orders_1
     type: INTEGER
     description: Count of individual orders at ask depth level 1. More orders at this level suggests broader market
@@ -291,6 +325,7 @@ table:
     source: "MarketDepth.proto::asks[1].orders"
     synonyms:
     - ask order count 1
+    category: measure
   - name: ask_orders_2
     type: INTEGER
     description: Count of individual orders at ask depth level 2. Tracks the number of distinct sell orders resting
@@ -299,6 +334,7 @@ table:
     source: "MarketDepth.proto::asks[2].orders"
     synonyms:
     - ask order count 2
+    category: measure
   - name: ask_orders_3
     type: INTEGER
     description: Count of individual orders at ask depth level 3. Tracks the number of distinct sell orders at the
@@ -306,6 +342,7 @@ table:
     source: "MarketDepth.proto::asks[3].orders"
     synonyms:
     - ask order count 3
+    category: measure
   - name: ask_orders_4
     type: INTEGER
     description: Count of individual orders at ask depth level 4 (deepest visible). The furthest visible sell order
@@ -314,6 +351,7 @@ table:
     source: "MarketDepth.proto::asks[4].orders"
     synonyms:
     - ask order count 4
+    category: measure
   - name: bid_orders_0
     type: INTEGER
     description: Count of individual orders resting at the best bid (depth level 0). More orders at a level suggests
@@ -322,6 +360,7 @@ table:
     source: "MarketDepth.proto::bids[0].orders"
     synonyms:
     - bid order count 0
+    category: measure
   - name: bid_orders_1
     type: INTEGER
     description: Count of individual orders at bid depth level 1. More orders at this level suggests broader market
@@ -330,6 +369,7 @@ table:
     source: "MarketDepth.proto::bids[1].orders"
     synonyms:
     - bid order count 1
+    category: measure
   - name: bid_orders_2
     type: INTEGER
     description: Count of individual orders at bid depth level 2. Tracks the number of distinct buy orders resting
@@ -338,6 +378,7 @@ table:
     source: "MarketDepth.proto::bids[2].orders"
     synonyms:
     - bid order count 2
+    category: measure
   - name: bid_orders_3
     type: INTEGER
     description: Count of individual orders at bid depth level 3. Tracks the number of distinct buy orders at the
@@ -345,6 +386,7 @@ table:
     source: "MarketDepth.proto::bids[3].orders"
     synonyms:
     - bid order count 3
+    category: measure
   - name: bid_orders_4
     type: INTEGER
     description: Count of individual orders at bid depth level 4 (deepest visible). The furthest visible buy order
@@ -353,6 +395,7 @@ table:
     source: "MarketDepth.proto::bids[4].orders"
     synonyms:
     - bid order count 4
+    category: measure
   - name: implied_bid_price
     type: FLOAT
     description: Implied bid price derived from spread/strategy markets, showing synthetic buying liquidity created
@@ -363,6 +406,7 @@ table:
     synonyms:
     - implied bid
     - synthetic bid
+    category: measure
   - name: implied_bid_volume
     type: INTEGER
     description: Implied bid volume (contracts/lots) derived from spread/strategy markets, showing the synthetic
@@ -372,6 +416,7 @@ table:
     synonyms:
     - implied bid size
     - synthetic bid size
+    category: measure
   - name: implied_bid_orders
     type: INTEGER
     description: Count of implied bid orders derived from spread/strategy markets, representing the number of synthetic
@@ -380,6 +425,7 @@ table:
     source: "MarketDepth.proto::impliedBid.orders"
     synonyms:
     - implied bid count
+    category: measure
   - name: implied_ask_price
     type: FLOAT
     description: Implied ask price derived from spread/strategy markets, showing synthetic selling liquidity created
@@ -391,6 +437,7 @@ table:
     - implied ask
     - implied offer
     - synthetic ask
+    category: measure
   - name: implied_ask_volume
     type: INTEGER
     description: Implied ask volume (contracts/lots) derived from spread/strategy markets, showing the synthetic
@@ -400,6 +447,7 @@ table:
     synonyms:
     - implied ask size
     - synthetic ask size
+    category: measure
   - name: implied_ask_orders
     type: INTEGER
     description: Count of implied ask orders derived from spread/strategy markets, representing the number of synthetic
@@ -408,6 +456,7 @@ table:
     source: "MarketDepth.proto::impliedAsk.orders"
     synonyms:
     - implied ask count
+    category: measure
   - name: keyframe
     type: BOOLEAN
     description: Boolean flag indicating whether this record is a complete orderbook snapshot (true) or an incremental
@@ -421,6 +470,7 @@ table:
     - snapshot
     - full snapshot
     - is keyframe
+    category: dimension
   - name: data_timestamp
     type: TIMESTAMP
     description: Timestamp recorded by the data pipeline when this market depth record was processed and stored.
@@ -430,6 +480,7 @@ table:
     synonyms:
     - data time
     - ingestion time
+    category: time
   - name: data_timestamp_ns
     type: INTEGER
     description: Nanosecond component of the data pipeline processing timestamp, providing sub-microsecond precision
@@ -437,6 +488,7 @@ table:
       pipeline latency measurement.
     source: "MarketDepth.proto::dataTimestamp"
     synonyms: []
+    category: time
   - name: data_order_identifier
     type: INTEGER
     description: Internal ordering identifier assigned by the data pipeline to maintain strict sequencing of market
@@ -444,6 +496,7 @@ table:
       replaying or reprocessing data.
     source: "MarketDepth.proto::dataOrderIdentifier"
     synonyms: []
+    category: measure
   - name: streamsource_stream_id
     type: INTEGER
     description: Stream identifier from the event streaming infrastructure, indicating which logical stream this record
@@ -451,18 +504,21 @@ table:
       stream.
     source: "MarketDepth.proto::streamsource_stream_id"
     synonyms: []
+    category: identifier
   - name: streamsource_event_id
     type: INTEGER
     description: Event identifier within the source stream, providing a unique monotonically increasing sequence number
       for ordering events. Used for data provenance and ensuring correct event ordering during replay or debugging.
     source: "MarketDepth.proto::streamsource_event_id"
     synonyms: []
+    category: identifier
   - name: streamsource_message_id
     type: INTEGER
     description: Message identifier within the source stream event, used when a single event contains multiple messages.
       Provides the finest-grained provenance tracking for tracing individual records back through the data pipeline.
     source: "MarketDepth.proto::streamsource_message_id"
     synonyms: []
+    category: identifier
   - name: datasource_pid
     type: INTEGER
     description: Process ID of the data source application that produced this record. Used for data provenance tracking
@@ -470,6 +526,7 @@ table:
       host machine.
     source: "MarketDepth.proto::datasource_pid"
     synonyms: []
+    category: measure
   - name: datasource_hostname
     type: STRING
     description: Hostname of the server running the data source application that produced this record. Used for data
@@ -477,6 +534,7 @@ table:
       that generated this book snapshot.
     source: "MarketDepth.proto::datasource_hostname"
     synonyms: []
+    category: dimension
   - name: market_state
     type: INTEGER
     description: Numeric code indicating the current trading state of the market for this instrument at the time of
@@ -489,6 +547,7 @@ table:
     synonyms:
     - trading state
     - market status
+    category: measure
   - name: strike
     type: FLOAT
     description: Option strike price (exercise price) at which the holder can buy (call) or sell (put) the underlying.
@@ -499,6 +558,7 @@ table:
     - exercise price
     - strike price
     - K
+    category: measure
   - name: option_type
     type: INTEGER
     description: Numeric code indicating whether the option is a call or put. Used as the raw integer representation
@@ -508,6 +568,7 @@ table:
     synonyms:
     - call put
     - C/P
+    category: dimension
   - name: option_type_name
     type: STRING
     description: Human-readable option type label indicating whether the instrument is a Call or Put option. Derived
@@ -520,6 +581,7 @@ table:
     synonyms:
     - call put name
     - option direction
+    category: dimension
   - name: expiry_timestamp
     type: TIMESTAMP
     description: Expiration timestamp of the option contract, indicating the exact date and time at which the option
@@ -531,6 +593,7 @@ table:
     - expiration
     - maturity date
     - expiration date
+    category: time
   - name: mako_symbol
     type: STRING
     description: Internal Mako system symbol for the instrument, used as the canonical identifier within Mako's trading
@@ -539,6 +602,7 @@ table:
     synonyms:
     - internal symbol
     - mako ticker
+    category: dimension
   - name: currency
     type: INTEGER
     description: Numeric currency code identifying the denomination of the instrument. Common values include USD=2,
@@ -550,6 +614,7 @@ table:
     synonyms:
     - ccy
     - currency code
+    category: dimension
   - name: inst_type_name
     type: STRING
     description: Human-readable instrument type name indicating whether this is an OPTION, FUTURE, COMBO (spread/strategy),
@@ -564,6 +629,7 @@ table:
     - instrument type
     - product type
     - security type
+    category: dimension
   - name: term
     type: STRING
     description: Expiry term or tenor label grouping options by their expiration cycle (e.g. monthly, weekly, quarterly).
@@ -575,6 +641,7 @@ table:
     - expiry term
     - maturity
     - expiry cycle
+    category: dimension
   - name: trade_date
     type: DATE
     description: Business date of the trading session, used as the primary partition column for this table. Always
@@ -585,6 +652,7 @@ table:
     - date
     - business date
     - trading date
+    category: time
   - name: symbol
     type: STRING
     description: Exchange symbol or ticker for the underlying product (e.g. AAPL, SPX, KOSPI). The primary
@@ -596,3 +664,4 @@ table:
     - product
     - instrument
     - underlying symbol
+    category: dimension

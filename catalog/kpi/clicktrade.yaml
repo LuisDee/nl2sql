@@ -42,6 +42,7 @@ table:
     - underlying
     - name
     source: 'PosData.proto :: PositionEvent.symbol'
+    category: dimension
   - name: portfolio
     type: STRING
     description: >
@@ -55,6 +56,7 @@ table:
     - strategy
     - desk
     source: 'PosData.proto :: PositionEvent.portfolio'
+    category: dimension
   - name: trader_id
     type: STRING
     description: >
@@ -67,6 +69,7 @@ table:
     - user
     - trader name
     source: 'PosData.proto :: PositionEvent.userId'
+    category: identifier
   - name: mako_id
     type: STRING
     description: >
@@ -76,6 +79,7 @@ table:
     synonyms:
     - mako identifier
     source: 'PosData.proto :: PositionEvent.makoId'
+    category: identifier
   - name: algorithm
     type: STRING
     description: >
@@ -104,6 +108,7 @@ table:
       This column defines table membership. Only trades matching the algorithm inclusion list
       are present. VTM = Volatility Trading Module, BOOKSCREEN = screen-based book trades.
     source: 'PosData.proto :: PositionEvent.algorithm'
+    category: dimension
   - name: channel
     type: STRING
     description: >
@@ -114,6 +119,7 @@ table:
     - execution channel
     - trading channel
     source: 'PosData.proto :: PositionEvent.channel'
+    category: dimension
   - name: inventory
     type: STRING
     description: >
@@ -124,6 +130,7 @@ table:
     - sub-account
     - sub account
     source: 'PosData.proto :: PositionEvent.inventory'
+    category: dimension
   - name: account
     type: STRING
     description: >
@@ -135,6 +142,7 @@ table:
     - trading account
     - acct
     source: 'PosData.proto :: PositionEvent.account'
+    category: dimension
   - name: exchange_timestamp
     type: TIMESTAMP
     description: >
@@ -147,6 +155,7 @@ table:
     - fill time
     - execution time
     source: 'PosData.proto :: PositionEvent.exchangeTimestamp'
+    category: time
   - name: exchange_timestamp_ns
     type: INTEGER
     description: >
@@ -157,6 +166,7 @@ table:
     synonyms:
     - exchange time ns
     source: 'PosData.proto :: PositionEvent.exchangeTimestamp (ns component)'
+    category: time
   - name: exchange_date
     type: DATE
     description: >
@@ -165,6 +175,7 @@ table:
       for trades near midnight or across time zones.
     synonyms:
     - fill date
+    category: time
   - name: exchange_transaction_id
     type: STRING
     description: >
@@ -174,6 +185,7 @@ table:
     synonyms:
     - exchange txn id
     source: 'PosData.proto :: PositionEvent.exchangeTransactionId'
+    category: identifier
   - name: exchange_order_id
     type: STRING
     description: >
@@ -183,6 +195,7 @@ table:
     synonyms:
     - exchange oid
     source: 'PosData.proto :: PositionEvent.exchangeOrderId'
+    category: identifier
   - name: agg_pos_timestamp
     type: STRING
     description: >
@@ -190,6 +203,7 @@ table:
       trade. Represents when the position state was captured for the normalized trade record.
       Internal pipeline field, not typically queried directly by traders.
     synonyms: []
+    category: dimension
   - name: agg_pos_timestamp_ns
     type: STRING
     description: >
@@ -197,12 +211,14 @@ table:
       pipeline field used for precise ordering during KPI normalization. Not typically queried
       directly by traders.
     synonyms: []
+    category: dimension
   - name: agg_pos_date
     type: STRING
     description: >
       Date component of the aggregated position snapshot timestamp. Internal pipeline field
       representing the business date of the position state used during KPI computation.
     synonyms: []
+    category: dimension
   - name: revision
     type: INTEGER
     description: >
@@ -216,6 +232,7 @@ table:
     business_rules: >
       When multiple revisions exist, use MAX(revision) to get the latest version of a trade.
     source: 'PosData.proto :: PositionEvent.revision'
+    category: identifier
   - name: revision_timestamp
     type: TIMESTAMP
     description: >
@@ -224,6 +241,7 @@ table:
       later revision_timestamps.
     synonyms:
     - amendment time
+    category: time
   - name: revision_timestamp_ns
     type: INTEGER
     description: >
@@ -231,6 +249,7 @@ table:
       representing nanoseconds since epoch. Used when sub-second precision is needed for
       ordering revisions.
     synonyms: []
+    category: time
   - name: traded_size
     type: INTEGER
     description: >
@@ -247,6 +266,7 @@ table:
       Signed value -- positive for buys, negative for sells. For total volume analysis use
       ABS(traded_size) or the abs_traded_size column.
     source: 'PosData.proto :: PositionEvent.size'
+    category: measure
   - name: counterparty
     type: STRING
     description: >
@@ -257,6 +277,7 @@ table:
     - counter party
     - other side
     - contra
+    category: dimension
   - name: revisor
     type: STRING
     description: >
@@ -265,6 +286,7 @@ table:
       made the correction. Internal audit field.
     synonyms:
     - amended by
+    category: dimension
   - name: transaction_id
     type: INTEGER
     description: >
@@ -275,6 +297,7 @@ table:
     - txn id
     - transaction
     source: 'PosData.proto :: PositionEvent.transactionId'
+    category: identifier
   - name: order_id
     type: INTEGER
     description: >
@@ -284,6 +307,7 @@ table:
     synonyms:
     - oid
     source: 'PosData.proto :: PositionEvent.orderId'
+    category: identifier
   - name: position_type
     type: INTEGER
     description: >
@@ -297,6 +321,7 @@ table:
       Rows with position_type IN (80, 69, 65, 68, 79) are excluded during clicktrade
       derivation. Value 84 = TRADE, 80 = POSITION.
     source: 'PosData.proto :: PositionEvent.positionType'
+    category: dimension
   - name: position_id
     type: INTEGER
     description: >
@@ -304,6 +329,7 @@ table:
       position management system. Used for position-level aggregation and reconciliation.
       Internal pipeline field.
     synonyms: []
+    category: identifier
   - name: trade_id
     type: INTEGER
     description: >
@@ -314,6 +340,7 @@ table:
     - fill id
     - fill identifier
     source: 'PosData.proto :: PositionEvent.fillId'
+    category: identifier
   - name: text
     type: STRING
     description: >
@@ -323,6 +350,7 @@ table:
     synonyms:
     - note
     - comment
+    category: dimension
   - name: mako_symbol
     type: STRING
     description: >
@@ -332,6 +360,7 @@ table:
     synonyms:
     - internal symbol
     - mako ticker
+    category: dimension
   - name: underlying_instrument_hash
     type: STRING
     description: >
@@ -341,6 +370,7 @@ table:
     synonyms:
     - underlying hash
     source: 'PosData.proto :: PositionEvent.instrumentHash (of underlying)'
+    category: identifier
   - name: underlying_exe_exch
     type: INTEGER
     description: >
@@ -350,6 +380,7 @@ table:
     synonyms:
     - underlying exchange id
     source: 'PosData.proto :: PositionEvent.executableExchange (of underlying)'
+    category: measure
   - name: underlying_exe_exch_name
     type: STRING
     description: >
@@ -357,6 +388,7 @@ table:
       derived from the numeric underlying_exe_exch code. Examples include AMEX, CBOE, NYSE.
     synonyms:
     - underlying exchange name
+    category: dimension
   - name: combo_type_name
     type: STRING
     description: >
@@ -372,6 +404,7 @@ table:
     - VERTICAL
     - STRADDLE
     - STRANGLE
+    category: dimension
   - name: executable_exchange
     type: INTEGER
     description: >
@@ -382,6 +415,7 @@ table:
     - exchange id
     - venue id
     source: 'PosData.proto :: PositionEvent.executableExchange'
+    category: measure
   - name: is_ref_component
     type: INTEGER
     description: >
@@ -391,6 +425,7 @@ table:
     synonyms:
     - hedge leg
     - ref leg
+    category: measure
   - name: liquid
     type: INTEGER
     description: >
@@ -399,6 +434,7 @@ table:
       Used for filtering to focus on liquid instruments in performance analysis.
     synonyms:
     - liquidity flag
+    category: measure
   - name: ref_inst_type_name
     type: STRING
     description: >
@@ -407,6 +443,7 @@ table:
       structures.
     synonyms:
     - reference instrument type
+    category: dimension
   - name: ref_term
     type: STRING
     description: >
@@ -414,6 +451,7 @@ table:
       to identify the maturity of the hedge leg. NULL for single-leg trades.
     synonyms:
     - reference term
+    category: dimension
   - name: total_traded_size
     type: STRING
     description: >
@@ -424,6 +462,7 @@ table:
     - total lots
     - total volume
     - total contracts
+    category: dimension
   - name: underlying_symbol
     type: STRING
     description: >
@@ -433,6 +472,7 @@ table:
     synonyms:
     - underlying ticker
     - underlying name
+    category: dimension
   - name: price
     type: FLOAT
     description: >
@@ -446,6 +486,7 @@ table:
     - trade price
     - traded price
     source: 'PosData.proto :: PositionEvent.price'
+    category: measure
   - name: trade_row_key
     type: STRING
     description: >
@@ -456,6 +497,7 @@ table:
     - trade key
     - row id
     - row key
+    category: identifier
   - name: trade_type
     type: STRING
     description: >
@@ -465,6 +507,7 @@ table:
     synonyms:
     - type
     - trade origin
+    category: dimension
   - name: trade_date
     type: DATE
     description: >
@@ -480,6 +523,7 @@ table:
       ALWAYS include a WHERE clause on trade_date. This is the partition column. Omitting it
       causes a full table scan. Use DATE literals like DATE '2024-01-15' or CURRENT_DATE().
     source: 'PosData.proto :: PositionEvent.tradeDate'
+    category: time
   - name: parent_is_combo
     type: BOOLEAN
     description: >
@@ -490,6 +534,7 @@ table:
     - is combo
     - is spread
     - combo trade
+    category: dimension
   - name: is_parent
     type: BOOLEAN
     description: >
@@ -501,6 +546,7 @@ table:
     business_rules: >
       For combo trades, filter is_parent=TRUE for combo-level metrics or is_parent=FALSE for
       leg-level breakdown. Single-leg trades have is_parent=FALSE.
+    category: dimension
   - name: is_auction
     type: BOOLEAN
     description: >
@@ -510,6 +556,7 @@ table:
     synonyms:
     - auction trade
     - during auction
+    category: dimension
   - name: contract_size
     type: FLOAT
     description: >
@@ -523,6 +570,7 @@ table:
     - contract multiplier
     - lot size
     source: derived from instrument reference data
+    category: measure
   - name: instrument_hash
     type: STRING
     description: >
@@ -536,6 +584,7 @@ table:
     - contract id
     - option id
     source: 'PosData.proto :: PositionEvent.instrumentHash'
+    category: identifier
   - name: parent_instrument_hash
     type: STRING
     description: >
@@ -545,6 +594,7 @@ table:
     synonyms:
     - parent hash
     - combo hash
+    category: identifier
   - name: parent_feed_code
     type: STRING
     description: >
@@ -552,6 +602,7 @@ table:
       the specific combo series as listed on the exchange. NULL for single-leg trades.
     synonyms:
     - combo feed code
+    category: dimension
   - name: no_legs
     type: INTEGER
     description: >
@@ -562,6 +613,7 @@ table:
     - num legs
     - leg count
     - number of legs
+    category: measure
   - name: leg_index
     type: STRING
     description: >
@@ -571,6 +623,7 @@ table:
     synonyms:
     - leg number
     - leg position
+    category: dimension
   - name: leg_ratio
     type: STRING
     description: >
@@ -580,6 +633,7 @@ table:
     synonyms:
     - ratio
     - leg multiplier
+    category: dimension
   - name: strike
     type: STRING
     description: >
@@ -592,6 +646,7 @@ table:
     - strike price
     - K
     - strike level
+    category: dimension
   - name: option_type
     type: STRING
     description: >
@@ -605,6 +660,7 @@ table:
     example_values:
     - C
     - P
+    category: dimension
   - name: currency_id
     type: INTEGER
     description: >
@@ -618,6 +674,7 @@ table:
     - 2
     - 4
     source: 'PosData.proto :: PositionEvent.currency'
+    category: identifier
   - name: parent_combo_type_name
     type: STRING
     description: >
@@ -626,6 +683,7 @@ table:
       single-leg trades.
     synonyms:
     - parent spread type
+    category: dimension
   - name: option_type_name
     type: STRING
     description: >
@@ -638,6 +696,7 @@ table:
     example_values:
     - Call
     - Put
+    category: dimension
   - name: underlying_inst_type_name
     type: STRING
     description: >
@@ -649,6 +708,7 @@ table:
     example_values:
     - STOCK
     - INDEX
+    category: dimension
   - name: inst_type_name
     type: STRING
     description: >
@@ -666,6 +726,7 @@ table:
     business_rules: >
       Only OPTION and COMBO values exist in this table due to the derivation filter
       inst_type_name IN ('OPTION', 'COMBO').
+    category: dimension
   - name: term
     type: STRING
     description: >
@@ -678,6 +739,7 @@ table:
     - expiry term
     - maturity
     - expiry bucket
+    category: dimension
   - name: expiry_timestamp
     type: STRING
     description: >
@@ -689,6 +751,7 @@ table:
     - expiration
     - maturity date
     - expiry date
+    category: dimension
   - name: is_bv_invalid
     type: STRING
     description: >
@@ -702,6 +765,7 @@ table:
     business_rules: >
       When is_bv_invalid is TRUE, treat instant_edge and slippage metrics with caution as the
       underlying reference price was stale at trade time.
+    category: dimension
   - name: option_exchange
     type: STRING
     description: >
@@ -711,6 +775,7 @@ table:
     synonyms:
     - option venue
     - exchange name
+    category: dimension
   - name: underlying_exchange
     type: STRING
     description: >
@@ -719,6 +784,7 @@ table:
       underlying market conditions at trade time.
     synonyms:
     - underlying venue
+    category: dimension
   - name: streamsource_stream_id
     type: STRING
     description: >
@@ -726,6 +792,7 @@ table:
       was consumed. Internal pipeline lineage field used for debugging data flow issues. Not
       used in analytical queries.
     synonyms: []
+    category: identifier
   - name: streamsource_event_id
     type: STRING
     description: >
@@ -733,6 +800,7 @@ table:
       click trade. Internal pipeline lineage field used for debugging and replay. Not used in
       analytical queries.
     synonyms: []
+    category: identifier
   - name: streamsource_message_id
     type: STRING
     description: >
@@ -740,6 +808,7 @@ table:
       Internal pipeline lineage field used for debugging and deduplication. Not used in
       analytical queries.
     synonyms: []
+    category: identifier
   - name: datasource_pid
     type: STRING
     description: >
@@ -747,6 +816,7 @@ table:
       this click trade record. Internal infrastructure field used for debugging pipeline issues.
       Not used in analytical queries.
     synonyms: []
+    category: dimension
   - name: datasource_hostname
     type: STRING
     description: >
@@ -754,6 +824,7 @@ table:
       trade record in the data pipeline. Internal infrastructure field used for debugging.
       Not used in analytical queries.
     synonyms: []
+    category: dimension
   - name: ref_delta
     type: FLOAT
     description: >
@@ -763,6 +834,7 @@ table:
       reference and execution.
     synonyms:
     - reference delta
+    category: measure
   - name: ref_gamma
     type: FLOAT
     description: >
@@ -771,6 +843,7 @@ table:
       decomposition calculations. Higher gamma means delta was changing faster.
     synonyms:
     - reference gamma
+    category: measure
   - name: mdepth_sequence_number
     type: INTEGER
     description: >
@@ -778,6 +851,7 @@ table:
       Identifies which specific market depth update was joined to the trade event. Used for
       data quality validation and pipeline debugging.
     synonyms: []
+    category: measure
   - name: curve_id
     type: STRING
     description: >
@@ -789,6 +863,7 @@ table:
     - vol curve
     - volatility curve
     - smile id
+    category: identifier
   - name: carry_id
     type: STRING
     description: >
@@ -798,6 +873,7 @@ table:
     synonyms:
     - dividend curve
     - carry curve
+    category: identifier
   - name: is_mdepth_snapshot
     type: BOOLEAN
     description: >
@@ -805,6 +881,7 @@ table:
       snapshot rather than an incremental update. Snapshots provide complete book state while
       incremental updates may miss levels. Affects reliability of bid/ask data at trade time.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot
     type: STRING
     description: >
@@ -812,6 +889,7 @@ table:
       from a full snapshot rather than an incremental update. Full snapshots are more reliable.
       Stored as STRING.
     synonyms: []
+    category: dimension
   - name: tv_offset
     type: STRING
     description: >
@@ -822,6 +900,7 @@ table:
     synonyms:
     - theo offset
     - tv adjustment
+    category: dimension
   - name: event_timestamp
     type: TIMESTAMP
     description: >
@@ -832,6 +911,7 @@ table:
     - event time
     - mako timestamp
     source: 'PosData.proto :: PositionEvent.transactionTimestamp'
+    category: time
   - name: event_timestamp_ns
     type: INTEGER
     description: >
@@ -840,6 +920,7 @@ table:
       and market depth when sub-second accuracy is needed.
     synonyms:
     - event time ns
+    category: time
   - name: option_mdepth_timestamp
     type: TIMESTAMP
     description: >
@@ -847,12 +928,14 @@ table:
       Indicates when the bid/ask prices (bid_price_0, ask_price_0) were captured. Used to
       assess how fresh the market depth data was relative to the trade execution.
     synonyms: []
+    category: time
   - name: option_mdepth_timestamp_ns
     type: INTEGER
     description: >
       Nanosecond-precision version of the option market depth timestamp at trade time. Used
       for precise staleness checks on the market depth data joined to this click trade.
     synonyms: []
+    category: time
   - name: theo_event_tx_timestamp
     type: STRING
     description: >
@@ -860,6 +943,7 @@ table:
       for this click trade. Indicates when the theoretical value, delta, and other Greeks were
       last computed. Staleness of this timestamp affects KPI accuracy.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns
     type: STRING
     description: >
@@ -867,6 +951,7 @@ table:
       Used for precise staleness analysis of the pricing model inputs used to compute
       instant_edge and slippage.
     synonyms: []
+    category: dimension
   - name: when_timestamp
     type: STRING
     description: >
@@ -874,12 +959,14 @@ table:
       in the KPI computation pipeline. Internal provenance field for tracking data freshness
       and pipeline latency. Not a trade execution timestamp.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns
     type: STRING
     description: >
       Nanosecond-precision version of the pipeline processing timestamp. Internal provenance
       field for detailed pipeline latency analysis. Not used in analytical queries.
     synonyms: []
+    category: dimension
   - name: bid_price_0
     type: FLOAT
     description: >
@@ -892,6 +979,7 @@ table:
     - best bid
     - bid
     - top bid
+    category: measure
   - name: bid_volume_0
     type: INTEGER
     description: >
@@ -902,6 +990,7 @@ table:
     - bid size 0
     - bid size
     - bid qty
+    category: measure
   - name: ask_price_0
     type: FLOAT
     description: >
@@ -915,6 +1004,7 @@ table:
     - ask
     - offer
     - top ask
+    category: measure
   - name: ask_volume_0
     type: INTEGER
     description: >
@@ -925,6 +1015,7 @@ table:
     - ask size 0
     - ask size
     - offer size
+    category: measure
   - name: ul_bid_price_0
     type: FLOAT
     description: >
@@ -933,12 +1024,14 @@ table:
       underlying bid/ask spread affects hedging cost estimates.
     synonyms:
     - underlying bid
+    category: measure
   - name: ul_bid_volume_0
     type: INTEGER
     description: >
       Volume available at the best underlying bid price at trade time. Indicates underlying
       market liquidity at the moment of click trade execution.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0
     type: FLOAT
     description: >
@@ -948,108 +1041,126 @@ table:
     synonyms:
     - underlying ask
     - underlying offer
+    category: measure
   - name: ul_ask_volume_0
     type: INTEGER
     description: >
       Volume available at the best underlying ask price at trade time. Indicates underlying
       market liquidity on the offer side at the moment of click trade execution.
     synonyms: []
+    category: measure
   - name: ul_bid_price_1
     type: FLOAT
     description: >
       Second-level bid price of the underlying instrument at trade time (depth level 1).
       Part of the underlying order book depth snapshot. Rarely queried directly.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_1
     type: INTEGER
     description: >
       Volume at the second-level underlying bid price at trade time. Part of the order book
       depth snapshot for underlying liquidity analysis.
     synonyms: []
+    category: measure
   - name: ul_ask_price_1
     type: FLOAT
     description: >
       Second-level ask price of the underlying instrument at trade time (depth level 1).
       Part of the underlying order book depth snapshot. Rarely queried directly.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_1
     type: INTEGER
     description: >
       Volume at the second-level underlying ask price at trade time. Part of the order book
       depth snapshot for underlying liquidity analysis.
     synonyms: []
+    category: measure
   - name: ul_bid_price_2
     type: FLOAT
     description: >
       Third-level bid price of the underlying instrument at trade time (depth level 2).
       Part of the 5-level underlying order book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_2
     type: INTEGER
     description: >
       Volume at the third-level underlying bid price at trade time. Part of the 5-level order
       book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_ask_price_2
     type: FLOAT
     description: >
       Third-level ask price of the underlying instrument at trade time (depth level 2).
       Part of the 5-level underlying order book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_2
     type: INTEGER
     description: >
       Volume at the third-level underlying ask price at trade time. Part of the 5-level order
       book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_bid_price_3
     type: FLOAT
     description: >
       Fourth-level bid price of the underlying instrument at trade time (depth level 3).
       Part of the 5-level underlying order book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_3
     type: INTEGER
     description: >
       Volume at the fourth-level underlying bid price at trade time. Part of the 5-level order
       book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_ask_price_3
     type: FLOAT
     description: >
       Fourth-level ask price of the underlying instrument at trade time (depth level 3).
       Part of the 5-level underlying order book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_3
     type: INTEGER
     description: >
       Volume at the fourth-level underlying ask price at trade time. Part of the 5-level order
       book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_bid_price_4
     type: FLOAT
     description: >
       Fifth-level bid price of the underlying instrument at trade time (depth level 4).
       Deepest level of the underlying order book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_4
     type: INTEGER
     description: >
       Volume at the fifth-level underlying bid price at trade time. Deepest level of the order
       book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_ask_price_4
     type: FLOAT
     description: >
       Fifth-level ask price of the underlying instrument at trade time (depth level 4).
       Deepest level of the underlying order book depth snapshot.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_4
     type: INTEGER
     description: >
       Volume at the fifth-level underlying ask price at trade time. Deepest level of the order
       book depth snapshot.
     synonyms: []
+    category: measure
   - name: delta_theo
     type: STRING
     description: >
@@ -1059,6 +1170,7 @@ table:
     synonyms:
     - delta theo
     - theo delta
+    category: dimension
   - name: raw_delta_mid_bv
     type: STRING
     description: >
@@ -1066,6 +1178,7 @@ table:
       at trade time. An intermediate computation used in delta-slippage decomposition before
       adjustments. Stored as STRING.
     synonyms: []
+    category: dimension
   - name: ref_base_val
     type: STRING
     description: >
@@ -1075,6 +1188,7 @@ table:
     synonyms:
     - reference base value
     - ref underlying price
+    category: dimension
   - name: adjusted_roll
     type: STRING
     description: >
@@ -1082,6 +1196,7 @@ table:
       slippage. When options are near expiry, roll effects can distort theo values and this
       adjustment compensates. Stored as STRING.
     synonyms: []
+    category: dimension
   - name: front_month_roll
     type: STRING
     description: >
@@ -1089,6 +1204,7 @@ table:
       contract at trade time. Used in roll-slippage decomposition to separate genuine
       slippage from expected roll effects. Stored as STRING.
     synonyms: []
+    category: dimension
   - name: curve_id_1s
     type: STRING
     description: >
@@ -1096,42 +1212,49 @@ table:
       which vol surface was active at t+1s. Changes from trade-time curve_id indicate a model
       update occurred.
     synonyms: []
+    category: dimension
   - name: carry_id_1s
     type: STRING
     description: >
       Carry/dividend curve identifier at the 1-second snapshot after this click trade.
       Identifies which carry model was active at t+1s.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_1s
     type: INTEGER
     description: >
       Market depth sequence number at the 1-second snapshot after trade. Identifies the
       specific market depth update used for the t+1s slippage calculation.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_1s
     type: BOOLEAN
     description: >
       Whether the market depth data at the 1-second horizon was from a full snapshot (TRUE)
       or incremental update (FALSE). Full snapshots are more reliable for slippage computation.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_1s
     type: STRING
     description: >
       Whether the theo pricing data at the 1-second horizon was from a full snapshot or
       incremental update. Affects reliability of Greeks and tv used in t+1s slippage calc.
     synonyms: []
+    category: dimension
   - name: event_timestamp_1s
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 1-second horizon after trade. The actual
       time of the snapshot used to compute t+1s slippage metrics.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_1s
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 1-second horizon after trade. Used for
       precise time difference calculations.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_1s
     type: TIMESTAMP
     description: >
@@ -1139,55 +1262,65 @@ table:
       calculated. May differ from event_timestamp_1s if the underlying update arrived at a
       different time.
     synonyms: []
+    category: time
   - name: calculated_base_val_timestamp_ns_1s
     type: INTEGER
     description: >
       Nanosecond-precision timestamp of the base value calculation at the 1-second horizon.
     synonyms: []
+    category: measure
   - name: theo_event_tx_timestamp_1s
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 1-second horizon. Records when the
       pricing model produced the t+1s theoretical values.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_1s
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 1-second horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_1s
     type: STRING
     description: >
       Pipeline processing timestamp for the 1-second horizon data. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_1s
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 1-second horizon. Internal
       provenance field.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_1s
     type: FLOAT
     description: >
       Best bid price of the underlying at the 1-second horizon after trade. Used for computing
       the underlying mid-price at t+1s for delta-slippage decomposition.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_0_1s
     type: INTEGER
     description: >
       Volume at the best underlying bid price at the 1-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0_1s
     type: FLOAT
     description: >
       Best ask price of the underlying at the 1-second horizon after trade. Used with
       ul_bid_price_0_1s to compute underlying mid-price at t+1s.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_0_1s
     type: INTEGER
     description: >
       Volume at the best underlying ask price at the 1-second horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_1s
     type: FLOAT
     description: >
@@ -1195,1162 +1328,1392 @@ table:
       the underlying price used for computing delta-slippage at the t+1s interval. Derived
       from the underlying bid/ask midpoint.
     synonyms: []
+    category: measure
   - name: tv_offset_1s
     type: STRING
     description: >
       Theoretical value offset (manual adjustment) applied at the 1-second horizon. Non-zero
       values indicate trader overrides were active at t+1s.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_1s
     type: STRING
     description: >
       Raw delta computed at the mid base value at the 1-second horizon. Intermediate
       computation for delta-slippage decomposition at t+1s.
     synonyms: []
+    category: dimension
   - name: ref_base_val_1s
     type: STRING
     description: >
       Reference base value (underlying price) at the 1-second horizon. The anchor underlying
       price used in KPI calculations at t+1s.
     synonyms: []
+    category: dimension
   - name: curve_id_5s
     type: STRING
     description: >
       Volatility curve identifier at the 5-second snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_5s
     type: STRING
     description: >
       Carry/dividend curve identifier at the 5-second snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_5s
     type: INTEGER
     description: >
       Market depth sequence number at the 5-second snapshot after trade.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_5s
     type: BOOLEAN
     description: >
       Whether market depth data at 5-second horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_5s
     type: STRING
     description: >
       Whether theo pricing data at 5-second horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_5s
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 5-second horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_5s
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 5-second horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_5s
     type: TIMESTAMP
     description: >
       Timestamp when the base value used for the 5-second horizon was calculated.
     synonyms: []
+    category: time
   - name: calculated_base_val_timestamp_ns_5s
     type: INTEGER
     description: >
       Nanosecond-precision base value calculation timestamp at the 5-second horizon.
     synonyms: []
+    category: measure
   - name: theo_event_tx_timestamp_5s
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 5-second horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_5s
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 5-second horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_5s
     type: STRING
     description: >
       Pipeline processing timestamp for the 5-second horizon data. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_5s
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 5-second horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_5s
     type: FLOAT
     description: >
       Best underlying bid price at the 5-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_0_5s
     type: INTEGER
     description: >
       Volume at the best underlying bid at the 5-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0_5s
     type: FLOAT
     description: >
       Best underlying ask price at the 5-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_0_5s
     type: INTEGER
     description: >
       Volume at the best underlying ask at the 5-second horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_5s
     type: FLOAT
     description: >
       Calculated base value (underlying price) at the 5-second horizon after trade. Used for
       delta-slippage decomposition at t+5s.
     synonyms: []
+    category: measure
   - name: tv_offset_5s
     type: STRING
     description: >
       Theoretical value offset at the 5-second horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_5s
     type: STRING
     description: >
       Raw delta at mid base value at the 5-second horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_5s
     type: STRING
     description: >
       Reference base value at the 5-second horizon.
     synonyms: []
+    category: dimension
   - name: curve_id_10s
     type: STRING
     description: >
       Volatility curve identifier at the 10-second snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_10s
     type: STRING
     description: >
       Carry/dividend curve identifier at the 10-second snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_10s
     type: INTEGER
     description: >
       Market depth sequence number at the 10-second snapshot after trade.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_10s
     type: BOOLEAN
     description: >
       Whether market depth data at 10-second horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_10s
     type: STRING
     description: >
       Whether theo pricing data at 10-second horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_10s
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 10-second horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_10s
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 10-second horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_10s
     type: TIMESTAMP
     description: >
       Timestamp when the base value used for the 10-second horizon was calculated.
     synonyms: []
+    category: time
   - name: calculated_base_val_timestamp_ns_10s
     type: INTEGER
     description: >
       Nanosecond-precision base value calculation timestamp at the 10-second horizon.
     synonyms: []
+    category: measure
   - name: theo_event_tx_timestamp_10s
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 10-second horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_10s
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 10-second horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_10s
     type: STRING
     description: >
       Pipeline processing timestamp for the 10-second horizon data. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_10s
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 10-second horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_10s
     type: FLOAT
     description: >
       Best underlying bid price at the 10-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_0_10s
     type: INTEGER
     description: >
       Volume at the best underlying bid at the 10-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0_10s
     type: FLOAT
     description: >
       Best underlying ask price at the 10-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_0_10s
     type: INTEGER
     description: >
       Volume at the best underlying ask at the 10-second horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_10s
     type: FLOAT
     description: >
       Calculated base value (underlying price) at the 10-second horizon after trade. Used for
       delta-slippage decomposition at the 10-second interval.
     synonyms: []
+    category: measure
   - name: tv_offset_10s
     type: STRING
     description: >
       Theoretical value offset at the 10-second horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_10s
     type: STRING
     description: >
       Raw delta at mid base value at the 10-second horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_10s
     type: STRING
     description: >
       Reference base value at the 10-second horizon.
     synonyms: []
+    category: dimension
   - name: curve_id_30s
     type: STRING
     description: >
       Volatility curve identifier at the 30-second snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_30s
     type: STRING
     description: >
       Carry/dividend curve identifier at the 30-second snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_30s
     type: INTEGER
     description: >
       Market depth sequence number at the 30-second snapshot after trade.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_30s
     type: BOOLEAN
     description: >
       Whether market depth data at 30-second horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_30s
     type: STRING
     description: >
       Whether theo pricing data at 30-second horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_30s
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 30-second horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_30s
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 30-second horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_30s
     type: TIMESTAMP
     description: >
       Timestamp when the base value used for the 30-second horizon was calculated.
     synonyms: []
+    category: time
   - name: calculated_base_val_timestamp_ns_30s
     type: INTEGER
     description: >
       Nanosecond-precision base value calculation timestamp at the 30-second horizon.
     synonyms: []
+    category: measure
   - name: theo_event_tx_timestamp_30s
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 30-second horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_30s
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 30-second horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_30s
     type: STRING
     description: >
       Pipeline processing timestamp for the 30-second horizon data. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_30s
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 30-second horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_30s
     type: FLOAT
     description: >
       Best underlying bid price at the 30-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_0_30s
     type: INTEGER
     description: >
       Volume at the best underlying bid at the 30-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0_30s
     type: FLOAT
     description: >
       Best underlying ask price at the 30-second horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_0_30s
     type: INTEGER
     description: >
       Volume at the best underlying ask at the 30-second horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_30s
     type: FLOAT
     description: >
       Calculated base value (underlying price) at the 30-second horizon after trade. Used for
       delta-slippage decomposition at the 30-second interval.
     synonyms: []
+    category: measure
   - name: tv_offset_30s
     type: STRING
     description: >
       Theoretical value offset at the 30-second horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_30s
     type: STRING
     description: >
       Raw delta at mid base value at the 30-second horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_30s
     type: STRING
     description: >
       Reference base value at the 30-second horizon.
     synonyms: []
+    category: dimension
   - name: curve_id_1m
     type: STRING
     description: >
       Volatility curve identifier at the 1-minute snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_1m
     type: STRING
     description: >
       Carry/dividend curve identifier at the 1-minute snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_1m
     type: INTEGER
     description: >
       Market depth sequence number at the 1-minute snapshot after trade.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_1m
     type: BOOLEAN
     description: >
       Whether market depth data at 1-minute horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_1m
     type: STRING
     description: >
       Whether theo pricing data at 1-minute horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_1m
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 1-minute horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_1m
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 1-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_1m
     type: TIMESTAMP
     description: >
       Timestamp when the base value used for the 1-minute horizon was calculated.
     synonyms: []
+    category: time
   - name: calculated_base_val_timestamp_ns_1m
     type: INTEGER
     description: >
       Nanosecond-precision base value calculation timestamp at the 1-minute horizon.
     synonyms: []
+    category: measure
   - name: theo_event_tx_timestamp_1m
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 1-minute horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_1m
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 1-minute horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_1m
     type: STRING
     description: >
       Pipeline processing timestamp for the 1-minute horizon data. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_1m
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 1-minute horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_1m
     type: FLOAT
     description: >
       Best underlying bid price at the 1-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_0_1m
     type: INTEGER
     description: >
       Volume at the best underlying bid at the 1-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0_1m
     type: FLOAT
     description: >
       Best underlying ask price at the 1-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_0_1m
     type: INTEGER
     description: >
       Volume at the best underlying ask at the 1-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_1m
     type: FLOAT
     description: >
       Calculated base value (underlying price) at the 1-minute horizon after trade. Used for
       delta-slippage decomposition at the 1-minute interval.
     synonyms: []
+    category: measure
   - name: tv_offset_1m
     type: STRING
     description: >
       Theoretical value offset at the 1-minute horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_1m
     type: STRING
     description: >
       Raw delta at mid base value at the 1-minute horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_1m
     type: STRING
     description: >
       Reference base value at the 1-minute horizon.
     synonyms: []
+    category: dimension
   - name: curve_id_5m
     type: STRING
     description: >
       Volatility curve identifier at the 5-minute snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_5m
     type: STRING
     description: >
       Carry/dividend curve identifier at the 5-minute snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_5m
     type: INTEGER
     description: >
       Market depth sequence number at the 5-minute snapshot after trade.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_5m
     type: BOOLEAN
     description: >
       Whether market depth data at 5-minute horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_5m
     type: STRING
     description: >
       Whether theo pricing data at 5-minute horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_5m
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 5-minute horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_5m
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 5-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_5m
     type: TIMESTAMP
     description: >
       Timestamp when the base value used for the 5-minute horizon was calculated.
     synonyms: []
+    category: time
   - name: calculated_base_val_timestamp_ns_5m
     type: INTEGER
     description: >
       Nanosecond-precision base value calculation timestamp at the 5-minute horizon.
     synonyms: []
+    category: measure
   - name: theo_event_tx_timestamp_5m
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 5-minute horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_5m
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 5-minute horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_5m
     type: STRING
     description: >
       Pipeline processing timestamp for the 5-minute horizon data. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_5m
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 5-minute horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_5m
     type: FLOAT
     description: >
       Best underlying bid price at the 5-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_0_5m
     type: INTEGER
     description: >
       Volume at the best underlying bid at the 5-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0_5m
     type: FLOAT
     description: >
       Best underlying ask price at the 5-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_0_5m
     type: INTEGER
     description: >
       Volume at the best underlying ask at the 5-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_5m
     type: FLOAT
     description: >
       Calculated base value (underlying price) at the 5-minute horizon after trade. Used for
       delta-slippage decomposition at the 5-minute interval.
     synonyms: []
+    category: measure
   - name: tv_offset_5m
     type: STRING
     description: >
       Theoretical value offset at the 5-minute horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_5m
     type: STRING
     description: >
       Raw delta at mid base value at the 5-minute horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_5m
     type: STRING
     description: >
       Reference base value at the 5-minute horizon.
     synonyms: []
+    category: dimension
   - name: curve_id_10m
     type: STRING
     description: >
       Volatility curve identifier at the 10-minute snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_10m
     type: STRING
     description: >
       Carry/dividend curve identifier at the 10-minute snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_10m
     type: INTEGER
     description: >
       Market depth sequence number at the 10-minute snapshot after trade.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_10m
     type: BOOLEAN
     description: >
       Whether market depth data at 10-minute horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_10m
     type: STRING
     description: >
       Whether theo pricing data at 10-minute horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_10m
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 10-minute horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_10m
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 10-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_10m
     type: TIMESTAMP
     description: >
       Timestamp when the base value used for the 10-minute horizon was calculated.
     synonyms: []
+    category: time
   - name: calculated_base_val_timestamp_ns_10m
     type: INTEGER
     description: >
       Nanosecond-precision base value calculation timestamp at the 10-minute horizon.
     synonyms: []
+    category: measure
   - name: theo_event_tx_timestamp_10m
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 10-minute horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_10m
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 10-minute horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_10m
     type: STRING
     description: >
       Pipeline processing timestamp for the 10-minute horizon data. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_10m
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 10-minute horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_10m
     type: FLOAT
     description: >
       Best underlying bid price at the 10-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_0_10m
     type: INTEGER
     description: >
       Volume at the best underlying bid at the 10-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0_10m
     type: FLOAT
     description: >
       Best underlying ask price at the 10-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_0_10m
     type: INTEGER
     description: >
       Volume at the best underlying ask at the 10-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_10m
     type: FLOAT
     description: >
       Calculated base value (underlying price) at the 10-minute horizon after trade. Used for
       delta-slippage decomposition at the 10-minute interval.
     synonyms: []
+    category: measure
   - name: tv_offset_10m
     type: STRING
     description: >
       Theoretical value offset at the 10-minute horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_10m
     type: STRING
     description: >
       Raw delta at mid base value at the 10-minute horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_10m
     type: STRING
     description: >
       Reference base value at the 10-minute horizon.
     synonyms: []
+    category: dimension
   - name: curve_id_30m
     type: STRING
     description: >
       Volatility curve identifier at the 30-minute snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_30m
     type: STRING
     description: >
       Carry/dividend curve identifier at the 30-minute snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_30m
     type: INTEGER
     description: >
       Market depth sequence number at the 30-minute snapshot after trade.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_30m
     type: BOOLEAN
     description: >
       Whether market depth data at 30-minute horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_30m
     type: STRING
     description: >
       Whether theo pricing data at 30-minute horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_30m
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 30-minute horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_30m
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 30-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_30m
     type: TIMESTAMP
     description: >
       Timestamp when the base value used for the 30-minute horizon was calculated.
     synonyms: []
+    category: time
   - name: calculated_base_val_timestamp_ns_30m
     type: INTEGER
     description: >
       Nanosecond-precision base value calculation timestamp at the 30-minute horizon.
     synonyms: []
+    category: measure
   - name: theo_event_tx_timestamp_30m
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 30-minute horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_30m
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 30-minute horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_30m
     type: STRING
     description: >
       Pipeline processing timestamp for the 30-minute horizon data. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_30m
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 30-minute horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_30m
     type: FLOAT
     description: >
       Best underlying bid price at the 30-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_0_30m
     type: INTEGER
     description: >
       Volume at the best underlying bid at the 30-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0_30m
     type: FLOAT
     description: >
       Best underlying ask price at the 30-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_0_30m
     type: INTEGER
     description: >
       Volume at the best underlying ask at the 30-minute horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_30m
     type: FLOAT
     description: >
       Calculated base value (underlying price) at the 30-minute horizon after trade. Used for
       delta-slippage decomposition at the 30-minute interval.
     synonyms: []
+    category: measure
   - name: tv_offset_30m
     type: STRING
     description: >
       Theoretical value offset at the 30-minute horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_30m
     type: STRING
     description: >
       Raw delta at mid base value at the 30-minute horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_30m
     type: STRING
     description: >
       Reference base value at the 30-minute horizon.
     synonyms: []
+    category: dimension
   - name: curve_id_1h
     type: STRING
     description: >
       Volatility curve identifier at the 1-hour snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_1h
     type: STRING
     description: >
       Carry/dividend curve identifier at the 1-hour snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_1h
     type: INTEGER
     description: >
       Market depth sequence number at the 1-hour snapshot after trade.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_1h
     type: BOOLEAN
     description: >
       Whether market depth data at 1-hour horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_1h
     type: STRING
     description: >
       Whether theo pricing data at 1-hour horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_1h
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 1-hour horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_1h
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 1-hour horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_1h
     type: TIMESTAMP
     description: >
       Timestamp when the base value used for the 1-hour horizon was calculated.
     synonyms: []
+    category: time
   - name: calculated_base_val_timestamp_ns_1h
     type: INTEGER
     description: >
       Nanosecond-precision base value calculation timestamp at the 1-hour horizon.
     synonyms: []
+    category: measure
   - name: theo_event_tx_timestamp_1h
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 1-hour horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_1h
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 1-hour horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_1h
     type: STRING
     description: >
       Pipeline processing timestamp for the 1-hour horizon data. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_1h
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 1-hour horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_1h
     type: FLOAT
     description: >
       Best underlying bid price at the 1-hour horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_bid_volume_0_1h
     type: INTEGER
     description: >
       Volume at the best underlying bid at the 1-hour horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_price_0_1h
     type: FLOAT
     description: >
       Best underlying ask price at the 1-hour horizon after trade.
     synonyms: []
+    category: measure
   - name: ul_ask_volume_0_1h
     type: INTEGER
     description: >
       Volume at the best underlying ask at the 1-hour horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_1h
     type: FLOAT
     description: >
       Calculated base value (underlying price) at the 1-hour horizon after trade. Used for
       delta-slippage decomposition at the 1-hour interval.
     synonyms: []
+    category: measure
   - name: tv_offset_1h
     type: STRING
     description: >
       Theoretical value offset at the 1-hour horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_1h
     type: STRING
     description: >
       Raw delta at mid base value at the 1-hour horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_1h
     type: STRING
     description: >
       Reference base value at the 1-hour horizon.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_eod
     type: INTEGER
     description: >
       Market depth sequence number at the end-of-day snapshot after trade.
     synonyms: []
+    category: measure
   - name: is_mdepth_snapshot_eod
     type: BOOLEAN
     description: >
       Whether market depth data at end-of-day horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_eod
     type: STRING
     description: >
       Whether theo pricing data at end-of-day horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_eod
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the end-of-day horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_eod
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the end-of-day horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_eod
     type: STRING
     description: >
       Timestamp when the base value used for the end-of-day horizon was calculated.
     synonyms: []
+    category: dimension
   - name: calculated_base_val_timestamp_ns_eod
     type: STRING
     description: >
       Nanosecond-precision base value calculation timestamp at the end-of-day horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_eod
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the end-of-day horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_eod
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the end-of-day horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_eod
     type: STRING
     description: >
       Pipeline processing timestamp for the end-of-day horizon. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_eod
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the end-of-day horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_eod
     type: STRING
     description: >
       Best underlying bid price at the end-of-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: ul_bid_volume_0_eod
     type: STRING
     description: >
       Volume at the best underlying bid at the end-of-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: ul_ask_price_0_eod
     type: STRING
     description: >
       Best underlying ask price at the end-of-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: ul_ask_volume_0_eod
     type: STRING
     description: >
       Volume at the best underlying ask at the end-of-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: tv_offset_eod
     type: STRING
     description: >
       Theoretical value offset at the end-of-day horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_eod
     type: STRING
     description: >
       Raw delta at mid base value at the end-of-day horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_eod
     type: STRING
     description: >
       Reference base value at the end-of-day horizon.
     synonyms: []
+    category: dimension
   - name: curve_id_1D
     type: STRING
     description: >
       Volatility curve identifier at the 1-day snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_1D
     type: STRING
     description: >
       Carry/dividend curve identifier at the 1-day snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_1D
     type: STRING
     description: >
       Market depth sequence number at the 1-day snapshot after trade.
     synonyms: []
+    category: dimension
   - name: is_mdepth_snapshot_1D
     type: STRING
     description: >
       Whether market depth data at 1-day horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_1D
     type: STRING
     description: >
       Whether theo pricing data at 1-day horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_1D
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 1-day horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_1D
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 1-day horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_1D
     type: STRING
     description: >
       Timestamp when the base value used for the 1-day horizon was calculated.
     synonyms: []
+    category: dimension
   - name: calculated_base_val_timestamp_ns_1D
     type: STRING
     description: >
       Nanosecond-precision base value calculation timestamp at the 1-day horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_1D
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 1-day horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_1D
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 1-day horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_1D
     type: STRING
     description: >
       Pipeline processing timestamp for the 1-day horizon. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_1D
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 1-day horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_1D
     type: STRING
     description: >
       Best underlying bid price at the 1-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: ul_bid_volume_0_1D
     type: STRING
     description: >
       Volume at the best underlying bid at the 1-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: ul_ask_price_0_1D
     type: STRING
     description: >
       Best underlying ask price at the 1-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: ul_ask_volume_0_1D
     type: STRING
     description: >
       Volume at the best underlying ask at the 1-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: tv_offset_1D
     type: STRING
     description: >
       Theoretical value offset at the 1-day horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_1D
     type: STRING
     description: >
       Raw delta at mid base value at the 1-day horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_1D
     type: STRING
     description: >
       Reference base value at the 1-day horizon.
     synonyms: []
+    category: dimension
   - name: curve_id_5D
     type: STRING
     description: >
       Volatility curve identifier at the 5-day snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: carry_id_5D
     type: STRING
     description: >
       Carry/dividend curve identifier at the 5-day snapshot after this click trade.
     synonyms: []
+    category: dimension
   - name: mdepth_sequence_number_5D
     type: STRING
     description: >
       Market depth sequence number at the 5-day snapshot after trade.
     synonyms: []
+    category: dimension
   - name: is_mdepth_snapshot_5D
     type: STRING
     description: >
       Whether market depth data at 5-day horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: is_theodata_snapshot_5D
     type: STRING
     description: >
       Whether theo pricing data at 5-day horizon was from a full snapshot.
     synonyms: []
+    category: dimension
   - name: event_timestamp_5D
     type: TIMESTAMP
     description: >
       Timestamp of the theodata/market event at the 5-day horizon after trade.
     synonyms: []
+    category: time
   - name: event_timestamp_ns_5D
     type: INTEGER
     description: >
       Nanosecond-precision event timestamp at the 5-day horizon after trade.
     synonyms: []
+    category: measure
   - name: calculated_base_val_timestamp_5D
     type: STRING
     description: >
       Timestamp when the base value used for the 5-day horizon was calculated.
     synonyms: []
+    category: dimension
   - name: calculated_base_val_timestamp_ns_5D
     type: STRING
     description: >
       Nanosecond-precision base value calculation timestamp at the 5-day horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_5D
     type: STRING
     description: >
       Transaction timestamp of the theo event used at the 5-day horizon.
     synonyms: []
+    category: dimension
   - name: theo_event_tx_timestamp_ns_5D
     type: STRING
     description: >
       Nanosecond-precision theo event transaction timestamp at the 5-day horizon.
     synonyms: []
+    category: dimension
   - name: when_timestamp_5D
     type: STRING
     description: >
       Pipeline processing timestamp for the 5-day horizon. Internal provenance field.
     synonyms: []
+    category: dimension
   - name: when_timestamp_ns_5D
     type: STRING
     description: >
       Nanosecond-precision pipeline processing timestamp for the 5-day horizon.
     synonyms: []
+    category: dimension
   - name: ul_bid_price_0_5D
     type: STRING
     description: >
       Best underlying bid price at the 5-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: ul_bid_volume_0_5D
     type: STRING
     description: >
       Volume at the best underlying bid at the 5-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: ul_ask_price_0_5D
     type: STRING
     description: >
       Best underlying ask price at the 5-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: ul_ask_volume_0_5D
     type: STRING
     description: >
       Volume at the best underlying ask at the 5-day horizon after trade.
     synonyms: []
+    category: dimension
   - name: tv_offset_5D
     type: STRING
     description: >
       Theoretical value offset at the 5-day horizon.
     synonyms: []
+    category: dimension
   - name: raw_delta_mid_bv_5D
     type: STRING
     description: >
       Raw delta at mid base value at the 5-day horizon.
     synonyms: []
+    category: dimension
   - name: ref_base_val_5D
     type: STRING
     description: >
       Reference base value at the 5-day horizon.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_1s
     type: BOOLEAN
     description: >
@@ -2359,6 +2722,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_5s
     type: BOOLEAN
     description: >
@@ -2367,6 +2731,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_10s
     type: BOOLEAN
     description: >
@@ -2375,6 +2740,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_30s
     type: BOOLEAN
     description: >
@@ -2383,6 +2749,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_1m
     type: BOOLEAN
     description: >
@@ -2391,6 +2758,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_5m
     type: BOOLEAN
     description: >
@@ -2399,6 +2767,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_10m
     type: BOOLEAN
     description: >
@@ -2407,6 +2776,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_30m
     type: BOOLEAN
     description: >
@@ -2415,6 +2785,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_1h
     type: BOOLEAN
     description: >
@@ -2423,6 +2794,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_eod
     type: BOOLEAN
     description: >
@@ -2431,6 +2803,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_1D
     type: BOOLEAN
     description: >
@@ -2439,6 +2812,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth_5D
     type: BOOLEAN
     description: >
@@ -2447,6 +2821,7 @@ table:
       may not reflect continuous market conditions and slippage metrics should be interpreted
       with caution.
     synonyms: []
+    category: dimension
   - name: is_auction_marketdepth
     type: BOOLEAN
     description: >
@@ -2455,6 +2830,7 @@ table:
       ask_price_0) may not reflect continuous trading conditions and instant_edge calculations
       should be treated with caution.
     synonyms: []
+    category: dimension
   - name: exchange
     type: STRING
     description: >
@@ -2473,6 +2849,7 @@ table:
     - PHLX
     - NASDAQ
     source: 'derived from PosData.proto :: PositionEvent.routedExchange (pb.ExchCode enum)'
+    category: dimension
   - name: mid_base_val
     type: STRING
     description: >
@@ -2484,6 +2861,7 @@ table:
     - mid underlying
     - base mid
     formula: 'ref_base_val'
+    category: dimension
   - name: base_adjustment
     type: INTEGER
     description: >
@@ -2493,6 +2871,7 @@ table:
     synonyms:
     - bv adjustment
     formula: '0'
+    category: measure
   - name: fees
     type: INTEGER
     description: >
@@ -2509,6 +2888,7 @@ table:
       Fees are always non-negative. Use instant_pnl_w_fees for net P&L which already subtracts
       fees, or compute instant_pnl - fees manually.
     formula: '0'
+    category: measure
   - name: trade_aggressor_side
     type: STRING
     description: >
@@ -2523,6 +2903,7 @@ table:
     - BUY
     - SELL
     formula: "CASE WHEN price > tv THEN 'BUY' WHEN price < tv THEN 'SELL' ELSE 'NULL' END"
+    category: dimension
   - name: trade_side
     type: STRING
     description: >
@@ -2540,6 +2921,7 @@ table:
     - SELL
     source: 'derived from PosData.proto :: PositionEvent.size (sign determines side)'
     formula: "CASE WHEN size > 0 THEN 'BUY' WHEN size < 0 THEN 'SELL' ELSE 'NULL' END"
+    category: dimension
   - name: size
     type: STRING
     description: >
@@ -2552,6 +2934,7 @@ table:
     - contracts
     - volume
     source: 'PosData.proto :: PositionEvent.size'
+    category: dimension
   - name: buy_sell_multiplier
     type: INTEGER
     description: >
@@ -2565,6 +2948,7 @@ table:
     - 1
     - -1
     formula: "CASE WHEN trade_side IN ('BUY', '66') THEN 1 WHEN trade_side IN ('SELL', '83') THEN -1 ELSE 0 END"
+    category: measure
   - name: vol_path_estimate_1s
     type: FLOAT
     description: >
@@ -2574,6 +2958,7 @@ table:
     synonyms:
     - vol path 1s
     formula: '((calculated_base_val_1s - mid_base_val) * ((delta_1s - raw_delta_1s) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_1s_per_unit
     type: FLOAT
     description: >
@@ -2584,6 +2969,7 @@ table:
     - vol slip 1s
     - volatility slippage 1s
     formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_1s
     type: STRING
     description: >
@@ -2593,6 +2979,7 @@ table:
     synonyms:
     - vol slip 1s
     formula: '((vol_1s - vol) * ((vega_1s + vega) / 2) - vol_path_estimate_1s) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_1s_per_unit
     type: FLOAT
     description: >
@@ -2603,6 +2990,7 @@ table:
     - other slip 1s
     - residual slippage 1s
     formula: '(tv_change_buysell_1s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1s_per_unit + roll_slippage_1s_per_unit)'
+    category: measure
   - name: other_slippage_1s
     type: STRING
     description: >
@@ -2611,6 +2999,7 @@ table:
     synonyms:
     - other slip 1s
     formula: '(tv_change_buysell_1s * contract_size * ABS(size)) - (delta_slippage_1s + roll_slippage_1s)'
+    category: dimension
   - name: tv_1s
     type: FLOAT
     description: >
@@ -2620,6 +3009,7 @@ table:
     synonyms:
     - theo 1s
     - fair value 1s
+    category: measure
   - name: delta_1s
     type: FLOAT
     description: >
@@ -2628,6 +3018,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 1s
+    category: measure
   - name: gamma_1s
     type: FLOAT
     description: >
@@ -2636,6 +3027,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 1s
+    category: measure
   - name: vega_1s
     type: FLOAT
     description: >
@@ -2643,6 +3035,7 @@ table:
       volatility at t+1s. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 1s
+    category: measure
   - name: theta_1s
     type: FLOAT
     description: >
@@ -2650,6 +3043,7 @@ table:
       erosion due to passage of time at t+1s.
     synonyms:
     - theta 1s
+    category: measure
   - name: under_1s
     type: FLOAT
     description: >
@@ -2658,6 +3052,7 @@ table:
     synonyms:
     - spot 1s
     - underlying 1s
+    category: measure
   - name: vol_1s
     type: STRING
     description: >
@@ -2667,23 +3062,27 @@ table:
     synonyms:
     - IV 1s
     - implied vol 1s
+    category: dimension
   - name: rho_1s
     type: FLOAT
     description: >
       Option rho at the 1-second snapshot after trade, measuring sensitivity to interest rate
       changes at t+1s. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_1s
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the 1-second snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_1s
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the 1-second snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_1s
     type: FLOAT
     description: >
@@ -2691,12 +3090,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+1s.
     synonyms:
     - moneyness 1s
+    category: measure
   - name: roll_1s
     type: FLOAT
     description: >
       Roll adjustment value at the 1-second snapshot. Captures the calendar roll effect on
       option pricing at t+1s.
     synonyms: []
+    category: measure
   - name: tv_change_1s
     type: FLOAT
     description: >
@@ -2707,6 +3108,7 @@ table:
     - tv move 1s
     - theo change 1s
     formula: '(adjusted_tv_1s - tv)'
+    category: measure
   - name: tv_change_buysell_1s
     type: FLOAT
     description: >
@@ -2719,6 +3121,7 @@ table:
     - slippage 1s
     - realized pnl 1s
     formula: '(adjusted_tv_1s - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_1s_per_unit
     type: FLOAT
     description: >
@@ -2728,6 +3131,7 @@ table:
     synonyms:
     - roll slip 1s
     formula: '((reference_roll_1s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_1s
     type: STRING
     description: >
@@ -2735,6 +3139,7 @@ table:
     synonyms:
     - roll slip 1s
     formula: '((reference_roll_1s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_1s
     type: FLOAT
     description: >
@@ -2742,6 +3147,7 @@ table:
       applied. May differ from tv_1s when adjustments are active.
     synonyms: []
     formula: 'tv_1s + delta_1s * (calculated_base_val_1s - (under_1s - roll_1s)) + 0.5 * gamma_1s * POW((calculated_base_val_1s - (under_1s - roll_1s)), 2)'
+    category: measure
   - name: delta_slippage_1s_per_unit
     type: FLOAT
     description: >
@@ -2751,6 +3157,7 @@ table:
     synonyms:
     - delta slip 1s
     formula: '((calculated_base_val_1s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_1s
     type: STRING
     description: >
@@ -2759,6 +3166,7 @@ table:
     synonyms:
     - delta slip 1s
     formula: '((calculated_base_val_1s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_5s
     type: FLOAT
     description: >
@@ -2768,6 +3176,7 @@ table:
     synonyms:
     - vol path 5s
     formula: '((calculated_base_val_5s - mid_base_val) * ((delta_5s - raw_delta_5s) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_5s_per_unit
     type: FLOAT
     description: >
@@ -2778,6 +3187,7 @@ table:
     - vol slip 5s
     - volatility slippage 5s
     formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_5s
     type: STRING
     description: >
@@ -2787,6 +3197,7 @@ table:
     synonyms:
     - vol slip 5s
     formula: '((vol_5s - vol) * ((vega_5s + vega) / 2) - vol_path_estimate_5s) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_5s_per_unit
     type: FLOAT
     description: >
@@ -2797,6 +3208,7 @@ table:
     - other slip 5s
     - residual slippage 5s
     formula: '(tv_change_buysell_5s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5s_per_unit + roll_slippage_5s_per_unit)'
+    category: measure
   - name: other_slippage_5s
     type: STRING
     description: >
@@ -2805,6 +3217,7 @@ table:
     synonyms:
     - other slip 5s
     formula: '(tv_change_buysell_5s * contract_size * ABS(size)) - (delta_slippage_5s + roll_slippage_5s)'
+    category: dimension
   - name: tv_5s
     type: FLOAT
     description: >
@@ -2814,6 +3227,7 @@ table:
     synonyms:
     - theo 5s
     - fair value 5s
+    category: measure
   - name: delta_5s
     type: FLOAT
     description: >
@@ -2822,6 +3236,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 5s
+    category: measure
   - name: gamma_5s
     type: FLOAT
     description: >
@@ -2830,6 +3245,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 5s
+    category: measure
   - name: vega_5s
     type: FLOAT
     description: >
@@ -2837,6 +3253,7 @@ table:
       volatility at t+5s. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 5s
+    category: measure
   - name: theta_5s
     type: FLOAT
     description: >
@@ -2844,6 +3261,7 @@ table:
       erosion due to passage of time at t+5s.
     synonyms:
     - theta 5s
+    category: measure
   - name: under_5s
     type: FLOAT
     description: >
@@ -2852,6 +3270,7 @@ table:
     synonyms:
     - spot 5s
     - underlying 5s
+    category: measure
   - name: vol_5s
     type: STRING
     description: >
@@ -2861,23 +3280,27 @@ table:
     synonyms:
     - IV 5s
     - implied vol 5s
+    category: dimension
   - name: rho_5s
     type: FLOAT
     description: >
       Option rho at the 5-second snapshot after trade, measuring sensitivity to interest rate
       changes at t+5s. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_5s
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the 5-second snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_5s
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the 5-second snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_5s
     type: FLOAT
     description: >
@@ -2885,12 +3308,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+5s.
     synonyms:
     - moneyness 5s
+    category: measure
   - name: roll_5s
     type: FLOAT
     description: >
       Roll adjustment value at the 5-second snapshot. Captures the calendar roll effect on
       option pricing at t+5s.
     synonyms: []
+    category: measure
   - name: tv_change_5s
     type: FLOAT
     description: >
@@ -2901,6 +3326,7 @@ table:
     - tv move 5s
     - theo change 5s
     formula: '(adjusted_tv_5s - tv)'
+    category: measure
   - name: tv_change_buysell_5s
     type: FLOAT
     description: >
@@ -2913,6 +3339,7 @@ table:
     - slippage 5s
     - realized pnl 5s
     formula: '(adjusted_tv_5s - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_5s_per_unit
     type: FLOAT
     description: >
@@ -2922,6 +3349,7 @@ table:
     synonyms:
     - roll slip 5s
     formula: '((reference_roll_5s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_5s
     type: STRING
     description: >
@@ -2929,6 +3357,7 @@ table:
     synonyms:
     - roll slip 5s
     formula: '((reference_roll_5s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_5s
     type: FLOAT
     description: >
@@ -2936,6 +3365,7 @@ table:
       applied. May differ from tv_5s when adjustments are active.
     synonyms: []
     formula: 'tv_5s + delta_5s * (calculated_base_val_5s - (under_5s - roll_5s)) + 0.5 * gamma_5s * POW((calculated_base_val_5s - (under_5s - roll_5s)), 2)'
+    category: measure
   - name: delta_slippage_5s_per_unit
     type: FLOAT
     description: >
@@ -2945,6 +3375,7 @@ table:
     synonyms:
     - delta slip 5s
     formula: '((calculated_base_val_5s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_5s
     type: STRING
     description: >
@@ -2953,6 +3384,7 @@ table:
     synonyms:
     - delta slip 5s
     formula: '((calculated_base_val_5s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_10s
     type: FLOAT
     description: >
@@ -2962,6 +3394,7 @@ table:
     synonyms:
     - vol path 10s
     formula: '((calculated_base_val_10s - mid_base_val) * ((delta_10s - raw_delta_10s) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_10s_per_unit
     type: FLOAT
     description: >
@@ -2972,6 +3405,7 @@ table:
     - vol slip 10s
     - volatility slippage 10s
     formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_10s
     type: STRING
     description: >
@@ -2981,6 +3415,7 @@ table:
     synonyms:
     - vol slip 10s
     formula: '((vol_10s - vol) * ((vega_10s + vega) / 2) - vol_path_estimate_10s) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_10s_per_unit
     type: FLOAT
     description: >
@@ -2991,6 +3426,7 @@ table:
     - other slip 10s
     - residual slippage 10s
     formula: '(tv_change_buysell_10s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10s_per_unit + roll_slippage_10s_per_unit)'
+    category: measure
   - name: other_slippage_10s
     type: STRING
     description: >
@@ -2999,6 +3435,7 @@ table:
     synonyms:
     - other slip 10s
     formula: '(tv_change_buysell_10s * contract_size * ABS(size)) - (delta_slippage_10s + roll_slippage_10s)'
+    category: dimension
   - name: tv_10s
     type: FLOAT
     description: >
@@ -3008,6 +3445,7 @@ table:
     synonyms:
     - theo 10s
     - fair value 10s
+    category: measure
   - name: delta_10s
     type: FLOAT
     description: >
@@ -3016,6 +3454,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 10s
+    category: measure
   - name: gamma_10s
     type: FLOAT
     description: >
@@ -3024,6 +3463,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 10s
+    category: measure
   - name: vega_10s
     type: FLOAT
     description: >
@@ -3031,6 +3471,7 @@ table:
       volatility at t+10s. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 10s
+    category: measure
   - name: theta_10s
     type: FLOAT
     description: >
@@ -3038,6 +3479,7 @@ table:
       erosion due to passage of time at t+10s.
     synonyms:
     - theta 10s
+    category: measure
   - name: under_10s
     type: FLOAT
     description: >
@@ -3046,6 +3488,7 @@ table:
     synonyms:
     - spot 10s
     - underlying 10s
+    category: measure
   - name: vol_10s
     type: STRING
     description: >
@@ -3055,23 +3498,27 @@ table:
     synonyms:
     - IV 10s
     - implied vol 10s
+    category: dimension
   - name: rho_10s
     type: FLOAT
     description: >
       Option rho at the 10-second snapshot after trade, measuring sensitivity to interest rate
       changes at t+10s. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_10s
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the 10-second snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_10s
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the 10-second snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_10s
     type: FLOAT
     description: >
@@ -3079,12 +3526,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+10s.
     synonyms:
     - moneyness 10s
+    category: measure
   - name: roll_10s
     type: FLOAT
     description: >
       Roll adjustment value at the 10-second snapshot. Captures the calendar roll effect on
       option pricing at t+10s.
     synonyms: []
+    category: measure
   - name: tv_change_10s
     type: FLOAT
     description: >
@@ -3095,6 +3544,7 @@ table:
     - tv move 10s
     - theo change 10s
     formula: '(adjusted_tv_10s - tv)'
+    category: measure
   - name: tv_change_buysell_10s
     type: FLOAT
     description: >
@@ -3107,6 +3557,7 @@ table:
     - slippage 10s
     - realized pnl 10s
     formula: '(adjusted_tv_10s - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_10s_per_unit
     type: FLOAT
     description: >
@@ -3116,6 +3567,7 @@ table:
     synonyms:
     - roll slip 10s
     formula: '((reference_roll_10s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_10s
     type: STRING
     description: >
@@ -3123,6 +3575,7 @@ table:
     synonyms:
     - roll slip 10s
     formula: '((reference_roll_10s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_10s
     type: FLOAT
     description: >
@@ -3130,6 +3583,7 @@ table:
       applied. May differ from tv_10s when adjustments are active.
     synonyms: []
     formula: 'tv_10s + delta_10s * (calculated_base_val_10s - (under_10s - roll_10s)) + 0.5 * gamma_10s * POW((calculated_base_val_10s - (under_10s - roll_10s)), 2)'
+    category: measure
   - name: delta_slippage_10s_per_unit
     type: FLOAT
     description: >
@@ -3139,6 +3593,7 @@ table:
     synonyms:
     - delta slip 10s
     formula: '((calculated_base_val_10s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_10s
     type: STRING
     description: >
@@ -3147,6 +3602,7 @@ table:
     synonyms:
     - delta slip 10s
     formula: '((calculated_base_val_10s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_30s
     type: FLOAT
     description: >
@@ -3156,6 +3612,7 @@ table:
     synonyms:
     - vol path 30s
     formula: '((calculated_base_val_30s - mid_base_val) * ((delta_30s - raw_delta_30s) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_30s_per_unit
     type: FLOAT
     description: >
@@ -3166,6 +3623,7 @@ table:
     - vol slip 30s
     - volatility slippage 30s
     formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_30s
     type: STRING
     description: >
@@ -3175,6 +3633,7 @@ table:
     synonyms:
     - vol slip 30s
     formula: '((vol_30s - vol) * ((vega_30s + vega) / 2) - vol_path_estimate_30s) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_30s_per_unit
     type: FLOAT
     description: >
@@ -3185,6 +3644,7 @@ table:
     - other slip 30s
     - residual slippage 30s
     formula: '(tv_change_buysell_30s * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30s_per_unit + roll_slippage_30s_per_unit)'
+    category: measure
   - name: other_slippage_30s
     type: STRING
     description: >
@@ -3193,6 +3653,7 @@ table:
     synonyms:
     - other slip 30s
     formula: '(tv_change_buysell_30s * contract_size * ABS(size)) - (delta_slippage_30s + roll_slippage_30s)'
+    category: dimension
   - name: tv_30s
     type: FLOAT
     description: >
@@ -3202,6 +3663,7 @@ table:
     synonyms:
     - theo 30s
     - fair value 30s
+    category: measure
   - name: delta_30s
     type: FLOAT
     description: >
@@ -3210,6 +3672,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 30s
+    category: measure
   - name: gamma_30s
     type: FLOAT
     description: >
@@ -3218,6 +3681,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 30s
+    category: measure
   - name: vega_30s
     type: FLOAT
     description: >
@@ -3225,6 +3689,7 @@ table:
       volatility at t+30s. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 30s
+    category: measure
   - name: theta_30s
     type: FLOAT
     description: >
@@ -3232,6 +3697,7 @@ table:
       erosion due to passage of time at t+30s.
     synonyms:
     - theta 30s
+    category: measure
   - name: under_30s
     type: FLOAT
     description: >
@@ -3240,6 +3706,7 @@ table:
     synonyms:
     - spot 30s
     - underlying 30s
+    category: measure
   - name: vol_30s
     type: STRING
     description: >
@@ -3249,23 +3716,27 @@ table:
     synonyms:
     - IV 30s
     - implied vol 30s
+    category: dimension
   - name: rho_30s
     type: FLOAT
     description: >
       Option rho at the 30-second snapshot after trade, measuring sensitivity to interest rate
       changes at t+30s. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_30s
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the 30-second snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_30s
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the 30-second snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_30s
     type: FLOAT
     description: >
@@ -3273,12 +3744,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+30s.
     synonyms:
     - moneyness 30s
+    category: measure
   - name: roll_30s
     type: FLOAT
     description: >
       Roll adjustment value at the 30-second snapshot. Captures the calendar roll effect on
       option pricing at t+30s.
     synonyms: []
+    category: measure
   - name: tv_change_30s
     type: FLOAT
     description: >
@@ -3289,6 +3762,7 @@ table:
     - tv move 30s
     - theo change 30s
     formula: '(adjusted_tv_30s - tv)'
+    category: measure
   - name: tv_change_buysell_30s
     type: FLOAT
     description: >
@@ -3301,6 +3775,7 @@ table:
     - slippage 30s
     - realized pnl 30s
     formula: '(adjusted_tv_30s - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_30s_per_unit
     type: FLOAT
     description: >
@@ -3310,6 +3785,7 @@ table:
     synonyms:
     - roll slip 30s
     formula: '((reference_roll_30s - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_30s
     type: STRING
     description: >
@@ -3317,6 +3793,7 @@ table:
     synonyms:
     - roll slip 30s
     formula: '((reference_roll_30s - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_30s
     type: FLOAT
     description: >
@@ -3324,6 +3801,7 @@ table:
       applied. May differ from tv_30s when adjustments are active.
     synonyms: []
     formula: 'tv_30s + delta_30s * (calculated_base_val_30s - (under_30s - roll_30s)) + 0.5 * gamma_30s * POW((calculated_base_val_30s - (under_30s - roll_30s)), 2)'
+    category: measure
   - name: delta_slippage_30s_per_unit
     type: FLOAT
     description: >
@@ -3333,6 +3811,7 @@ table:
     synonyms:
     - delta slip 30s
     formula: '((calculated_base_val_30s - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_30s
     type: STRING
     description: >
@@ -3341,6 +3820,7 @@ table:
     synonyms:
     - delta slip 30s
     formula: '((calculated_base_val_30s - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_1m
     type: FLOAT
     description: >
@@ -3350,6 +3830,7 @@ table:
     synonyms:
     - vol path 1m
     formula: '((calculated_base_val_1m - mid_base_val) * ((delta_1m - raw_delta_1m) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_1m_per_unit
     type: FLOAT
     description: >
@@ -3360,6 +3841,7 @@ table:
     - vol slip 1m
     - volatility slippage 1m
     formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_1m
     type: STRING
     description: >
@@ -3369,6 +3851,7 @@ table:
     synonyms:
     - vol slip 1m
     formula: '((vol_1m - vol) * ((vega_1m + vega) / 2) - vol_path_estimate_1m) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_1m_per_unit
     type: FLOAT
     description: >
@@ -3379,6 +3862,7 @@ table:
     - other slip 1m
     - residual slippage 1m
     formula: '(tv_change_buysell_1m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1m_per_unit + roll_slippage_1m_per_unit)'
+    category: measure
   - name: other_slippage_1m
     type: STRING
     description: >
@@ -3387,6 +3871,7 @@ table:
     synonyms:
     - other slip 1m
     formula: '(tv_change_buysell_1m * contract_size * ABS(size)) - (delta_slippage_1m + roll_slippage_1m)'
+    category: dimension
   - name: tv_1m
     type: FLOAT
     description: >
@@ -3396,6 +3881,7 @@ table:
     synonyms:
     - theo 1m
     - fair value 1m
+    category: measure
   - name: delta_1m
     type: FLOAT
     description: >
@@ -3404,6 +3890,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 1m
+    category: measure
   - name: gamma_1m
     type: FLOAT
     description: >
@@ -3412,6 +3899,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 1m
+    category: measure
   - name: vega_1m
     type: FLOAT
     description: >
@@ -3419,6 +3907,7 @@ table:
       volatility at t+1m. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 1m
+    category: measure
   - name: theta_1m
     type: FLOAT
     description: >
@@ -3426,6 +3915,7 @@ table:
       erosion due to passage of time at t+1m.
     synonyms:
     - theta 1m
+    category: measure
   - name: under_1m
     type: FLOAT
     description: >
@@ -3434,6 +3924,7 @@ table:
     synonyms:
     - spot 1m
     - underlying 1m
+    category: measure
   - name: vol_1m
     type: STRING
     description: >
@@ -3443,23 +3934,27 @@ table:
     synonyms:
     - IV 1m
     - implied vol 1m
+    category: dimension
   - name: rho_1m
     type: FLOAT
     description: >
       Option rho at the 1-minute snapshot after trade, measuring sensitivity to interest rate
       changes at t+1m. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_1m
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the 1-minute snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_1m
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the 1-minute snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_1m
     type: FLOAT
     description: >
@@ -3467,12 +3962,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+1m.
     synonyms:
     - moneyness 1m
+    category: measure
   - name: roll_1m
     type: FLOAT
     description: >
       Roll adjustment value at the 1-minute snapshot. Captures the calendar roll effect on
       option pricing at t+1m.
     synonyms: []
+    category: measure
   - name: tv_change_1m
     type: FLOAT
     description: >
@@ -3483,6 +3980,7 @@ table:
     - tv move 1m
     - theo change 1m
     formula: '(adjusted_tv_1m - tv)'
+    category: measure
   - name: tv_change_buysell_1m
     type: FLOAT
     description: >
@@ -3495,6 +3993,7 @@ table:
     - slippage 1m
     - realized pnl 1m
     formula: '(adjusted_tv_1m - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_1m_per_unit
     type: FLOAT
     description: >
@@ -3504,6 +4003,7 @@ table:
     synonyms:
     - roll slip 1m
     formula: '((reference_roll_1m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_1m
     type: STRING
     description: >
@@ -3511,6 +4011,7 @@ table:
     synonyms:
     - roll slip 1m
     formula: '((reference_roll_1m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_1m
     type: FLOAT
     description: >
@@ -3518,6 +4019,7 @@ table:
       applied. May differ from tv_1m when adjustments are active.
     synonyms: []
     formula: 'tv_1m + delta_1m * (calculated_base_val_1m - (under_1m - roll_1m)) + 0.5 * gamma_1m * POW((calculated_base_val_1m - (under_1m - roll_1m)), 2)'
+    category: measure
   - name: delta_slippage_1m_per_unit
     type: FLOAT
     description: >
@@ -3527,6 +4029,7 @@ table:
     synonyms:
     - delta slip 1m
     formula: '((calculated_base_val_1m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_1m
     type: STRING
     description: >
@@ -3535,6 +4038,7 @@ table:
     synonyms:
     - delta slip 1m
     formula: '((calculated_base_val_1m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_5m
     type: FLOAT
     description: >
@@ -3544,6 +4048,7 @@ table:
     synonyms:
     - vol path 5m
     formula: '((calculated_base_val_5m - mid_base_val) * ((delta_5m - raw_delta_5m) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_5m_per_unit
     type: FLOAT
     description: >
@@ -3554,6 +4059,7 @@ table:
     - vol slip 5m
     - volatility slippage 5m
     formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_5m
     type: STRING
     description: >
@@ -3563,6 +4069,7 @@ table:
     synonyms:
     - vol slip 5m
     formula: '((vol_5m - vol) * ((vega_5m + vega) / 2) - vol_path_estimate_5m) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_5m_per_unit
     type: FLOAT
     description: >
@@ -3573,6 +4080,7 @@ table:
     - other slip 5m
     - residual slippage 5m
     formula: '(tv_change_buysell_5m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5m_per_unit + roll_slippage_5m_per_unit)'
+    category: measure
   - name: other_slippage_5m
     type: STRING
     description: >
@@ -3581,6 +4089,7 @@ table:
     synonyms:
     - other slip 5m
     formula: '(tv_change_buysell_5m * contract_size * ABS(size)) - (delta_slippage_5m + roll_slippage_5m)'
+    category: dimension
   - name: tv_5m
     type: FLOAT
     description: >
@@ -3590,6 +4099,7 @@ table:
     synonyms:
     - theo 5m
     - fair value 5m
+    category: measure
   - name: delta_5m
     type: FLOAT
     description: >
@@ -3598,6 +4108,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 5m
+    category: measure
   - name: gamma_5m
     type: FLOAT
     description: >
@@ -3606,6 +4117,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 5m
+    category: measure
   - name: vega_5m
     type: FLOAT
     description: >
@@ -3613,6 +4125,7 @@ table:
       volatility at t+5m. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 5m
+    category: measure
   - name: theta_5m
     type: FLOAT
     description: >
@@ -3620,6 +4133,7 @@ table:
       erosion due to passage of time at t+5m.
     synonyms:
     - theta 5m
+    category: measure
   - name: under_5m
     type: FLOAT
     description: >
@@ -3628,6 +4142,7 @@ table:
     synonyms:
     - spot 5m
     - underlying 5m
+    category: measure
   - name: vol_5m
     type: STRING
     description: >
@@ -3637,23 +4152,27 @@ table:
     synonyms:
     - IV 5m
     - implied vol 5m
+    category: dimension
   - name: rho_5m
     type: FLOAT
     description: >
       Option rho at the 5-minute snapshot after trade, measuring sensitivity to interest rate
       changes at t+5m. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_5m
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the 5-minute snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_5m
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the 5-minute snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_5m
     type: FLOAT
     description: >
@@ -3661,12 +4180,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+5m.
     synonyms:
     - moneyness 5m
+    category: measure
   - name: roll_5m
     type: FLOAT
     description: >
       Roll adjustment value at the 5-minute snapshot. Captures the calendar roll effect on
       option pricing at t+5m.
     synonyms: []
+    category: measure
   - name: tv_change_5m
     type: FLOAT
     description: >
@@ -3677,6 +4198,7 @@ table:
     - tv move 5m
     - theo change 5m
     formula: '(adjusted_tv_5m - tv)'
+    category: measure
   - name: tv_change_buysell_5m
     type: FLOAT
     description: >
@@ -3689,6 +4211,7 @@ table:
     - slippage 5m
     - realized pnl 5m
     formula: '(adjusted_tv_5m - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_5m_per_unit
     type: FLOAT
     description: >
@@ -3698,6 +4221,7 @@ table:
     synonyms:
     - roll slip 5m
     formula: '((reference_roll_5m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_5m
     type: STRING
     description: >
@@ -3705,6 +4229,7 @@ table:
     synonyms:
     - roll slip 5m
     formula: '((reference_roll_5m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_5m
     type: FLOAT
     description: >
@@ -3712,6 +4237,7 @@ table:
       applied. May differ from tv_5m when adjustments are active.
     synonyms: []
     formula: 'tv_5m + delta_5m * (calculated_base_val_5m - (under_5m - roll_5m)) + 0.5 * gamma_5m * POW((calculated_base_val_5m - (under_5m - roll_5m)), 2)'
+    category: measure
   - name: delta_slippage_5m_per_unit
     type: FLOAT
     description: >
@@ -3721,6 +4247,7 @@ table:
     synonyms:
     - delta slip 5m
     formula: '((calculated_base_val_5m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_5m
     type: STRING
     description: >
@@ -3729,6 +4256,7 @@ table:
     synonyms:
     - delta slip 5m
     formula: '((calculated_base_val_5m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_10m
     type: FLOAT
     description: >
@@ -3738,6 +4266,7 @@ table:
     synonyms:
     - vol path 10m
     formula: '((calculated_base_val_10m - mid_base_val) * ((delta_10m - raw_delta_10m) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_10m_per_unit
     type: FLOAT
     description: >
@@ -3748,6 +4277,7 @@ table:
     - vol slip 10m
     - volatility slippage 10m
     formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_10m
     type: STRING
     description: >
@@ -3757,6 +4287,7 @@ table:
     synonyms:
     - vol slip 10m
     formula: '((vol_10m - vol) * ((vega_10m + vega) / 2) - vol_path_estimate_10m) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_10m_per_unit
     type: FLOAT
     description: >
@@ -3767,6 +4298,7 @@ table:
     - other slip 10m
     - residual slippage 10m
     formula: '(tv_change_buysell_10m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_10m_per_unit + roll_slippage_10m_per_unit)'
+    category: measure
   - name: other_slippage_10m
     type: STRING
     description: >
@@ -3775,6 +4307,7 @@ table:
     synonyms:
     - other slip 10m
     formula: '(tv_change_buysell_10m * contract_size * ABS(size)) - (delta_slippage_10m + roll_slippage_10m)'
+    category: dimension
   - name: tv_10m
     type: FLOAT
     description: >
@@ -3784,6 +4317,7 @@ table:
     synonyms:
     - theo 10m
     - fair value 10m
+    category: measure
   - name: delta_10m
     type: FLOAT
     description: >
@@ -3792,6 +4326,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 10m
+    category: measure
   - name: gamma_10m
     type: FLOAT
     description: >
@@ -3800,6 +4335,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 10m
+    category: measure
   - name: vega_10m
     type: FLOAT
     description: >
@@ -3807,6 +4343,7 @@ table:
       volatility at t+10m. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 10m
+    category: measure
   - name: theta_10m
     type: FLOAT
     description: >
@@ -3814,6 +4351,7 @@ table:
       erosion due to passage of time at t+10m.
     synonyms:
     - theta 10m
+    category: measure
   - name: under_10m
     type: FLOAT
     description: >
@@ -3822,6 +4360,7 @@ table:
     synonyms:
     - spot 10m
     - underlying 10m
+    category: measure
   - name: vol_10m
     type: STRING
     description: >
@@ -3831,23 +4370,27 @@ table:
     synonyms:
     - IV 10m
     - implied vol 10m
+    category: dimension
   - name: rho_10m
     type: FLOAT
     description: >
       Option rho at the 10-minute snapshot after trade, measuring sensitivity to interest rate
       changes at t+10m. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_10m
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the 10-minute snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_10m
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the 10-minute snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_10m
     type: FLOAT
     description: >
@@ -3855,12 +4398,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+10m.
     synonyms:
     - moneyness 10m
+    category: measure
   - name: roll_10m
     type: FLOAT
     description: >
       Roll adjustment value at the 10-minute snapshot. Captures the calendar roll effect on
       option pricing at t+10m.
     synonyms: []
+    category: measure
   - name: tv_change_10m
     type: FLOAT
     description: >
@@ -3871,6 +4416,7 @@ table:
     - tv move 10m
     - theo change 10m
     formula: '(adjusted_tv_10m - tv)'
+    category: measure
   - name: tv_change_buysell_10m
     type: FLOAT
     description: >
@@ -3883,6 +4429,7 @@ table:
     - slippage 10m
     - realized pnl 10m
     formula: '(adjusted_tv_10m - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_10m_per_unit
     type: FLOAT
     description: >
@@ -3892,6 +4439,7 @@ table:
     synonyms:
     - roll slip 10m
     formula: '((reference_roll_10m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_10m
     type: STRING
     description: >
@@ -3899,6 +4447,7 @@ table:
     synonyms:
     - roll slip 10m
     formula: '((reference_roll_10m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_10m
     type: FLOAT
     description: >
@@ -3906,6 +4455,7 @@ table:
       applied. May differ from tv_10m when adjustments are active.
     synonyms: []
     formula: 'tv_10m + delta_10m * (calculated_base_val_10m - (under_10m - roll_10m)) + 0.5 * gamma_10m * POW((calculated_base_val_10m - (under_10m - roll_10m)), 2)'
+    category: measure
   - name: delta_slippage_10m_per_unit
     type: FLOAT
     description: >
@@ -3915,6 +4465,7 @@ table:
     synonyms:
     - delta slip 10m
     formula: '((calculated_base_val_10m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_10m
     type: STRING
     description: >
@@ -3923,6 +4474,7 @@ table:
     synonyms:
     - delta slip 10m
     formula: '((calculated_base_val_10m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_30m
     type: FLOAT
     description: >
@@ -3932,6 +4484,7 @@ table:
     synonyms:
     - vol path 30m
     formula: '((calculated_base_val_30m - mid_base_val) * ((delta_30m - raw_delta_30m) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_30m_per_unit
     type: FLOAT
     description: >
@@ -3942,6 +4495,7 @@ table:
     - vol slip 30m
     - volatility slippage 30m
     formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_30m
     type: STRING
     description: >
@@ -3951,6 +4505,7 @@ table:
     synonyms:
     - vol slip 30m
     formula: '((vol_30m - vol) * ((vega_30m + vega) / 2) - vol_path_estimate_30m) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_30m_per_unit
     type: FLOAT
     description: >
@@ -3961,6 +4516,7 @@ table:
     - other slip 30m
     - residual slippage 30m
     formula: '(tv_change_buysell_30m * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_30m_per_unit + roll_slippage_30m_per_unit)'
+    category: measure
   - name: other_slippage_30m
     type: STRING
     description: >
@@ -3969,6 +4525,7 @@ table:
     synonyms:
     - other slip 30m
     formula: '(tv_change_buysell_30m * contract_size * ABS(size)) - (delta_slippage_30m + roll_slippage_30m)'
+    category: dimension
   - name: tv_30m
     type: FLOAT
     description: >
@@ -3978,6 +4535,7 @@ table:
     synonyms:
     - theo 30m
     - fair value 30m
+    category: measure
   - name: delta_30m
     type: FLOAT
     description: >
@@ -3986,6 +4544,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 30m
+    category: measure
   - name: gamma_30m
     type: FLOAT
     description: >
@@ -3994,6 +4553,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 30m
+    category: measure
   - name: vega_30m
     type: FLOAT
     description: >
@@ -4001,6 +4561,7 @@ table:
       volatility at t+30m. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 30m
+    category: measure
   - name: theta_30m
     type: FLOAT
     description: >
@@ -4008,6 +4569,7 @@ table:
       erosion due to passage of time at t+30m.
     synonyms:
     - theta 30m
+    category: measure
   - name: under_30m
     type: FLOAT
     description: >
@@ -4016,6 +4578,7 @@ table:
     synonyms:
     - spot 30m
     - underlying 30m
+    category: measure
   - name: vol_30m
     type: STRING
     description: >
@@ -4025,23 +4588,27 @@ table:
     synonyms:
     - IV 30m
     - implied vol 30m
+    category: dimension
   - name: rho_30m
     type: FLOAT
     description: >
       Option rho at the 30-minute snapshot after trade, measuring sensitivity to interest rate
       changes at t+30m. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_30m
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the 30-minute snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_30m
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the 30-minute snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_30m
     type: FLOAT
     description: >
@@ -4049,12 +4616,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+30m.
     synonyms:
     - moneyness 30m
+    category: measure
   - name: roll_30m
     type: FLOAT
     description: >
       Roll adjustment value at the 30-minute snapshot. Captures the calendar roll effect on
       option pricing at t+30m.
     synonyms: []
+    category: measure
   - name: tv_change_30m
     type: FLOAT
     description: >
@@ -4065,6 +4634,7 @@ table:
     - tv move 30m
     - theo change 30m
     formula: '(adjusted_tv_30m - tv)'
+    category: measure
   - name: tv_change_buysell_30m
     type: FLOAT
     description: >
@@ -4077,6 +4647,7 @@ table:
     - slippage 30m
     - realized pnl 30m
     formula: '(adjusted_tv_30m - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_30m_per_unit
     type: FLOAT
     description: >
@@ -4086,6 +4657,7 @@ table:
     synonyms:
     - roll slip 30m
     formula: '((reference_roll_30m - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_30m
     type: STRING
     description: >
@@ -4093,6 +4665,7 @@ table:
     synonyms:
     - roll slip 30m
     formula: '((reference_roll_30m - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_30m
     type: FLOAT
     description: >
@@ -4100,6 +4673,7 @@ table:
       applied. May differ from tv_30m when adjustments are active.
     synonyms: []
     formula: 'tv_30m + delta_30m * (calculated_base_val_30m - (under_30m - roll_30m)) + 0.5 * gamma_30m * POW((calculated_base_val_30m - (under_30m - roll_30m)), 2)'
+    category: measure
   - name: delta_slippage_30m_per_unit
     type: FLOAT
     description: >
@@ -4109,6 +4683,7 @@ table:
     synonyms:
     - delta slip 30m
     formula: '((calculated_base_val_30m - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_30m
     type: STRING
     description: >
@@ -4117,6 +4692,7 @@ table:
     synonyms:
     - delta slip 30m
     formula: '((calculated_base_val_30m - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_1h
     type: FLOAT
     description: >
@@ -4126,6 +4702,7 @@ table:
     synonyms:
     - vol path 1h
     formula: '((calculated_base_val_1h - mid_base_val) * ((delta_1h - raw_delta_1h) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_1h_per_unit
     type: FLOAT
     description: >
@@ -4136,6 +4713,7 @@ table:
     - vol slip 1h
     - volatility slippage 1h
     formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_1h
     type: STRING
     description: >
@@ -4145,6 +4723,7 @@ table:
     synonyms:
     - vol slip 1h
     formula: '((vol_1h - vol) * ((vega_1h + vega) / 2) - vol_path_estimate_1h) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_1h_per_unit
     type: FLOAT
     description: >
@@ -4155,6 +4734,7 @@ table:
     - other slip 1h
     - residual slippage 1h
     formula: '(tv_change_buysell_1h * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1h_per_unit + roll_slippage_1h_per_unit)'
+    category: measure
   - name: other_slippage_1h
     type: STRING
     description: >
@@ -4163,6 +4743,7 @@ table:
     synonyms:
     - other slip 1h
     formula: '(tv_change_buysell_1h * contract_size * ABS(size)) - (delta_slippage_1h + roll_slippage_1h)'
+    category: dimension
   - name: tv_1h
     type: FLOAT
     description: >
@@ -4172,6 +4753,7 @@ table:
     synonyms:
     - theo 1h
     - fair value 1h
+    category: measure
   - name: delta_1h
     type: FLOAT
     description: >
@@ -4180,6 +4762,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 1h
+    category: measure
   - name: gamma_1h
     type: FLOAT
     description: >
@@ -4188,6 +4771,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 1h
+    category: measure
   - name: vega_1h
     type: FLOAT
     description: >
@@ -4195,6 +4779,7 @@ table:
       volatility at t+1h. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 1h
+    category: measure
   - name: theta_1h
     type: FLOAT
     description: >
@@ -4202,6 +4787,7 @@ table:
       erosion due to passage of time at t+1h.
     synonyms:
     - theta 1h
+    category: measure
   - name: under_1h
     type: FLOAT
     description: >
@@ -4210,6 +4796,7 @@ table:
     synonyms:
     - spot 1h
     - underlying 1h
+    category: measure
   - name: vol_1h
     type: STRING
     description: >
@@ -4219,23 +4806,27 @@ table:
     synonyms:
     - IV 1h
     - implied vol 1h
+    category: dimension
   - name: rho_1h
     type: FLOAT
     description: >
       Option rho at the 1-hour snapshot after trade, measuring sensitivity to interest rate
       changes at t+1h. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_1h
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the 1-hour snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_1h
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the 1-hour snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_1h
     type: FLOAT
     description: >
@@ -4243,12 +4834,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+1h.
     synonyms:
     - moneyness 1h
+    category: measure
   - name: roll_1h
     type: FLOAT
     description: >
       Roll adjustment value at the 1-hour snapshot. Captures the calendar roll effect on
       option pricing at t+1h.
     synonyms: []
+    category: measure
   - name: tv_change_1h
     type: FLOAT
     description: >
@@ -4259,6 +4852,7 @@ table:
     - tv move 1h
     - theo change 1h
     formula: '(adjusted_tv_1h - tv)'
+    category: measure
   - name: tv_change_buysell_1h
     type: FLOAT
     description: >
@@ -4271,6 +4865,7 @@ table:
     - slippage 1h
     - realized pnl 1h
     formula: '(adjusted_tv_1h - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_1h_per_unit
     type: FLOAT
     description: >
@@ -4280,6 +4875,7 @@ table:
     synonyms:
     - roll slip 1h
     formula: '((reference_roll_1h - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_1h
     type: STRING
     description: >
@@ -4287,6 +4883,7 @@ table:
     synonyms:
     - roll slip 1h
     formula: '((reference_roll_1h - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_1h
     type: FLOAT
     description: >
@@ -4294,6 +4891,7 @@ table:
       applied. May differ from tv_1h when adjustments are active.
     synonyms: []
     formula: 'tv_1h + delta_1h * (calculated_base_val_1h - (under_1h - roll_1h)) + 0.5 * gamma_1h * POW((calculated_base_val_1h - (under_1h - roll_1h)), 2)'
+    category: measure
   - name: delta_slippage_1h_per_unit
     type: FLOAT
     description: >
@@ -4303,6 +4901,7 @@ table:
     synonyms:
     - delta slip 1h
     formula: '((calculated_base_val_1h - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_1h
     type: STRING
     description: >
@@ -4311,6 +4910,7 @@ table:
     synonyms:
     - delta slip 1h
     formula: '((calculated_base_val_1h - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_eod
     type: FLOAT
     description: >
@@ -4320,6 +4920,7 @@ table:
     synonyms:
     - vol path eod
     formula: '((calculated_base_val_eod - mid_base_val) * ((delta_eod - raw_delta_eod) + (delta - raw_delta)) / 2)'
+    category: measure
   - name: vol_slippage_eod_per_unit
     type: FLOAT
     description: >
@@ -4330,6 +4931,7 @@ table:
     - vol slip eod
     - volatility slippage eod
     formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: vol_slippage_eod
     type: STRING
     description: >
@@ -4339,6 +4941,7 @@ table:
     synonyms:
     - vol slip eod
     formula: '((vol_eod - vol) * ((vega_eod + vega) / 2) - vol_path_estimate_eod) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_eod_per_unit
     type: FLOAT
     description: >
@@ -4349,6 +4952,7 @@ table:
     - other slip eod
     - residual slippage eod
     formula: '(tv_change_buysell_eod * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_eod_per_unit + roll_slippage_eod_per_unit)'
+    category: measure
   - name: other_slippage_eod
     type: STRING
     description: >
@@ -4357,6 +4961,7 @@ table:
     synonyms:
     - other slip eod
     formula: '(tv_change_buysell_eod * contract_size * ABS(size)) - (delta_slippage_eod + roll_slippage_eod)'
+    category: dimension
   - name: tv_eod
     type: FLOAT
     description: >
@@ -4366,6 +4971,7 @@ table:
     synonyms:
     - theo eod
     - fair value eod
+    category: measure
   - name: delta_eod
     type: FLOAT
     description: >
@@ -4374,6 +4980,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta eod
+    category: measure
   - name: gamma_eod
     type: FLOAT
     description: >
@@ -4382,6 +4989,7 @@ table:
       underlying moves.
     synonyms:
     - gamma eod
+    category: measure
   - name: vega_eod
     type: FLOAT
     description: >
@@ -4389,6 +4997,7 @@ table:
       volatility at t+eod. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega eod
+    category: measure
   - name: theta_eod
     type: FLOAT
     description: >
@@ -4396,6 +5005,7 @@ table:
       erosion due to passage of time at t+eod.
     synonyms:
     - theta eod
+    category: measure
   - name: under_eod
     type: FLOAT
     description: >
@@ -4404,6 +5014,7 @@ table:
     synonyms:
     - spot eod
     - underlying eod
+    category: measure
   - name: vol_eod
     type: STRING
     description: >
@@ -4413,23 +5024,27 @@ table:
     synonyms:
     - IV eod
     - implied vol eod
+    category: dimension
   - name: rho_eod
     type: FLOAT
     description: >
       Option rho at the end-of-day snapshot after trade, measuring sensitivity to interest rate
       changes at t+eod. Typically small for short-dated options.
     synonyms: []
+    category: measure
   - name: raw_delta_eod
     type: FLOAT
     description: >
       Raw (unadjusted) delta at the end-of-day snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: measure
   - name: raw_gamma_eod
     type: FLOAT
     description: >
       Raw (unadjusted) gamma at the end-of-day snapshot after trade.
     synonyms: []
+    category: measure
   - name: norm_strike_eod
     type: FLOAT
     description: >
@@ -4437,12 +5052,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+eod.
     synonyms:
     - moneyness eod
+    category: measure
   - name: roll_eod
     type: FLOAT
     description: >
       Roll adjustment value at the end-of-day snapshot. Captures the calendar roll effect on
       option pricing at t+eod.
     synonyms: []
+    category: measure
   - name: tv_change_eod
     type: FLOAT
     description: >
@@ -4453,6 +5070,7 @@ table:
     - tv move eod
     - theo change eod
     formula: '(adjusted_tv_eod - tv)'
+    category: measure
   - name: tv_change_buysell_eod
     type: FLOAT
     description: >
@@ -4465,6 +5083,7 @@ table:
     - slippage eod
     - realized pnl eod
     formula: '(adjusted_tv_eod - tv) * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_eod_per_unit
     type: FLOAT
     description: >
@@ -4474,6 +5093,7 @@ table:
     synonyms:
     - roll slip eod
     formula: '((reference_roll_eod - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: roll_slippage_eod
     type: STRING
     description: >
@@ -4481,6 +5101,7 @@ table:
     synonyms:
     - roll slip eod
     formula: '((reference_roll_eod - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_eod
     type: FLOAT
     description: >
@@ -4488,6 +5109,7 @@ table:
       applied. May differ from tv_eod when adjustments are active.
     synonyms: []
     formula: 'tv_eod + delta_eod * (calculated_base_val_eod - (under_eod - roll_eod)) + 0.5 * gamma_eod * POW((calculated_base_val_eod - (under_eod - roll_eod)), 2)'
+    category: measure
   - name: delta_slippage_eod_per_unit
     type: FLOAT
     description: >
@@ -4497,6 +5119,7 @@ table:
     synonyms:
     - delta slip eod
     formula: '((calculated_base_val_eod - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: measure
   - name: delta_slippage_eod
     type: STRING
     description: >
@@ -4505,6 +5128,7 @@ table:
     synonyms:
     - delta slip eod
     formula: '((calculated_base_val_eod - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_1D
     type: STRING
     description: >
@@ -4514,6 +5138,7 @@ table:
     synonyms:
     - vol path 1d
     formula: '((calculated_base_val_1D - mid_base_val) * ((delta_1D - raw_delta_1D) + (delta - raw_delta)) / 2)'
+    category: dimension
   - name: vol_slippage_1D_per_unit
     type: STRING
     description: >
@@ -4524,6 +5149,7 @@ table:
     - vol slip 1d
     - volatility slippage 1d
     formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_slippage_1D
     type: STRING
     description: >
@@ -4533,6 +5159,7 @@ table:
     synonyms:
     - vol slip 1d
     formula: '((vol_1D - vol) * ((vega_1D + vega) / 2) - vol_path_estimate_1D) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_1D_per_unit
     type: STRING
     description: >
@@ -4543,6 +5170,7 @@ table:
     - other slip 1d
     - residual slippage 1d
     formula: '(tv_change_buysell_1D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_1D_per_unit + roll_slippage_1D_per_unit)'
+    category: dimension
   - name: other_slippage_1D
     type: STRING
     description: >
@@ -4551,6 +5179,7 @@ table:
     synonyms:
     - other slip 1d
     formula: '(tv_change_buysell_1D * contract_size * ABS(size)) - (delta_slippage_1D + roll_slippage_1D)'
+    category: dimension
   - name: tv_1D
     type: STRING
     description: >
@@ -4560,6 +5189,7 @@ table:
     synonyms:
     - theo 1d
     - fair value 1d
+    category: dimension
   - name: delta_1D
     type: STRING
     description: >
@@ -4568,6 +5198,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 1d
+    category: dimension
   - name: gamma_1D
     type: STRING
     description: >
@@ -4576,6 +5207,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 1d
+    category: dimension
   - name: vega_1D
     type: STRING
     description: >
@@ -4583,6 +5215,7 @@ table:
       volatility at t+1D. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 1d
+    category: dimension
   - name: theta_1D
     type: STRING
     description: >
@@ -4590,6 +5223,7 @@ table:
       erosion due to passage of time at t+1D.
     synonyms:
     - theta 1d
+    category: dimension
   - name: under_1D
     type: STRING
     description: >
@@ -4598,6 +5232,7 @@ table:
     synonyms:
     - spot 1d
     - underlying 1d
+    category: dimension
   - name: vol_1D
     type: STRING
     description: >
@@ -4607,23 +5242,27 @@ table:
     synonyms:
     - IV 1d
     - implied vol 1d
+    category: dimension
   - name: rho_1D
     type: STRING
     description: >
       Option rho at the 1-day snapshot after trade, measuring sensitivity to interest rate
       changes at t+1D. Typically small for short-dated options.
     synonyms: []
+    category: dimension
   - name: raw_delta_1D
     type: STRING
     description: >
       Raw (unadjusted) delta at the 1-day snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: dimension
   - name: raw_gamma_1D
     type: STRING
     description: >
       Raw (unadjusted) gamma at the 1-day snapshot after trade.
     synonyms: []
+    category: dimension
   - name: norm_strike_1D
     type: STRING
     description: >
@@ -4631,12 +5270,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+1D.
     synonyms:
     - moneyness 1d
+    category: dimension
   - name: roll_1D
     type: STRING
     description: >
       Roll adjustment value at the 1-day snapshot. Captures the calendar roll effect on
       option pricing at t+1D.
     synonyms: []
+    category: dimension
   - name: tv_change_1D
     type: STRING
     description: >
@@ -4647,6 +5288,7 @@ table:
     - tv move 1d
     - theo change 1d
     formula: '(adjusted_tv_1D - tv)'
+    category: dimension
   - name: tv_change_buysell_1D
     type: STRING
     description: >
@@ -4659,6 +5301,7 @@ table:
     - slippage 1d
     - realized pnl 1d
     formula: '(adjusted_tv_1D - tv) * buy_sell_multiplier'
+    category: dimension
   - name: roll_slippage_1D_per_unit
     type: STRING
     description: >
@@ -4668,6 +5311,7 @@ table:
     synonyms:
     - roll slip 1d
     formula: '((reference_roll_1D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: roll_slippage_1D
     type: STRING
     description: >
@@ -4675,6 +5319,7 @@ table:
     synonyms:
     - roll slip 1d
     formula: '((reference_roll_1D - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_1D
     type: STRING
     description: >
@@ -4682,6 +5327,7 @@ table:
       applied. May differ from tv_1D when adjustments are active.
     synonyms: []
     formula: 'tv_1D + delta_1D * (calculated_base_val_1D - (under_1D - roll_1D)) + 0.5 * gamma_1D * POW((calculated_base_val_1D - (under_1D - roll_1D)), 2)'
+    category: dimension
   - name: delta_slippage_1D_per_unit
     type: STRING
     description: >
@@ -4691,6 +5337,7 @@ table:
     synonyms:
     - delta slip 1d
     formula: '((calculated_base_val_1D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: delta_slippage_1D
     type: STRING
     description: >
@@ -4699,6 +5346,7 @@ table:
     synonyms:
     - delta slip 1d
     formula: '((calculated_base_val_1D - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_path_estimate_5D
     type: STRING
     description: >
@@ -4708,6 +5356,7 @@ table:
     synonyms:
     - vol path 5d
     formula: '((calculated_base_val_5D - mid_base_val) * ((delta_5D - raw_delta_5D) + (delta - raw_delta)) / 2)'
+    category: dimension
   - name: vol_slippage_5D_per_unit
     type: STRING
     description: >
@@ -4718,6 +5367,7 @@ table:
     - vol slip 5d
     - volatility slippage 5d
     formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: vol_slippage_5D
     type: STRING
     description: >
@@ -4727,6 +5377,7 @@ table:
     synonyms:
     - vol slip 5d
     formula: '((vol_5D - vol) * ((vega_5D + vega) / 2) - vol_path_estimate_5D) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: other_slippage_5D_per_unit
     type: STRING
     description: >
@@ -4737,6 +5388,7 @@ table:
     - other slip 5d
     - residual slippage 5d
     formula: '(tv_change_buysell_5D * COALESCE(ABS(leg_ratio), 1) * contract_size) - (delta_slippage_5D_per_unit + roll_slippage_5D_per_unit)'
+    category: dimension
   - name: other_slippage_5D
     type: STRING
     description: >
@@ -4745,6 +5397,7 @@ table:
     synonyms:
     - other slip 5d
     formula: '(tv_change_buysell_5D * contract_size * ABS(size)) - (delta_slippage_5D + roll_slippage_5D)'
+    category: dimension
   - name: tv_5D
     type: STRING
     description: >
@@ -4754,6 +5407,7 @@ table:
     synonyms:
     - theo 5d
     - fair value 5d
+    category: dimension
   - name: delta_5D
     type: STRING
     description: >
@@ -4762,6 +5416,7 @@ table:
       delta exposure evolved after trade execution.
     synonyms:
     - delta 5d
+    category: dimension
   - name: gamma_5D
     type: STRING
     description: >
@@ -4770,6 +5425,7 @@ table:
       underlying moves.
     synonyms:
     - gamma 5d
+    category: dimension
   - name: vega_5D
     type: STRING
     description: >
@@ -4777,6 +5433,7 @@ table:
       volatility at t+5D. Used to estimate P&L impact of vol changes.
     synonyms:
     - vega 5d
+    category: dimension
   - name: theta_5D
     type: STRING
     description: >
@@ -4784,6 +5441,7 @@ table:
       erosion due to passage of time at t+5D.
     synonyms:
     - theta 5d
+    category: dimension
   - name: under_5D
     type: STRING
     description: >
@@ -4792,6 +5450,7 @@ table:
     synonyms:
     - spot 5d
     - underlying 5d
+    category: dimension
   - name: vol_5D
     type: STRING
     description: >
@@ -4801,23 +5460,27 @@ table:
     synonyms:
     - IV 5d
     - implied vol 5d
+    category: dimension
   - name: rho_5D
     type: STRING
     description: >
       Option rho at the 5-day snapshot after trade, measuring sensitivity to interest rate
       changes at t+5D. Typically small for short-dated options.
     synonyms: []
+    category: dimension
   - name: raw_delta_5D
     type: STRING
     description: >
       Raw (unadjusted) delta at the 5-day snapshot after trade. The model-output delta
       before any adjustments for roll or base value corrections.
     synonyms: []
+    category: dimension
   - name: raw_gamma_5D
     type: STRING
     description: >
       Raw (unadjusted) gamma at the 5-day snapshot after trade.
     synonyms: []
+    category: dimension
   - name: norm_strike_5D
     type: STRING
     description: >
@@ -4825,12 +5488,14 @@ table:
       in/out of the money the option is relative to the underlying price at t+5D.
     synonyms:
     - moneyness 5d
+    category: dimension
   - name: roll_5D
     type: STRING
     description: >
       Roll adjustment value at the 5-day snapshot. Captures the calendar roll effect on
       option pricing at t+5D.
     synonyms: []
+    category: dimension
   - name: tv_change_5D
     type: STRING
     description: >
@@ -4841,6 +5506,7 @@ table:
     - tv move 5d
     - theo change 5d
     formula: '(adjusted_tv_5D - tv)'
+    category: dimension
   - name: tv_change_buysell_5D
     type: STRING
     description: >
@@ -4853,6 +5519,7 @@ table:
     - slippage 5d
     - realized pnl 5d
     formula: '(adjusted_tv_5D - tv) * buy_sell_multiplier'
+    category: dimension
   - name: roll_slippage_5D_per_unit
     type: STRING
     description: >
@@ -4862,6 +5529,7 @@ table:
     synonyms:
     - roll slip 5d
     formula: '((reference_roll_5D - reference_roll) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: roll_slippage_5D
     type: STRING
     description: >
@@ -4869,6 +5537,7 @@ table:
     synonyms:
     - roll slip 5d
     formula: '((reference_roll_5D - reference_roll) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: adjusted_tv_5D
     type: STRING
     description: >
@@ -4876,6 +5545,7 @@ table:
       applied. May differ from tv_5D when adjustments are active.
     synonyms: []
     formula: 'tv_5D + delta_5D * (calculated_base_val_5D - (under_5D - roll_5D)) + 0.5 * gamma_5D * POW((calculated_base_val_5D - (under_5D - roll_5D)), 2)'
+    category: dimension
   - name: delta_slippage_5D_per_unit
     type: STRING
     description: >
@@ -4885,6 +5555,7 @@ table:
     synonyms:
     - delta slip 5d
     formula: '((calculated_base_val_5D - mid_base_val) * delta) * COALESCE(ABS(leg_ratio), 1) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: delta_slippage_5D
     type: STRING
     description: >
@@ -4893,6 +5564,7 @@ table:
     synonyms:
     - delta slip 5d
     formula: '((calculated_base_val_5D - mid_base_val) * delta) * ABS(size) * contract_size * buy_sell_multiplier'
+    category: dimension
   - name: calculated_base_val_eod
     type: FLOAT
     description: >
@@ -4901,12 +5573,14 @@ table:
     synonyms:
     - eod underlying
     - closing base value
+    category: measure
   - name: calculated_base_val_1D
     type: STRING
     description: >
       Calculated base value (underlying price) at the 1-day horizon. The underlying price on
       the next business day. Used for next-day slippage analysis. Stored as STRING.
     synonyms: []
+    category: dimension
   - name: calculated_base_val_5D
     type: STRING
     description: >
@@ -4914,6 +5588,7 @@ table:
       price five business days after the trade. Used for weekly slippage analysis. Stored as
       STRING.
     synonyms: []
+    category: dimension
   - name: delta
     type: FLOAT
     description: >
@@ -4926,6 +5601,7 @@ table:
     - hedge ratio
     - greek delta
     formula: 'delta_theo'
+    category: measure
   - name: gamma
     type: FLOAT
     description: >
@@ -4937,6 +5613,7 @@ table:
     - gamma exposure
     - convexity
     - greek gamma
+    category: measure
   - name: vega
     type: FLOAT
     description: >
@@ -4947,6 +5624,7 @@ table:
     - vol sensitivity
     - vega exposure
     - greek vega
+    category: measure
   - name: theta
     type: FLOAT
     description: >
@@ -4958,6 +5636,7 @@ table:
     - time decay
     - theta decay
     - greek theta
+    category: measure
   - name: under
     type: FLOAT
     description: >
@@ -4971,6 +5650,7 @@ table:
     - underlying price
     - spot price
     source: derived from market depth mid-price at trade time
+    category: measure
   - name: vol
     type: STRING
     description: >
@@ -4984,6 +5664,7 @@ table:
     - sigma
     - implied vol
     - volatility
+    category: dimension
   - name: rho
     type: FLOAT
     description: >
@@ -4993,6 +5674,7 @@ table:
     synonyms:
     - rate sensitivity
     - greek rho
+    category: measure
   - name: raw_delta
     type: FLOAT
     description: >
@@ -5001,6 +5683,7 @@ table:
       column to understand the impact of corrections.
     synonyms:
     - unadjusted delta
+    category: measure
   - name: raw_gamma
     type: FLOAT
     description: >
@@ -5008,6 +5691,7 @@ table:
       The direct model output gamma.
     synonyms:
     - unadjusted gamma
+    category: measure
   - name: norm_strike
     type: FLOAT
     description: >
@@ -5020,6 +5704,7 @@ table:
     - delta bucket
     - normalized strike
     - strike moneyness
+    category: measure
   - name: roll
     type: FLOAT
     description: >
@@ -5030,6 +5715,7 @@ table:
     - calendar roll
     - roll value
     - roll adjustment
+    category: measure
   - name: tv
     type: FLOAT
     description: >
@@ -5046,6 +5732,7 @@ table:
     - model price
     source: 'PosData.proto :: PositionEvent.tv'
     formula: 'tv_theo'
+    category: measure
   - name: instant_edge
     type: FLOAT
     description: >
@@ -5062,6 +5749,7 @@ table:
       CASE WHEN trade_side = 'BUY' THEN (tv - price)
            WHEN trade_side = 'SELL' THEN (price - tv) ELSE 0 END
     source: kpi_clicktrade_calculations.sql
+    category: measure
   - name: instant_pnl
     type: FLOAT
     description: >
@@ -5078,6 +5766,7 @@ table:
     - P&L
     formula: "CASE WHEN trade_side = 'BUY' THEN (tv - price) * ABS(size) * contract_size WHEN trade_side = 'SELL' THEN (price - tv) * ABS(size) * contract_size ELSE 0 END"
     source: kpi_clicktrade_calculations.sql
+    category: measure
   - name: instant_pnl_w_fees
     type: FLOAT
     description: >
@@ -5091,6 +5780,7 @@ table:
     - pnl net
     formula: "CASE WHEN trade_side = 'BUY' THEN ((tv - price) - fees) * ABS(size) * contract_size WHEN trade_side = 'SELL' THEN ((price - tv) - fees) * ABS(size) * contract_size ELSE 0 END"
     source: kpi_clicktrade_calculations.sql
+    category: measure
   - name: abs_traded_size
     type: FLOAT
     description: >
@@ -5103,6 +5793,7 @@ table:
     - abs size
     - volume
     formula: 'ABS(traded_size)'
+    category: measure
   - name: tte_1s
     type: FLOAT
     description: >
@@ -5110,6 +5801,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+1s.
     synonyms:
     - time to expiry 1s
+    category: measure
   - name: forward_1s
     type: FLOAT
     description: >
@@ -5117,24 +5809,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+1s.
     synonyms:
     - fwd 1s
+    category: measure
   - name: short_rate_1s
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the 1-second snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+1s.
     synonyms: []
+    category: measure
   - name: stock_roll_1s
     type: FLOAT
     description: >
       Stock roll value at the 1-second snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+1s.
     synonyms: []
+    category: measure
   - name: reference_roll_1s
     type: FLOAT
     description: >
       Reference roll value at the 1-second snapshot. The benchmark roll used for slippage
       decomposition at t+1s.
     synonyms: []
+    category: measure
   - name: tte_5s
     type: FLOAT
     description: >
@@ -5142,6 +5838,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+5s.
     synonyms:
     - time to expiry 5s
+    category: measure
   - name: forward_5s
     type: FLOAT
     description: >
@@ -5149,24 +5846,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+5s.
     synonyms:
     - fwd 5s
+    category: measure
   - name: short_rate_5s
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the 5-second snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+5s.
     synonyms: []
+    category: measure
   - name: stock_roll_5s
     type: FLOAT
     description: >
       Stock roll value at the 5-second snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+5s.
     synonyms: []
+    category: measure
   - name: reference_roll_5s
     type: FLOAT
     description: >
       Reference roll value at the 5-second snapshot. The benchmark roll used for slippage
       decomposition at t+5s.
     synonyms: []
+    category: measure
   - name: tte_10s
     type: FLOAT
     description: >
@@ -5174,6 +5875,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+10s.
     synonyms:
     - time to expiry 10s
+    category: measure
   - name: forward_10s
     type: FLOAT
     description: >
@@ -5181,24 +5883,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+10s.
     synonyms:
     - fwd 10s
+    category: measure
   - name: short_rate_10s
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the 10-second snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+10s.
     synonyms: []
+    category: measure
   - name: stock_roll_10s
     type: FLOAT
     description: >
       Stock roll value at the 10-second snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+10s.
     synonyms: []
+    category: measure
   - name: reference_roll_10s
     type: FLOAT
     description: >
       Reference roll value at the 10-second snapshot. The benchmark roll used for slippage
       decomposition at t+10s.
     synonyms: []
+    category: measure
   - name: tte_30s
     type: FLOAT
     description: >
@@ -5206,6 +5912,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+30s.
     synonyms:
     - time to expiry 30s
+    category: measure
   - name: forward_30s
     type: FLOAT
     description: >
@@ -5213,24 +5920,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+30s.
     synonyms:
     - fwd 30s
+    category: measure
   - name: short_rate_30s
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the 30-second snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+30s.
     synonyms: []
+    category: measure
   - name: stock_roll_30s
     type: FLOAT
     description: >
       Stock roll value at the 30-second snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+30s.
     synonyms: []
+    category: measure
   - name: reference_roll_30s
     type: FLOAT
     description: >
       Reference roll value at the 30-second snapshot. The benchmark roll used for slippage
       decomposition at t+30s.
     synonyms: []
+    category: measure
   - name: tte_1m
     type: FLOAT
     description: >
@@ -5238,6 +5949,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+1m.
     synonyms:
     - time to expiry 1m
+    category: measure
   - name: forward_1m
     type: FLOAT
     description: >
@@ -5245,24 +5957,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+1m.
     synonyms:
     - fwd 1m
+    category: measure
   - name: short_rate_1m
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the 1-minute snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+1m.
     synonyms: []
+    category: measure
   - name: stock_roll_1m
     type: FLOAT
     description: >
       Stock roll value at the 1-minute snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+1m.
     synonyms: []
+    category: measure
   - name: reference_roll_1m
     type: FLOAT
     description: >
       Reference roll value at the 1-minute snapshot. The benchmark roll used for slippage
       decomposition at t+1m.
     synonyms: []
+    category: measure
   - name: tte_5m
     type: FLOAT
     description: >
@@ -5270,6 +5986,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+5m.
     synonyms:
     - time to expiry 5m
+    category: measure
   - name: forward_5m
     type: FLOAT
     description: >
@@ -5277,24 +5994,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+5m.
     synonyms:
     - fwd 5m
+    category: measure
   - name: short_rate_5m
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the 5-minute snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+5m.
     synonyms: []
+    category: measure
   - name: stock_roll_5m
     type: FLOAT
     description: >
       Stock roll value at the 5-minute snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+5m.
     synonyms: []
+    category: measure
   - name: reference_roll_5m
     type: FLOAT
     description: >
       Reference roll value at the 5-minute snapshot. The benchmark roll used for slippage
       decomposition at t+5m.
     synonyms: []
+    category: measure
   - name: tte_10m
     type: FLOAT
     description: >
@@ -5302,6 +6023,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+10m.
     synonyms:
     - time to expiry 10m
+    category: measure
   - name: forward_10m
     type: FLOAT
     description: >
@@ -5309,24 +6031,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+10m.
     synonyms:
     - fwd 10m
+    category: measure
   - name: short_rate_10m
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the 10-minute snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+10m.
     synonyms: []
+    category: measure
   - name: stock_roll_10m
     type: FLOAT
     description: >
       Stock roll value at the 10-minute snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+10m.
     synonyms: []
+    category: measure
   - name: reference_roll_10m
     type: FLOAT
     description: >
       Reference roll value at the 10-minute snapshot. The benchmark roll used for slippage
       decomposition at t+10m.
     synonyms: []
+    category: measure
   - name: tte_30m
     type: FLOAT
     description: >
@@ -5334,6 +6060,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+30m.
     synonyms:
     - time to expiry 30m
+    category: measure
   - name: forward_30m
     type: FLOAT
     description: >
@@ -5341,24 +6068,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+30m.
     synonyms:
     - fwd 30m
+    category: measure
   - name: short_rate_30m
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the 30-minute snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+30m.
     synonyms: []
+    category: measure
   - name: stock_roll_30m
     type: FLOAT
     description: >
       Stock roll value at the 30-minute snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+30m.
     synonyms: []
+    category: measure
   - name: reference_roll_30m
     type: FLOAT
     description: >
       Reference roll value at the 30-minute snapshot. The benchmark roll used for slippage
       decomposition at t+30m.
     synonyms: []
+    category: measure
   - name: tte_1h
     type: FLOAT
     description: >
@@ -5366,6 +6097,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+1h.
     synonyms:
     - time to expiry 1h
+    category: measure
   - name: forward_1h
     type: FLOAT
     description: >
@@ -5373,24 +6105,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+1h.
     synonyms:
     - fwd 1h
+    category: measure
   - name: short_rate_1h
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the 1-hour snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+1h.
     synonyms: []
+    category: measure
   - name: stock_roll_1h
     type: FLOAT
     description: >
       Stock roll value at the 1-hour snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+1h.
     synonyms: []
+    category: measure
   - name: reference_roll_1h
     type: FLOAT
     description: >
       Reference roll value at the 1-hour snapshot. The benchmark roll used for slippage
       decomposition at t+1h.
     synonyms: []
+    category: measure
   - name: tte_eod
     type: FLOAT
     description: >
@@ -5398,6 +6134,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+eod.
     synonyms:
     - time to expiry eod
+    category: measure
   - name: forward_eod
     type: FLOAT
     description: >
@@ -5405,24 +6142,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+eod.
     synonyms:
     - fwd eod
+    category: measure
   - name: short_rate_eod
     type: FLOAT
     description: >
       Short-term interest rate used in option pricing at the end-of-day snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+eod.
     synonyms: []
+    category: measure
   - name: stock_roll_eod
     type: FLOAT
     description: >
       Stock roll value at the end-of-day snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+eod.
     synonyms: []
+    category: measure
   - name: reference_roll_eod
     type: FLOAT
     description: >
       Reference roll value at the end-of-day snapshot. The benchmark roll used for slippage
       decomposition at t+eod.
     synonyms: []
+    category: measure
   - name: tte_1D
     type: STRING
     description: >
@@ -5430,6 +6171,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+1D.
     synonyms:
     - time to expiry 1d
+    category: dimension
   - name: forward_1D
     type: STRING
     description: >
@@ -5437,24 +6179,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+1D.
     synonyms:
     - fwd 1d
+    category: dimension
   - name: short_rate_1D
     type: STRING
     description: >
       Short-term interest rate used in option pricing at the 1-day snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+1D.
     synonyms: []
+    category: dimension
   - name: stock_roll_1D
     type: STRING
     description: >
       Stock roll value at the 1-day snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+1D.
     synonyms: []
+    category: dimension
   - name: reference_roll_1D
     type: STRING
     description: >
       Reference roll value at the 1-day snapshot. The benchmark roll used for slippage
       decomposition at t+1D.
     synonyms: []
+    category: dimension
   - name: tte_5D
     type: STRING
     description: >
@@ -5462,6 +6208,7 @@ table:
       time as the option approaches expiration. Input to the pricing model at t+5D.
     synonyms:
     - time to expiry 5d
+    category: dimension
   - name: forward_5D
     type: STRING
     description: >
@@ -5469,24 +6216,28 @@ table:
       accounting for dividends and interest rates, used in option pricing at t+5D.
     synonyms:
     - fwd 5d
+    category: dimension
   - name: short_rate_5D
     type: STRING
     description: >
       Short-term interest rate used in option pricing at the 5-day snapshot. Input to the
       Black-Scholes or similar model for computing tv at t+5D.
     synonyms: []
+    category: dimension
   - name: stock_roll_5D
     type: STRING
     description: >
       Stock roll value at the 5-day snapshot. Captures the stock-specific calendar roll
       effect used in adjusted pricing at t+5D.
     synonyms: []
+    category: dimension
   - name: reference_roll_5D
     type: STRING
     description: >
       Reference roll value at the 5-day snapshot. The benchmark roll used for slippage
       decomposition at t+5D.
     synonyms: []
+    category: dimension
   - name: tte
     type: FLOAT
     description: >
@@ -5499,6 +6250,7 @@ table:
     - days to expiry
     - DTE
     - time to maturity
+    category: measure
   - name: forward
     type: FLOAT
     description: >
@@ -5509,6 +6261,7 @@ table:
     - forward price
     - fwd
     - forward value
+    category: measure
   - name: short_rate
     type: FLOAT
     description: >
@@ -5519,6 +6272,7 @@ table:
     - rate
     - risk-free rate
     - interest rate
+    category: measure
   - name: stock_roll
     type: FLOAT
     description: >
@@ -5527,6 +6281,7 @@ table:
       Used in the pricing model for accurate forward calculation.
     synonyms: []
     formula: 'forward - under'
+    category: measure
   - name: reference_roll
     type: FLOAT
     description: >
@@ -5535,6 +6290,7 @@ table:
       horizons contribute to roll_slippage.
     synonyms: []
     formula: '(forward - under) + roll'
+    category: measure
   - name: is_expiry_trade
     type: BOOLEAN
     description: >
@@ -5546,3 +6302,4 @@ table:
     - expiry trade
     - expiration day trade
     - expiry day
+    category: dimension

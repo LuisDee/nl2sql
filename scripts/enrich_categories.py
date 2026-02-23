@@ -211,6 +211,22 @@ def _build_category_changes(
     return changes, stats
 
 
+def _flush_pending(
+    result: list[str],
+    current_col: str | None,
+    changes: dict[str, str],
+    handled: set[str],
+) -> None:
+    """Insert pending category for the current column if needed."""
+    if (
+        current_col is not None
+        and current_col in changes
+        and current_col not in handled
+    ):
+        result.append(f"    category: {changes[current_col]}")
+        handled.add(current_col)
+
+
 def _apply_category_changes(
     yaml_path: Path,
     changes: dict[str, str],
@@ -220,31 +236,34 @@ def _apply_category_changes(
     result: list[str] = []
     current_col: str | None = None
     handled: set[str] = set()
+    in_columns = False
 
     for line in lines:
         # Detect start of a new column block
         col_match = re.match(r"^  - name: (.+?)(\s*#.*)?$", line)
         if col_match:
-            # Insert category for previous column if needed
-            if (
-                current_col is not None
-                and current_col in changes
-                and current_col not in handled
-            ):
-                result.append(f"    category: {changes[current_col]}")
-                handled.add(current_col)
-
+            in_columns = True
+            _flush_pending(result, current_col, changes, handled)
             current_col = col_match.group(1).strip()
+            result.append(line)
+            continue
+
+        # Detect end of columns section: a line at indent 0-2 that's not
+        # a column field (e.g. table-level `note:`, `business_context:`)
+        if (
+            in_columns
+            and line
+            and not line.startswith("    ")
+            and not line.startswith("  - name:")
+        ):
+            _flush_pending(result, current_col, changes, handled)
+            current_col = None
+            in_columns = False
 
         result.append(line)
 
-    # Handle the very last column in the file
-    if (
-        current_col is not None
-        and current_col in changes
-        and current_col not in handled
-    ):
-        result.append(f"    category: {changes[current_col]}")
+    # Handle case where file ends inside columns section
+    _flush_pending(result, current_col, changes, handled)
 
     yaml_path.write_text("\n".join(result) + "\n")
 

@@ -462,15 +462,11 @@ queries:
   - id: "eval_026"
     question: "How many trades did we do across all types today?"
     category: "union_all"
-    expected_tables: ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"]
+    expected_tables: ["quotertrade", "brokertrade", "clicktrade", "otoswing"]
     expected_dataset: "nl2sql_omx_kpi"
-    expected_routing_signal: "all trades count -> UNION ALL"
+    expected_routing_signal: "Mako trade count by type -> UNION 4 Mako tables (no markettrade, which is ALL participants)"
     gold_sql: |
-      SELECT 'markettrade' AS trade_type, COUNT(*) AS trade_count
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
-      WHERE trade_date = CURRENT_DATE()
-      UNION ALL
-      SELECT 'quotertrade', COUNT(*)
+      SELECT 'quotertrade' AS trade_type, COUNT(*) AS trade_count
       FROM `{project}.nl2sql_omx_kpi.quotertrade`
       WHERE trade_date = CURRENT_DATE()
       UNION ALL
@@ -487,7 +483,7 @@ queries:
       WHERE trade_date = CURRENT_DATE()
       ORDER BY trade_count DESC
     complexity: "complex"
-    tags: ["union_all", "all_kpi", "count"]
+    tags: ["union_all", "mako_only", "count", "no_double_count"]
 
   - id: "eval_027"
     question: "How many trades did we do by symbol across market and quoter?"
@@ -510,17 +506,13 @@ queries:
     tags: ["union_all", "partial_kpi", "symbol"]
 
   - id: "eval_028"
-    question: "Compare average edge across all trade types"
+    question: "Compare average edge across Mako trade types"
     category: "union_all"
-    expected_tables: ["markettrade", "quotertrade", "brokertrade", "clicktrade", "otoswing"]
+    expected_tables: ["quotertrade", "brokertrade", "clicktrade", "otoswing"]
     expected_dataset: "nl2sql_omx_kpi"
-    expected_routing_signal: "compare edge all types -> UNION ALL"
+    expected_routing_signal: "compare edge by Mako trade type -> UNION 4 Mako tables (no markettrade, which is ALL participants)"
     gold_sql: |
-      SELECT 'markettrade' AS trade_type, ROUND(AVG(instant_edge), 4) AS avg_edge, COUNT(*) AS count
-      FROM `{project}.nl2sql_omx_kpi.markettrade`
-      WHERE trade_date = CURRENT_DATE()
-      UNION ALL
-      SELECT 'quotertrade', ROUND(AVG(instant_edge), 4), COUNT(*)
+      SELECT 'quotertrade' AS trade_type, ROUND(AVG(instant_edge), 4) AS avg_edge, COUNT(*) AS count
       FROM `{project}.nl2sql_omx_kpi.quotertrade`
       WHERE trade_date = CURRENT_DATE()
       UNION ALL
@@ -537,7 +529,7 @@ queries:
       WHERE trade_date = CURRENT_DATE()
       ORDER BY avg_edge DESC
     complexity: "complex"
-    tags: ["union_all", "all_kpi", "edge"]
+    tags: ["union_all", "mako_only", "edge", "no_double_count"]
 
   # ============================================================
   # Category: slippage_intervals (5 queries)

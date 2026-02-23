@@ -165,3 +165,75 @@ examples:
     routing_signal: "swing PnL / performance -> kpi.otoswing (NOT data.swingdata)"
     validated: false
     validated_by: ""
+
+  # --- CRITICAL: Double-counting pitfall ---
+  # markettrade is the SUPERSET of ALL trades (Mako + counterparties).
+  # quotertrade, brokertrade, clicktrade, otoswing are Mako-only SUBSETS.
+  # NEVER sum or UNION markettrade with the other tables.
+
+  - question: "What was the total PnL today?"
+    sql: |
+      SELECT
+        ROUND(SUM(instant_pnl), 2) AS total_pnl,
+        COUNT(*) AS trade_count
+      FROM `{project}.{kpi_dataset}.markettrade`
+      WHERE trade_date = '2026-02-17'
+    tables_used: [markettrade]
+    dataset: "{kpi_dataset}"
+    complexity: simple
+    routing_signal: >-
+      total PnL -> markettrade ALONE (superset of all trade types).
+      NEVER UNION markettrade with quotertrade/brokertrade/clicktrade/otoswing — that double-counts.
+    validated: false
+    validated_by: ""
+
+  - question: "Show me PnL broken down by trade type"
+    sql: |
+      SELECT 'quotertrade' AS trade_type, ROUND(SUM(instant_pnl), 2) AS total_pnl, COUNT(*) AS count
+      FROM `{project}.{kpi_dataset}.quotertrade`
+      WHERE trade_date = '2026-02-17'
+      UNION ALL
+      SELECT 'brokertrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.{kpi_dataset}.brokertrade`
+      WHERE trade_date = '2026-02-17'
+      UNION ALL
+      SELECT 'clicktrade', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.{kpi_dataset}.clicktrade`
+      WHERE trade_date = '2026-02-17'
+      UNION ALL
+      SELECT 'otoswing', ROUND(SUM(instant_pnl), 2), COUNT(*)
+      FROM `{project}.{kpi_dataset}.otoswing`
+      WHERE trade_date = '2026-02-17'
+      ORDER BY total_pnl DESC
+    tables_used: [quotertrade, brokertrade, clicktrade, otoswing]
+    dataset: "{kpi_dataset}"
+    complexity: complex
+    routing_signal: >-
+      PnL by trade type -> UNION ALL of 4 Mako-only tables (quotertrade, brokertrade,
+      clicktrade, otoswing). Does NOT include markettrade because markettrade is the
+      superset containing ALL participants' trades — including it would double-count.
+    validated: false
+    validated_by: ""
+
+  - question: "What was Mako's total PnL across all our trade types?"
+    sql: |
+      SELECT
+        ROUND(SUM(pnl), 2) AS mako_total_pnl,
+        SUM(cnt) AS mako_total_trades
+      FROM (
+        SELECT SUM(instant_pnl) AS pnl, COUNT(*) AS cnt FROM `{project}.{kpi_dataset}.quotertrade` WHERE trade_date = '2026-02-17'
+        UNION ALL
+        SELECT SUM(instant_pnl), COUNT(*) FROM `{project}.{kpi_dataset}.brokertrade` WHERE trade_date = '2026-02-17'
+        UNION ALL
+        SELECT SUM(instant_pnl), COUNT(*) FROM `{project}.{kpi_dataset}.clicktrade` WHERE trade_date = '2026-02-17'
+        UNION ALL
+        SELECT SUM(instant_pnl), COUNT(*) FROM `{project}.{kpi_dataset}.otoswing` WHERE trade_date = '2026-02-17'
+      )
+    tables_used: [quotertrade, brokertrade, clicktrade, otoswing]
+    dataset: "{kpi_dataset}"
+    complexity: complex
+    routing_signal: >-
+      Mako total PnL -> UNION ALL 4 Mako tables only. markettrade is excluded because
+      it contains ALL participants (Mako + counterparties), not just Mako.
+    validated: false
+    validated_by: ""

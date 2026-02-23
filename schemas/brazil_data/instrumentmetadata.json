@@ -1,0 +1,1 @@
+[{"name":"kafka_partition","type":"INTEGER","mode":"NULLABLE"},{"name":"kafka_offset","type":"INTEGER","mode":"NULLABLE"},{"name":"trade_date","type":"DATE","mode":"NULLABLE"},{"name":"instrument_hash","type":"STRING","mode":"NULLABLE"},{"name":"message_trade_date","type":"DATE","mode":"NULLABLE"},{"name":"is_market_maker_instrument","type":"BOOLEAN","mode":"NULLABLE"}]

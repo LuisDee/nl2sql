@@ -1,0 +1,33 @@
+dataset:
+  name: "{{dataset_prefix}}arb_data"
+  layer: data
+  exchange: arb
+  description: >
+    ARB (Arbitrage) options trading and market data. Silver layer.
+    Contains trade execution details, theoretical pricing snapshots,
+    market data feeds, and order book depth.
+
+  tables:
+    - algostartup
+    - brokertrade_2
+    - brokertrade_data
+    - clicktrade
+    - eodpostradessnap
+    - instrumentreceival
+    - instruments
+    - livestats
+    - mako_underlyingtrade
+    - marketdata
+    - marketdata_trades
+    - marketdepth
+    - marketdepth_snapshot
+    - markettrade
+    - norm_strike_voldata
+    - posdata
+    - quoterdelete
+    - quotertrade
+    - quoterupdate
+    - streammetadatamessage
+    - theodata
+    - theodata_snapshot
+    - tradedata

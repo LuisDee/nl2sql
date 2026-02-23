@@ -1,0 +1,215 @@
+table:
+  name: marketdepth
+  dataset: "{dataset_prefix}asx_data"
+  fqn: '{project}.{dataset_prefix}asx_data.marketdepth'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: event_date
+      type: DATE
+      description: ""
+    - name: exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: hw_nic_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: hw_nic_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: mako_ingress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_ingress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: software_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: software_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: sequence_number
+      type: INTEGER
+      description: ""
+    - name: ask_price_0
+      type: FLOAT
+      description: ""
+    - name: ask_price_1
+      type: FLOAT
+      description: ""
+    - name: ask_price_2
+      type: FLOAT
+      description: ""
+    - name: ask_price_3
+      type: FLOAT
+      description: ""
+    - name: ask_price_4
+      type: FLOAT
+      description: ""
+    - name: bid_price_0
+      type: FLOAT
+      description: ""
+    - name: bid_price_1
+      type: FLOAT
+      description: ""
+    - name: bid_price_2
+      type: FLOAT
+      description: ""
+    - name: bid_price_3
+      type: FLOAT
+      description: ""
+    - name: bid_price_4
+      type: FLOAT
+      description: ""
+    - name: ask_volume_0
+      type: INTEGER
+      description: ""
+    - name: ask_volume_1
+      type: INTEGER
+      description: ""
+    - name: ask_volume_2
+      type: INTEGER
+      description: ""
+    - name: ask_volume_3
+      type: INTEGER
+      description: ""
+    - name: ask_volume_4
+      type: INTEGER
+      description: ""
+    - name: bid_volume_0
+      type: INTEGER
+      description: ""
+    - name: bid_volume_1
+      type: INTEGER
+      description: ""
+    - name: bid_volume_2
+      type: INTEGER
+      description: ""
+    - name: bid_volume_3
+      type: INTEGER
+      description: ""
+    - name: bid_volume_4
+      type: INTEGER
+      description: ""
+    - name: ask_orders_0
+      type: INTEGER
+      description: ""
+    - name: ask_orders_1
+      type: INTEGER
+      description: ""
+    - name: ask_orders_2
+      type: INTEGER
+      description: ""
+    - name: ask_orders_3
+      type: INTEGER
+      description: ""
+    - name: ask_orders_4
+      type: INTEGER
+      description: ""
+    - name: bid_orders_0
+      type: INTEGER
+      description: ""
+    - name: bid_orders_1
+      type: INTEGER
+      description: ""
+    - name: bid_orders_2
+      type: INTEGER
+      description: ""
+    - name: bid_orders_3
+      type: INTEGER
+      description: ""
+    - name: bid_orders_4
+      type: INTEGER
+      description: ""
+    - name: implied_bid_price
+      type: FLOAT
+      description: ""
+    - name: implied_bid_volume
+      type: INTEGER
+      description: ""
+    - name: implied_bid_orders
+      type: INTEGER
+      description: ""
+    - name: implied_ask_price
+      type: FLOAT
+      description: ""
+    - name: implied_ask_volume
+      type: INTEGER
+      description: ""
+    - name: implied_ask_orders
+      type: INTEGER
+      description: ""
+    - name: keyframe
+      type: BOOLEAN
+      description: ""
+    - name: data_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: data_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: data_order_identifier
+      type: INTEGER
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: market_state
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""

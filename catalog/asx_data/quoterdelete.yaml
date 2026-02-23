@@ -1,0 +1,356 @@
+table:
+  name: quoterdelete
+  dataset: "{dataset_prefix}asx_data"
+  fqn: '{project}.{dataset_prefix}asx_data.quoterdelete'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: algo
+      type: STRING
+      description: ""
+    - name: ref_curve_id
+      type: INTEGER
+      description: ""
+    - name: ref_carry_id
+      type: INTEGER
+      description: ""
+    - name: ref_tv
+      type: FLOAT
+      description: ""
+    - name: ref_delta
+      type: FLOAT
+      description: ""
+    - name: ref_gamma
+      type: FLOAT
+      description: ""
+    - name: ref_base_price
+      type: FLOAT
+      description: ""
+    - name: ref_roll
+      type: FLOAT
+      description: ""
+    - name: raw_bv_bid
+      type: FLOAT
+      description: ""
+    - name: raw_bv_bid_size
+      type: INTEGER
+      description: ""
+    - name: raw_bv_ask
+      type: FLOAT
+      description: ""
+    - name: raw_bv_ask_size
+      type: INTEGER
+      description: ""
+    - name: layered_base_bid
+      type: FLOAT
+      description: ""
+    - name: layered_base_bid_size
+      type: INTEGER
+      description: ""
+    - name: layered_base_ask
+      type: FLOAT
+      description: ""
+    - name: layered_base_ask_size
+      type: INTEGER
+      description: ""
+    - name: layered_base_adjustment
+      type: FLOAT
+      description: ""
+    - name: odr_adjustment
+      type: FLOAT
+      description: ""
+    - name: inflight_deflection_tv_adjustment_bid
+      type: FLOAT
+      description: ""
+    - name: inflight_deflection_tv_adjustment_ask
+      type: FLOAT
+      description: ""
+    - name: internal_tv_adjustment_bid
+      type: FLOAT
+      description: ""
+    - name: internal_tv_adjustment_ask
+      type: FLOAT
+      description: ""
+    - name: nhr_adjustment_bid
+      type: FLOAT
+      description: ""
+    - name: nhr_adjustment_ask
+      type: FLOAT
+      description: ""
+    - name: base_edge_bid
+      type: FLOAT
+      description: ""
+    - name: base_edge_ask
+      type: FLOAT
+      description: ""
+    - name: fees
+      type: FLOAT
+      description: ""
+    - name: roll
+      type: FLOAT
+      description: ""
+    - name: bv_side
+      type: STRING
+      description: ""
+    - name: delta_adjusted_base_price
+      type: FLOAT
+      description: ""
+    - name: tv
+      type: FLOAT
+      description: ""
+    - name: base_sequence_number
+      type: INTEGER
+      description: ""
+    - name: option_sequence_number
+      type: INTEGER
+      description: ""
+    - name: base_instrument_hash
+      type: STRING
+      description: ""
+    - name: hardware_nic_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: hardware_nic_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: event_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: event_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: delete_side
+      type: STRING
+      description: ""
+    - name: trigger_price
+      type: FLOAT
+      description: ""
+    - name: active_price
+      type: FLOAT
+      description: ""
+    - name: active_size
+      type: INTEGER
+      description: ""
+    - name: delete_type
+      type: STRING
+      description: ""
+    - name: trigger_type
+      type: STRING
+      description: ""
+    - name: batch_id
+      type: INTEGER
+      description: ""
+    - name: pcap_id
+      type: STRING
+      description: ""
+    - name: bucket
+      type: STRING
+      description: ""
+    - name: event_type
+      type: STRING
+      description: ""
+    - name: latency_stats_prcx
+      type: INTEGER
+      description: ""
+    - name: latency_stats_prcs
+      type: INTEGER
+      description: ""
+    - name: latency_stats_vtio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_bkio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_qmio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_itio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_itex
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: is_book_resubmit
+      type: BOOLEAN
+      description: ""
+    - name: pid
+      type: INTEGER
+      description: ""
+    - name: hostname
+      type: STRING
+      description: ""
+    - name: inflight_trade_volume
+      type: INTEGER
+      description: ""
+    - name: bv_update_sequence_number
+      type: INTEGER
+      description: ""
+    - name: bv_update_instrument_hash
+      type: STRING
+      description: ""
+    - name: underlying_sequence_number
+      type: INTEGER
+      description: ""
+    - name: underlying_instrument_hash
+      type: STRING
+      description: ""
+    - name: mako_order_id
+      type: INTEGER
+      description: ""
+    - name: is_bv_invalid
+      type: BOOLEAN
+      description: ""
+    - name: exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: underlying_exe_exch
+      type: INTEGER
+      description: ""
+    - name: underlying_exe_exch_name
+      type: STRING
+      description: ""
+    - name: is_spark
+      type: BOOLEAN
+      description: ""
+    - name: ref_inst_carry_id
+      type: INTEGER
+      description: ""
+    - name: ref_inst_curve_id
+      type: INTEGER
+      description: ""
+    - name: is_ref_theo_invalid
+      type: BOOLEAN
+      description: ""
+    - name: lb_enabled
+      type: BOOLEAN
+      description: ""
+    - name: edge_model_type
+      type: INTEGER
+      description: ""
+    - name: edge_model_type_name
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: bid_price_0
+      type: FLOAT
+      description: ""
+    - name: ask_price_0
+      type: FLOAT
+      description: ""
+    - name: ask_volume_0
+      type: INTEGER
+      description: ""
+    - name: bid_volume_0
+      type: INTEGER
+      description: ""
+    - name: latency_stats_bvio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_delio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_lockio
+      type: INTEGER
+      description: ""
+    - name: ref_theoevent_stream_id
+      type: INTEGER
+      description: ""
+    - name: ref_theoevent_event_id
+      type: INTEGER
+      description: ""
+    - name: is_spark_resubmit
+      type: BOOLEAN
+      description: ""
+    - name: last_trade_price
+      type: FLOAT
+      description: ""
+    - name: price_level
+      type: INTEGER
+      description: ""
+    - name: total_market_volume
+      type: INTEGER
+      description: ""
+    - name: total_our_volume
+      type: INTEGER
+      description: ""
+    - name: delete_amend_threshold
+      type: FLOAT
+      description: ""
+    - name: volume_reduced_so_far
+      type: INTEGER
+      description: ""
+    - name: is_breached
+      type: BOOLEAN
+      description: ""
+    - name: num_of_breaches
+      type: INTEGER
+      description: ""
+    - name: max_breach_permitted
+      type: INTEGER
+      description: ""
+    - name: requirement_check_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: requirement_check_timestamp_ns
+      type: INTEGER
+      description: ""

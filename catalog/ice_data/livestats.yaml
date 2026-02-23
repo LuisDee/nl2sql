@@ -1,0 +1,89 @@
+table:
+  name: livestats
+  dataset: "{dataset_prefix}ice_data"
+  fqn: '{project}.{dataset_prefix}ice_data.livestats'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_message_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: record_written_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: component
+      type: STRING
+      description: ""
+    - name: message_type
+      type: STRING
+      description: ""
+    - name: hostname
+      type: STRING
+      description: ""
+    - name: pid
+      type: INTEGER
+      description: ""
+    - name: exchange_code
+      type: STRING
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: message_identifier
+      type: STRING
+      description: ""
+    - name: message_identifier_name
+      type: STRING
+      description: ""
+    - name: message_description
+      type: STRING
+      description: ""
+    - name: message_description_name
+      type: STRING
+      description: ""
+    - name: order_identifier
+      type: INTEGER
+      description: ""
+    - name: label
+      type: STRING
+      description: ""
+    - name: int_value
+      type: INTEGER
+      description: ""
+    - name: float_value
+      type: FLOAT
+      description: ""
+    - name: string_value
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""

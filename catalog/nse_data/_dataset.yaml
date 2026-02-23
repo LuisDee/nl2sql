@@ -1,0 +1,30 @@
+dataset:
+  name: "{{dataset_prefix}}nse_data"
+  layer: data
+  exchange: nse
+  description: >
+    NSE (India) options trading and market data. Silver layer.
+    Contains trade execution details, theoretical pricing snapshots,
+    market data feeds, and order book depth.
+
+  tables:
+    - algostartup
+    - clicktrade
+    - eodpostradessnap
+    - instrumentreceival
+    - instruments
+    - kpibaseval
+    - livestats
+    - mako_underlyingtrade
+    - makotonuvamapcapdata
+    - markettrade
+    - nuvamatonsepcapdata
+    - posdata
+    - quoterdelete
+    - quotertrade
+    - quoterupdate
+    - streammetadatamessage
+    - swingdata
+    - theodata
+    - theodata_snapshot
+    - tradedata

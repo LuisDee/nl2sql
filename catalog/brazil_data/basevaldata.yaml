@@ -1,0 +1,107 @@
+table:
+  name: basevaldata
+  dataset: "{dataset_prefix}brazil_data"
+  fqn: '{project}.{dataset_prefix}brazil_data.basevaldata'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: is_valid
+      type: BOOLEAN
+      description: ""
+    - name: sequence_number
+      type: INTEGER
+      description: ""
+    - name: exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: hardware_nic_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: hardware_nic_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: vt_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: vt_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: base_val_bid
+      type: FLOAT
+      description: ""
+    - name: base_val_ask
+      type: FLOAT
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: bv_data
+      type: RECORD
+      description: ""
+    - name: algo
+      type: STRING
+      description: ""
+    - name: latency_stats_bvio
+      type: INTEGER
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""

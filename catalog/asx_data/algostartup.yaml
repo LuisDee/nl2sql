@@ -1,0 +1,74 @@
+table:
+  name: algostartup
+  dataset: "{dataset_prefix}asx_data"
+  fqn: '{project}.{dataset_prefix}asx_data.algostartup'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_message_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: record_written_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: algo
+      type: STRING
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: event_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: event_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: underlying_exe_exch
+      type: INTEGER
+      description: ""
+    - name: underlying_exe_exch_name
+      type: STRING
+      description: ""
+    - name: is_spark
+      type: BOOLEAN
+      description: ""
+    - name: underlying_instrument_hash
+      type: STRING
+      description: ""
+    - name: base_valuation_type
+      type: INTEGER
+      description: ""
+    - name: base_valuation_type_name
+      type: STRING
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""

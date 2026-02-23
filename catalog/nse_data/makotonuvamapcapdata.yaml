@@ -1,0 +1,89 @@
+table:
+  name: makotonuvamapcapdata
+  dataset: "{dataset_prefix}nse_data"
+  fqn: '{project}.{dataset_prefix}nse_data.makotonuvamapcapdata'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: exchange_code
+      type: INTEGER
+      description: ""
+    - name: dealer_id
+      type: STRING
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: protocol_version
+      type: STRING
+      description: ""
+    - name: channel
+      type: STRING
+      description: ""
+    - name: mako_order_id
+      type: INTEGER
+      description: ""
+    - name: exchange_order_id
+      type: INTEGER
+      description: ""
+    - name: source_ip
+      type: STRING
+      description: ""
+    - name: source_port
+      type: INTEGER
+      description: ""
+    - name: destination_ip
+      type: STRING
+      description: ""
+    - name: destination_port
+      type: INTEGER
+      description: ""
+    - name: nnf_message_type
+      type: INTEGER
+      description: ""
+    - name: message_type
+      type: STRING
+      description: ""
+    - name: native_type_name
+      type: STRING
+      description: ""
+    - name: native_type
+      type: INTEGER
+      description: ""
+    - name: normalised_message_type
+      type: STRING
+      description: ""
+    - name: mako_ingress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: mako_ingress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_egress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: mako_egress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: gateway_received_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: gateway_received_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: matching_engine_received_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: matching_engine_received_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""

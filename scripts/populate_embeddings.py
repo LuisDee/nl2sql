@@ -116,6 +116,7 @@ def populate_column_embeddings(
             t["dataset"],
             kpi_dataset=settings.kpi_dataset,
             data_dataset=settings.data_dataset,
+            dataset_prefix=settings.dataset_prefix,
         )
         table_name = t["name"]
 

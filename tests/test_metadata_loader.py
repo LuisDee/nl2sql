@@ -158,4 +158,4 @@ class TestLoadYamlMetadata:
             result = load_yaml_metadata("markettrade", "nl2sql_omx_kpi")
 
         assert result["status"] == "success"
-        assert "_kpi_dataset_context" in result["metadata"]
+        assert "_dataset_context" in result["metadata"]

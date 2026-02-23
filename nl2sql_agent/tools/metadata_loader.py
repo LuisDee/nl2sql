@@ -18,27 +18,31 @@ logger = get_logger(__name__)
 
 
 def _discover_table_yaml_map() -> dict[str, str]:
-    """Scan catalog/{kpi,data}/*.yaml and build table -> path map.
+    """Scan all catalog subdirectories and build table -> path map.
 
     Discovers all table YAML files dynamically so new tables don't
     require manual map updates. Skips _-prefixed files (e.g. _dataset.yaml).
 
-    For tables that exist in only one layer, the map key is the table name.
-    For tables in both layers (e.g. markettrade), both are stored with
-    layer-prefixed keys (kpi/markettrade, data/markettrade) and the
-    plain key points to the last one found (data takes priority since
-    dataset resolution via _dataset_to_layer handles disambiguation).
+    Scans catalog/kpi/, catalog/data/, and all catalog/*_data/ market
+    directories. For tables in multiple directories, both are stored
+    with prefixed keys (kpi/markettrade, data/markettrade, arb_data/markettrade)
+    and the plain key points to the last one found.
     """
+    from nl2sql_agent.catalog_loader import _catalog_subdirs
+
     table_map: dict[str, str] = {}
-    for layer in ("kpi", "data"):
-        layer_dir = CATALOG_DIR / layer
-        if not layer_dir.exists():
+    for subdir in _catalog_subdirs():
+        subdir_path = CATALOG_DIR / subdir
+        if not subdir_path.exists():
             continue
-        for yaml_file in sorted(layer_dir.glob("*.yaml")):
+        for yaml_file in sorted(subdir_path.glob("*.yaml")):
             if yaml_file.name.startswith("_"):
                 continue
             table_name = yaml_file.stem
-            rel_path = f"{layer}/{yaml_file.name}"
+            rel_path = f"{subdir}/{yaml_file.name}"
+            # Store prefixed version for disambiguation
+            table_map[f"{subdir}/{table_name}"] = rel_path
+            # Plain name points to last found (data > kpi, market-specific last)
             table_map[table_name] = rel_path
     return table_map
 
@@ -46,11 +50,12 @@ def _discover_table_yaml_map() -> dict[str, str]:
 _TABLE_YAML_MAP = _discover_table_yaml_map()
 
 
-def _dataset_to_layer(dataset_name: str) -> str | None:
-    """Map a resolved dataset name to catalog layer (kpi or data).
+def _dataset_to_catalog_dir(dataset_name: str) -> str | None:
+    """Map a resolved dataset name to catalog directory.
 
-    Supports any exchange dataset — first checks against the exchange
-    registry, then falls back to suffix-based heuristic.
+    For default exchange: nl2sql_omx_kpi -> kpi, nl2sql_omx_data -> data.
+    For other markets: nl2sql_brazil_data -> brazil_data (if dir exists).
+    Falls back to suffix-based heuristic.
     """
     # Quick check against default settings
     if dataset_name == settings.kpi_dataset:
@@ -58,23 +63,22 @@ def _dataset_to_layer(dataset_name: str) -> str | None:
     if dataset_name == settings.data_dataset:
         return "data"
 
-    # Check exchange registry for any exchange's dataset
-    try:
-        from nl2sql_agent.catalog_loader import load_exchange_registry
-
-        registry = load_exchange_registry()
-        for info in registry.get("exchanges", {}).values():
-            if dataset_name == info.get("kpi_dataset"):
-                return "kpi"
-            if dataset_name == info.get("data_dataset"):
-                return "data"
-    except Exception:  # noqa: S110
-        pass
+    # Check if a market-specific catalog directory exists
+    # Strip dataset_prefix to get the market dir name
+    prefix = settings.dataset_prefix
+    if prefix and dataset_name.startswith(prefix):
+        market_dir = dataset_name[len(prefix) :]
+        if (CATALOG_DIR / market_dir).exists():
+            return market_dir
 
     # Heuristic fallback: suffix-based
     if dataset_name.endswith("_kpi"):
         return "kpi"
     if dataset_name.endswith("_data"):
+        # Check if market dir exists (e.g. brazil_data)
+        suffix = dataset_name.split(prefix)[-1] if prefix else dataset_name
+        if (CATALOG_DIR / suffix).exists():
+            return suffix
         return "data"
 
     return None
@@ -83,18 +87,27 @@ def _dataset_to_layer(dataset_name: str) -> str | None:
 def _resolve_yaml_path(table_name: str, dataset_name: str = "") -> str | None:
     """Resolve a table name + optional dataset to a YAML file path.
 
-    Uses dataset_to_layer() for dynamic resolution — works with any
-    exchange dataset name (OMX, Brazil, ICE, etc.) as long as the
-    KPI_DATASET/DATA_DATASET env vars match.
+    Uses _dataset_to_catalog_dir() for dynamic resolution — works with
+    any exchange dataset name (OMX, Brazil, ICE, etc.).
 
     Tries dataset+table first (most specific), then table alone.
     Returns None if no mapping found.
     """
     # Try dataset-based resolution first (most specific)
     if dataset_name:
-        layer = _dataset_to_layer(dataset_name)
-        if layer:
-            return f"{layer}/{table_name}.yaml"
+        catalog_dir = _dataset_to_catalog_dir(dataset_name)
+        if catalog_dir:
+            candidate = f"{catalog_dir}/{table_name}.yaml"
+            if (CATALOG_DIR / candidate).exists():
+                return candidate
+
+    # Try prefixed lookup (market/table) from the map
+    if dataset_name:
+        catalog_dir = _dataset_to_catalog_dir(dataset_name)
+        if catalog_dir:
+            prefixed = f"{catalog_dir}/{table_name}"
+            if prefixed in _TABLE_YAML_MAP:
+                return _TABLE_YAML_MAP[prefixed]
 
     # Try direct table name (unique tables only)
     if table_name in _TABLE_YAML_MAP:
@@ -167,25 +180,15 @@ def load_yaml_metadata(
         )
         return {"status": "error", "error_message": f"Failed to parse YAML: {e}"}
 
-    # If this is a KPI table, also load the KPI dataset context
-    if "kpi/" in yaml_path:
-        dataset_yaml_path = CATALOG_DIR / "kpi" / "_dataset.yaml"
-        if dataset_yaml_path.exists():
-            try:
-                dataset_context = load_yaml(dataset_yaml_path)
-                content["_kpi_dataset_context"] = dataset_context
-            except Exception:  # noqa: S110
-                pass  # Non-fatal — table metadata is still useful without dataset context
-
-    # If this is a data table, also load the data dataset context
-    if "data/" in yaml_path:
-        dataset_yaml_path = CATALOG_DIR / "data" / "_dataset.yaml"
-        if dataset_yaml_path.exists():
-            try:
-                dataset_context = load_yaml(dataset_yaml_path)
-                content["_data_dataset_context"] = dataset_context
-            except Exception:  # noqa: S110
-                pass
+    # Load dataset context from the same directory as the table YAML
+    yaml_dir = yaml_path.split("/")[0]  # e.g. "kpi", "data", "brazil_data"
+    dataset_yaml_path = CATALOG_DIR / yaml_dir / "_dataset.yaml"
+    if dataset_yaml_path.exists():
+        try:
+            dataset_context = load_yaml(dataset_yaml_path)
+            content["_dataset_context"] = dataset_context
+        except Exception:  # noqa: S110
+            pass  # Non-fatal — table metadata is still useful without dataset context
 
     # Convert to YAML string for the LLM (more readable than nested dict repr)
     metadata_str = yaml.dump(content, default_flow_style=False, sort_keys=False)

@@ -1,0 +1,224 @@
+table:
+  name: theodata_snapshot
+  dataset: "{dataset_prefix}arb_data"
+  fqn: '{project}.{dataset_prefix}arb_data.theodata_snapshot'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: snap_ts
+      type: TIMESTAMP
+      description: ""
+    - name: kafka_message_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: record_written_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: partition_timestamp_local
+      type: TIMESTAMP
+      description: ""
+    - name: partition_number
+      type: INTEGER
+      description: ""
+    - name: event_date
+      type: DATE
+      description: ""
+    - name: theo_event_tx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: theo_event_tx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: when_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: when_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: source_event_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: source_event_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: inst_type
+      type: STRING
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: STRING
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: curve_id
+      type: INTEGER
+      description: ""
+    - name: carry_id
+      type: INTEGER
+      description: ""
+    - name: stream_id
+      type: INTEGER
+      description: ""
+    - name: tv
+      type: FLOAT
+      description: ""
+    - name: tv_offset
+      type: FLOAT
+      description: ""
+    - name: delta
+      type: FLOAT
+      description: ""
+    - name: gamma
+      type: FLOAT
+      description: ""
+    - name: vega
+      type: FLOAT
+      description: ""
+    - name: theta
+      type: FLOAT
+      description: ""
+    - name: rho
+      type: FLOAT
+      description: ""
+    - name: tte
+      type: FLOAT
+      description: ""
+    - name: raw_delta
+      type: FLOAT
+      description: ""
+    - name: raw_gamma
+      type: FLOAT
+      description: ""
+    - name: vol
+      type: FLOAT
+      description: ""
+    - name: norm_strike
+      type: FLOAT
+      description: ""
+    - name: under
+      type: FLOAT
+      description: ""
+    - name: roll
+      type: FLOAT
+      description: ""
+    - name: forward
+      type: FLOAT
+      description: ""
+    - name: short_rate
+      type: FLOAT
+      description: ""
+    - name: greek_atm
+      type: FLOAT
+      description: ""
+    - name: greek_skew
+      type: FLOAT
+      description: ""
+    - name: greek_call_skew
+      type: FLOAT
+      description: ""
+    - name: greek_put_k
+      type: FLOAT
+      description: ""
+    - name: greek_call_k
+      type: FLOAT
+      description: ""
+    - name: greek_put_a
+      type: FLOAT
+      description: ""
+    - name: greek_call_a
+      type: FLOAT
+      description: ""
+    - name: greek_put_b
+      type: FLOAT
+      description: ""
+    - name: greek_call_b
+      type: FLOAT
+      description: ""
+    - name: greek_datm
+      type: FLOAT
+      description: ""
+    - name: param_atm
+      type: FLOAT
+      description: ""
+    - name: param_skew
+      type: FLOAT
+      description: ""
+    - name: param_call_skew
+      type: FLOAT
+      description: ""
+    - name: param_put_k
+      type: FLOAT
+      description: ""
+    - name: param_call_k
+      type: FLOAT
+      description: ""
+    - name: param_s_vol
+      type: FLOAT
+      description: ""
+    - name: rec_ts
+      type: TIMESTAMP
+      description: ""
+    - name: theo_compute_timestamp_start
+      type: TIMESTAMP
+      description: ""
+    - name: theo_compute_timestamp_start_ns
+      type: INTEGER
+      description: ""
+    - name: theo_compute_timestamp_stop
+      type: TIMESTAMP
+      description: ""
+    - name: theo_compute_timestamp_stop_ns
+      type: INTEGER
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: theo_compute_type
+      type: STRING
+      description: ""
+    - name: offset_id
+      type: INTEGER
+      description: ""

@@ -1,0 +1,50 @@
+table:
+  name: streammetadatamessage
+  dataset: "{dataset_prefix}euronext_data"
+  fqn: '{project}.{dataset_prefix}euronext_data.streammetadatamessage'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_message_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: record_written_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: partition_timestamp_local
+      type: TIMESTAMP
+      description: ""
+    - name: partition_number
+      type: INTEGER
+      description: ""
+    - name: stream_id
+      type: INTEGER
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: event_type
+      type: STRING
+      description: ""
+    - name: metadata
+      type: RECORD
+      description: ""
+    - name: summary
+      type: RECORD
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""

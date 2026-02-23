@@ -1,0 +1,233 @@
+table:
+  name: boshorder
+  dataset: "{dataset_prefix}brazil_data"
+  fqn: '{project}.{dataset_prefix}brazil_data.boshorder'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: partition_number
+      type: INTEGER
+      description: ""
+    - name: partition_timestamp_local
+      type: TIMESTAMP
+      description: ""
+    - name: algorithm
+      type: STRING
+      description: ""
+    - name: bosh_order_id
+      type: INTEGER
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: tv
+      type: FLOAT
+      description: ""
+    - name: delta
+      type: FLOAT
+      description: ""
+    - name: gamma
+      type: FLOAT
+      description: ""
+    - name: vega
+      type: FLOAT
+      description: ""
+    - name: under
+      type: FLOAT
+      description: ""
+    - name: roll
+      type: FLOAT
+      description: ""
+    - name: vol
+      type: FLOAT
+      description: ""
+    - name: when_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: when_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: curve_id
+      type: INTEGER
+      description: ""
+    - name: carry_id
+      type: INTEGER
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: theta
+      type: FLOAT
+      description: ""
+    - name: rho
+      type: FLOAT
+      description: ""
+    - name: raw_gamma
+      type: FLOAT
+      description: ""
+    - name: raw_delta
+      type: FLOAT
+      description: ""
+    - name: lvol
+      type: FLOAT
+      description: ""
+    - name: norms
+      type: FLOAT
+      description: ""
+    - name: tax_div_tv_diff
+      type: FLOAT
+      description: ""
+    - name: tv_offset
+      type: FLOAT
+      description: ""
+    - name: tte
+      type: FLOAT
+      description: ""
+    - name: forward
+      type: FLOAT
+      description: ""
+    - name: short_rate
+      type: FLOAT
+      description: ""
+    - name: greek_atm
+      type: FLOAT
+      description: ""
+    - name: greek_skew
+      type: FLOAT
+      description: ""
+    - name: greek_call_skew
+      type: FLOAT
+      description: ""
+    - name: greek_put_k
+      type: FLOAT
+      description: ""
+    - name: greek_call_k
+      type: FLOAT
+      description: ""
+    - name: greek_put_a
+      type: FLOAT
+      description: ""
+    - name: greek_call_a
+      type: FLOAT
+      description: ""
+    - name: greek_put_b
+      type: FLOAT
+      description: ""
+    - name: greek_call_b
+      type: FLOAT
+      description: ""
+    - name: greek_datm
+      type: FLOAT
+      description: ""
+    - name: param_atm
+      type: FLOAT
+      description: ""
+    - name: param_skew
+      type: FLOAT
+      description: ""
+    - name: param_call_skew
+      type: FLOAT
+      description: ""
+    - name: param_put_k
+      type: FLOAT
+      description: ""
+    - name: param_call_k
+      type: FLOAT
+      description: ""
+    - name: param_s_vol
+      type: FLOAT
+      description: ""
+    - name: custom_greeks
+      type: RECORD
+      description: ""
+    - name: base_atm_size
+      type: INTEGER
+      description: ""
+    - name: max_edge_loss
+      type: FLOAT
+      description: ""
+    - name: edge_units
+      type: STRING
+      description: ""
+    - name: side
+      type: STRING
+      description: ""
+    - name: atm_vega
+      type: FLOAT
+      description: ""
+    - name: max_size_multiplier
+      type: FLOAT
+      description: ""
+    - name: order_option
+      type: INTEGER
+      description: ""
+    - name: order_option_name
+      type: STRING
+      description: ""
+    - name: event_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: event_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: mako_id
+      type: STRING
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: resting_time_limit_nanos
+      type: INTEGER
+      description: ""
+    - name: edge_loss
+      type: FLOAT
+      description: ""
+    - name: mode
+      type: INTEGER
+      description: ""
+    - name: mode_name
+      type: STRING
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""

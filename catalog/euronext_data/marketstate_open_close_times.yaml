@@ -1,0 +1,23 @@
+table:
+  name: marketstate_open_close_times
+  dataset: "{dataset_prefix}euronext_data"
+  fqn: '{project}.{dataset_prefix}euronext_data.marketstate_open_close_times'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: instrument_type
+      type: STRING
+      description: ""
+    - name: open_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: close_timestamp
+      type: TIMESTAMP
+      description: ""

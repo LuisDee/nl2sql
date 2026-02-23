@@ -1,0 +1,242 @@
+table:
+  name: eodpostradessnap
+  dataset: "{dataset_prefix}nse_data"
+  fqn: '{project}.{dataset_prefix}nse_data.eodpostradessnap'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: mako_id
+      type: STRING
+      description: ""
+    - name: trader_id
+      type: STRING
+      description: ""
+    - name: algorithm
+      type: STRING
+      description: ""
+    - name: routed_exchange
+      type: INTEGER
+      description: ""
+    - name: executable_exchange
+      type: INTEGER
+      description: ""
+    - name: channel
+      type: STRING
+      description: ""
+    - name: transaction_properties
+      type: INTEGER
+      description: ""
+    - name: tag_book
+      type: INTEGER
+      description: ""
+    - name: tag_exchange
+      type: INTEGER
+      description: ""
+    - name: tag_user
+      type: INTEGER
+      description: ""
+    - name: revision
+      type: INTEGER
+      description: ""
+    - name: inventory
+      type: STRING
+      description: ""
+    - name: account
+      type: STRING
+      description: ""
+    - name: fill_id
+      type: INTEGER
+      description: ""
+    - name: user_id
+      type: INTEGER
+      description: ""
+    - name: user_order_id
+      type: INTEGER
+      description: ""
+    - name: transaction_id
+      type: INTEGER
+      description: ""
+    - name: order_id
+      type: INTEGER
+      description: ""
+    - name: exchange_transaction_id
+      type: STRING
+      description: ""
+    - name: exchange_order_id
+      type: STRING
+      description: ""
+    - name: transaction_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: transaction_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: exchange_date
+      type: DATE
+      description: ""
+    - name: exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: exchange_info
+      type: STRING
+      description: ""
+    - name: exchange_info_bits
+      type: INTEGER
+      description: ""
+    - name: exchange_qualifier
+      type: STRING
+      description: ""
+    - name: statistics
+      type: STRING
+      description: ""
+    - name: position_type
+      type: INTEGER
+      description: ""
+    - name: position_id
+      type: INTEGER
+      description: ""
+    - name: size
+      type: INTEGER
+      description: ""
+    - name: tv
+      type: FLOAT
+      description: ""
+    - name: ectv
+      type: FLOAT
+      description: ""
+    - name: settlement
+      type: FLOAT
+      description: ""
+    - name: settlement_date
+      type: DATE
+      description: ""
+    - name: pos_currency
+      type: INTEGER
+      description: ""
+    - name: pos_value_currency
+      type: INTEGER
+      description: ""
+    - name: cash_value
+      type: FLOAT
+      description: ""
+    - name: mgmt_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mgmt_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: max_trade_id
+      type: INTEGER
+      description: ""
+    - name: agg_pos_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: agg_pos_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: agg_pos_date
+      type: DATE
+      description: ""
+    - name: price
+      type: FLOAT
+      description: ""
+    - name: deflection_scale
+      type: FLOAT
+      description: ""
+    - name: curve_id
+      type: INTEGER
+      description: ""
+    - name: carry_id
+      type: INTEGER
+      description: ""
+    - name: revision_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: revision_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: trade_id
+      type: INTEGER
+      description: ""
+    - name: company_position
+      type: INTEGER
+      description: ""
+    - name: traded_size
+      type: INTEGER
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: value_date
+      type: DATE
+      description: ""
+    - name: counterparty
+      type: STRING
+      description: ""
+    - name: text
+      type: STRING
+      description: ""
+    - name: revisor
+      type: STRING
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: term
+      type: STRING
+      description: ""

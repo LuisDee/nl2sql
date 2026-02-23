@@ -1,0 +1,65 @@
+table:
+  name: kpibaseval
+  dataset: "{dataset_prefix}nse_data"
+  fqn: '{project}.{dataset_prefix}nse_data.kpibaseval'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: hardware_nic_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: hardware_nic_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: software_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: software_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: option_underlying_type
+      type: INTEGER
+      description: ""
+    - name: option_term
+      type: STRING
+      description: ""
+    - name: base_term
+      type: STRING
+      description: ""
+    - name: option_underlying
+      type: FLOAT
+      description: ""
+    - name: option_roll
+      type: FLOAT
+      description: ""
+    - name: option_underlying_is_valid
+      type: BOOLEAN
+      description: ""
+    - name: update_instrument_hash
+      type: STRING
+      description: ""
+    - name: update_sequence_number
+      type: INTEGER
+      description: ""
+    - name: data_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: data_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""

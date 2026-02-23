@@ -1,0 +1,40 @@
+dataset:
+  name: "{{dataset_prefix}}eurex_data"
+  layer: data
+  exchange: eurex
+  description: >
+    Eurex (European) options trading and market data. Silver layer.
+    Contains trade execution details, theoretical pricing snapshots,
+    market data feeds, and order book depth.
+
+  tables:
+    - algostartup
+    - brokertrade_2
+    - brokertrade_data
+    - clicktrade
+    - eodpostradessnap
+    - instrumentreceival
+    - instruments
+    - livestats
+    - mako_underlyingtrade
+    - marketdata
+    - marketdata_trades
+    - marketdataext
+    - marketdepth
+    - marketdepth_snapshot
+    - marketstate
+    - marketstate_open_close_times
+    - markettrade
+    - norm_strike_voldata
+    - oroswingdata
+    - pcaporder
+    - pcapquote
+    - posdata
+    - quoterdelete
+    - quotertrade
+    - quoterupdate
+    - streammetadatamessage
+    - swingdata
+    - theodata
+    - theodata_snapshot
+    - tradedata

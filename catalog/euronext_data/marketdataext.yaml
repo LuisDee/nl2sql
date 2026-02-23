@@ -1,0 +1,146 @@
+table:
+  name: marketdataext
+  dataset: "{dataset_prefix}euronext_data"
+  fqn: '{project}.{dataset_prefix}euronext_data.marketdataext'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: mako_ingress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_ingress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: hardware_nic_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: hardware_nic_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: software_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: software_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: sequence_number
+      type: INTEGER
+      description: ""
+    - name: market_trade_id
+      type: STRING
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: price
+      type: FLOAT
+      description: ""
+    - name: size
+      type: FLOAT
+      description: ""
+    - name: buy_sell
+      type: STRING
+      description: ""
+    - name: buyer_id
+      type: STRING
+      description: ""
+    - name: seller_id
+      type: STRING
+      description: ""
+    - name: trade_exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: trade_exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: trade_ingress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: trade_ingress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: event_type
+      type: INTEGER
+      description: ""
+    - name: event_type_name
+      type: STRING
+      description: ""
+    - name: entering_firm_id
+      type: STRING
+      description: ""
+    - name: order_id
+      type: STRING
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: aggressor_exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: aggressor_exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: sent_exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: sent_exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""

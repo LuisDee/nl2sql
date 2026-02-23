@@ -1,0 +1,353 @@
+table:
+  name: swingdata
+  dataset: "{dataset_prefix}ice_data"
+  fqn: '{project}.{dataset_prefix}ice_data.swingdata'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: algo
+      type: STRING
+      description: ""
+    - name: ref_curve_id
+      type: INTEGER
+      description: ""
+    - name: ref_carry_id
+      type: INTEGER
+      description: ""
+    - name: ref_tv
+      type: FLOAT
+      description: ""
+    - name: ref_delta
+      type: FLOAT
+      description: ""
+    - name: ref_gamma
+      type: FLOAT
+      description: ""
+    - name: ref_base_price
+      type: FLOAT
+      description: ""
+    - name: ref_roll
+      type: FLOAT
+      description: ""
+    - name: raw_bv_bid
+      type: FLOAT
+      description: ""
+    - name: raw_bv_bid_size
+      type: INTEGER
+      description: ""
+    - name: raw_bv_ask
+      type: FLOAT
+      description: ""
+    - name: raw_bv_ask_size
+      type: INTEGER
+      description: ""
+    - name: layered_base_bid
+      type: FLOAT
+      description: ""
+    - name: layered_base_bid_size
+      type: INTEGER
+      description: ""
+    - name: layered_base_ask
+      type: FLOAT
+      description: ""
+    - name: layered_base_ask_size
+      type: INTEGER
+      description: ""
+    - name: layered_base_adjustment
+      type: FLOAT
+      description: ""
+    - name: odr_adjustment
+      type: FLOAT
+      description: ""
+    - name: inflight_deflection_tv_adjustment_bid
+      type: FLOAT
+      description: ""
+    - name: inflight_deflection_tv_adjustment_ask
+      type: FLOAT
+      description: ""
+    - name: internal_tv_adjustment_bid
+      type: FLOAT
+      description: ""
+    - name: internal_tv_adjustment_ask
+      type: FLOAT
+      description: ""
+    - name: nhr_adjustment_bid
+      type: FLOAT
+      description: ""
+    - name: nhr_adjustment_ask
+      type: FLOAT
+      description: ""
+    - name: base_edge_bid
+      type: FLOAT
+      description: ""
+    - name: base_edge_ask
+      type: FLOAT
+      description: ""
+    - name: fees
+      type: FLOAT
+      description: ""
+    - name: roll
+      type: FLOAT
+      description: ""
+    - name: bv_side
+      type: STRING
+      description: ""
+    - name: delta_adjusted_base_price
+      type: FLOAT
+      description: ""
+    - name: tv
+      type: FLOAT
+      description: ""
+    - name: base_sequence_number
+      type: INTEGER
+      description: ""
+    - name: option_sequence_number
+      type: INTEGER
+      description: ""
+    - name: base_instrument_hash
+      type: STRING
+      description: ""
+    - name: hardware_nic_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: hardware_nic_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: event_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: event_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: takeout_category
+      type: STRING
+      description: ""
+    - name: base_order_event_type
+      type: STRING
+      description: ""
+    - name: base_order_event_side
+      type: STRING
+      description: ""
+    - name: takeout_type
+      type: STRING
+      description: ""
+    - name: event_type
+      type: STRING
+      description: ""
+    - name: fanout_identifier
+      type: INTEGER
+      description: ""
+    - name: fanout_count
+      type: INTEGER
+      description: ""
+    - name: opportunity_index
+      type: INTEGER
+      description: ""
+    - name: num_opportunities
+      type: INTEGER
+      description: ""
+    - name: swing_properties
+      type: INTEGER
+      description: ""
+    - name: market_price
+      type: FLOAT
+      description: ""
+    - name: market_size
+      type: INTEGER
+      description: ""
+    - name: routed_price
+      type: FLOAT
+      description: ""
+    - name: routed_size
+      type: FLOAT
+      description: ""
+    - name: routed_buy_sell
+      type: STRING
+      description: ""
+    - name: avg_trade_price
+      type: FLOAT
+      description: ""
+    - name: swing_edge
+      type: FLOAT
+      description: ""
+    - name: trade_volume
+      type: INTEGER
+      description: ""
+    - name: mako_order_id
+      type: INTEGER
+      description: ""
+    - name: exch_order_id
+      type: STRING
+      description: ""
+    - name: exch_trans_id
+      type: STRING
+      description: ""
+    - name: latency_stats_prcx
+      type: INTEGER
+      description: ""
+    - name: latency_stats_prcs
+      type: INTEGER
+      description: ""
+    - name: latency_stats_vtio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_bkio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_qmio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_itio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_itex
+      type: INTEGER
+      description: ""
+    - name: exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: pid
+      type: INTEGER
+      description: ""
+    - name: hostname
+      type: STRING
+      description: ""
+    - name: fanout_index
+      type: INTEGER
+      description: ""
+    - name: bv_update_sequence_number
+      type: INTEGER
+      description: ""
+    - name: bv_update_instrument_hash
+      type: STRING
+      description: ""
+    - name: underlying_sequence_number
+      type: INTEGER
+      description: ""
+    - name: underlying_instrument_hash
+      type: STRING
+      description: ""
+    - name: is_bv_invalid
+      type: BOOLEAN
+      description: ""
+    - name: underlying_exe_exch
+      type: INTEGER
+      description: ""
+    - name: underlying_exe_exch_name
+      type: STRING
+      description: ""
+    - name: is_spark
+      type: BOOLEAN
+      description: ""
+    - name: ref_inst_carry_id
+      type: INTEGER
+      description: ""
+    - name: ref_inst_curve_id
+      type: INTEGER
+      description: ""
+    - name: min_edge
+      type: FLOAT
+      description: ""
+    - name: raw_min_edge
+      type: FLOAT
+      description: ""
+    - name: is_ref_theo_invalid
+      type: BOOLEAN
+      description: ""
+    - name: lb_enabled
+      type: BOOLEAN
+      description: ""
+    - name: edge_model_type
+      type: INTEGER
+      description: ""
+    - name: edge_model_type_name
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: is_negative_edge_allowed
+      type: BOOLEAN
+      description: ""
+    - name: bid_price_0
+      type: FLOAT
+      description: ""
+    - name: ask_price_0
+      type: FLOAT
+      description: ""
+    - name: ask_volume_0
+      type: INTEGER
+      description: ""
+    - name: bid_volume_0
+      type: INTEGER
+      description: ""
+    - name: latency_stats_bvio
+      type: INTEGER
+      description: ""
+    - name: ref_theoevent_stream_id
+      type: INTEGER
+      description: ""
+    - name: ref_theoevent_event_id
+      type: INTEGER
+      description: ""
+    - name: base_size
+      type: FLOAT
+      description: ""

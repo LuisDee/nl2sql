@@ -1,0 +1,26 @@
+table:
+  name: instrumentmetadata
+  dataset: "{dataset_prefix}brazil_data"
+  fqn: '{project}.{dataset_prefix}brazil_data.instrumentmetadata'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: is_market_maker_instrument
+      type: BOOLEAN
+      description: ""

@@ -1,0 +1,1 @@
+[{"name":"trade_date","type":"DATE","mode":"NULLABLE"},{"name":"symbol","type":"STRING","mode":"NULLABLE"},{"name":"instrument_type","type":"STRING","mode":"NULLABLE"},{"name":"open_timestamp","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"close_timestamp","type":"TIMESTAMP","mode":"NULLABLE"}]

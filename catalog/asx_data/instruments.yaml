@@ -1,0 +1,320 @@
+table:
+  name: instruments
+  dataset: "{dataset_prefix}asx_data"
+  fqn: '{project}.{dataset_prefix}asx_data.instruments'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: partition_timestamp_local
+      type: TIMESTAMP
+      description: ""
+    - name: parent_instrument_hash
+      type: STRING
+      description: ""
+    - name: parent_no_legs
+      type: INTEGER
+      description: ""
+    - name: parent_settle_type
+      type: INTEGER
+      description: ""
+    - name: parent_settle_type_name
+      type: STRING
+      description: ""
+    - name: parent_composition
+      type: STRING
+      description: ""
+    - name: parent_feed_code
+      type: STRING
+      description: ""
+    - name: parent_exchange_native
+      type: STRING
+      description: ""
+    - name: parent_mako_symbol
+      type: STRING
+      description: ""
+    - name: parent_isin
+      type: STRING
+      description: ""
+    - name: parent_sedol
+      type: STRING
+      description: ""
+    - name: parent_cusip
+      type: STRING
+      description: ""
+    - name: parent_bloomberg
+      type: STRING
+      description: ""
+    - name: parent_reuters
+      type: STRING
+      description: ""
+    - name: parent_raw_proto
+      type: BYTES
+      description: ""
+    - name: parent_is_combo
+      type: BOOLEAN
+      description: ""
+    - name: parent_combo_type
+      type: INTEGER
+      description: ""
+    - name: parent_combo_type_name
+      type: STRING
+      description: ""
+    - name: parent_listed
+      type: INTEGER
+      description: ""
+    - name: parent_listed_name
+      type: STRING
+      description: ""
+    - name: parent_pos_exchange
+      type: INTEGER
+      description: ""
+    - name: parent_currency
+      type: INTEGER
+      description: ""
+    - name: parent_currency_name
+      type: STRING
+      description: ""
+    - name: parent_contract_size
+      type: FLOAT
+      description: ""
+    - name: leg_index
+      type: INTEGER
+      description: ""
+    - name: ratio
+      type: FLOAT
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: underlying_hash
+      type: STRING
+      description: ""
+    - name: pricing_count
+      type: INTEGER
+      description: ""
+    - name: inst_type
+      type: INTEGER
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: listed
+      type: INTEGER
+      description: ""
+    - name: listed_name
+      type: STRING
+      description: ""
+    - name: pos_exch
+      type: INTEGER
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: currency_name
+      type: STRING
+      description: ""
+    - name: revision
+      type: INTEGER
+      description: ""
+    - name: contract_size
+      type: FLOAT
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: expiry_timezone
+      type: STRING
+      description: ""
+    - name: issue_date
+      type: TIMESTAMP
+      description: ""
+    - name: bond_type
+      type: INTEGER
+      description: ""
+    - name: bond_type_name
+      type: STRING
+      description: ""
+    - name: day_count_type
+      type: INTEGER
+      description: ""
+    - name: day_count_type_name
+      type: STRING
+      description: ""
+    - name: coupon_type
+      type: INTEGER
+      description: ""
+    - name: coupon_type_name
+      type: STRING
+      description: ""
+    - name: coupon_freq_type
+      type: INTEGER
+      description: ""
+    - name: coupon
+      type: FLOAT
+      description: ""
+    - name: has_underlying
+      type: BOOLEAN
+      description: ""
+    - name: stock_type
+      type: INTEGER
+      description: ""
+    - name: stock_type_name
+      type: STRING
+      description: ""
+    - name: payment_type
+      type: INTEGER
+      description: ""
+    - name: payment_type_name
+      type: STRING
+      description: ""
+    - name: cash_type
+      type: INTEGER
+      description: ""
+    - name: cash_type_name
+      type: STRING
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: exercise_type
+      type: INTEGER
+      description: ""
+    - name: exercise_type_name
+      type: STRING
+      description: ""
+    - name: pos_currency
+      type: INTEGER
+      description: ""
+    - name: pos_currency_name
+      type: STRING
+      description: ""
+    - name: comm_type
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: underlying_inst_type
+      type: INTEGER
+      description: ""
+    - name: underlying_inst_type_name
+      type: STRING
+      description: ""
+    - name: underlying_listed
+      type: INTEGER
+      description: ""
+    - name: underlying_listed_name
+      type: STRING
+      description: ""
+    - name: underlying_pos_exch
+      type: INTEGER
+      description: ""
+    - name: underlying_currency
+      type: INTEGER
+      description: ""
+    - name: underlying_currency_name
+      type: STRING
+      description: ""
+    - name: underlying_revision
+      type: INTEGER
+      description: ""
+    - name: underlying_contract_size
+      type: FLOAT
+      description: ""
+    - name: underlying_term
+      type: STRING
+      description: ""
+    - name: underlying_expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: underlying_expiry_timezone
+      type: STRING
+      description: ""
+    - name: underlying_issue_date
+      type: TIMESTAMP
+      description: ""
+    - name: underlying_bond_type
+      type: INTEGER
+      description: ""
+    - name: underlying_bond_type_name
+      type: STRING
+      description: ""
+    - name: underlying_day_count_type
+      type: INTEGER
+      description: ""
+    - name: underlying_day_count_type_name
+      type: STRING
+      description: ""
+    - name: underlying_coupon_type
+      type: INTEGER
+      description: ""
+    - name: underlying_coupon_type_name
+      type: STRING
+      description: ""
+    - name: underlying_coupon_freq_type
+      type: INTEGER
+      description: ""
+    - name: underlying_coupon
+      type: FLOAT
+      description: ""
+    - name: underlying_has_underlying
+      type: BOOLEAN
+      description: ""
+    - name: underlying_stock_type
+      type: INTEGER
+      description: ""
+    - name: underlying_stock_type_name
+      type: STRING
+      description: ""
+    - name: underlying_payment_type
+      type: INTEGER
+      description: ""
+    - name: underlying_payment_type_name
+      type: STRING
+      description: ""
+    - name: underlying_cash_type
+      type: INTEGER
+      description: ""
+    - name: underlying_cash_type_name
+      type: STRING
+      description: ""
+    - name: underlying_option_type
+      type: INTEGER
+      description: ""
+    - name: underlying_option_type_name
+      type: STRING
+      description: ""
+    - name: underlying_exercise_type
+      type: INTEGER
+      description: ""
+    - name: underlying_exercise_type_name
+      type: STRING
+      description: ""
+    - name: underlying_pos_currency
+      type: INTEGER
+      description: ""
+    - name: underlying_pos_currency_name
+      type: STRING
+      description: ""
+    - name: underlying_comm_type
+      type: INTEGER
+      description: ""
+    - name: underlying_strike
+      type: FLOAT
+      description: ""

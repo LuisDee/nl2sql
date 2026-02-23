@@ -1,0 +1,251 @@
+table:
+  name: brokertrade_2
+  dataset: "{dataset_prefix}ice_data"
+  fqn: '{project}.{dataset_prefix}ice_data.brokertrade_2'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_message_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: record_written_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: partition_timestamp_local
+      type: TIMESTAMP
+      description: ""
+    - name: partition_number
+      type: INTEGER
+      description: ""
+    - name: uuid
+      type: STRING
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: parent_instrument_hash
+      type: STRING
+      description: ""
+    - name: entry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: last_edit_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: trade_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: revision
+      type: INTEGER
+      description: ""
+    - name: counterparty
+      type: STRING
+      description: ""
+    - name: user
+      type: STRING
+      description: ""
+    - name: inventory
+      type: STRING
+      description: ""
+    - name: contract_name
+      type: STRING
+      description: ""
+    - name: source
+      type: STRING
+      description: ""
+    - name: broker
+      type: STRING
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: month
+      type: INTEGER
+      description: ""
+    - name: day
+      type: INTEGER
+      description: ""
+    - name: year
+      type: INTEGER
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: tte
+      type: FLOAT
+      description: ""
+    - name: ref_price
+      type: FLOAT
+      description: ""
+    - name: carry_id
+      type: INTEGER
+      description: ""
+    - name: curve_id
+      type: INTEGER
+      description: ""
+    - name: vol
+      type: FLOAT
+      description: ""
+    - name: when_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: vega
+      type: FLOAT
+      description: ""
+    - name: tv
+      type: FLOAT
+      description: ""
+    - name: under
+      type: FLOAT
+      description: ""
+    - name: gamma
+      type: FLOAT
+      description: ""
+    - name: roll
+      type: FLOAT
+      description: ""
+    - name: delta
+      type: FLOAT
+      description: ""
+    - name: price
+      type: FLOAT
+      description: ""
+    - name: is_mako_or_market
+      type: STRING
+      description: ""
+    - name: executable_exchange
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: parent_is_combo
+      type: BOOLEAN
+      description: ""
+    - name: leg_ratio
+      type: FLOAT
+      description: ""
+    - name: leg_index
+      type: INTEGER
+      description: ""
+    - name: underlying_inst_type_name
+      type: STRING
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: combo_type_name
+      type: STRING
+      description: ""
+    - name: underlying_symbol
+      type: STRING
+      description: ""
+    - name: market_or_mako_trade
+      type: STRING
+      description: ""
+    - name: count_calendar
+      type: INTEGER
+      description: ""
+    - name: is_parent
+      type: BOOLEAN
+      description: ""
+    - name: is_ref_component
+      type: INTEGER
+      description: ""
+    - name: underlying_exe_exch
+      type: INTEGER
+      description: ""
+    - name: liquid
+      type: INTEGER
+      description: ""
+    - name: company
+      type: STRING
+      description: ""
+    - name: brokerage_rate
+      type: FLOAT
+      description: ""
+    - name: fee_method
+      type: STRING
+      description: ""
+    - name: parent_feed_code
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: contract_size
+      type: FLOAT
+      description: ""
+    - name: no_legs
+      type: INTEGER
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: underlying_instrument_hash
+      type: STRING
+      description: ""
+    - name: parent_combo_type_name
+      type: STRING
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: total_traded_size
+      type: FLOAT
+      description: ""
+    - name: size
+      type: INTEGER
+      description: ""
+    - name: ref_term
+      type: STRING
+      description: ""
+    - name: ref_inst_type_name
+      type: STRING
+      description: ""
+    - name: account
+      type: STRING
+      description: ""
+    - name: note
+      type: STRING
+      description: ""
+    - name: mako_inventory
+      type: STRING
+      description: ""
+    - name: mako_account
+      type: STRING
+      description: ""
+    - name: market_inventory
+      type: STRING
+      description: ""
+    - name: market_account
+      type: STRING
+      description: ""

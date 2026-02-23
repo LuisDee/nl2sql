@@ -1,0 +1,38 @@
+table:
+  name: marketstate
+  dataset: "{dataset_prefix}korea_data"
+  fqn: '{project}.{dataset_prefix}korea_data.marketstate'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: market_state
+      type: INTEGER
+      description: ""
+    - name: data_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: data_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: sequence_number
+      type: INTEGER
+      description: ""
+    - name: instrument_type
+      type: STRING
+      description: ""
+    - name: keyframe
+      type: BOOLEAN
+      description: ""
+    - name: data_order_identifier
+      type: INTEGER
+      description: ""

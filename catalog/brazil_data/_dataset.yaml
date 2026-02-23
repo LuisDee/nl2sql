@@ -1,0 +1,49 @@
+dataset:
+  name: "{{dataset_prefix}}brazil_data"
+  layer: data
+  exchange: brazil
+  description: >
+    Brazil (B3/Bovespa) options trading and market data. Silver layer.
+    Contains trade execution details, theoretical pricing snapshots,
+    market data feeds, and order book depth.
+
+  tables:
+    - algostartup
+    - basevaldata
+    - boshorder
+    - boshorderupdate
+    - brokertrade_2
+    - brokertrade_data
+    - clicktrade
+    - eodpostradessnap
+    - feedarbitrage
+    - instrumentmetadata
+    - instrumentreceival
+    - instruments
+    - livestats
+    - mako_underlyingtrade
+    - marketdata
+    - marketdata_trades
+    - marketdataext
+    - marketdepth
+    - marketdepth_snapshot
+    - marketstate
+    - marketstate_open_close_times
+    - markettrade
+    - multilevel_data
+    - norm_strike_voldata
+    - orderdeletenotificationevent
+    - orderfillevent
+    - orderposdata
+    - ordertransevent
+    - pcaporder
+    - posdata
+    - quoterdelete
+    - quoterpull
+    - quotertrade
+    - quoterupdate
+    - streammetadatamessage
+    - swingdata
+    - theodata
+    - theodata_snapshot
+    - tradedata

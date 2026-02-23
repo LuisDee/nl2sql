@@ -1,0 +1,89 @@
+table:
+  name: orderposdata
+  dataset: "{dataset_prefix}brazil_data"
+  fqn: '{project}.{dataset_prefix}brazil_data.orderposdata'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: order_id
+      type: INTEGER
+      description: ""
+    - name: prev_order_id
+      type: INTEGER
+      description: ""
+    - name: order_book_side
+      type: INTEGER
+      description: ""
+    - name: level
+      type: INTEGER
+      description: ""
+    - name: position_this_level
+      type: INTEGER
+      description: ""
+    - name: quantity_this_level_ahead
+      type: INTEGER
+      description: ""
+    - name: quantity_this_level_behind
+      type: INTEGER
+      description: ""
+    - name: quantity_ahead_all
+      type: INTEGER
+      description: ""
+    - name: last_order_modification_timestamp
+      type: INTEGER
+      description: ""
+    - name: reason
+      type: INTEGER
+      description: ""
+    - name: reason_name
+      type: STRING
+      description: ""
+    - name: exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: hw_nic_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_ingress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: software_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: hw_nic_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: mako_ingress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: software_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: price
+      type: FLOAT
+      description: ""
+    - name: quantity
+      type: INTEGER
+      description: ""
+    - name: data_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: data_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: data_order_identifier
+      type: INTEGER
+      description: ""

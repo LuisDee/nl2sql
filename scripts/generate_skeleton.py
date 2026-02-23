@@ -7,6 +7,7 @@ Usage:
     python scripts/generate_skeleton.py --layer data --table newtable --offline
     python scripts/generate_skeleton.py --layer kpi --table newtable --live
     python scripts/generate_skeleton.py --layer data --table newtable --offline --force
+    python scripts/generate_skeleton.py --layer brazil_data --table markettrade --offline
 """
 
 from __future__ import annotations
@@ -28,10 +29,32 @@ SCHEMA_DIR = PROJECT_ROOT / "schemas"
 # Dataset placeholder map
 # ---------------------------------------------------------------------------
 
+# Legacy OMX layers
 DATASET_PLACEHOLDERS = {
     "kpi": "{kpi_dataset}",
     "data": "{data_dataset}",
 }
+
+
+def _dataset_placeholder(layer: str) -> str:
+    """Return the dataset placeholder for a given layer/market directory.
+
+    Legacy layers (kpi/data) use {kpi_dataset}/{data_dataset}.
+    Market directories (e.g. brazil_data) use {dataset_prefix}brazil_data.
+    """
+    if layer in DATASET_PLACEHOLDERS:
+        return DATASET_PLACEHOLDERS[layer]
+    return "{dataset_prefix}" + layer
+
+
+def _canonical_layer(layer: str) -> str:
+    """Return the canonical layer name for YAML (kpi or data).
+
+    Market directories like brazil_data map to layer=data.
+    """
+    if layer == "kpi":
+        return "kpi"
+    return "data"
 
 
 # ---------------------------------------------------------------------------
@@ -106,7 +129,8 @@ def generate_skeleton_yaml(
 
     Returns the YAML string (not written to disk).
     """
-    dataset_placeholder = DATASET_PLACEHOLDERS[layer]
+    dataset_placeholder = _dataset_placeholder(layer)
+    canonical_layer = _canonical_layer(layer)
     fqn = f"{{project}}.{dataset_placeholder}.{table}"
     # Escape single quotes for YAML single-quoted string
     fqn_escaped = fqn.replace("'", "''")
@@ -116,7 +140,7 @@ def generate_skeleton_yaml(
         f"  name: {table}",
         f'  dataset: "{dataset_placeholder}"',
         f"  fqn: '{fqn_escaped}'",
-        f"  layer: {layer}",
+        f"  layer: {canonical_layer}",
         '  description: ""',
         "  partition_field: trade_date",
         "  columns:" if columns else "  columns: []",
@@ -159,7 +183,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Generate skeleton YAML for a new table from BQ schema"
     )
-    parser.add_argument("--layer", required=True, choices=["kpi", "data"])
+    parser.add_argument(
+        "--layer",
+        required=True,
+        help="Layer or market directory (kpi, data, arb_data, brazil_data, etc.)",
+    )
     parser.add_argument("--table", required=True, help="Table name")
     parser.add_argument("--live", action="store_true", help="Query live BQ")
     parser.add_argument(

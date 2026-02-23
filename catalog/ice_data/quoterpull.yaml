@@ -1,0 +1,80 @@
+table:
+  name: quoterpull
+  dataset: "{dataset_prefix}ice_data"
+  fqn: '{project}.{dataset_prefix}ice_data.quoterpull'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: kafka_message_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: record_written_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: algo
+      type: STRING
+      description: ""
+    - name: trader
+      type: STRING
+      description: ""
+    - name: pcap_id
+      type: STRING
+      description: ""
+    - name: mako_order_id
+      type: INTEGER
+      description: ""
+    - name: bucket
+      type: STRING
+      description: ""
+    - name: pull_restriction
+      type: INTEGER
+      description: ""
+    - name: exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: latency_stats_bkio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_qmio
+      type: INTEGER
+      description: ""
+    - name: latency_stats_itio
+      type: INTEGER
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""

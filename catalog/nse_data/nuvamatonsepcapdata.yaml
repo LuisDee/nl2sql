@@ -1,0 +1,62 @@
+table:
+  name: nuvamatonsepcapdata
+  dataset: "{dataset_prefix}nse_data"
+  fqn: '{project}.{dataset_prefix}nse_data.nuvamatonsepcapdata'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: exchange_order_id
+      type: INTEGER
+      description: ""
+    - name: trader_id
+      type: INTEGER
+      description: ""
+    - name: source_ip
+      type: STRING
+      description: ""
+    - name: source_port
+      type: INTEGER
+      description: ""
+    - name: destination_ip
+      type: STRING
+      description: ""
+    - name: destination_port
+      type: INTEGER
+      description: ""
+    - name: nnf_message_type
+      type: INTEGER
+      description: ""
+    - name: normalised_message_type
+      type: STRING
+      description: ""
+    - name: rms_ingress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: rms_ingress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: rms_egress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: rms_egress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: gateway_received_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: gateway_received_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""

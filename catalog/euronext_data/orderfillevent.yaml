@@ -1,0 +1,179 @@
+table:
+  name: orderfillevent
+  dataset: "{dataset_prefix}euronext_data"
+  fqn: '{project}.{dataset_prefix}euronext_data.orderfillevent'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: event_type_name
+      type: STRING
+      description: ""
+    - name: event_type
+      type: INTEGER
+      description: ""
+    - name: client_id
+      type: INTEGER
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: algorithm
+      type: STRING
+      description: ""
+    - name: inventory
+      type: STRING
+      description: ""
+    - name: account
+      type: STRING
+      description: ""
+    - name: mako_id
+      type: STRING
+      description: ""
+    - name: trader
+      type: STRING
+      description: ""
+    - name: session_group
+      type: STRING
+      description: ""
+    - name: session
+      type: STRING
+      description: ""
+    - name: exchange_code
+      type: INTEGER
+      description: ""
+    - name: channel_identifier
+      type: STRING
+      description: ""
+    - name: market_data_id
+      type: STRING
+      description: ""
+    - name: message_type
+      type: STRING
+      description: ""
+    - name: destination_host
+      type: STRING
+      description: ""
+    - name: source_host
+      type: STRING
+      description: ""
+    - name: destination_port
+      type: INTEGER
+      description: ""
+    - name: source_port
+      type: INTEGER
+      description: ""
+    - name: protocol_version
+      type: STRING
+      description: ""
+    - name: client_order_id
+      type: INTEGER
+      description: ""
+    - name: mako_order_id
+      type: INTEGER
+      description: ""
+    - name: exch_order_id
+      type: STRING
+      description: ""
+    - name: trans_id
+      type: INTEGER
+      description: ""
+    - name: order_side_name
+      type: STRING
+      description: ""
+    - name: order_side
+      type: INTEGER
+      description: ""
+    - name: volume
+      type: INTEGER
+      description: ""
+    - name: resid_volume
+      type: INTEGER
+      description: ""
+    - name: price
+      type: FLOAT
+      description: ""
+    - name: leg_head_type_name
+      type: STRING
+      description: ""
+    - name: leg_head_type
+      type: INTEGER
+      description: ""
+    - name: exch_fill_id
+      type: STRING
+      description: ""
+    - name: ingress_software_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: ingress_software_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: ingress_hardware_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: ingress_hardware_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: trade_time_ns
+      type: INTEGER
+      description: ""
+    - name: trade_time
+      type: TIMESTAMP
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""

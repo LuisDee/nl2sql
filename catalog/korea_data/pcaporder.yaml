@@ -1,0 +1,134 @@
+table:
+  name: pcaporder
+  dataset: "{dataset_prefix}korea_data"
+  fqn: '{project}.{dataset_prefix}korea_data.pcaporder'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: mako_ingress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_ingress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: mako_egress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_egress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: channel
+      type: STRING
+      description: ""
+    - name: message_type
+      type: STRING
+      description: ""
+    - name: exchange_order_id
+      type: STRING
+      description: ""
+    - name: payload
+      type: STRING
+      description: ""
+    - name: mako_order_id
+      type: INTEGER
+      description: ""
+    - name: exchange_code
+      type: INTEGER
+      description: ""
+    - name: source_ip
+      type: STRING
+      description: ""
+    - name: source_port
+      type: INTEGER
+      description: ""
+    - name: destination_ip
+      type: STRING
+      description: ""
+    - name: destination_port
+      type: INTEGER
+      description: ""
+    - name: native_type
+      type: INTEGER
+      description: ""
+    - name: normalised_message_type
+      type: STRING
+      description: ""
+    - name: market_data_id
+      type: STRING
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: protocol_version
+      type: STRING
+      description: ""
+    - name: exchange_data
+      type: RECORD
+      description: ""
+    - name: gateway_received_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: gateway_received_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: matching_engine_received_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: matching_engine_received_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""

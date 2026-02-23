@@ -35,6 +35,9 @@ REQUIRED_COLUMN_KEYS = {"name", "type", "description"}
 REQUIRED_EXAMPLE_KEYS = {"question", "sql", "tables_used", "dataset", "complexity"}
 VALID_LAYERS = {"kpi", "data"}
 VALID_DATASETS = {"{kpi_dataset}", "{data_dataset}"}
+
+# Market-specific directories (e.g. arb_data, brazil_data) are also valid
+_MARKET_DIR_PATTERN = "_data"  # Suffix for market data directories
 VALID_COMPLEXITIES = {"simple", "medium", "complex"}
 
 
@@ -69,11 +72,16 @@ def resolve_placeholders(
     project: str = "",
     kpi_dataset: str = "",
     data_dataset: str = "",
+    dataset_prefix: str = "",
 ) -> str:
     """Resolve all catalog placeholders in a string.
 
-    Handles {project}, {kpi_dataset}, and {data_dataset} placeholders.
-    Only replaces placeholders for which a non-empty value is provided.
+    Handles {project}, {kpi_dataset}, {data_dataset}, and {dataset_prefix}
+    placeholders. Only replaces placeholders for which a non-empty value
+    is provided.
+
+    The {dataset_prefix} placeholder supports multi-market datasets:
+    e.g. {dataset_prefix}brazil_data -> nl2sql_brazil_data
     """
     result = text
     if project:
@@ -82,6 +90,8 @@ def resolve_placeholders(
         result = result.replace("{kpi_dataset}", kpi_dataset)
     if data_dataset:
         result = result.replace("{data_dataset}", data_dataset)
+    if dataset_prefix is not None:
+        result = result.replace("{dataset_prefix}", dataset_prefix)
     return result
 
 
@@ -162,9 +172,12 @@ def validate_table_yaml(data: dict[str, Any], filepath: str = "") -> list[str]:
             f"{prefix}Invalid layer: {table.get('layer')}. Must be one of {VALID_LAYERS}"
         )
 
-    if table.get("dataset") not in VALID_DATASETS:
+    dataset_val = table.get("dataset", "")
+    dataset_ok = dataset_val in VALID_DATASETS or "{dataset_prefix}" in dataset_val
+    if not dataset_ok:
         errors.append(
-            f"{prefix}Invalid dataset: {table.get('dataset')}. Must be one of {VALID_DATASETS}"
+            f"{prefix}Invalid dataset: {dataset_val}. Must be one of {VALID_DATASETS} "
+            f"or use {{dataset_prefix}} pattern"
         )
 
     fqn = table.get("fqn", "")
@@ -239,14 +252,34 @@ def validate_examples_yaml(data: dict[str, Any], filepath: str = "") -> list[str
     return errors
 
 
+def _catalog_subdirs() -> list[str]:
+    """Return all catalog subdirectories that contain table YAMLs.
+
+    Includes legacy kpi/data dirs and all *_data market directories.
+    """
+    subdirs = ["kpi", "data"]
+    if CATALOG_DIR.exists():
+        for d in sorted(CATALOG_DIR.iterdir()):
+            if (
+                d.is_dir()
+                and d.name.endswith(_MARKET_DIR_PATTERN)
+                and d.name not in subdirs
+            ):
+                subdirs.append(d.name)
+    return subdirs
+
+
 def load_all_table_yamls() -> list[dict[str, Any]]:
-    """Load all table YAML files from catalog/kpi/ and catalog/data/.
+    """Load all table YAML files from catalog subdirectories.
+
+    Scans catalog/kpi/, catalog/data/, and all catalog/*_data/ market
+    directories.
 
     Returns:
         List of parsed table YAML dicts.
     """
     tables = []
-    for subdir in ["kpi", "data"]:
+    for subdir in _catalog_subdirs():
         dir_path = CATALOG_DIR / subdir
         if not dir_path.exists():
             continue

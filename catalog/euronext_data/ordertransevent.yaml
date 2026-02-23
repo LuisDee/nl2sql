@@ -1,0 +1,275 @@
+table:
+  name: ordertransevent
+  dataset: "{dataset_prefix}euronext_data"
+  fqn: '{project}.{dataset_prefix}euronext_data.ordertransevent'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: kafka_partition
+      type: INTEGER
+      description: ""
+    - name: kafka_offset
+      type: INTEGER
+      description: ""
+    - name: message_trade_date
+      type: DATE
+      description: ""
+    - name: event_type_name
+      type: STRING
+      description: ""
+    - name: event_type
+      type: INTEGER
+      description: ""
+    - name: client_id
+      type: INTEGER
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: algorithm
+      type: STRING
+      description: ""
+    - name: inventory
+      type: STRING
+      description: ""
+    - name: account
+      type: STRING
+      description: ""
+    - name: mako_id
+      type: STRING
+      description: ""
+    - name: trader
+      type: STRING
+      description: ""
+    - name: session_group
+      type: STRING
+      description: ""
+    - name: session
+      type: STRING
+      description: ""
+    - name: exchange_code
+      type: INTEGER
+      description: ""
+    - name: channel_identifier
+      type: STRING
+      description: ""
+    - name: market_data_id
+      type: STRING
+      description: ""
+    - name: message_type
+      type: STRING
+      description: ""
+    - name: destination_host
+      type: STRING
+      description: ""
+    - name: source_host
+      type: STRING
+      description: ""
+    - name: destination_port
+      type: INTEGER
+      description: ""
+    - name: source_port
+      type: INTEGER
+      description: ""
+    - name: protocol_version
+      type: STRING
+      description: ""
+    - name: client_order_id
+      type: INTEGER
+      description: ""
+    - name: mako_order_id
+      type: INTEGER
+      description: ""
+    - name: exch_order_id
+      type: STRING
+      description: ""
+    - name: trans_id
+      type: INTEGER
+      description: ""
+    - name: linked_trans_id
+      type: INTEGER
+      description: ""
+    - name: user_tag
+      type: INTEGER
+      description: ""
+    - name: bucket_code
+      type: STRING
+      description: ""
+    - name: order_type_name
+      type: STRING
+      description: ""
+    - name: order_type
+      type: INTEGER
+      description: ""
+    - name: working_side_name
+      type: STRING
+      description: ""
+    - name: working_side
+      type: INTEGER
+      description: ""
+    - name: bid_total_volume
+      type: INTEGER
+      description: ""
+    - name: bid_resid_volume
+      type: INTEGER
+      description: ""
+    - name: bid_price
+      type: FLOAT
+      description: ""
+    - name: ask_total_volume
+      type: INTEGER
+      description: ""
+    - name: ask_resid_volume
+      type: INTEGER
+      description: ""
+    - name: ask_price
+      type: FLOAT
+      description: ""
+    - name: resultInfo_name
+      type: STRING
+      description: ""
+    - name: result_info
+      type: INTEGER
+      description: ""
+    - name: result_tag_name
+      type: STRING
+      description: ""
+    - name: result_tag
+      type: INTEGER
+      description: ""
+    - name: result_name
+      type: STRING
+      description: ""
+    - name: result_code
+      type: INTEGER
+      description: ""
+    - name: exch_info
+      type: STRING
+      description: ""
+    - name: egress_software_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: egress_software_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: egress_hardware_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: egress_hardware_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: outgoing_internal_server_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: outgoing_internal_server_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: outgoing_internal_server_tx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: outgoing_internal_server_tx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: gateway_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: gateway_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: matching_engine_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: matching_engine_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: transaction_time_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: transaction_time_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: ingress_software_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: ingress_software_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: ingress_hardware_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: ingress_hardware_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: internal_server_rx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: internal_server_rx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: internal_server_tx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: internal_server_tx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: algo_tx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: algo_tx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: adapter_tx_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: adapter_tx_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""

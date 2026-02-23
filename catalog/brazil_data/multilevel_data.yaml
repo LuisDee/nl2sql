@@ -1,0 +1,77 @@
+table:
+  name: multilevel_data
+  dataset: "{dataset_prefix}brazil_data"
+  fqn: '{project}.{dataset_prefix}brazil_data.multilevel_data'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: algo
+      type: STRING
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: event_type
+      type: INTEGER
+      description: ""
+    - name: market_event_type
+      type: INTEGER
+      description: ""
+    - name: side
+      type: INTEGER
+      description: ""
+    - name: order_id
+      type: INTEGER
+      description: ""
+    - name: price
+      type: FLOAT
+      description: ""
+    - name: data_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: data_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: data_order_identifier
+      type: INTEGER
+      description: ""
+    - name: volume_ahead_insert
+      type: INTEGER
+      description: ""
+    - name: volume_ahead_tob
+      type: INTEGER
+      description: ""
+    - name: volume_behind_tob
+      type: INTEGER
+      description: ""
+    - name: our_pos
+      type: INTEGER
+      description: ""
+    - name: mako_sequence_number
+      type: INTEGER
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: market_price_level
+      type: INTEGER
+      description: ""
+    - name: delta_bucket
+      type: STRING
+      description: ""

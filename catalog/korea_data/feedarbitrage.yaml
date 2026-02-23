@@ -1,0 +1,71 @@
+table:
+  name: feedarbitrage
+  dataset: "{dataset_prefix}korea_data"
+  fqn: '{project}.{dataset_prefix}korea_data.feedarbitrage'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: mako_ingress_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: mako_ingress_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: sequence_number
+      type: INTEGER
+      description: ""
+    - name: channel_id
+      type: INTEGER
+      description: ""
+    - name: connection_kind
+      type: INTEGER
+      description: ""
+    - name: connection_feed
+      type: INTEGER
+      description: ""
+    - name: host
+      type: STRING
+      description: ""
+    - name: port
+      type: INTEGER
+      description: ""
+    - name: spark_event_type
+      type: STRING
+      description: ""
+    - name: native_event_type
+      type: STRING
+      description: ""
+    - name: order_identifier
+      type: INTEGER
+      description: ""
+    - name: broker_name
+      type: STRING
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: mako_symbol
+      type: STRING
+      description: ""
+    - name: streamsource_stream_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_event_id
+      type: INTEGER
+      description: ""
+    - name: streamsource_message_id
+      type: INTEGER
+      description: ""
+    - name: datasource_pid
+      type: INTEGER
+      description: ""
+    - name: datasource_hostname
+      type: STRING
+      description: ""

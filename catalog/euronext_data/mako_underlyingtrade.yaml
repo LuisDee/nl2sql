@@ -1,0 +1,182 @@
+table:
+  name: mako_underlyingtrade
+  dataset: "{dataset_prefix}euronext_data"
+  fqn: '{project}.{dataset_prefix}euronext_data.mako_underlyingtrade'
+  layer: data
+  description: ""
+  partition_field: trade_date
+  columns:
+    - name: trade_date
+      type: DATE
+      description: ""
+    - name: symbol
+      type: STRING
+      description: ""
+    - name: portfolio
+      type: STRING
+      description: ""
+    - name: instrument_hash
+      type: STRING
+      description: ""
+    - name: parent_instrument_hash
+      type: STRING
+      description: ""
+    - name: parent_is_combo
+      type: BOOLEAN
+      description: ""
+    - name: is_parent
+      type: BOOLEAN
+      description: ""
+    - name: leg_ratio
+      type: FLOAT
+      description: ""
+    - name: no_legs
+      type: INTEGER
+      description: ""
+    - name: leg_index
+      type: INTEGER
+      description: ""
+    - name: parent_combo_type_name
+      type: STRING
+      description: ""
+    - name: inst_type_name
+      type: STRING
+      description: ""
+    - name: underlying_inst_type_name
+      type: STRING
+      description: ""
+    - name: combo_type_name
+      type: STRING
+      description: ""
+    - name: expiry_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: term
+      type: STRING
+      description: ""
+    - name: currency
+      type: INTEGER
+      description: ""
+    - name: trader_id
+      type: STRING
+      description: ""
+    - name: mako_id
+      type: STRING
+      description: ""
+    - name: algorithm
+      type: STRING
+      description: ""
+    - name: channel
+      type: STRING
+      description: ""
+    - name: inventory
+      type: STRING
+      description: ""
+    - name: account
+      type: STRING
+      description: ""
+    - name: transaction_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: transaction_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: exchange_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: exchange_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: exchange_date
+      type: DATE
+      description: ""
+    - name: exchange_transaction_id
+      type: STRING
+      description: ""
+    - name: exchange_order_id
+      type: STRING
+      description: ""
+    - name: agg_pos_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: agg_pos_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: agg_pos_date
+      type: DATE
+      description: ""
+    - name: revision
+      type: INTEGER
+      description: ""
+    - name: revision_timestamp
+      type: TIMESTAMP
+      description: ""
+    - name: revision_timestamp_ns
+      type: INTEGER
+      description: ""
+    - name: traded_size
+      type: INTEGER
+      description: ""
+    - name: price
+      type: FLOAT
+      description: ""
+    - name: size
+      type: INTEGER
+      description: ""
+    - name: tv
+      type: FLOAT
+      description: ""
+    - name: counterparty
+      type: STRING
+      description: ""
+    - name: revisor
+      type: STRING
+      description: ""
+    - name: transaction_id
+      type: INTEGER
+      description: ""
+    - name: order_id
+      type: INTEGER
+      description: ""
+    - name: position_type
+      type: INTEGER
+      description: ""
+    - name: position_id
+      type: INTEGER
+      description: ""
+    - name: curve_id
+      type: INTEGER
+      description: ""
+    - name: carry_id
+      type: INTEGER
+      description: ""
+    - name: trade_id
+      type: INTEGER
+      description: ""
+    - name: text
+      type: STRING
+      description: ""
+    - name: strike
+      type: FLOAT
+      description: ""
+    - name: option_type
+      type: INTEGER
+      description: ""
+    - name: option_type_name
+      type: STRING
+      description: ""
+    - name: contract_size
+      type: FLOAT
+      description: ""
+    - name: underlying_exe_exch
+      type: INTEGER
+      description: ""
+    - name: parent_feed_code
+      type: STRING
+      description: ""
+    - name: total_traded_size
+      type: FLOAT
+      description: ""
+    - name: liquid
+      type: INTEGER
+      description: ""

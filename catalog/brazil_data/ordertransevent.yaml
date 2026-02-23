@@ -9,282 +9,442 @@ table:
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: message_trade_date
       type: DATE
       description: ""
+      category: time
     - name: event_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: event_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: client_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: algorithm
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: inventory
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: account
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: mako_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: trader
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: session_group
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: session
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: exchange_code
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: channel_identifier
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: market_data_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: message_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: destination_host
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: source_host
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: destination_port
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: source_port
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: protocol_version
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: client_order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: mako_order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: exch_order_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: trans_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: linked_trans_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: user_tag
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: bucket_code
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: order_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: order_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: working_side_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: working_side
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: bid_total_volume
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: bid_resid_volume
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: bid_price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ask_total_volume
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: ask_resid_volume
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: ask_price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: resultInfo_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: result_info
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: result_tag_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: result_tag
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: result_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: result_code
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: exch_info
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: egress_software_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: egress_software_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: egress_hardware_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: egress_hardware_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: outgoing_internal_server_rx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: outgoing_internal_server_rx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: outgoing_internal_server_tx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: outgoing_internal_server_tx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: gateway_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: gateway_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: matching_engine_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: matching_engine_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: transaction_time_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: transaction_time_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: ingress_software_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: ingress_software_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: ingress_hardware_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: ingress_hardware_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: internal_server_rx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: internal_server_rx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: internal_server_tx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: internal_server_tx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: algo_tx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: algo_tx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: adapter_tx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: adapter_tx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: option_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: currency
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: order_side_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: order_side
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: total_volume
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: resid_volume
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG

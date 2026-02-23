@@ -9,348 +9,571 @@ table:
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: algo
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: ref_curve_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: ref_carry_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: ref_tv
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ref_delta
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ref_gamma
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ref_base_price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ref_roll
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: raw_bv_bid
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: raw_bv_bid_size
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: raw_bv_ask
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: raw_bv_ask_size
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: layered_base_bid
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: layered_base_bid_size
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: layered_base_ask
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: layered_base_ask_size
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: layered_base_adjustment
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: odr_adjustment
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: inflight_deflection_tv_adjustment_bid
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: inflight_deflection_tv_adjustment_ask
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: internal_tv_adjustment_bid
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: internal_tv_adjustment_ask
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: nhr_adjustment_bid
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: nhr_adjustment_ask
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: base_edge_bid
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: base_edge_ask
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: fees
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: roll
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: bv_side
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: delta_adjusted_base_price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: tv
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: base_sequence_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: option_sequence_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: base_instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: hardware_nic_rx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: event_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: event_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: delete_side
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: trigger_price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: active_price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: active_size
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: delete_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: trigger_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: batch_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: pcap_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: bucket
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: event_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: latency_stats_prcx
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: latency_stats_prcs
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: latency_stats_vtio
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: latency_stats_bkio
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: latency_stats_qmio
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: latency_stats_itio
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: latency_stats_itex
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: option_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: currency
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: is_book_resubmit
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: inflight_trade_volume
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: bv_update_sequence_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: bv_update_instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: underlying_sequence_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: mako_order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: is_bv_invalid
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: exchange_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: exchange_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: underlying_exe_exch
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_exe_exch_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: is_spark
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: ref_inst_carry_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: ref_inst_curve_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: is_ref_theo_invalid
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: lb_enabled
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: edge_model_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: edge_model_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: bid_price_0
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ask_price_0
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ask_volume_0
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: bid_volume_0
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: latency_stats_bvio
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: latency_stats_delio
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: latency_stats_lockio
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ref_theoevent_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: ref_theoevent_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: is_spark_resubmit
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: last_trade_price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: price_level
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: total_market_volume
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: total_our_volume
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: delete_amend_threshold
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: volume_reduced_so_far
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: is_breached
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: num_of_breaches
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: max_breach_permitted
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: requirement_check_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: requirement_check_timestamp_ns
       type: INTEGER
       description: ""
+      category: time

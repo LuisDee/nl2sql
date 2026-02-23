@@ -6,11 +6,17 @@ glossary:
       definition: >-
         Sum of instant_pnl across all trades. Measures gross profitability before
         fees. Formula: SUM(instant_pnl). Use instant_pnl_w_fees for net PnL.
+        CRITICAL: for "total PnL" or "all trades PnL", query markettrade ALONE
+        — it is the superset of ALL trades. Do NOT sum markettrade + quotertrade +
+        brokertrade + clicktrade + otoswing — that double-counts because the 4
+        Mako tables are subsets already included in markettrade. For Mako-only PnL
+        by trade type, UNION the 4 Mako tables WITHOUT markettrade.
       synonyms:
         - total profit
         - aggregate pnl
         - gross pnl
         - P&L
+        - overall pnl
       related_columns:
         - markettrade.instant_pnl
         - quotertrade.instant_pnl

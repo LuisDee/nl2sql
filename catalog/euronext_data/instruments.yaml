@@ -9,312 +9,515 @@ table:
     - name: parent_raw_proto
       type: BYTES
       description: ""
+      category: dimension
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: parent_instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: parent_no_legs
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: parent_settle_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_settle_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_composition
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_feed_code
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_exchange_native
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_mako_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_isin
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_sedol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_cusip
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_bloomberg
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_reuters
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_is_combo
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_combo_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_combo_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_listed
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: parent_listed_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_pos_exchange
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: parent_currency
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: parent_currency_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_contract_size
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: leg_index
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ratio
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: underlying_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: pricing_count
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: inst_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: listed
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: listed_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: pos_exch
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: currency
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: currency_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: revision
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: contract_size
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: expiry_timezone
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: issue_date
       type: TIMESTAMP
       description: ""
+      category: time
     - name: bond_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: bond_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: day_count_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: day_count_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: coupon_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: coupon_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: coupon_freq_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: coupon
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: has_underlying
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: stock_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: stock_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: payment_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: payment_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: cash_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: cash_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: option_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: exercise_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: exercise_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: pos_currency
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: pos_currency_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: comm_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_inst_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_listed
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_listed_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_pos_exch
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_currency
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_currency_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_revision
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_contract_size
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: underlying_term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: underlying_expiry_timezone
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_issue_date
       type: TIMESTAMP
       description: ""
+      category: time
     - name: underlying_bond_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_bond_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_day_count_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_day_count_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_coupon_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_coupon_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_coupon_freq_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_coupon
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_has_underlying
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_stock_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_stock_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_payment_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_payment_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_cash_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_cash_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_option_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_exercise_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_exercise_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_pos_currency
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_pos_currency_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_comm_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: partition_timestamp_local
       type: TIMESTAMP
       description: ""
+      category: time

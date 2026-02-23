@@ -16,14 +16,17 @@ import yaml
 
 CATALOG_DIR = Path(__file__).resolve().parent.parent / "catalog"
 
-# Tables to check (layer, table_name)
+# Tables to check (layer, table_name) — only enriched tables (non-empty table description)
 _TABLES = []
 for _layer in ("kpi", "data"):
     _dir = CATALOG_DIR / _layer
     if _dir.exists():
         for _f in sorted(_dir.glob("*.yaml")):
             if not _f.name.startswith("_"):
-                _TABLES.append((_layer, _f.stem))
+                _data = yaml.safe_load(_f.read_text())
+                _desc = _data.get("table", {}).get("description", "")
+                if _desc and _desc.strip():  # Skip skeleton/WIP tables
+                    _TABLES.append((_layer, _f.stem))
 
 
 def _load_table(layer: str, table: str) -> dict:

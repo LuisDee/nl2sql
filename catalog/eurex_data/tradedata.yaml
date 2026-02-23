@@ -9,234 +9,453 @@ table:
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: kafka infrastructure
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: kafka infrastructure
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
+      source: kafka infrastructure
     - name: mako_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.makoId (data/PosData.proto)
     - name: trader_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.traderId (data/PosData.proto)
     - name: algorithm
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: routed_exchange
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.routedExchange (data/PosData.proto)
     - name: executable_exchange
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.executableExchange (data/PosData.proto)
     - name: channel
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: transaction_properties
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.transactionProperties (data/PosData.proto)
     - name: tag_book
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.tagBook (data/PosData.proto)
     - name: tag_exchange
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.tagExchange (data/PosData.proto)
     - name: tag_user
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.tagUser (data/PosData.proto)
     - name: revision
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: kafka infrastructure
     - name: inventory
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: account
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: fill_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.fillId (data/PosData.proto)
     - name: user_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.userId (data/PosData.proto)
     - name: user_order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.userOrderId (data/PosData.proto)
     - name: transaction_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.transactionId (data/PosData.proto)
     - name: order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.orderId (data/PosData.proto)
     - name: exchange_transaction_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.exchangeTransactionId (data/PosData.proto)
     - name: exchange_order_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.exchangeOrderId (data/PosData.proto)
     - name: transaction_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
+      source: PositionEvent.transactionTimestamp (data/PosData.proto)
     - name: transaction_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
+      source: PositionEvent.transactionTimestamp_ns (data/PosData.proto)
     - name: exchange_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
+      source: derived (data-loader)
     - name: exchange_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
+      source: PositionEvent.exchangeTimestamp (data/PosData.proto)
     - name: exchange_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
+      source: PositionEvent.exchangeTimestamp_ns (data/PosData.proto)
     - name: exchange_info
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: PositionEvent.exchangeInfo (data/PosData.proto)
     - name: exchange_info_bits
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.exchangeInfoBits (data/PosData.proto)
     - name: exchange_qualifier
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: PositionEvent.exchangeQualifier (data/PosData.proto)
     - name: statistics
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: position_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
+      source: PositionEvent.positionType (data/PosData.proto)
     - name: position_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.positionId (data/PosData.proto)
     - name: size
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: kafka infrastructure
     - name: tv
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: kafka infrastructure
     - name: ectv
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: kafka infrastructure
     - name: settlement
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: kafka infrastructure
     - name: settlement_date
       type: DATE
       description: ""
+      category: time
+      source: derived (data-loader)
     - name: pos_currency
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.currency (data/PosData.proto)
     - name: pos_value_currency
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.valueCurrency (data/PosData.proto)
     - name: cash_value
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.cashValue (data/PosData.proto)
     - name: mgmt_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
+      source: PositionEvent.mgmtTimestamp (data/PosData.proto)
     - name: mgmt_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
+      source: PositionEvent.mgmtTimestamp_ns (data/PosData.proto)
     - name: max_trade_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.maxTradeId (data/PosData.proto)
     - name: agg_pos_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
+      source: PositionEvent.aggPosTimestamp (data/PosData.proto)
     - name: agg_pos_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
+      source: PositionEvent.aggPosTimestamp_ns (data/PosData.proto)
     - name: agg_pos_date
       type: DATE
       description: ""
+      category: time
+      source: derived (data-loader)
     - name: price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: kafka infrastructure
     - name: deflection_scale
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.deflectionScale (data/PosData.proto)
     - name: curve_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.curveId (data/PosData.proto)
     - name: carry_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.carryId (data/PosData.proto)
     - name: revision_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
+      source: PositionEvent.revisionTimestamp (data/PosData.proto)
     - name: revision_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
+      source: PositionEvent.revisionTimestamp_ns (data/PosData.proto)
     - name: trade_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.tradeId (data/PosData.proto)
     - name: company_position
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.companyPosition (data/PosData.proto)
     - name: traded_size
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
+      source: PositionEvent.tradedSize (data/PosData.proto)
     - name: message_trade_date
       type: DATE
       description: ""
+      category: time
+      source: derived (data-loader)
     - name: value_date
       type: DATE
       description: ""
+      category: time
+      source: derived (data-loader)
     - name: counterparty
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: text
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: revisor
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: kafka infrastructure
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.instrumentHash (data/PosData.proto)
     - name: strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: instrument enrichment (data-loader)
     - name: option_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
+      source: instrument enrichment (data-loader)
     - name: option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: instrument enrichment (data-loader)
     - name: expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
+      source: instrument enrichment (data-loader)
     - name: mako_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: instrument enrichment (data-loader)
     - name: currency
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
+      source: instrument enrichment (data-loader)
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: instrument enrichment (data-loader)
     - name: inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: instrument enrichment (data-loader)
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.streamId (data/PosData.proto)
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.eventId (data/PosData.proto)
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
+      source: PositionEvent.messageId (data/PosData.proto)
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
+      source: PositionEvent.pid (data/PosData.proto)
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
+      source: PositionEvent.hostname (data/PosData.proto)

@@ -43,9 +43,9 @@ class TestResolveYamlPath:
         assert path == "kpi/markettrade.yaml"
 
     def test_resolves_asx_data_via_registry(self):
-        """Exchange registry lookup: ASX data dataset."""
+        """Exchange registry lookup: ASX data dataset resolves to market dir."""
         path = _resolve_yaml_path("theodata", "nl2sql_asx_data")
-        assert path == "data/theodata.yaml"
+        assert path == "asx_data/theodata.yaml"
 
     def test_resolves_unknown_dataset_via_suffix_heuristic(self):
         """Suffix heuristic: nl2sql_newexchange_kpi → kpi."""

@@ -9,81 +9,130 @@ table:
     - name: kafka_message_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: record_written_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: component
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: message_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: exchange_code
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: message_trade_date
       type: DATE
       description: ""
+      category: time
     - name: message_identifier
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: message_identifier_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: message_description
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: message_description_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: order_identifier
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: label
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: int_value
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: float_value
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: string_value
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true

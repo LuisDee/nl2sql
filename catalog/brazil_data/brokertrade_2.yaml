@@ -9,231 +9,377 @@ table:
     - name: kafka_message_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: record_written_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: partition_timestamp_local
       type: TIMESTAMP
       description: ""
+      category: time
     - name: partition_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: uuid
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: parent_instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: entry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: last_edit_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: trade_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: revision
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: counterparty
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: user
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: inventory
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: contract_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: source
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: broker
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: month
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: day
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: year
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: tte
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ref_price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: carry_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: curve_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: vol
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: when_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: vega
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: tv
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: under
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: gamma
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: roll
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: delta
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: is_mako_or_market
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: executable_exchange
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_is_combo
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: leg_ratio
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: leg_index
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: combo_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: market_or_mako_trade
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: count_calendar
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: is_parent
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: is_ref_component
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_exe_exch
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: liquid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: company
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: brokerage_rate
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: fee_method
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: parent_feed_code
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: currency
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: contract_size
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: no_legs
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: parent_combo_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: total_traded_size
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: size
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ref_term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: ref_inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: account
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: note
       type: STRING
       description: ""
+      category: dimension
+      filterable: true

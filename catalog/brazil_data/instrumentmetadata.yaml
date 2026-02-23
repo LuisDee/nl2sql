@@ -9,18 +9,29 @@ table:
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: message_trade_date
       type: DATE
       description: ""
+      category: time
     - name: is_market_maker_instrument
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true

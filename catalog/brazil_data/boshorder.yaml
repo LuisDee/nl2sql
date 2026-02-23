@@ -9,225 +9,369 @@ table:
     - name: partition_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: partition_timestamp_local
       type: TIMESTAMP
       description: ""
+      category: time
     - name: algorithm
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: bosh_order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: tv
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: delta
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: gamma
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: vega
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: under
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: roll
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: vol
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: when_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: when_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: curve_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: carry_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: currency
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: theta
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: rho
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: raw_gamma
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: raw_delta
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: lvol
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: norms
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: tax_div_tv_diff
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: tv_offset
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: tte
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: forward
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: short_rate
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_atm
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_skew
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_call_skew
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_put_k
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_call_k
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_put_a
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_call_a
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_put_b
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_call_b
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: greek_datm
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: param_atm
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: param_skew
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: param_call_skew
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: param_put_k
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: param_call_k
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: param_s_vol
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: custom_greeks
       type: RECORD
       description: ""
+      category: dimension
+      filterable: true
     - name: base_atm_size
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: max_edge_loss
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: edge_units
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: side
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: atm_vega
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: max_size_multiplier
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: order_option
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: order_option_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: event_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: event_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: mako_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: resting_time_limit_nanos
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: edge_loss
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: mode
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: mode_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: option_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true

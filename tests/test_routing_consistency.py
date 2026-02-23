@@ -7,6 +7,8 @@ Verifies that:
 4. Embedding descriptions are driven by YAML (no hardcoded drift)
 """
 
+import yaml
+
 from nl2sql_agent.catalog_loader import (
     CATALOG_DIR,
     load_routing_rules,
@@ -174,7 +176,7 @@ class TestEmbeddingDrift:
         )
 
     def test_build_table_descriptions_covers_all_data_tables(self) -> None:
-        """Every data table YAML must appear in embedding descriptions."""
+        """Every enriched data table YAML must appear in embedding descriptions."""
         from scripts.run_embeddings import _build_table_descriptions
 
         descs = _build_table_descriptions(settings)
@@ -183,11 +185,15 @@ class TestEmbeddingDrift:
             for d in descs
             if d["layer"] == "data" and d["source_type"] == "table"
         }
-        data_yamls = {
-            f.stem
-            for f in (CATALOG_DIR / "data").glob("*.yaml")
-            if not f.name.startswith("_")
-        }
+        # Only check tables that have non-empty descriptions (enriched tables)
+        data_yamls = set()
+        for f in (CATALOG_DIR / "data").glob("*.yaml"):
+            if f.name.startswith("_"):
+                continue
+            content = yaml.safe_load(f.read_text())
+            desc = content.get("table", {}).get("description", "").strip()
+            if desc:
+                data_yamls.add(f.stem)
         assert data_yamls == data_tables, (
             f"Mismatch between data YAMLs and embedding descriptions: "
             f"missing={data_yamls - data_tables}, extra={data_tables - data_yamls}"

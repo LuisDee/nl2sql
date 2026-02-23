@@ -262,29 +262,27 @@ def _apply_agg_changes(
     current_col: str | None = None
     handled: set[str] = set()
     in_columns = False
+    field_indent = "    "  # default; detected from first column
 
     for line in lines:
-        col_match = re.match(r"^  - name: (.+?)(\s*#.*)?$", line)
+        col_match = re.match(r"^(\s+)- name: (.+?)(\s*#.*)?$", line)
         if col_match:
             in_columns = True
-            _flush_agg(result, current_col, changes, handled)
-            current_col = col_match.group(1).strip()
+            _flush_agg(result, current_col, changes, handled, field_indent)
+            col_indent = col_match.group(1)
+            field_indent = col_indent + "  "  # fields are 2 more than list item
+            current_col = col_match.group(2).strip()
             result.append(line)
             continue
 
-        if (
-            in_columns
-            and line
-            and not line.startswith("    ")
-            and not line.startswith("  - name:")
-        ):
-            _flush_agg(result, current_col, changes, handled)
+        if in_columns and line and not line[0].isspace():
+            _flush_agg(result, current_col, changes, handled, field_indent)
             current_col = None
             in_columns = False
 
         result.append(line)
 
-    _flush_agg(result, current_col, changes, handled)
+    _flush_agg(result, current_col, changes, handled, field_indent)
     yaml_path.write_text("\n".join(result) + "\n")
 
 
@@ -293,14 +291,15 @@ def _flush_agg(
     current_col: str | None,
     changes: dict[str, dict[str, str | bool]],
     handled: set[str],
+    field_indent: str = "    ",
 ) -> None:
     if current_col is None or current_col in handled or current_col not in changes:
         return
     for key, value in changes[current_col].items():
         if isinstance(value, bool):
-            result.append(f"    {key}: {str(value).lower()}")
+            result.append(f"{field_indent}{key}: {str(value).lower()}")
         else:
-            result.append(f"    {key}: {value}")
+            result.append(f"{field_indent}{key}: {value}")
     handled.add(current_col)
 
 

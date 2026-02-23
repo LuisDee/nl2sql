@@ -9,81 +9,124 @@ table:
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: prev_order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: order_book_side
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: level
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: position_this_level
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: quantity_this_level_ahead
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: quantity_this_level_behind
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: quantity_ahead_all
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: last_order_modification_timestamp
       type: INTEGER
       description: ""
+      category: time
     - name: reason
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: reason_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: exchange_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: hw_nic_rx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_ingress_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: software_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: exchange_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: hw_nic_rx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: mako_ingress_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: software_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: mako_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: quantity
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: data_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: data_order_identifier
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG

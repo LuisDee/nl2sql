@@ -1,5 +1,6 @@
-# Exchange Registry — maps canonical names to aliases and BQ dataset names.
-# All 10 exchanges have identical table schemas; only the dataset name differs.
+# Exchange Registry — maps canonical names to aliases.
+# All 10 exchanges have identical table schemas; dataset names are computed
+# at runtime from settings.dataset_prefix + exchange code (e.g. "nl2sql_brazil_kpi").
 # Used by resolve_exchange tool for routing questions to the correct datasets.
 
 default_exchange: omx
@@ -7,50 +8,30 @@ default_exchange: omx
 exchanges:
   arb:
     aliases: [arb, arbitrage]
-    kpi_dataset: nl2sql_arb_kpi
-    data_dataset: nl2sql_arb_data
 
   asx:
     aliases: [asx, australia, australian, sydney]
-    kpi_dataset: nl2sql_asx_kpi
-    data_dataset: nl2sql_asx_data
 
   eurex:
     aliases: [eurex, european]
-    kpi_dataset: nl2sql_eurex_kpi
-    data_dataset: nl2sql_eurex_data
 
   canada:
     aliases: [canada, canadian, tsx, montreal]
-    kpi_dataset: nl2sql_canada_kpi
-    data_dataset: nl2sql_canada_data
 
   euronext:
     aliases: [euronext, amsterdam, paris, lisbon]
-    kpi_dataset: nl2sql_euronext_kpi
-    data_dataset: nl2sql_euronext_data
 
   brazil:
     aliases: [brazil, bovespa, b3, brazilian]
-    kpi_dataset: nl2sql_brazil_kpi
-    data_dataset: nl2sql_brazil_data
 
   ice:
     aliases: [ice, intercontinental]
-    kpi_dataset: nl2sql_ice_kpi
-    data_dataset: nl2sql_ice_data
 
   omx:
     aliases: [omx, nordic, stockholm]
-    kpi_dataset: nl2sql_omx_kpi
-    data_dataset: nl2sql_omx_data
 
   nse:
     aliases: [nse, india, indian]
-    kpi_dataset: nl2sql_nse_kpi
-    data_dataset: nl2sql_nse_data
 
   korea:
     aliases: [korea, korean, krx]
-    kpi_dataset: nl2sql_korea_kpi
-    data_dataset: nl2sql_korea_data

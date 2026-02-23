@@ -9,354 +9,587 @@ table:
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: rec_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: rec_date
       type: DATE
       description: ""
+      category: time
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: vol_region
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: tte
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: fwd
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: under
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: curve_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: ivol_minus_1000
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_1000
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_900
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_900
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_800
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_800
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_700
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_700
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_600
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_600
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_500
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_500
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_450
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_450
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_400
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_400
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_350
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_350
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_300
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_300
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_275
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_275
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_250
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_250
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_225
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_225
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_200
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_200
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_175
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_175
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_150
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_150
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_125
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_125
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_100
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_100
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_075
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_075
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_050
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_050
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_040
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_040
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_030
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_030
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_020
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_020
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_minus_010
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_minus_010
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_atm_000
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_atm_000
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_010
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_010
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_020
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_020
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_030
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_030
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_040
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_040
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_050
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_050
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_075
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_075
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_100
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_100
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_125
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_125
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_150
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_150
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_175
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_175
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_200
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_200
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_225
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_225
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_250
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_250
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_275
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_275
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_300
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_300
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_350
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_350
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_400
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_400
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_450
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_450
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_500
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_500
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_600
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_600
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_700
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_700
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_800
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_800
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_900
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_900
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: ivol_plus_1000
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: svol_plus_1000
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true

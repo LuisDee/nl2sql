@@ -20,8 +20,12 @@ routing_descriptions:
     (broker trades, has account field for broker comparison), clicktrade (manual
     click trades), otoswing (OTO swing trades). When a question doesn't specify
     trade type, use markettrade. When comparing brokers or mentioning account
-    names, use brokertrade. When asking about all trades or total PnL, UNION
-    ALL across all 5 tables.
+    names, use brokertrade. CRITICAL: markettrade contains ALL participants'
+    trades (Mako + counterparties). The other 4 tables are Mako-only subsets
+    that also appear in markettrade. For "total PnL" or "all trades", use
+    markettrade ALONE. For "PnL by Mako trade type", UNION ALL the 4 Mako
+    tables (quotertrade, brokertrade, clicktrade, otoswing) WITHOUT markettrade.
+    NEVER sum or UNION markettrade with the other tables — that double-counts.
 
   theodata_routing: >
     Questions about theoretical pricing, implied volatility (IV, vol, sigma),

@@ -9,66 +9,105 @@ table:
     - name: kafka_message_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: record_written_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: algo
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: event_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: event_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: underlying_exe_exch
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: underlying_exe_exch_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: is_spark
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: underlying_instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: base_valuation_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: base_valuation_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: message_trade_date
       type: DATE
       description: ""
+      category: time
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true

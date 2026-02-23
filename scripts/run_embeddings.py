@@ -260,13 +260,16 @@ def _build_table_descriptions(s: Settings) -> list[dict[str, str]]:
                 continue
             content = load_yaml(yaml_file)
             table = content.get("table", {})
+            desc = table.get("description", "").strip()
+            if not desc:
+                continue  # Skip skeleton/WIP tables with empty descriptions
             descriptions.append(
                 {
                     "source_type": "table",
                     "layer": layer,
                     "dataset_name": dataset_name,
                     "table_name": table.get("name", yaml_file.stem),
-                    "description": table.get("description", "").strip(),
+                    "description": desc,
                 }
             )
 

@@ -9,57 +9,89 @@ table:
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: hardware_nic_rx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: hardware_nic_rx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: software_rx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: software_rx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: option_underlying_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: option_term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: base_term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: option_underlying
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: option_roll
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: option_underlying_is_valid
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: update_instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: update_sequence_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: data_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true

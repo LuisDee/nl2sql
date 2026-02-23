@@ -9,69 +9,113 @@ table:
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: algo
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: portfolio
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: event_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: market_event_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: side
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: data_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: data_order_identifier
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: volume_ahead_insert
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: volume_ahead_tob
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: volume_behind_tob
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: SUM
     - name: our_pos
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: mako_sequence_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: market_price_level
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: delta_bucket
       type: STRING
       description: ""
+      category: dimension
+      filterable: true

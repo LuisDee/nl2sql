@@ -9,54 +9,83 @@ table:
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: message_trade_date
       type: DATE
       description: ""
+      category: time
     - name: exchange_order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: trader_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: source_ip
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: source_port
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: destination_ip
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: destination_port
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: nnf_message_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: normalised_message_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: rms_ingress_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: rms_ingress_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: rms_egress_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: rms_egress_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: gateway_received_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: gateway_received_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true

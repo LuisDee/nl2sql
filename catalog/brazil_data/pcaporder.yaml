@@ -9,126 +9,200 @@ table:
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: message_trade_date
       type: DATE
       description: ""
+      category: time
     - name: mako_ingress_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_ingress_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: mako_egress_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_egress_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: channel
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: message_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: exchange_order_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: payload
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: mako_order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: exchange_code
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: source_ip
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: source_port
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: destination_ip
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: destination_port
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: native_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: normalised_message_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: market_data_id
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: option_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: currency
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: protocol_version
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: exchange_data
       type: RECORD
       description: ""
+      category: dimension
+      filterable: true
     - name: gateway_received_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: gateway_received_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: matching_engine_received_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: matching_engine_received_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true

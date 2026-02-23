@@ -270,13 +270,14 @@ def _apply_changes_to_file(
     result: list[str] = []
     current_col: str | None = None
     handled: set[str] = set()
+    field_indent = "    "
     i = 0
 
     while i < len(lines):
         line = lines[i]
 
-        # Detect start of a new column block
-        col_match = re.match(r"^  - name: (.+?)(\s*#.*)?$", line)
+        # Detect start of a new column block (flexible indent)
+        col_match = re.match(r"^(\s+)- name: (.+?)(\s*#.*)?$", line)
         if col_match:
             # Insert formula for previous column if it needed one
             if (
@@ -285,22 +286,26 @@ def _apply_changes_to_file(
                 and current_col not in handled
             ):
                 _, formula = changes[current_col]
-                result.append(f"    formula: {_quote_for_yaml(formula)}")
+                result.append(f"{field_indent}formula: {_quote_for_yaml(formula)}")
                 handled.add(current_col)
 
-            current_col = col_match.group(1).strip()
+            col_indent = col_match.group(1)
+            field_indent = col_indent + "  "
+            current_col = col_match.group(2).strip()
 
-        # Detect and replace existing formula line
-        if re.match(r"^    formula:", line) and current_col in changes:
+        # Detect and replace existing formula line (flexible indent)
+        formula_match = re.match(r"^(\s+)formula:", line)
+        if formula_match and current_col in changes:
             _, new_formula = changes[current_col]
-            result.append(f"    formula: {_quote_for_yaml(new_formula)}")
+            result.append(f"{field_indent}formula: {_quote_for_yaml(new_formula)}")
             handled.add(current_col)
             i += 1
 
             # Skip continuation lines of old value (block scalars or
             # plain scalars that wrap to the next line).  Continuation
-            # lines are indented deeper than the key (6+ spaces).
-            while i < len(lines) and lines[i].startswith("      "):
+            # lines are indented deeper than the key.
+            cont_indent = field_indent + "  "
+            while i < len(lines) and lines[i].startswith(cont_indent):
                 i += 1
             continue
 
@@ -314,7 +319,7 @@ def _apply_changes_to_file(
         and current_col not in handled
     ):
         _, formula = changes[current_col]
-        result.append(f"    formula: {_quote_for_yaml(formula)}")
+        result.append(f"{field_indent}formula: {_quote_for_yaml(formula)}")
 
     yaml_path.write_text("\n".join(result) + "\n")
 

@@ -9,30 +9,48 @@ table:
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: market_state
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: data_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: sequence_number
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: instrument_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: keyframe
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: data_order_identifier
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG

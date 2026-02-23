@@ -241,29 +241,27 @@ def _apply_example_changes(
     current_col: str | None = None
     handled: set[str] = set()
     in_columns = False
+    field_indent = "    "
 
     for line in lines:
-        col_match = re.match(r"^  - name: (.+?)(\s*#.*)?$", line)
+        col_match = re.match(r"^(\s+)- name: (.+?)(\s*#.*)?$", line)
         if col_match:
             in_columns = True
-            _flush_examples(result, current_col, changes, handled)
-            current_col = col_match.group(1).strip()
+            _flush_examples(result, current_col, changes, handled, field_indent)
+            col_indent = col_match.group(1)
+            field_indent = col_indent + "  "
+            current_col = col_match.group(2).strip()
             result.append(line)
             continue
 
-        if (
-            in_columns
-            and line
-            and not line.startswith("    ")
-            and not line.startswith("  - name:")
-        ):
-            _flush_examples(result, current_col, changes, handled)
+        if in_columns and line and not line[0].isspace():
+            _flush_examples(result, current_col, changes, handled, field_indent)
             current_col = None
             in_columns = False
 
         result.append(line)
 
-    _flush_examples(result, current_col, changes, handled)
+    _flush_examples(result, current_col, changes, handled, field_indent)
     yaml_path.write_text("\n".join(result) + "\n")
 
 
@@ -272,19 +270,20 @@ def _flush_examples(
     current_col: str | None,
     changes: dict[str, dict],
     handled: set[str],
+    field_indent: str = "    ",
 ) -> None:
     if current_col is None or current_col in handled or current_col not in changes:
         return
     info = changes[current_col]
-    result.append("    example_values:")
+    result.append(f"{field_indent}example_values:")
     for val in info["example_values"]:
         # Quote strings that could be misinterpreted by YAML
         if isinstance(val, str):
             escaped = val.replace("'", "''")
-            result.append(f"    - '{escaped}'")
+            result.append(f"{field_indent}- '{escaped}'")
         else:
-            result.append(f"    - {val}")
-    result.append(f"    comprehensive: {str(info['comprehensive']).lower()}")
+            result.append(f"{field_indent}- {val}")
+    result.append(f"{field_indent}comprehensive: {str(info['comprehensive']).lower()}")
     handled.add(current_col)
 
 

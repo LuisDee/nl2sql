@@ -25,11 +25,12 @@ def _discover_table_yaml_map() -> dict[str, str]:
 
     Scans catalog/kpi/, catalog/data/, and all catalog/*_data/ market
     directories. For tables in multiple directories, both are stored
-    with prefixed keys (kpi/markettrade, data/markettrade, arb_data/markettrade)
-    and the plain key points to the last one found.
+    with prefixed keys (kpi/markettrade, data/markettrade, arb_data/markettrade).
+    For the plain name key, kpi/ and data/ (OMX) take priority over market dirs.
     """
     from nl2sql_agent.catalog_loader import _catalog_subdirs
 
+    primary_dirs = {"kpi", "data"}
     table_map: dict[str, str] = {}
     for subdir in _catalog_subdirs():
         subdir_path = CATALOG_DIR / subdir
@@ -42,8 +43,9 @@ def _discover_table_yaml_map() -> dict[str, str]:
             rel_path = f"{subdir}/{yaml_file.name}"
             # Store prefixed version for disambiguation
             table_map[f"{subdir}/{table_name}"] = rel_path
-            # Plain name points to last found (data > kpi, market-specific last)
-            table_map[table_name] = rel_path
+            # Plain name: primary dirs (kpi/data) always win over market dirs
+            if table_name not in table_map or subdir in primary_dirs:
+                table_map[table_name] = rel_path
     return table_map
 
 

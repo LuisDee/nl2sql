@@ -9,15 +9,23 @@ table:
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: instrument_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: open_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: close_timestamp
       type: TIMESTAMP
       description: ""
+      category: time

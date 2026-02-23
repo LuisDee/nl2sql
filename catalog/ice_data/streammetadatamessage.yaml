@@ -9,42 +9,66 @@ table:
     - name: kafka_message_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: record_written_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: partition_timestamp_local
       type: TIMESTAMP
       description: ""
+      category: time
     - name: partition_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: event_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: metadata
       type: RECORD
       description: ""
+      category: dimension
+      filterable: true
     - name: summary
       type: RECORD
       description: ""
+      category: dimension
+      filterable: true
     - name: message_trade_date
       type: DATE
       description: ""
+      category: time

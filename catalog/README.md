@@ -283,23 +283,30 @@ python scripts/run_embeddings.py --step generate-embeddings
 
 ## How to: Switch Between Dev and Prod
 
-All configuration is in `nl2sql_agent/.env`. To switch environments, change the project-specific values:
+All configuration is in `nl2sql_agent/.env`. Two things change between environments:
+
+1. **Project & model references** — GCP project, Vertex AI connection, embedding model ref
+2. **Dataset prefix** — dev datasets have `nl2sql_` prefix, prod datasets don't
 
 **Dev** (`nl2sql_agent/.env`):
 ```env
 GCP_PROJECT=melodic-stone-437916-t3
+DATASET_PREFIX=nl2sql_
 VERTEX_AI_CONNECTION=melodic-stone-437916-t3.europe-west2.vertex-ai-connection
 EMBEDDING_MODEL_REF=melodic-stone-437916-t3.nl2sql.text_embedding_model
 ```
+Computed datasets: `nl2sql_omx_kpi`, `nl2sql_omx_data`, `nl2sql_metadata`
 
-**Prod** (`nl2sql_agent/.env-prod`):
+**Prod** (`nl2sql_agent/.env`):
 ```env
 GCP_PROJECT=cloud-data-n-base-d4b3
+DATASET_PREFIX=
 VERTEX_AI_CONNECTION=cloud-ai-d-base-a2df.europe-west2.vertex-ai-connection
 EMBEDDING_MODEL_REF=cloud-ai-d-base-a2df.nl2sql.text_embedding_model
 ```
+Computed datasets: `omx_kpi`, `omx_data`, `metadata`
 
-Dataset names (`KPI_DATASET`, `DATA_DATASET`, `METADATA_DATASET`), BQ location, and embedding model name are the same across environments. Only `GCP_PROJECT`, `VERTEX_AI_CONNECTION`, and `EMBEDDING_MODEL_REF` change.
+You can also override individual datasets explicitly (`KPI_DATASET=custom_kpi`) — explicit values take precedence over prefix computation.
 
 After switching, re-run the embedding pipeline to populate the target project:
 ```bash
@@ -307,6 +314,66 @@ python scripts/run_embeddings.py --step all
 python scripts/populate_embeddings.py
 python scripts/run_embeddings.py --step generate-embeddings
 ```
+
+---
+
+## How to: Add a New Market (Exchange)
+
+All 10 exchanges share the same table schemas. Adding a new exchange (e.g., Brazil) requires:
+
+### 1. Verify datasets exist in BQ
+
+The agent expects two datasets per exchange: `{prefix}{exchange}_kpi` and `{prefix}{exchange}_data`.
+
+```bash
+# Dev example (prefix=nl2sql_):
+bq ls --project_id=melodic-stone-437916-t3 nl2sql_brazil_kpi
+bq ls --project_id=melodic-stone-437916-t3 nl2sql_brazil_data
+```
+
+### 2. Add exchange to registry
+
+Add an entry in `catalog/_exchanges.yaml`:
+```yaml
+  brazil:
+    aliases: [brazil, bovespa, b3, brazilian]
+```
+
+### 3. Verify table schemas match
+
+New market tables should have the same columns as OMX. If schemas vary, create market-specific YAML overrides (not yet supported — all markets currently share OMX schema).
+
+### 4. Add symbol mappings
+
+Insert rows into the `symbol_exchange_map` BQ table so the agent can resolve trading symbols (e.g., "VALE3") to the correct exchange:
+
+```bash
+# Add to data/symbol_exchange_map.csv, then:
+python scripts/run_embeddings.py --step populate-symbols
+```
+
+### 5. Populate embeddings
+
+```bash
+python scripts/populate_embeddings.py
+python scripts/run_embeddings.py --step generate-embeddings
+```
+
+### 6. Test
+
+Ask a question mentioning the new exchange:
+> "What was the edge on market trades for bovespa yesterday?"
+
+### Metadata is shared
+
+The metadata dataset (`{prefix}metadata`) is shared across ALL markets. It contains:
+- `schema_embeddings` — table-level routing (shared schema across exchanges)
+- `column_embeddings` — column-level search (shared columns across exchanges)
+- `query_memory` — cached queries (filtered by `dataset_name` column)
+- `glossary_embeddings` — business terms (shared)
+- `symbol_exchange_map` — per-exchange symbol lookup
+
+No per-market metadata datasets are needed. The `dataset_name` column in `query_memory` + semantic cache provides exchange-level isolation.
 
 ---
 

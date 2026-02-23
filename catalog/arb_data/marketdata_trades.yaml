@@ -9,138 +9,219 @@ table:
     - name: kafka_partition
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: kafka_offset
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: trade_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: event_date
       type: DATE
       description: ""
+      category: time
+      filterable: true
     - name: exchange_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: hw_nic_rx_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_ingress_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: software_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: exchange_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: hw_nic_rx_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: mako_ingress_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: software_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: instrument_hash
       type: STRING
       description: ""
+      category: identifier
+      filterable: true
     - name: event_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: sequence_number
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: side
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: price
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: quantity
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: order_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: order_position
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: market_state
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: keyframe
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: instrument_type
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: data_order_identifier
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: data_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: data_timestamp_ns
       type: INTEGER
       description: ""
+      category: time
     - name: is_snap
       type: BOOLEAN
       description: ""
+      category: dimension
+      filterable: true
     - name: fill_quantity
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: hidden_quantity
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: cancel_quantity
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: mako_sequence_number
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: strike
       type: FLOAT
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: option_type
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: option_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: expiry_timestamp
       type: TIMESTAMP
       description: ""
+      category: time
     - name: mako_symbol
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: currency
       type: INTEGER
       description: ""
+      category: dimension
+      filterable: true
     - name: inst_type_name
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: term
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
     - name: pos_exch
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: streamsource_stream_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_event_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: streamsource_message_id
       type: INTEGER
       description: ""
+      category: identifier
+      filterable: true
     - name: datasource_pid
       type: INTEGER
       description: ""
+      category: measure
+      typical_aggregation: AVG
     - name: datasource_hostname
       type: STRING
       description: ""
+      category: dimension
+      filterable: true
